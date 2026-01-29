@@ -20,6 +20,16 @@ A lightweight, high-performance blog system designed specifically for photograph
 4. Add your posts in `contents/index_post.txt` and `contents/post_files/`.
 5. Run `make_html.php` to generate static pages.
 
+## Acknowledgments & Third-Party Libraries
+This project makes use of the following open-source libraries. We gratefully acknowledge their authors:
+
+- **[Dindent](https://github.com/gajus/dindent)** by Gajus Kuizinas:
+  Used in `make_html.php` to beautify and indent the generated HTML output.
+- **[html2text](https://github.com/soundasleep/html2text)** by Jevon Wright:
+  Used to convert HTML content into plain text for metadata processing.
+- **[exif-js](https://github.com/exif-js/exif-js)**:
+  Used in the frontend (`static/exif.js`) to extract and display EXIF metadata from images.
+
 ---
 
 # BaxerMux 攝影部落格
@@ -43,3 +53,13 @@ A lightweight, high-performance blog system designed specifically for photograph
 3. 將 `config.example.js` 重新命名為 `config.js` 並設定 API 類型與 Google 搜尋主控台 ID。
 4. 在 `contents/index_post.txt` 與 `contents/post_files/` 加入您的文章。
 5. 執行 `make_html.php` 以生成靜態頁面。
+
+## 致謝與第三方函式庫
+本專案使用了以下開源函式庫，感謝原作者的貢獻：
+
+- **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas):
+  用於 `make_html.php` 中，將生成的 HTML 原始碼進行排版美化。
+- **[html2text](https://github.com/soundasleep/html2text)** (Jevon Wright):
+  用於將 HTML 內容轉換為純文字，以便處理元資料。
+- **[exif-js](https://github.com/exif-js/exif-js)**:
+  用於前端 (`static/exif.js`)，從圖片中讀取並顯示 EXIF 資訊。
