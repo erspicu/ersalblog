@@ -34,7 +34,7 @@ def minify_files():
     # --- ★ 設定要排除的檔案清單 (新增功能) ---
     # 這些檔案將不會被壓縮，也不會產生 .min.js
     # 您可以在這裡加入 'config.js', 'settings.js' 等
-    SKIP_FILES = ['config.js'] 
+    SKIP_FILES = ['config.js', 'config.example.js'] 
     
     # 檢查工具
     print("🔍 正在檢查環境...")
