@@ -9,7 +9,14 @@ $dbConfig = [
 
     // --- 其他全域設定 ---
     'debug_mode' => true,           // true: 顯示錯誤訊息 (開發用), false: 隱藏 (上線用)
-    'site_url'   => 'https://www.baxermux.org/ersalblog/' // 網站網址
+    'site_url'   => 'https://example.com/blog/' // 網站網址
+];
+
+// --- 後台管理員設定 ---
+$adminConfig = [
+    'username' => 'admin',
+    'password' => 'YOUR_PASSWORD_HERE', // 請修改此密碼
+    'session_secret' => 'CHANGE_ME_TO_RANDOM_STRING'
 ];
 
 //設定時區
