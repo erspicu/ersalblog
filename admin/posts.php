@@ -10,8 +10,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['id
     exit;
 }
 
-// 讀取文章列表
-$stmt = $pdo->query("SELECT id, post_date, post_title, post_categories, post_filename FROM blog_posts ORDER BY post_date DESC");
+// 讀取文章列表 (依日期降序)
+$stmt = $pdo->query("SELECT id, post_date, post_title, post_categories, post_filename, post_tags FROM blog_posts ORDER BY post_date DESC");
 $posts = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -81,10 +81,11 @@ $posts = $stmt->fetchAll();
                 <table class="table table-hover table-striped mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th width="15%">日期</th>
-                            <th width="40%">標題</th>
-                            <th width="20%">分類</th>
-                            <th width="25%" class="text-end">操作</th>
+                            <th width="10%">日期</th>
+                            <th width="35%">標題</th>
+                            <th width="15%">分類</th>
+                            <th width="20%">標籤</th>
+                            <th width="20%" class="text-end">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,16 +94,25 @@ $posts = $stmt->fetchAll();
                             <td><?php echo substr($post['post_date'], 0, 10); ?></td>
                             <td>
                                 <a href="post_edit.php?id=<?php echo $post['id']; ?>" class="text-decoration-none fw-bold">
-                                    <?php echo htmlspecialchars($post['post_title']); ?>
+                                    <?php echo htmlspecialchars($post['post_title'] ?? ''); ?>
                                 </a>
                                 <br>
-                                <small class="text-muted"><?php echo htmlspecialchars($post['post_filename']); ?></small>
+                                <small class="text-muted"><?php echo htmlspecialchars($post['post_filename'] ?? ''); ?></small>
                             </td>
                             <td>
                                 <?php 
-                                $cats = explode(',', $post['post_categories']);
+                                $cats = explode(',', $post['post_categories'] ?? '');
                                 foreach($cats as $c) {
                                     if(trim($c)) echo "<span class='badge bg-info text-dark me-1'>".htmlspecialchars($c)."</span>";
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                $tags = explode(',', $post['post_tags'] ?? '');
+                                foreach($tags as $t) {
+                                    $t = trim($t);
+                                    if($t) echo "<span class='badge bg-secondary me-1'>".htmlspecialchars($t)."</span>";
                                 }
                                 ?>
                             </td>
