@@ -180,3 +180,9 @@
 - **實作**:
     - 更新 `gemini.md` 加入 UTC+8 時區規範與 Git Bash 執行建議。
     - 修復 `gemini_log.md` 中的 BOM (`\xEF\xBB\xBF`) 亂碼問題。
+
+### [01:45] 文檔編碼修正
+- **任務**: 修正 `gemini.md` 與 `gemini_log.md` 的編碼問題，確保在 Windows 環境下可正常讀取。
+- **實作**:
+    - 重新儲存上述檔案為 UTF-8 with BOM 格式。
+    - 移除日誌檔末尾的亂碼字元。
