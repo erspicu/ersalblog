@@ -207,6 +207,13 @@ Recorded the development journey and original Prompt commands of this project th
     - Completed English translation and synchronization for core root documents `ARCHITECTURE.md` and `HISTORY.md`.
     - Added a mandatory rule to the "Update" process in `gemini.md`: "All documents must maintain synchronized Chinese and English content."
 
+### [00:20] README Synchronization and Macro Refinement
+- **Task**: Fix README content discrepancy and refine Gemini CLI instructions.
+- **Implementation**:
+    - Synchronized missing sections in `README.md` (Chinese version) to match English content.
+    - Added "Reload" (重讀) macro command to `gemini.md` for syncing external edits via `git diff`.
+    - Cleaned up excessive blank lines in `gemini.md` for better readability.
+
 ---
 
 # Vibe Coding History (繁體中文)
@@ -426,12 +433,54 @@ Recorded the development journey and original Prompt commands of this project th
 
 ### [23:58] 檔案格式統一與多語系同步
 
+
+
 - **任務**: 統一 readme 檔案格式並落實全站雙語化。
+
+
 
 - **實作**:
 
+
+
     - 將 `category/`, `contents/`, `preview/`, `static/` 子目錄下的 `readme.txt` 全部更名為 `readme.md`。
+
+
 
     - 完成根目錄核心文件 `ARCHITECTURE.md` 與 `HISTORY.md` 的中英文翻譯與同步。
 
+
+
     - 在 `gemini.md` 的「更新」流程中加入「文件必須維持中英文同步」的硬性規定。
+
+
+
+
+
+
+
+### [00:20] README 同步與指令優化
+
+
+
+- **任務**: 修正 README 內容不一致並優化 Gemini CLI 指令定義。
+
+
+
+- **實作**:
+
+
+
+    - 補全 `README.md` 中文部分缺失章節，確保與英文版完全對照。
+
+
+
+    - 在 `gemini.md` 中新增「重讀」(Reload) 巨集指令，透過 `git diff` 同步外部編輯器的修改。
+
+
+
+    - 修正 `gemini.md` 排版，移除多餘空行以提升可讀性。
+
+
+
+
