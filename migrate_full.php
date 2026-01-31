@@ -34,20 +34,23 @@ ob_implicit_flush(1);
 // 2. 輔助函式
 // ==========================================
 function output_log($msg, $type = 'info') {
-    $color = match ($type) {
+    $colors = [
         'success' => '#2ecc71', // Green
         'error'   => '#e74c3c', // Red
         'warning' => '#f39c12', // Orange
         'system'  => '#3498db', // Blue
-        default   => '#bdc3c7'  // Grey
-    };
-    $icon = match ($type) {
+        'default' => '#bdc3c7'  // Grey
+    ];
+    $color = $colors[$type] ?? $colors['default'];
+
+    $icons = [
         'success' => '✅',
         'error'   => '❌',
         'warning' => '⚠️',
         'system'  => '⚙️',
-        default   => '📝'
-    };
+        'default' => '📝'
+    ];
+    $icon = $icons[$type] ?? $icons['default'];
     
     // 輸出 HTML 並強制 Flush
     echo "<div class='log-item' style='border-left: 4px solid $color;'>

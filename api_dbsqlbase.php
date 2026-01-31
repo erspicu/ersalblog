@@ -89,9 +89,14 @@ function get_data($filter_type, $filter_value)
     global $pdo;
 
     // 1. Fetch All Posts
-    // We fetch all to calculate sidebar stats (Counts) correctly for the entire blog,
-    // which matches api_filebase behavior.
-    $sql = "SELECT * FROM blog_posts ORDER BY post_date DESC";
+    // Modified to use JOINs and GROUP_CONCAT for categories
+    $sql = "SELECT p.*, GROUP_CONCAT(c.category_name SEPARATOR ',') as post_categories_str 
+            FROM blog_posts p
+            LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
+            LEFT JOIN blog_categories c ON pc.category_id = c.id
+            GROUP BY p.id
+            ORDER BY p.post_date DESC";
+
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll();
 
@@ -118,8 +123,8 @@ function get_data($filter_type, $filter_value)
         $tags = ($tags_str !== '') ? explode(',', $tags_str) : [];
         $tags = array_map('trim', $tags);
         
-        // Categories
-        $cats_str = $row['post_categories'];
+        // Categories (Now from GROUP_CONCAT)
+        $cats_str = $row['post_categories_str'] ?? '';
         $cats = ($cats_str !== '') ? explode(',', $cats_str) : [];
         $cats = array_map('trim', $cats);
 
@@ -142,13 +147,6 @@ function get_data($filter_type, $filter_value)
                 ];
             }
             $cat_stats_map[$c]['count']++;
-            // filebase mimics checking 'category/DIR/FILENAME'
-            // We just store the filename (index) here
-            // Note: api_filebase category_deal() returns 'posts' array containing filenames inside that category dir.
-            // We should strip .html if strict parity needed? filebase returns file list from scandir.
-            // Usually filenames in category dir do NOT have .html extension based on migrate_full.php logic?
-            // "get_post_categories" in migrate checks target path.
-            // Let's store the raw filename (post_index) for safety.
             $cat_stats_map[$c]['posts'][] = str_replace('.html', '', $filename); 
         }
 
@@ -193,14 +191,6 @@ function get_data($filter_type, $filter_value)
             }
         } 
         elseif ($filter_type === 'date') {
-            // filter_value is like "202601" or "2026"
-            // api_filebase startsWith check
-            // $line_arr[0] is "2026-01-29 ..."
-            // $year . "-" . $mon check
-            
-            // logic: $year = substr($param, 0, 4); $mon = substr($param, 4, 2);
-            // check startsWith($line[0], "$year-$mon")
-            
             $f_year = substr($filter_value, 0, 4);
             $f_mon  = substr($filter_value, 4, 2);
             $target_prefix = $f_year . '-' . $f_mon;

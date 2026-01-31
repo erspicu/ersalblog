@@ -36,16 +36,24 @@ function requireLogin() {
 /**
  * 嘗試登入
  */
-function login($username, $password) {
+function login($username, $password, $dataSource = 'db') {
     global $adminConfig;
     
     // 簡單的明文比對 (建議未來改用 password_verify)
     if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_user'] = $username;
+        $_SESSION['admin_source'] = $dataSource; // Store the selected source
         return true;
     }
     return false;
+}
+
+/**
+ * 取得目前管理模式
+ */
+function getAdminSource() {
+    return $_SESSION['admin_source'] ?? 'db';
 }
 
 /**

@@ -1,10 +1,13 @@
 <?php
 require_once 'auth.php';
+require_once 'data_provider.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die('Invalid Request');
 }
+
+$dataManager = new DataManager();
 
 $id = $_POST['id'] ?? '';
 $title = $_POST['post_title'] ?? '未命名文章';
@@ -33,50 +36,33 @@ if (empty($filename)) {
     $filename = date('YmdHis', $ts) . '.html';
 }
 // 確保有 .html 結尾 (若使用者忘了打)
-if (!str_ends_with($filename, '.html') && !str_ends_with($filename, '.htm')) {
+if (substr($filename, -5) !== '.html' && substr($filename, -4) !== '.htm') {
     $filename .= '.html';
 }
 
 
 try {
-    if ($id) {
-        // --- 更新模式 ---
-        $sql = "UPDATE blog_posts SET 
-                post_title = ?, 
-                post_filename = ?, 
-                post_date = ?, 
-                post_content = ?, 
-                post_tags = ?, 
-                post_categories = ?, 
-                post_description = ?,
-                updated_at = NOW()
-                WHERE id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$title, $filename, $date, $content, $tags, $categoriesStr, $desc, $id]);
-        $msg = "updated";
-    } else {
-        // --- 新增模式 ---
-        // 檢查檔名是否重複
-        $check = $pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-        $check->execute([$filename]);
-        if ($check->rowCount() > 0) {
-            // 若重複，加個亂數後綴
-            $filename = str_replace('.html', '-' . rand(100,999) . '.html', $filename);
-        }
+    $saveData = [
+        'id' => $id,
+        'title' => $title,
+        'filename' => $filename,
+        'date' => $date,
+        'content' => $content,
+        'tags' => $tags,
+        'categories' => $categoriesStr,
+        'desc' => $desc
+    ];
 
-        $sql = "INSERT INTO blog_posts 
-                (post_title, post_filename, post_date, post_content, post_tags, post_categories, post_description, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$title, $filename, $date, $content, $tags, $categoriesStr, $desc]);
-        $msg = "created";
-    }
+    $dataManager->savePost($saveData);
+    
+    // 判斷是新增還是修改
+    $msg = $id ? 'updated' : 'created';
 
     // 成功後轉導回列表
     header("Location: posts.php?msg=$msg");
     exit;
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
     die("儲存失敗: " . $e->getMessage());
 }
 ?>

@@ -1,10 +1,12 @@
 <?php
 require_once 'auth.php';
+require_once 'data_provider.php';
 requireLogin();
 
+$dataManager = new DataManager();
 $msg = '';
 
-// --- 處理表單提交 (邏輯不變) ---
+// --- 處理表單提交 ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
@@ -14,26 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newName = trim($_POST['new_name']);
         
         if ($oldName && $newName && $oldName !== $newName) {
-            $stmt = $pdo->prepare("SELECT id, post_categories FROM blog_posts WHERE post_categories LIKE ?");
-            $stmt->execute(['%' . $oldName . '%']);
-            $rows = $stmt->fetchAll();
-            
-            $count = 0;
-            foreach ($rows as $row) {
-                $cats = explode(',', $row['post_categories']);
-                $cats = array_map('trim', $cats);
-                
-                if (($key = array_search($oldName, $cats)) !== false) {
-                    $cats[$key] = $newName; 
-                    $cats = array_unique($cats);
-                    $newStr = implode(',', $cats);
-                    
-                    $update = $pdo->prepare("UPDATE blog_posts SET post_categories = ? WHERE id = ?");
-                    $update->execute([$newStr, $row['id']]);
-                    $count++;
-                }
+            $count = $dataManager->renameCategory($oldName, $newName);
+            if ($count > 0 || $count === true) {
+                $msg = "成功將分類由「{$oldName}」改為「{$newName}」。";
+            } else {
+                 $msg = "修改失敗或未找到目標。";
             }
-            $msg = "成功將 {$count} 篇文章的分類由「{$oldName}」改為「{$newName}」。";
         }
     }
     
@@ -42,44 +30,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delName = trim($_POST['delete_name']);
         
         if ($delName) {
-            $stmt = $pdo->prepare("SELECT id, post_categories FROM blog_posts WHERE post_categories LIKE ?");
-            $stmt->execute(['%' . $delName . '%']);
-            $rows = $stmt->fetchAll();
-            
-            $count = 0;
-            foreach ($rows as $row) {
-                $cats = explode(',', $row['post_categories']);
-                $cats = array_map('trim', $cats);
-                
-                if (($key = array_search($delName, $cats)) !== false) {
-                    unset($cats[$key]);
-                    $newStr = implode(',', $cats);
-                    
-                    $update = $pdo->prepare("UPDATE blog_posts SET post_categories = ? WHERE id = ?");
-                    $update->execute([$newStr, $row['id']]);
-                    $count++;
-                }
+            $count = $dataManager->deleteCategory($delName);
+            if ($count > 0 || $count === true) {
+                $msg = "成功移除分類「{$delName}」。";
+            } else {
+                 $msg = "移除失敗或未找到目標。";
             }
-            $msg = "成功從 {$count} 篇文章中移除分類「{$delName}」。";
+        }
+    }
+
+    // [新增功能]
+    if ($action === 'create') {
+        $newCatName = trim($_POST['new_category_name']);
+        if ($newCatName) {
+            $result = $dataManager->createCategory($newCatName);
+            if ($result) {
+                $msg = "成功建立新分類「{$newCatName}」。";
+            } else {
+                $msg = "建立失敗，可能分類已存在。";
+            }
         }
     }
 }
 
 // --- 取得目前所有分類統計 ---
-$catStats = [];
-$stmt = $pdo->query("SELECT post_categories FROM blog_posts");
-while ($row = $stmt->fetch()) {
-    $parts = explode(',', $row['post_categories']);
-    foreach ($parts as $p) {
-        $p = trim($p);
-        if ($p === '') continue;
-        if (!isset($catStats[$p])) {
-            $catStats[$p] = 0;
-        }
-        $catStats[$p]++;
-    }
-}
-arsort($catStats);
+$catStats = $dataManager->getAllCategories();
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant">
@@ -104,6 +79,11 @@ arsort($catStats);
             <span class="fs-4">Blog Admin</span>
         </a>
         <hr>
+        <div class="text-center mb-3">
+            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+            </span>
+        </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php">
@@ -120,6 +100,13 @@ arsort($catStats);
                     📂 分類管理
                 </a>
             </li>
+            <?php if ($dataManager->getSource() === 'file'): ?>
+            <li>
+                <a href="tool_migrate.php">
+                    🔄 資料匯入
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
@@ -132,6 +119,9 @@ arsort($catStats);
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>📂 分類管理</h2>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
+                + 新增分類
+            </button>
         </div>
 
         <?php if ($msg): ?>
@@ -142,7 +132,7 @@ arsort($catStats);
         <?php endif; ?>
 
         <div class="alert alert-info">
-            <small>提示：此處列出目前所有文章中已使用的分類。由於系統架構特性，「新增分類」請直接在撰寫文章時輸入即可。此處主要提供維護現有分類的功能。</small>
+            <small>提示：此處列出系統中的所有分類。您可以新增、改名或移除分類。請注意，移除分類不會刪除該分類下的文章。</small>
         </div>
 
         <div class="row">
@@ -175,6 +165,29 @@ arsort($catStats);
                 <div class="col-12 text-center text-muted p-5">目前沒有任何分類資料。</div>
             <?php endif; ?>
         </div>
+    </div>
+</div>
+
+<!-- Modal: Create -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" class="modal-content">
+            <input type="hidden" name="action" value="create">
+            <div class="modal-header">
+                <h5 class="modal-title">新增分類</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">分類名稱</label>
+                    <input type="text" name="new_category_name" class="form-control" required placeholder="請輸入分類名稱">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-success">建立</button>
+            </div>
+        </form>
     </div>
 </div>
 

@@ -1,8 +1,11 @@
 <?php
 require_once 'auth.php';
+require_once 'data_provider.php';
 requireLogin();
 
+$dataManager = new DataManager();
 $id = $_GET['id'] ?? null;
+
 $post = [
     'post_title' => '',
     'post_filename' => '', 
@@ -16,9 +19,7 @@ $post = [
 $pageTitle = '撰寫新文章';
 
 if ($id) {
-    $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE id = ?");
-    $stmt->execute([$id]);
-    $fetched = $stmt->fetch();
+    $fetched = $dataManager->getPost($id);
     if ($fetched) {
         $post = $fetched;
         $pageTitle = '編輯文章';
@@ -27,18 +28,15 @@ if ($id) {
     }
 }
 
-$allCats = [];
-$cStmt = $pdo->query("SELECT post_categories FROM blog_posts");
-while ($row = $cStmt->fetch()) {
-    $parts = explode(',', $row['post_categories']);
-    foreach ($parts as $p) {
-        $p = trim($p);
-        if ($p && !in_array($p, $allCats)) {
-            $allCats[] = $p;
-        }
-    }
+// Get all categories for checkboxes
+$allCatsData = $dataManager->getAllCategories(); // Returns ['CatName' => Count, ...]
+$allCats = array_keys($allCatsData);
+
+// Current post categories (Handle both string and array just in case)
+$currentCats = $post['post_categories'];
+if (!is_array($currentCats)) {
+    $currentCats = explode(',', $currentCats ?? '');
 }
-$currentCats = explode(',', $post['post_categories']);
 $currentCats = array_map('trim', $currentCats);
 ?>
 <!DOCTYPE html>
@@ -64,6 +62,11 @@ $currentCats = array_map('trim', $currentCats);
             <span class="fs-4">Blog Admin</span>
         </a>
         <hr>
+        <div class="text-center mb-3">
+            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+            </span>
+        </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php">
@@ -80,6 +83,13 @@ $currentCats = array_map('trim', $currentCats);
                     📂 分類管理
                 </a>
             </li>
+            <?php if ($dataManager->getSource() === 'file'): ?>
+            <li>
+                <a href="tool_migrate.php">
+                    🔄 資料匯入
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">

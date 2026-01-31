@@ -1,18 +1,19 @@
 <?php
 require_once 'auth.php';
+require_once 'data_provider.php';
 requireLogin();
+
+$dataManager = new DataManager();
 
 // 處理刪除請求
 if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['id'])) {
-    $stmt = $pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
-    $stmt->execute([$_POST['id']]);
+    $dataManager->deletePost($_POST['id']);
     header("Location: posts.php?msg=deleted");
     exit;
 }
 
 // 讀取文章列表 (依日期降序)
-$stmt = $pdo->query("SELECT id, post_date, post_title, post_categories, post_filename, post_tags, post_description FROM blog_posts ORDER BY post_date DESC");
-$posts = $stmt->fetchAll();
+$posts = $dataManager->getAllPosts();
 
 // 輔助函式
 function truncate($text, $limit = 60) {
@@ -57,6 +58,11 @@ function truncate($text, $limit = 60) {
             <span class="fs-4">Blog Admin</span>
         </a>
         <hr>
+        <div class="text-center mb-3">
+            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+            </span>
+        </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php">
@@ -73,6 +79,13 @@ function truncate($text, $limit = 60) {
                     📂 分類管理
                 </a>
             </li>
+            <?php if ($dataManager->getSource() === 'file'): ?>
+            <li>
+                <a href="tool_migrate.php">
+                    🔄 資料匯入
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
@@ -116,7 +129,7 @@ function truncate($text, $limit = 60) {
                             </td>
                             <td>
                                 <!-- 標題 -->
-                                <a href="post_edit.php?id=<?php echo $post['id']; ?>" class="text-decoration-none fw-bold text-dark fs-5">
+                                <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="text-decoration-none fw-bold text-dark fs-5">
                                     <?php echo htmlspecialchars($post['post_title'] ?? '無標題'); ?>
                                 </a>
                                 <br>
@@ -133,9 +146,10 @@ function truncate($text, $limit = 60) {
                             </td>
                             <td class="align-top pt-3">
                                 <?php 
-                                $cats = explode(',', $post['post_categories'] ?? '');
+                                $cats = is_array($post['post_categories']) ? $post['post_categories'] : explode(',', $post['post_categories'] ?? '');
                                 foreach($cats as $c) {
-                                    if(trim($c)) echo "<span class='badge bg-info text-dark me-1 mb-1 d-inline-block'>".htmlspecialchars($c)."</span>";
+                                    $c = trim($c);
+                                    if($c) echo "<span class='badge bg-info text-dark me-1 mb-1 d-inline-block'>".htmlspecialchars($c)."</span>";
                                 }
                                 ?>
                             </td>
@@ -149,11 +163,11 @@ function truncate($text, $limit = 60) {
                                 ?>
                             </td>
                             <td class="text-center align-middle">
-                                <a href="post_edit.php?id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-primary mb-1 w-100">編輯</a>
+                                <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="btn btn-sm btn-outline-primary mb-1 w-100">編輯</a>
                                 <!-- 加入 delete-form class 並移除 onsubmit -->
                                 <form method="POST" class="d-block delete-form">
                                     <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?php echo $post['id']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100">刪除</button>
                                 </form>
                             </td>

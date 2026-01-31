@@ -1,30 +1,48 @@
 <?php
 require_once 'auth.php';
+require_once 'data_provider.php'; // Include DataManager
 requireLogin();
+
+$dataManager = new DataManager();
+$source = $dataManager->getSource(); // 'db' or 'file'
 
 // 收集系統資訊
 $phpVersion = phpversion();
-$dbHost = $dbConfig['host'];
-$dbName = $dbConfig['dbname'];
 
 // 1. 文章總數
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM blog_posts");
-    $postCount = $stmt->fetchColumn();
-} catch (Exception $e) {
-    $postCount = "Error";
-}
+$postCount = $dataManager->getPostCount();
 
-// 2. DB 大小 (MB) - 針對整個資料庫
-try {
-    $stmt = $pdo->prepare("SELECT round(SUM(data_length + index_length) / 1024 / 1024, 2) 
-                           FROM information_schema.TABLES 
-                           WHERE table_schema = ?");
-    $stmt->execute([$dbName]);
-    $dbSize = $stmt->fetchColumn();
-    if($dbSize === false) $dbSize = 0;
-} catch (Exception $e) {
-    $dbSize = "Unknown";
+// 2. DB 大小 & 連線資訊 (Only for DB mode)
+$dbSize = 'N/A';
+$dbHost = 'N/A';
+$serverVersion = 'N/A';
+$serverInfo = '';
+$dbType = 'File System';
+
+if ($source === 'db') {
+    $dbHost = $dbConfig['host'];
+    $dbName = $dbConfig['dbname'];
+    
+    // DB Size
+    try {
+        $stmt = $pdo->prepare("SELECT round(SUM(data_length + index_length) / 1024 / 1024, 2) 
+                               FROM information_schema.TABLES 
+                               WHERE table_schema = ?");
+        $stmt->execute([$dbName]);
+        $dbSize = $stmt->fetchColumn();
+        if($dbSize === false) $dbSize = 0;
+    } catch (Exception $e) {
+        $dbSize = "Unknown";
+    }
+
+    // Version Info
+    try {
+        $serverVersion = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
+        $serverInfo = $pdo->getAttribute(PDO::ATTR_SERVER_INFO);
+        $dbType = (strpos(strtolower($serverVersion), 'mariadb') !== false) ? 'MariaDB' : 'MySQL';
+    } catch (Exception $e) {
+        $serverVersion = "Unknown";
+    }
 }
 
 // 3. 磁碟空間 (GB)
@@ -33,9 +51,8 @@ $diskTotal = @disk_total_space(".");
 $diskFreeGB = $diskFree ? round($diskFree / 1024 / 1024 / 1024, 2) : 'N/A';
 $diskTotalGB = $diskTotal ? round($diskTotal / 1024 / 1024 / 1024, 2) : 'N/A';
 
-// 4. 最新文章 (取前 5 筆)
-$stmt = $pdo->query("SELECT post_title, post_date FROM blog_posts ORDER BY post_date DESC LIMIT 5");
-$recentPosts = $stmt->fetchAll();
+// 4. 最新文章
+$recentPosts = $dataManager->getRecentPosts(5);
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant">
@@ -62,6 +79,11 @@ $recentPosts = $stmt->fetchAll();
             <span class="fs-4">Blog Admin</span>
         </a>
         <hr>
+        <div class="text-center mb-3">
+            <span class="badge <?php echo ($source === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
+                模式: <?php echo ($source === 'db') ? '資料庫' : '檔案系統'; ?>
+            </span>
+        </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php" class="active">
@@ -78,6 +100,13 @@ $recentPosts = $stmt->fetchAll();
                     📂 分類管理
                 </a>
             </li>
+            <?php if ($source === 'file'): ?>
+            <li>
+                <a href="tool_migrate.php">
+                    🔄 資料匯入
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
@@ -118,8 +147,8 @@ $recentPosts = $stmt->fetchAll();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0">資料庫大小</h6>
-                                <h2 class="my-2"><?php echo $dbSize; ?> <span class="fs-6">MB</span></h2>
-                                <small>DB: <?php echo htmlspecialchars($dbName); ?></small>
+                                <h2 class="my-2"><?php echo $dbSize; ?> <span class="fs-6"><?php echo ($source === 'db') ? 'MB' : ''; ?></span></h2>
+                                <small><?php echo ($source === 'db') ? 'DB: '.htmlspecialchars($dbName) : '不適用'; ?></small>
                             </div>
                             <span class="fs-1">💾</span>
                         </div>
@@ -150,8 +179,16 @@ $recentPosts = $stmt->fetchAll();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0">連線資訊</h6>
-                                <p class="my-2 fw-bold">Host: <?php echo htmlspecialchars($dbHost); ?></p>
-                                <small>Driver: PDO MySQL</small>
+                                <?php if ($source === 'db'): ?>
+                                    <p class="my-2 fw-bold">Host: <?php echo htmlspecialchars($dbHost); ?></p>
+                                    <small>Type: <?php echo $dbType; ?></small><br>
+                                    <small title="<?php echo htmlspecialchars($serverInfo); ?>">Ver: <?php echo htmlspecialchars($serverVersion); ?></small><br>
+                                    <small>Driver: PDO MySQL</small>
+                                <?php else: ?>
+                                    <p class="my-2 fw-bold">Mode: File System</p>
+                                    <small>Path: contents/</small><br>
+                                    <small>Log: index_post.txt</small>
+                                <?php endif; ?>
                             </div>
                             <span class="fs-1">🔌</span>
                         </div>
