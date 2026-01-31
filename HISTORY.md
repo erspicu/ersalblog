@@ -127,3 +127,16 @@
 - **任務**: 移除 `blog_posts` 中的 `post_categories` 欄位並重構相關查詢。
 - **Prompt**: "目前看起來blog_posts內已經不需要post_categories 欄位?我可以在資料庫中直接刪除那個欄位嗎?程式有需要相對應修改嗎?"
 - **實作**: 重構 `getAllPosts`, `getPost` 等方法使用 `GROUP_CONCAT` 查詢，建立 `admin/db_drop_column.php` 供使用者安全刪除欄位。
+
+### [16:39] 文件與格式更新
+- 將原本 `reme.txt` 內容整合至 `README.md`，並更新第三方套件資訊。
+- `gemini_log.txt` 轉型為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
+
+### [19:05] 自動化初始化系統 (Database Initialization)
+- **任務**: 建立自動化資料庫建表與資料遷移機制。
+- **實作**: 
+    - 建立 `admin/db_init.php`，支援從檔案系統一鍵遷移至資料庫。
+    - 修改 `admin/login.php`，針對「已設定連線但未建表」的狀態提供引導連結。
+- **穩定性優化**: 
+    - 解決 MySQL DDL 隱式提交導致的 "No active transaction" 錯誤。
+    - 拆分 SQL 語句並強化事務 (Transaction) 狀態偵測，提升初始化成功率。

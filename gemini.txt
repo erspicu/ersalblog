@@ -3,8 +3,10 @@
 撰寫語法希望盡可能相容舊版,最少得支援到php 7.x系列.
 
 掃描整個專案目錄和目錄結構以及說明檔(*.md , *.txt), 針對 *.php *.js *.css *py去了解一下,跟開發程式無關的圖檔資源不需要理會,
-也不需要理會 min.js 或是 min.css 壓縮版本,也不需要理會make_html.php輸出的靜態網頁&sitemap.xml,或是google search console認證的html檔,
-了解一下這個專案的設計.
+也不需要理會 min.js 或是 min.css 壓縮版本,也不需要理會make_html.php輸出的靜態網頁 & sitemap.xml,或是google search console認證的html檔,
+了解一下這個專案的設計和目錄架構.
 
 每次下prompt動作後,請記錄prompt內容到gemini_log.md檔(必須使用 UTF-8 with BOM 編碼以確保 win11 筆記本程式能夠正常開啟繁體中文內容),加上時間紀錄 [YYYY-MM-DD HH:MM:SS],並使用 Markdown 列表格式 (例如: - [時間] 內容).
+
+每次prompt"更新" ,意思是依照現在的開發現況更新 ARCHITECTURE.md & HISTORY.md & README.md 內容 ,然後git發佈.
 

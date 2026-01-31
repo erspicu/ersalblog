@@ -18,3 +18,9 @@
 - [2026-01-31 16:43:03] 處理GIT更新
 - [2026-01-31 16:47:09] gemini_log.txt 改用md檔
 - [2026-01-31 16:50:14] git更新
+- [2026-01-31 19:25:00] 建立 admin/db_init.php 初始化資料庫功能，並修改 admin/login.php 在檢測到空資料庫時顯示初始化連結。
+
+- [2026-01-31 19:40:00] 修正 admin/db_init.php 初始化錯誤 'No active transaction'，將 Create Table (DDL) 移出 Transaction 區塊。
+
+- [2026-01-31 19:55:00] 再度修正 admin/db_init.php 初始化錯誤，拆分 DDL 語句並加強 Transaction 狀態檢查，避免因驅動相容性導致的隱式提交錯誤。
+

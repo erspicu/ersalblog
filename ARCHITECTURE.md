@@ -29,6 +29,9 @@
 *   **敏感資料分離**: 
     *   `config.php` 與 `config.js` 包含資料庫密碼與 API 設定，已被 Git 忽略。
     *   開發者應複製 `config.example.php` 與 `config.example.js` 來建立本地設定。
+*   **初始化與健康檢查**:
+    *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php`，在登入前自動驗證資料庫連線與檔案系統完整性。
+    *   **初始化精靈**: 若資料庫已連線但缺少資料表，系統會引導至 `admin/db_init.php`。該工具支援「匯入現有檔案資料」或「建立範例資料」兩種模式，確保系統能快速從檔案模式遷移至資料庫模式。
 
 ---
 

@@ -30,6 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = '帳號或密碼錯誤';
     }
 }
+
+// Special Check: DB Configured but Tables Missing
+$showInitLink = false;
+if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !== false) {
+    $showInitLink = true;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant">
@@ -70,6 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="file">檔案系統 (File System)</option>
             </select>
             <div id="source_status" class="status-msg"></div>
+            <?php if ($showInitLink): ?>
+                <div id="db_init_alert" class="alert alert-warning mt-2 mb-0 p-2" style="font-size: 0.9em; display: none;">
+                    資料庫尚未初始化。<br>
+                    <a href="db_init.php" class="fw-bold">點擊此處進行初始化設定 &rarr;</a>
+                </div>
+            <?php endif; ?>
         </div>
         <button type="submit" id="login_btn" class="btn btn-primary w-100">登入</button>
     </form>
@@ -89,6 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     var sourceSelect = document.getElementById('data_source');
     var statusDiv = document.getElementById('source_status');
     var loginBtn = document.getElementById('login_btn');
+    var dbInitAlert = document.getElementById('db_init_alert');
 
     function updateStatus() {
         var mode = sourceSelect.value;
@@ -97,9 +111,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (info.status) {
             statusDiv.innerHTML = '<span class="text-success">✅ ' + info.message + '</span>';
             loginBtn.disabled = false;
+            if(dbInitAlert) dbInitAlert.style.display = 'none';
         } else {
             statusDiv.innerHTML = '<span class="text-danger">❌ ' + info.message + '</span>';
             loginBtn.disabled = true;
+            
+            // Show Init Link only if selecting DB and DB is missing tables
+            if (mode === 'db' && info.message.indexOf('找不到資料表') !== -1 && dbInitAlert) {
+                dbInitAlert.style.display = 'block';
+            } else if (dbInitAlert) {
+                dbInitAlert.style.display = 'none';
+            }
         }
     }
 
