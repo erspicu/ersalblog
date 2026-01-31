@@ -181,8 +181,14 @@
     - 更新 `gemini.md` 加入 UTC+8 時區規範與 Git Bash 執行建議。
     - 修復 `gemini_log.md` 中的 BOM (`\xEF\xBB\xBF`) 亂碼問題。
 
-### [01:45] 文檔編碼修正
-- **任務**: 修正 `gemini.md` 與 `gemini_log.md` 的編碼問題，確保在 Windows 環境下可正常讀取。
+### [21:30] 校正系統時間與規範強化
+- **任務**: 統一校正全站時間標記至正確的 UTC+8 晚間時段，並強化規範。
 - **實作**:
-    - 重新儲存上述檔案為 UTF-8 with BOM 格式。
-    - 移除日誌檔末尾的亂碼字元。
+    - 修正 `HISTORY.md`、`admin/version_config.php` 與 `gemini_log.md` 的時間偏差。
+    - 在 `gemini.md` 中明確要求未來所有紀錄必須直接使用 UTC+8。
+
+### [21:35] 執行巨集指令: 更新
+- **任務**: 依照 gemini.md 規範執行文件更新、版本號同步與 Git 發佈。
+- **實作**:
+    - 更新版本號至 v2026.01.31.21.35。
+    - 同步 Gemini CLI (v0.26.0) 與模型 (gemini-3-flash-preview) 資訊。
