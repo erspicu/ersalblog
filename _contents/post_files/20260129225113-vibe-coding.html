@@ -1,0 +1,72 @@
+<p>當初發展這個blog的目的很單純,主要是以前使用的Blog服務爛掉,都是廣告,然後其他Blog平台不是有一些我討厭的問題,不然就是即使自行架設wordpress也覺得肥大,乾脆從零打造起,一切都打造成我意志下的自由發揮,一切盡可能精簡,
+主要以呈現攝影發表為目的.</p>
+<p>慢慢發展到現在其實blog功能也越趨完善,主要還欠缺像是分頁功能(以後等篇幅多時候再來實作)或是留言機制(之前有申請一套網路免費資源,但後來也是炸廣告,所以先移除掉,以後想要自己實作).自己的全文檢索機制(想設計自己的方法作全文檢索,
+目前申請google search console暫時用),最後就是這個Blog簡單到不需要什麼後台管理概念,但之後想來追加實作,反正當成下班之餘打發時間的side project,順便學一點東西的心態發展.</p>
+<p>隨著這一年左右vibe coding討論度高,想藉著此機會用vibe codig的方式開發看看後面的部分(特別是管理後台),目前先學習gemini cli為主,然後之前沒有用資料庫架站,完全用文字檔案來當成架構內容資料的紀錄方式,
+最近總算是把godaddy的資料庫搞定,搞了半天原來是虛擬主機環境上根本還沒安裝php相關資料庫元件,安裝後不管是MySQLi或PDO都可以正常讀寫主機資料庫了,因此之後可能會以兩種方式併行發展,主要是我很喜歡無資料庫的設計方式,
+不然有時候特殊環境下的主機根本沒裝資料庫服務,以檔案為基礎的設計就能夠照跑無誤.</p>
+<p>隨著摸vibe coding可能會累積一些心得,有在考慮開新blog空間獨立發表,畢竟這邊blog主要存在目的主要是整理攝影作品用,技術範疇的主題可能他處放置比較適合.</p>
+<p>這個side project會發表到GitHub上 <a href="https://github.com/erspicu/ersalblog" target="_blank">https://github.com/erspicu/ersalblog</a></p>
+<p>底下分享這個blog實作一些經過AI整理的技術概要</p>
+
+<header>
+        <h1>Ersalblog 技術架構分析</h1>
+        <p>以攝影為核心、效能為優先的現代化 Hybrid Web 系統</p>
+        <hr>
+    </header>
+
+    <main>
+        <section>
+            <h2>🚀 核心架構：混合式靜態生成 (Hybrid SSG)</h2>
+            <p>本專案採用獨特的混合架構，結合了靜態網站 (SSG) 的 SEO 優勢與單頁應用 (SPA) 的流暢體驗。</p>
+            <ul>
+                <li><strong>靜態生成 (Static Generation)</strong>：透過核心腳本 <code>make_html.php</code>，將文字檔資料庫中的內容「預先渲染」為獨立的 HTML 實體檔案。確保極致的載入速度與 SEO 排名。</li>
+                <li><strong>客戶端渲染 (Client-Side Rendering)</strong>：分類列表、標籤篩選與日期歸檔功能，透過 <code>blog.js</code> 與 <code>api_filebase.php</code> 進行非同步 (AJAX) 載入，減少伺服器冗餘檔案生成。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>📷 亮點功能：自動化 EXIF 解析與 GPS 連動</h2>
+            <p>專為攝影愛好者打造的自動化流程，解決傳統攝影部落格需手動輸入參數的痛點。</p>
+            <ul>
+                <li><strong>前端即時解析</strong>：整合 <code>exif.js</code>，在客戶端直接讀取圖片二進位資料。</li>
+                <li><strong>智慧偵測</strong>：系統自動掃描帶有特定屬性 (<code>data-ShowCameraMeta='1'</code>) 的圖片，提取光圈、快門、ISO、焦段與機身型號。</li>
+                <li><strong>GPS 地圖整合</strong>：自動將照片中的經緯度資訊轉換為 Google Maps 連結，並動態注入至圖片下方。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>💾 資料層設計：Flat-File (純文字) 資料庫</h2>
+            <p>追求極致的輕量化與可攜性，摒棄傳統關聯式資料庫的依賴。</p>
+            <ul>
+                <li><strong>無資料庫依賴</strong>：採用 <code>index_post.txt</code> 作為資料核心，以 <code>|</code> 符號作為欄位分隔，無需 MySQL 即可運作。</li>
+                <li><strong>高遷移性</strong>：網站備份僅需複製資料夾，無需匯出 SQL，部署極其簡便。</li>
+                <li><strong>介面隔離設計</strong>：<code>config.js</code> 保留了 API 切換接口，隨時可無痛升級回 MySQL 架構。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>⚡ 效能優化 (Web Performance Optimization)</h2>
+            <p>針對 Core Web Vitals 指標進行深度優化，確保最佳的使用者體驗。</p>
+            <p><strong>LCP (Largest Contentful Paint) 策略：</strong></p>
+            <ul>
+                <li>系統在後端生成與前端渲染時，實作了智慧載入邏輯。</li>
+                <li>第一張圖片強制設定 <code>loading="eager"</code> 與 <code>fetchpriority="high"</code>。</li>
+                <li>其餘圖片自動設定 <code>loading="lazy"</code>，大幅節省頻寬並提升初始載入速度。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>🎨 獨特的樣板共用策略 (Universal Templating)</h2>
+            <p>解決了靜態生成與動態渲染之間樣板不同步的工程難題。</p>
+            <ul>
+                <li><strong>單一來源 (Single Source of Truth)</strong>：所有的 HTML 結構（文章卡片、列表項目）統一定義在 <code>blog.html</code> 的 <code>&lt;template&gt;</code> 標籤中。</li>
+                <li><strong>雙端共用</strong>：PHP 後端解析樣板生成靜態頁，JS 前端讀取同一組樣板生成動態列表。修改一次 HTML，全站同步更新。</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <hr>
+        <p>&copy; 2026 Ersalblog Project Analysis</p>
+    </footer>

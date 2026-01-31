@@ -33,8 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Special Check: DB Configured but Tables Missing
 $showInitLink = false;
+$showFileInitLink = false;
+
 if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !== false) {
     $showInitLink = true;
+}
+
+if (!$fileStatus['status']) {
+    $showFileInitLink = true;
 }
 
 ?>
@@ -83,6 +89,12 @@ if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !
                     <a href="db_init.php" class="fw-bold">點擊此處進行初始化設定 &rarr;</a>
                 </div>
             <?php endif; ?>
+            <?php if ($showFileInitLink): ?>
+                <div id="file_init_alert" class="alert alert-warning mt-2 mb-0 p-2" style="font-size: 0.9em; display: none;">
+                    檔案系統結構不完整。<br>
+                    <a href="file_init.php" class="fw-bold">點擊此處進行建構設定 &rarr;</a>
+                </div>
+            <?php endif; ?>
         </div>
         <button type="submit" id="login_btn" class="btn btn-primary w-100">登入</button>
     </form>
@@ -103,6 +115,7 @@ if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !
     var statusDiv = document.getElementById('source_status');
     var loginBtn = document.getElementById('login_btn');
     var dbInitAlert = document.getElementById('db_init_alert');
+    var fileInitAlert = document.getElementById('file_init_alert');
 
     function updateStatus() {
         var mode = sourceSelect.value;
@@ -112,6 +125,7 @@ if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !
             statusDiv.innerHTML = '<span class="text-success">✅ ' + info.message + '</span>';
             loginBtn.disabled = false;
             if(dbInitAlert) dbInitAlert.style.display = 'none';
+            if(fileInitAlert) fileInitAlert.style.display = 'none';
         } else {
             statusDiv.innerHTML = '<span class="text-danger">❌ ' + info.message + '</span>';
             loginBtn.disabled = true;
@@ -119,8 +133,16 @@ if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !
             // Show Init Link only if selecting DB and DB is missing tables
             if (mode === 'db' && info.message.indexOf('找不到資料表') !== -1 && dbInitAlert) {
                 dbInitAlert.style.display = 'block';
-            } else if (dbInitAlert) {
-                dbInitAlert.style.display = 'none';
+                if(fileInitAlert) fileInitAlert.style.display = 'none';
+            } 
+            // Show File Init Link if selecting File and status is error
+            else if (mode === 'file' && fileInitAlert) {
+                fileInitAlert.style.display = 'block';
+                if(dbInitAlert) dbInitAlert.style.display = 'none';
+            }
+            else {
+                if(dbInitAlert) dbInitAlert.style.display = 'none';
+                if(fileInitAlert) fileInitAlert.style.display = 'none';
             }
         }
     }

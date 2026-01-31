@@ -133,10 +133,31 @@
 - `gemini_log.txt` 轉型為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
 
 ### [19:05] 自動化初始化系統 (Database Initialization)
+
 - **任務**: 建立自動化資料庫建表與資料遷移機制。
+
 - **實作**: 
+
     - 建立 `admin/db_init.php`，支援從檔案系統一鍵遷移至資料庫。
+
     - 修改 `admin/login.php`，針對「已設定連線但未建表」的狀態提供引導連結。
+
 - **穩定性優化**: 
+
     - 解決 MySQL DDL 隱式提交導致的 "No active transaction" 錯誤。
+
     - 拆分 SQL 語句並強化事務 (Transaction) 狀態偵測，提升初始化成功率。
+
+
+
+### [20:20] 檔案系統還原工具 (File System Recovery)
+
+- **任務**: 建立檔案系統結構修復與資料庫反向匯出機制。
+
+- **實作**:
+
+    - 建立 `admin/file_init.php`，功能與資料庫初始化對稱。
+
+    - 支援從 MySQL 資料庫讀取內容，自動重建 `contents/` 下的索引與文章檔，以及 `category/` 目錄結構。
+
+    - 於登入頁面整合檔案系統健康狀態檢查，引導使用者進行修復。

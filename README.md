@@ -31,7 +31,7 @@ A lightweight, high-performance blog system designed specifically for photograph
 2. 將 `config.example.php` 重新命名為 `config.php` 並設定資料庫資訊。
 3. 將 `config.example.js` 重新命名為 `config.js` 並設定 API 類型與 Google 搜尋主控台 ID。
 4. 進入 `/admin` 並選擇 **資料庫模式**。若尚未初始化，請點擊畫面提示進入 **初始化精靈** 以建立資料表並匯入資料。
-5. 或者，在 `contents/index_post.txt` 加入您的文章（檔案模式）。
+5. 若選擇 **檔案模式** 且目錄結構缺失，系統亦會引導進入 **檔案建構精靈**，可選擇從資料庫還原內容。
 6. 執行 `make_html.php` 以生成靜態頁面。
 
 ## 致謝與第三方函式庫
