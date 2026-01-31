@@ -1,4 +1,4 @@
-# Preview Images Directory
+﻿# Preview Images Directory
 
 This directory stores preview images and icons for the blog posts.
 

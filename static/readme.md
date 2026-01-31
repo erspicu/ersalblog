@@ -1,4 +1,4 @@
-# Static Assets Directory
+﻿# Static Assets Directory
 
 This directory contains static files used by the blog's frontend.
 

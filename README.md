@@ -1,4 +1,4 @@
-# BaxerMux Photography Blog
+﻿# BaxerMux Photography Blog
 
 A lightweight, high-performance blog system designed specifically for photographers. It features a unique hybrid architecture combining Static Site Generation (SSG) and Single Page Application (SPA) capabilities without requiring a traditional SQL database for its core operation.
 

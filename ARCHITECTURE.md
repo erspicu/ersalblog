@@ -1,4 +1,4 @@
-# BaxerMux Photography Blog Technical Architecture Analysis
+﻿# BaxerMux Photography Blog Technical Architecture Analysis
 
 This project is a photography blog system featuring a hybrid mode of **Static Site Generation (SSG)** and **Single Page Application (SPA)**. Its design core lies in the separation of data and logic, supporting content management through plain text files.
 
