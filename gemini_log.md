@@ -26,3 +26,21 @@
 
 - [2026-01-31 20:20:00] 建立 admin/file_init.php 初始化檔案系統功能，支援從資料庫反向匯出資料至檔案結構。
 
+\xEF\xBB\xBF- [2026-01-31 00:00:00] 讀取gemini.txt檔案內容指示執行.
+\xEF\xBB\xBF- [2026-01-31 00:05:00] 實作後台版本號顯示(以修改時間為準)與多語系架構(langs/admin),並修改登入頁面支援語系切換.
+\xEF\xBB\xBF- [2026-01-31 00:10:00] 修改後台版本號機制,改為寫死在 admin/version_config.php 變數中(以更新當下時間為準),並移除舊的動態掃描機制.
+\xEF\xBB\xBF- [2026-01-31 00:15:00] 簡化語系目錄結構,移除子目錄改為直接以檔名區分(如 langs/admin/zh_TW.php).
+\xEF\xBB\xBF- [2026-01-31 00:20:00] 實作後台全站多語系: 建立 lang_init.php, 修改 auth.php 引入, 並全面替換 index.php, posts.php, categories.php 等頁面文字.
+\xEF\xBB\xBF- [2026-01-31 00:25:00] 續作多語系: 處理 categories.php 與 post_edit.php.
+\xEF\xBB\xBF- [2026-01-31 00:30:00] 續作多語系: 處理 tool_migrate.php.
+\xEF\xBB\xBF- [2026-01-31 00:35:00] 實作前端 JS 多語系: 建立 langs/admin/zh_TW.js 與 en_US.js, 並在後台頁面動態引入.
+\xEF\xBB\xBF- [2026-01-31 00:40:00] 修正 login.php JS 提示訊息多語系: 修改 health_check.php 使用 __() 翻譯.
+\xEF\xBB\xBF- [2026-01-31 00:45:00] 在登入頁加入 Vibe Coding 資訊 (Gemini CLI & Gemini Models).
+\xEF\xBB\xBF- [2026-01-31 00:50:00] 在登入頁加入 Gemini CLI 版本與 AI 模型名稱資訊。
+\xEF\xBB\xBF- [2026-01-31 00:52:00] 修正 AI 模型名稱為 Auto (Gemini 3)。
+\xEF\xBB\xBF- [2026-01-31 00:55:00] 透過內部工具獲取正確 Runtime 資訊 (CLI v0.26.0, Model gemini-3-pro-preview) 並更新設定檔。
+\xEF\xBB\xBF- [2026-01-31 01:00:00] 更新 gemini.txt：將「自動查詢並更新版本資訊」納入「更新」指示的標準流程。
+\xEF\xBB\xBF- [2026-01-31 01:05:00] 更新 gemini.txt：在「更新」流程中加入獲取當下時間並寫入版本資訊的指示。
+\xEF\xBB\xBF- [2026-01-31 01:10:00] 重構 gemini.txt，提升內容結構與 AI 可讀性。
+\xEF\xBB\xBF- [2026-01-31 01:13:00] 將 gemini.txt 重新命名為 gemini.md。
+\xEF\xBB\xBF- [2026-01-31 01:20:00] 執行巨集指令: 更新 (更新文件 -> 更新版本 -> Git 發佈)。

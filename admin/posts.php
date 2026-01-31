@@ -25,11 +25,11 @@ function truncate($text, $limit = 60) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文章管理 - Blog Admin</title>
+    <title><?php echo __('posts_list_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
@@ -55,56 +55,55 @@ function truncate($text, $limit = 60) {
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
         <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Blog Admin</span>
+            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
         </a>
         <hr>
         <div class="text-center mb-3">
             <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php">
-                    📊 儀表板
+                    <?php echo __('nav_dashboard'); ?>
                 </a>
             </li>
             <li>
                 <a href="posts.php" class="active">
-                    📝 文章管理
+                    <?php echo __('nav_posts'); ?>
                 </a>
             </li>
             <li>
                 <a href="categories.php">
-                    📂 分類管理
+                    <?php echo __('nav_categories'); ?>
                 </a>
             </li>
             <?php if ($dataManager->getSource() === 'file'): ?>
             <li>
                 <a href="tool_migrate.php">
-                    🔄 資料匯入
+                    <?php echo __('nav_import'); ?>
                 </a>
             </li>
             <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
-            <a href="../blog.html" target="_blank">🌍 預覽網站</a>
-            <a href="logout.php" class="text-danger mt-2">🚪 登出</a>
+            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
+            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>📂 文章列表</h2>
-            <a href="post_edit.php" class="btn btn-success">+ 撰寫新文章</a>
+            <h2><?php echo __('posts_list_title'); ?></h2>
+            <a href="post_edit.php" class="btn btn-success"><?php echo __('btn_new_post'); ?></a>
         </div>
 
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
-            <!-- 這裡也可以改用 SweetAlert，但先保留 Bootstrap Alert 作為簡單反饋 -->
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                文章已刪除。
+                <?php echo __('msg_deleted'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
@@ -114,11 +113,11 @@ function truncate($text, $limit = 60) {
                 <table class="table table-hover table-striped mb-0 table-bordered">
                     <thead class="table-dark">
                         <tr class="text-center">
-                            <th style="width: 10%;">日期</th>
-                            <th style="width: 45%;">文章資訊 (標題/檔名/描述)</th>
-                            <th style="width: 15%;">分類</th>
-                            <th style="width: 15%;">標籤</th>
-                            <th style="width: 15%;">操作</th>
+                            <th style="width: 10%;"><?php echo __('col_date'); ?></th>
+                            <th style="width: 45%;"><?php echo __('col_post_info'); ?></th>
+                            <th style="width: 15%;"><?php echo __('col_category'); ?></th>
+                            <th style="width: 15%;"><?php echo __('col_tags'); ?></th>
+                            <th style="width: 15%;"><?php echo __('col_action'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,7 +129,7 @@ function truncate($text, $limit = 60) {
                             <td>
                                 <!-- 標題 -->
                                 <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="text-decoration-none fw-bold text-dark fs-5">
-                                    <?php echo htmlspecialchars($post['post_title'] ?? '無標題'); ?>
+                                    <?php echo htmlspecialchars($post['post_title'] ?? __('no_title')); ?>
                                 </a>
                                 <br>
                                 <!-- 檔名 -->
@@ -163,19 +162,19 @@ function truncate($text, $limit = 60) {
                                 ?>
                             </td>
                             <td class="text-center align-middle">
-                                <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="btn btn-sm btn-outline-primary mb-1 w-100">編輯</a>
+                                <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="btn btn-sm btn-outline-primary mb-1 w-100"><?php echo __('btn_edit'); ?></a>
                                 <!-- 加入 delete-form class 並移除 onsubmit -->
                                 <form method="POST" class="d-block delete-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($post['id']); ?>">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">刪除</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100"><?php echo __('btn_delete'); ?></button>
                                 </form>
                             </td>
                         </tr>
                         <?php endforeach; ?>
                         
                         <?php if(empty($posts)): ?>
-                            <tr><td colspan="5" class="text-center py-4 text-muted">目前沒有任何文章</td></tr>
+                            <tr><td colspan="5" class="text-center py-4 text-muted"><?php echo __('no_posts'); ?></td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -184,8 +183,7 @@ function truncate($text, $limit = 60) {
     </div>
 </div>
 
-<script src="assets/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/sweetalert2.all.min.js"></script>
+<?php require 'common_js_inc.php'; ?>
 <script>
     // 綁定所有刪除表單
     document.querySelectorAll('.delete-form').forEach(form => {
@@ -193,14 +191,14 @@ function truncate($text, $limit = 60) {
             e.preventDefault(); // 阻止直接送出
             
             Swal.fire({
-                title: '確定要刪除這篇文章嗎？',
-                text: "這個動作無法復原！",
+                title: Lang.confirm_delete_title,
+                text: Lang.confirm_delete_text,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545', // Danger color
                 cancelButtonColor: '#6c757d',  // Secondary color
-                confirmButtonText: '是的，刪除它！',
-                cancelButtonText: '取消'
+                confirmButtonText: Lang.confirm_yes,
+                cancelButtonText: Lang.confirm_cancel
             }).then((result) => {
                 if (result.isConfirmed) {
                     this.submit(); // 確認後再送出
@@ -213,13 +211,13 @@ function truncate($text, $limit = 60) {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('msg') === 'deleted') {
         Swal.fire({
-            title: '已刪除！',
-            text: '文章已成功移除。',
+            title: Lang.deleted_title,
+            text: Lang.deleted_post_text,
             icon: 'success',
             timer: 2000,
             showConfirmButton: false
         });
-        // 移除 URL 參數以免重整時又跳出來 (Optional)
+        // 移除 URL 參數以免重整時又跳出來
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 </script>

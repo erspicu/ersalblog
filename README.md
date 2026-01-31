@@ -8,6 +8,8 @@ A lightweight, high-performance blog system designed specifically for photograph
   - **Flat-file Mode**: Uses simple text files (`index_post.txt`) and directory structures for content management.
   - **Database Mode**: Supports MySQL/MariaDB with a normalized schema (`blog_posts`, `blog_categories`) for robust data handling.
 - **Dual-Mode Admin Panel**: A unified administration interface that allows you to switch between managing local files or the database seamlessly.
+    - **Multi-language Support**: Fully localized admin interface (Traditional Chinese / English).
+    - **Vibe Coding**: Developed with Gemini CLI & Gemini AI Models, featuring automated version tracking.
 - **Hybrid Rendering**: Serve content dynamically as a SPA for rich interaction or pre-render static HTML pages for SEO and speed.
 - **Performance Optimized**: Built-in lazy loading for images and automatic JS/CSS minification via Python scripts.
 

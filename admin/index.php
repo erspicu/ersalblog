@@ -55,11 +55,11 @@ $diskTotalGB = $diskTotal ? round($diskTotal / 1024 / 1024 / 1024, 2) : 'N/A';
 $recentPosts = $dataManager->getRecentPosts(5);
 ?>
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog 後台管理</title>
+    <title><?php echo __('login_title'); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
@@ -76,49 +76,49 @@ $recentPosts = $dataManager->getRecentPosts(5);
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
         <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Blog Admin</span>
+            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
         </a>
         <hr>
         <div class="text-center mb-3">
             <span class="badge <?php echo ($source === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                模式: <?php echo ($source === 'db') ? '資料庫' : '檔案系統'; ?>
+                <?php echo __('mode_label'); ?>: <?php echo ($source === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php" class="active">
-                    📊 儀表板
+                    <?php echo __('nav_dashboard'); ?>
                 </a>
             </li>
             <li>
                 <a href="posts.php">
-                    📝 文章管理
+                    <?php echo __('nav_posts'); ?>
                 </a>
             </li>
             <li>
                 <a href="categories.php">
-                    📂 分類管理
+                    <?php echo __('nav_categories'); ?>
                 </a>
             </li>
             <?php if ($source === 'file'): ?>
             <li>
                 <a href="tool_migrate.php">
-                    🔄 資料匯入
+                    <?php echo __('nav_import'); ?>
                 </a>
             </li>
             <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
-            <a href="../blog.html" target="_blank">🌍 預覽網站</a>
-            <a href="logout.php" class="text-danger mt-2">🚪 登出</a>
+            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
+            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>歡迎回來，<?php echo htmlspecialchars($_SESSION['admin_user']); ?>！</h2>
+            <h2><?php echo __('welcome_msg'); ?>，<?php echo htmlspecialchars($_SESSION['admin_user']); ?>！</h2>
             <span class="badge bg-secondary">PHP v<?php echo $phpVersion; ?></span>
         </div>
         
@@ -130,9 +130,9 @@ $recentPosts = $dataManager->getRecentPosts(5);
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">文章總數</h6>
+                                <h6 class="card-title mb-0"><?php echo __('stat_posts'); ?></h6>
                                 <h2 class="my-2"><?php echo $postCount; ?></h2>
-                                <small>篇已發布文章</small>
+                                <small><?php echo __('stat_posts_sub'); ?></small>
                             </div>
                             <span class="fs-1">📝</span>
                         </div>
@@ -146,9 +146,9 @@ $recentPosts = $dataManager->getRecentPosts(5);
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">資料庫大小</h6>
+                                <h6 class="card-title mb-0"><?php echo __('stat_db_size'); ?></h6>
                                 <h2 class="my-2"><?php echo $dbSize; ?> <span class="fs-6"><?php echo ($source === 'db') ? 'MB' : ''; ?></span></h2>
-                                <small><?php echo ($source === 'db') ? 'DB: '.htmlspecialchars($dbName) : '不適用'; ?></small>
+                                <small><?php echo ($source === 'db') ? 'DB: '.htmlspecialchars($dbName) : __('not_applicable'); ?></small>
                             </div>
                             <span class="fs-1">💾</span>
                         </div>
@@ -162,9 +162,9 @@ $recentPosts = $dataManager->getRecentPosts(5);
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">磁碟剩餘空間</h6>
+                                <h6 class="card-title mb-0"><?php echo __('stat_disk_free'); ?></h6>
                                 <h2 class="my-2"><?php echo $diskFreeGB; ?> <span class="fs-6">GB</span></h2>
-                                <small>總容量: <?php echo $diskTotalGB; ?> GB</small>
+                                <small><?php echo __('stat_disk_total'); ?>: <?php echo $diskTotalGB; ?> GB</small>
                             </div>
                             <span class="fs-1">💿</span>
                         </div>
@@ -178,7 +178,7 @@ $recentPosts = $dataManager->getRecentPosts(5);
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">連線資訊</h6>
+                                <h6 class="card-title mb-0"><?php echo __('stat_connection'); ?></h6>
                                 <?php if ($source === 'db'): ?>
                                     <p class="my-2 fw-bold">Host: <?php echo htmlspecialchars($dbHost); ?></p>
                                     <small>Type: <?php echo $dbType; ?></small><br>
@@ -200,14 +200,14 @@ $recentPosts = $dataManager->getRecentPosts(5);
         <!-- 最新文章列表 -->
         <div class="card shadow-sm">
             <div class="card-header bg-white py-3">
-                <h5 class="mb-0">🚀 最新發布文章</h5>
+                <h5 class="mb-0"><?php echo __('recent_posts_title'); ?></h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col">發布日期</th>
-                            <th scope="col">標題</th>
+                            <th scope="col"><?php echo __('col_date'); ?></th>
+                            <th scope="col"><?php echo __('col_title'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -218,18 +218,18 @@ $recentPosts = $dataManager->getRecentPosts(5);
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($recentPosts)): ?>
-                        <tr><td colspan="2" class="text-center text-muted">目前沒有文章</td></tr>
+                        <tr><td colspan="2" class="text-center text-muted"><?php echo __('no_posts'); ?></td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
             <div class="card-footer bg-white text-end">
-                <a href="posts.php" class="btn btn-sm btn-outline-primary">管理所有文章 &rarr;</a>
+                <a href="posts.php" class="btn btn-sm btn-outline-primary"><?php echo __('view_all_posts'); ?> &rarr;</a>
             </div>
         </div>
     </div>
 </div>
 
-<script src="assets/js/bootstrap.bundle.min.js"></script>
+<?php require 'common_js_inc.php'; ?>
 </body>
 </html>

@@ -18,9 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($oldName && $newName && $oldName !== $newName) {
             $count = $dataManager->renameCategory($oldName, $newName);
             if ($count > 0 || $count === true) {
-                $msg = "成功將分類由「{$oldName}」改為「{$newName}」。";
+                $msg = sprintf(__('msg_rename_success'), $oldName, $newName);
             } else {
-                 $msg = "修改失敗或未找到目標。";
+                 $msg = __('msg_rename_fail');
             }
         }
     }
@@ -32,9 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($delName) {
             $count = $dataManager->deleteCategory($delName);
             if ($count > 0 || $count === true) {
-                $msg = "成功移除分類「{$delName}」。";
+                $msg = sprintf(__('msg_remove_success'), $delName);
             } else {
-                 $msg = "移除失敗或未找到目標。";
+                 $msg = __('msg_remove_fail');
             }
         }
     }
@@ -45,9 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($newCatName) {
             $result = $dataManager->createCategory($newCatName);
             if ($result) {
-                $msg = "成功建立新分類「{$newCatName}」。";
+                $msg = sprintf(__('msg_create_success'), $newCatName);
             } else {
-                $msg = "建立失敗，可能分類已存在。";
+                $msg = __('msg_create_fail');
             }
         }
     }
@@ -57,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $catStats = $dataManager->getAllCategories();
 ?>
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>分類管理 - Blog Admin</title>
+    <title><?php echo __('cat_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
@@ -76,51 +76,51 @@ $catStats = $dataManager->getAllCategories();
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
         <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Blog Admin</span>
+            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
         </a>
         <hr>
         <div class="text-center mb-3">
             <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
                 <a href="index.php">
-                    📊 儀表板
+                    <?php echo __('nav_dashboard'); ?>
                 </a>
             </li>
             <li>
                 <a href="posts.php">
-                    📝 文章管理
+                    <?php echo __('nav_posts'); ?>
                 </a>
             </li>
             <li>
                 <a href="categories.php" class="active">
-                    📂 分類管理
+                    <?php echo __('nav_categories'); ?>
                 </a>
             </li>
             <?php if ($dataManager->getSource() === 'file'): ?>
             <li>
                 <a href="tool_migrate.php">
-                    🔄 資料匯入
+                    <?php echo __('nav_import'); ?>
                 </a>
             </li>
             <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
-            <a href="../blog.html" target="_blank">🌍 預覽網站</a>
-            <a href="logout.php" class="text-danger mt-2">🚪 登出</a>
+            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
+            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>📂 分類管理</h2>
+            <h2><?php echo __('cat_title'); ?></h2>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
-                + 新增分類
+                <?php echo __('btn_add_cat'); ?>
             </button>
         </div>
 
@@ -132,7 +132,7 @@ $catStats = $dataManager->getAllCategories();
         <?php endif; ?>
 
         <div class="alert alert-info">
-            <small>提示：此處列出系統中的所有分類。您可以新增、改名或移除分類。請注意，移除分類不會刪除該分類下的文章。</small>
+            <small><?php echo __('cat_hint'); ?></small>
         </div>
 
         <div class="row">
@@ -142,18 +142,18 @@ $catStats = $dataManager->getAllCategories();
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="card-title mb-0 fw-bold text-primary"><?php echo htmlspecialchars($catName); ?></h5>
-                            <small class="text-muted">共 <?php echo $count; ?> 篇文章</small>
+                            <small class="text-muted"><?php echo __('cat_count_suffix'); ?>: <?php echo $count; ?></small>
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn btn-outline-secondary btn-sm" 
                                     data-bs-toggle="modal" data-bs-target="#renameModal" 
                                     data-oldname="<?php echo htmlspecialchars($catName); ?>">
-                                改名
+                                <?php echo __('btn_rename'); ?>
                             </button>
                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                     data-bs-toggle="modal" data-bs-target="#deleteModal" 
                                     data-delname="<?php echo htmlspecialchars($catName); ?>">
-                                移除
+                                <?php echo __('btn_remove'); ?>
                             </button>
                         </div>
                     </div>
@@ -162,7 +162,7 @@ $catStats = $dataManager->getAllCategories();
             <?php endforeach; ?>
             
             <?php if(empty($catStats)): ?>
-                <div class="col-12 text-center text-muted p-5">目前沒有任何分類資料。</div>
+                <div class="col-12 text-center text-muted p-5"><?php echo __('no_categories'); ?></div>
             <?php endif; ?>
         </div>
     </div>
@@ -174,76 +174,77 @@ $catStats = $dataManager->getAllCategories();
         <form method="POST" class="modal-content">
             <input type="hidden" name="action" value="create">
             <div class="modal-header">
-                <h5 class="modal-title">新增分類</h5>
+                <h5 class="modal-title"><?php echo __('modal_create_title'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">分類名稱</label>
-                    <input type="text" name="new_category_name" class="form-control" required placeholder="請輸入分類名稱">
+                    <label class="form-label"><?php echo __('modal_cat_name'); ?></label>
+                    <input type="text" name="new_category_name" class="form-control" required>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-success">建立</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('confirm_cancel'); ?></button>
+                <button type="submit" class="btn btn-success"><?php echo __('btn_create'); ?></button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal 保持不變，複製進來 -->
+<!-- Modal: Rename -->
 <div class="modal fade" id="renameModal" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
             <input type="hidden" name="action" value="rename">
             <input type="hidden" name="old_name" id="renameOldName">
             <div class="modal-header">
-                <h5 class="modal-title">重新命名分類</h5>
+                <h5 class="modal-title"><?php echo __('modal_rename_title'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">原名稱</label>
+                    <label class="form-label"><?php echo __('modal_old_name'); ?></label>
                     <input type="text" class="form-control" id="renameOldNameDisplay" disabled>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">新名稱</label>
-                    <input type="text" name="new_name" class="form-control" required placeholder="請輸入新名稱">
+                    <label class="form-label"><?php echo __('modal_new_name'); ?></label>
+                    <input type="text" name="new_name" class="form-control" required>
                 </div>
                 <div class="alert alert-warning py-2 small">
-                    <i class="bi bi-exclamation-triangle"></i> 注意：這將會批次修改所有相關的文章資料。
+                    <i class="bi bi-exclamation-triangle"></i> <?php echo __('modal_rename_warn'); ?>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-primary">確認修改</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('confirm_cancel'); ?></button>
+                <button type="submit" class="btn btn-primary"><?php echo __('btn_confirm_modify'); ?></button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Modal: Delete -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="delete_name" id="deleteName">
             <div class="modal-header">
-                <h5 class="modal-title">移除分類</h5>
+                <h5 class="modal-title"><?php echo __('modal_remove_title'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>您確定要移除分類 <strong id="deleteNameDisplay" class="text-danger"></strong> 嗎？</p>
-                <p class="text-muted">這將會從所有相關的文章中刪除此分類標籤，但文章本身不會被刪除。</p>
+                <p><?php echo __('modal_remove_confirm'); ?> <strong id="deleteNameDisplay" class="text-danger"></strong> <?php echo __('modal_remove_confirm_suffix'); ?></p>
+                <p class="text-muted"><?php echo __('modal_remove_hint'); ?></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-danger">確認移除</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('confirm_cancel'); ?></button>
+                <button type="submit" class="btn btn-danger"><?php echo __('btn_confirm_remove'); ?></button>
             </div>
         </form>
     </div>
 </div>
 
-<script src="assets/js/bootstrap.bundle.min.js"></script>
+<?php require 'common_js_inc.php'; ?>
 <script>
     var renameModal = document.getElementById('renameModal');
     renameModal.addEventListener('show.bs.modal', function (event) {

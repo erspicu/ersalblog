@@ -2,6 +2,9 @@
 // admin/auth.php
 session_start();
 
+// 初始化多語系支援
+require_once __DIR__ . '/lang_init.php';
+
 // 引入上層的設定檔
 require_once __DIR__ . '/../config.php';
 

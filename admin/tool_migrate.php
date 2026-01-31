@@ -7,14 +7,8 @@ requireLogin();
 
 $dataManager = new DataManager();
 
-// Only allow in File Mode (or strict restriction as per request)
-// The request said: "登入檔案模式後...增加一個功能分類...將檔案內容匯入到資料庫"
-// So we restrict to File Mode or allow both? The prompt implies File Mode specifically.
 if ($dataManager->getSource() !== 'file') {
-    // Optional: Redirect or just show message.
-    // But let's allow accessing it, just warning that source is DB?
-    // Actually, if I am in DB mode, I am seeing DB data. "Importing from File" is also valid.
-    // But let's stick to the prompt: "In File Mode".
+    // Optional restriction
 }
 
 // Check DB connection first
@@ -26,11 +20,11 @@ $startMigration = isset($_POST['start_migration']);
 
 ?>
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>資料遷移 - Blog Admin</title>
+    <title><?php echo __('migrate_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
@@ -51,61 +45,61 @@ $startMigration = isset($_POST['start_migration']);
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
         <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Blog Admin</span>
+            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
         </a>
         <hr>
         <div class="text-center mb-3">
             <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                模式: <?php echo ($dataManager->getSource() === 'db') ? '資料庫' : '檔案系統'; ?>
+                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item"><a href="index.php">📊 儀表板</a></li>
-            <li class="nav-item"><a href="posts.php">📝 文章管理</a></li>
-            <li class="nav-item"><a href="categories.php">📂 分類管理</a></li>
+            <li class="nav-item"><a href="index.php"><?php echo __('nav_dashboard'); ?></a></li>
+            <li class="nav-item"><a href="posts.php"><?php echo __('nav_posts'); ?></a></li>
+            <li class="nav-item"><a href="categories.php"><?php echo __('nav_categories'); ?></a></li>
             <?php if ($dataManager->getSource() === 'file'): ?>
-            <li class="nav-item"><a href="tool_migrate.php" class="active">🔄 資料匯入</a></li>
+            <li class="nav-item"><a href="tool_migrate.php" class="active"><?php echo __('nav_import'); ?></a></li>
             <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
-            <a href="../blog.html" target="_blank">🌍 預覽網站</a>
-            <a href="logout.php" class="text-danger mt-2">🚪 登出</a>
+            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
+            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>🔄 資料匯入 (File to DB)</h2>
+            <h2><?php echo __('migrate_title'); ?></h2>
         </div>
 
         <div class="card shadow-sm mb-4">
             <div class="card-body">
-                <h5 class="card-title">說明</h5>
+                <h5 class="card-title"><?php echo __('migrate_info_title'); ?></h5>
                 <p class="card-text">
-                    此功能會讀取目前的「檔案系統」內容 (contents, category)，並將其解析後寫入至設定的 MySQL 資料庫中。<br>
-                    <span class="text-danger">注意：若資料庫中已有同檔名的文章，將會進行更新 (Update)；若無則新增 (Insert)。</span>
+                    <?php echo __('migrate_desc'); ?><br>
+                    <span class="text-danger"><?php echo __('migrate_warn'); ?></span>
                 </p>
                 
                 <div class="alert <?php echo $dbReady ? 'alert-success' : 'alert-danger'; ?>">
-                    <strong>目標資料庫狀態:</strong> <?php echo $dbStatus['message']; ?>
+                    <strong><?php echo __('db_status'); ?>:</strong> <?php echo $dbStatus['message']; ?>
                 </div>
 
                 <?php if ($dbReady && !$startMigration): ?>
-                    <form method="POST" onsubmit="return confirm('確定要開始匯入嗎？這可能需要一點時間。');">
+                    <form method="POST" onsubmit="return confirm('<?php echo __('confirm_start_migration'); ?>');">
                         <input type="hidden" name="start_migration" value="1">
-                        <button type="submit" class="btn btn-primary">🚀 開始匯入資料</button>
+                        <button type="submit" class="btn btn-primary"><?php echo __('btn_start_migration'); ?></button>
                     </form>
                 <?php elseif (!$dbReady): ?>
-                    <button class="btn btn-secondary" disabled>無法連線至資料庫</button>
+                    <button class="btn btn-secondary" disabled><?php echo __('btn_db_unreachable'); ?></button>
                 <?php endif; ?>
             </div>
         </div>
 
         <?php if ($startMigration): ?>
             <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">執行日誌</div>
+                <div class="card-header bg-dark text-white"><?php echo __('log_header'); ?></div>
                 <div class="card-body bg-dark">
                     <div class="progress-bar-container">
                         <div id="p-bar" class="progress-fill">0%</div>
@@ -123,7 +117,7 @@ $startMigration = isset($_POST['start_migration']);
     </div>
 </div>
 
-<script src="assets/js/bootstrap.bundle.min.js"></script>
+<?php require 'common_js_inc.php'; ?>
 </body>
 </html>
 
@@ -183,13 +177,13 @@ function runMigration($dbConfig) {
     ];
 
     try {
-        output_log("正在連線到資料庫...", 'system');
+        output_log(__('log_connecting'), 'system');
         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
         $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
-        output_log("連線成功!", 'success');
+        output_log(__('log_connected'), 'success');
 
         // Check Table (New Schema)
         $pdo->exec("CREATE TABLE IF NOT EXISTS `blog_posts` (
@@ -223,7 +217,7 @@ function runMigration($dbConfig) {
 
         // Read File Data
         if (!file_exists($paths['index_file'])) {
-            output_log("找不到索引檔: " . $paths['index_file'], 'error');
+            output_log(sprintf(__('log_file_missing'), $paths['index_file']), 'error');
             return;
         }
 
@@ -245,7 +239,7 @@ function runMigration($dbConfig) {
             updated_at = NOW()
         ");
 
-        output_log("開始處理 $total_lines 篇文章...", 'system');
+        output_log(sprintf(__('log_start_process'), $total_lines), 'system');
 
         foreach ($lines as $index => $line) {
             $parts = explode('|', $line);
@@ -324,12 +318,12 @@ function runMigration($dbConfig) {
                 }
 
                 $pdo->commit();
-                output_log("已匯入: $post_title", 'success');
+                output_log(sprintf(__('log_imported'), $post_title), 'success');
                 $success_count++;
 
             } catch (Exception $e) {
                 $pdo->rollBack();
-                output_log("失敗 [$post_filename]: " . $e->getMessage(), 'error');
+                output_log(sprintf(__('log_failed'), $post_filename, $e->getMessage()), 'error');
             }
 
             // Update Progress
@@ -345,10 +339,10 @@ function runMigration($dbConfig) {
             if (ob_get_level() > 0) ob_flush();
         }
 
-        output_log("匯入完成! 成功: $success_count", 'system');
+        output_log(sprintf(__('log_complete'), $success_count), 'system');
 
     } catch (Exception $e) {
-        output_log("系統錯誤: " . $e->getMessage(), 'error');
+        output_log(sprintf(__('log_sys_error'), $e->getMessage()), 'error');
     }
 }
 ?>

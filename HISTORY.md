@@ -133,31 +133,44 @@
 - `gemini_log.txt` 轉型為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
 
 ### [19:05] 自動化初始化系統 (Database Initialization)
-
 - **任務**: 建立自動化資料庫建表與資料遷移機制。
-
 - **實作**: 
-
     - 建立 `admin/db_init.php`，支援從檔案系統一鍵遷移至資料庫。
-
     - 修改 `admin/login.php`，針對「已設定連線但未建表」的狀態提供引導連結。
-
 - **穩定性優化**: 
-
     - 解決 MySQL DDL 隱式提交導致的 "No active transaction" 錯誤。
-
     - 拆分 SQL 語句並強化事務 (Transaction) 狀態偵測，提升初始化成功率。
 
-
-
 ### [20:20] 檔案系統還原工具 (File System Recovery)
-
 - **任務**: 建立檔案系統結構修復與資料庫反向匯出機制。
-
 - **實作**:
-
     - 建立 `admin/file_init.php`，功能與資料庫初始化對稱。
-
     - 支援從 MySQL 資料庫讀取內容，自動重建 `contents/` 下的索引與文章檔，以及 `category/` 目錄結構。
-
     - 於登入頁面整合檔案系統健康狀態檢查，引導使用者進行修復。
+
+### [00:05] 後台版本控制與多語系架構 (i18n)
+- **任務**: 實作後台版本號顯示與繁簡英多語系支援。
+- **實作**:
+    - **版本機制**: 初步嘗試掃描檔案時間，後改為在 `admin/version_config.php` 中定義靜態版本號 (vYYYY.MM.DD.HH.MM)。
+    - **語系架構**: 建立 `langs/admin/` 目錄，以檔名 (`zh_TW.php`, `en_US.php`) 區分語系。
+    - **登入頁改造**: `admin/login.php` 加入語系切換下拉選單與版本顯示。
+
+### [00:20] 後台全站國際化
+- **任務**: 將多語系支援擴展至整個後台管理系統。
+- **實作**:
+    - 建立 `admin/lang_init.php` 處理語系載入與 `__()` 翻譯函式。
+    - 修改 `admin/auth.php` 全域引入語系機制。
+    - 全面替換 `index.php` (儀表板)、`posts.php` (文章管理)、`categories.php` (分類管理)、`post_edit.php` (文章編輯)、`tool_migrate.php` (匯入工具) 中的硬編碼文字。
+    - 支援前端 JavaScript 多語系：建立 `zh_TW.js` / `en_US.js`，並透過 `admin/common_js_inc.php` 動態引入，解決 SweetAlert2 等彈窗文字的翻譯問題。
+    - 修正 `admin/health_check.php`，讓後端回傳的狀態訊息也能支援多語系。
+
+### [00:50] Vibe Coding 資訊整合
+- **任務**: 在登入頁面顯示開發使用的 AI 工具版本。
+- **實作**:
+    - **自動化更新**: 修改 `gemini.md` 的「更新」指令定義，每次更新時自動查詢 Gemini CLI 版本與 AI 模型名稱。
+    - **設定檔寫入**: 將 Runtime 資訊 (CLI v0.26.0, Model gemini-3-pro-preview) 寫入 `admin/version_config.php`。
+    - **登入頁顯示**: 在 `admin/login.php` 顯示 "Vibe coded with Gemini CLI..." 資訊。
+
+### [01:10] 開發規範重構
+- **任務**: 優化 Prompt 指令文件。
+- **實作**: 將 `gemini.txt` 重構為結構化的 `gemini.md`，明確定義核心行為準則、自動化流程與日誌規範。
