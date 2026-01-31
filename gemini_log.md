@@ -44,3 +44,6 @@
 \xEF\xBB\xBF- [2026-01-31 01:10:00] 重構 gemini.txt，提升內容結構與 AI 可讀性。
 \xEF\xBB\xBF- [2026-01-31 01:13:00] 將 gemini.txt 重新命名為 gemini.md。
 \xEF\xBB\xBF- [2026-01-31 01:20:00] 執行巨集指令: 更新 (更新文件 -> 更新版本 -> Git 發佈)。
+\xEF\xBB\xBF- [2026-01-31 01:25:00] 更新 gemini.md：指定 Git Bash 為偏好的執行環境。
+\xEF\xBB\xBF- [2026-01-31 01:28:00] 更新 gemini.md：指定所有時間記錄與版本號必須使用 UTC+8 時區。
+\xEF\xBB\xBF- [2026-01-31 01:31:00] (UTC+8) 執行最後更新，並發佈變更至 GitHub。
