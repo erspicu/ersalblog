@@ -28,6 +28,26 @@ A lightweight, high-performance blog system designed specifically for photograph
 
 ---
 
+# BaxerMux 攝影部落格 (Photography Blog)
+
+一個輕量、高效能，專為攝影師設計的部落格系統。採用獨特的混合架構，結合了靜態網站生成 (SSG) 與單頁應用程式 (SPA) 的優點，且核心運作不需要傳統的 SQL 資料庫。
+
+## 核心特性 (Key Features)
+- **攝影導向**：整合 `exif.js`，自動從您的照片中提取並顯示 EXIF 元數據（相機、光圈、快門、ISO、GPS）。
+- **混合數據管理**：
+  - **檔案模式 (Flat-file)**：使用簡單的文字檔 (`index_post.txt`) 與目錄結構進行內容管理。
+  - **資料庫模式 (Database)**：支援 MySQL/MariaDB，並採用正規化架構 (`blog_posts`, `blog_categories`) 處理更強大的數據需求。
+- **雙模式管理後台**：統一的管理介面，讓您能在管理本地檔案或資料庫之間無縫切換。
+    - **多語系支援**：完整的後台介面本地化（繁體中文 / 英文）。
+    - **Vibe Coding**：由 Gemini CLI 與 Gemini AI 模型開發，具備自動化版本追蹤。
+- **混合渲染**：內容可透過 SPA 動態呈現以獲得豐富互動，或預先渲染為靜態 HTML 頁面以提升 SEO 與載入速度。
+- **效能優化**：內建圖片延遲載入 (Lazy Loading) 機制，並透過 Python 腳本自動壓縮 JS/CSS。
+
+## 技術棧 (Tech Stack)
+- **後端 (Backend)**: PHP 7.4+ (相容 PHP 8.x)
+- **前端 (Frontend)**: 原生 JavaScript (Vanilla JS), HTML5, CSS3
+- **工具 (Tools)**: Python 3 (用於資產壓縮)
+
 ## 快速開始
 1. 複製儲存庫。
 2. 將 `config.example.php` 重新命名為 `config.php` 並設定資料庫資訊。
