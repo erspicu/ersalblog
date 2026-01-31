@@ -6,5 +6,5 @@
 也不需要理會 min.js 或是 min.css 壓縮版本,也不需要理會make_html.php輸出的靜態網頁&sitemap.xml,或是google search console認證的html檔,
 了解一下這個專案的設計.
 
-每次下prompt動作後,請記錄prompt內容到gemini_log.txt檔(必須使用 UTF-8 with BOM 編碼以確保 win11 筆記本程式能夠正常開啟繁體中文內容),加上時間紀錄 [YYYY-MM-DD HH:MM:SS].
+每次下prompt動作後,請記錄prompt內容到gemini_log.md檔(必須使用 UTF-8 with BOM 編碼以確保 win11 筆記本程式能夠正常開啟繁體中文內容),加上時間紀錄 [YYYY-MM-DD HH:MM:SS],並使用 Markdown 列表格式 (例如: - [時間] 內容).
 
