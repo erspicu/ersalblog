@@ -1,5 +1,216 @@
 # Vibe Coding History
 
+Recorded the development journey and original Prompt commands of this project through Vibe Coding with Gemini CLI.
+
+---
+
+## 2026-01-30
+
+### [12:05] Initial Project Scan and Analysis
+- **Task**: Understand project architecture (Hybrid SSG + SPA).
+- **Prompt**: 
+    > "Scan the development files *.js *.css *.php *.py in this project directory again (no need for the test directory), as well as blog.html, to understand the content. Modifications will follow."
+
+### [12:15] Optimization of Database Migration Tool
+- **Task**: Change `migrate_full.php` to read from the central configuration `config.php`.
+- **Prompt**: 
+    > "Hope the database connection settings in migrate_full.php can be changed to read from config.php."
+
+### [12:20] Git Version Control Initialization (.gitignore)
+- **Task**: Establish comprehensive filtering rules to exclude sensitive information, large photo resources, and automatically generated HTML files.
+- **Prompts**: 
+    - "Want to manage with git later, but before that, ask Gemini to create a git ignore configuration file. First, remove programs containing sensitive data from uploading."
+    - "Add all other generated files in the root directory except the blog.html template file."
+    - "Remove Google verification files as well."
+    - "Exclude all image files under the preview directory." (Later corrected to remove .jpg .png files in preview)
+    - "Remove pic directory."
+    - "Exclude everything under category directory except readme.md."
+    - "Exclude everything under contents directory except readme.md."
+    - "Exclude image files in static."
+
+### [12:30] Documentation of Directory Purposes (READMEs)
+- **Task**: Create bilingual instruction documents for main directories and update the project architecture document.
+- **Prompts**: 
+    - "Help write the purpose of the contents directory into the readme.md file within it based on the project implementation. Express in English first, then in Chinese."
+    - "Add that tags can be separated by commas (`,`)."
+    - "Yes, help me build it together." (For the category directory)
+    - "Category descriptions can use existing directories and files as examples."
+    - "Create a readme.md in static, briefly explaining its purpose."
+    - "Create a readme.md in preview as well and explain its purpose."
+    - "Update ARCHITECTURE.md according to the current directory structure and excluded content."
+    - "Make a simple introduction for this project and create readme.md in the root directory."
+
+### [12:45] Repository Publication (GitHub)
+- **Task**: Initialize Git and push to GitHub.
+- **Prompt**: 
+    > "I want to upload this project to my GitHub https://github.com/erspicu/ersalblog"
+
+### [12:50] Acknowledgments and Open Source Licenses
+- **Task**: Note the third-party PHP and JS libraries used in README to respect the original authors.
+- **Prompt**: 
+    > "My PHP_LIB contains some third-party packages, and there's an exif reading library in static. Write these package descriptions into the root readme to respect original versions, then push to git."
+
+### [13:00] Database API Development (SQL-based)
+- **Task**: Create `api_dbsqlbase.php` to support reading content from MySQL while maintaining compatibility with the SPA format.
+- **Prompt**: 
+    > "Help rewrite a database version of api_filebase.php. api_dbsqlbase.php will handle the db version api."
+
+### [13:10] Build Tool Adjustments (Python)
+- **Task**: Optimize minification script.
+- **Prompts**: 
+    - "Execute mini.py"
+    - "Rewrite mini.py, config.example.js does not need minification."
+
+### [13:20] Admin Dashboard Construction
+- **Task**: Build an admin system including login, post management, and category management.
+- **Prompts**: 
+    - "Need to establish an admin mechanism. Start with the database version. First, help modify config.php to add admin username and password settings, and update to config.example.php after removing sensitive info."
+    - "Create an admin directory for admin-related PHP code. First, build a login verification interface where users can logout after logging in. Add more features later."
+    - "Build post management: can post new articles, edit old ones, delete old ones, edit tags, and assign categories."
+    - "If admin management uses third-party components, bundle them into the admin directory to avoid loss if the source disappears."
+    - "Add category management: can add, remove, or rename categories."
+    - "Dashboard should show PHP version, DB connection info, remaining DB size, DB occupied size, total posts, etc."
+
+### [13:45] UI/UX Polishing and Layout Unification
+- **Task**: Unify admin to Sidebar layout, optimize post list display, and introduce SweetAlert2.
+- **Prompts**: 
+    - "Admin layout after login is a bit strange. Hope the layout remains consistent with the login page after clicking post or category management—sidebar on the left, management on the right, like the dashboard."
+    - "In post list under post management, put description with title below the file URL. Wrap if too long."
+    - "Edit and delete operations are vertically aligned with different colors. Is it a deliberate aesthetic design?"
+    - "It's fine, keep it. But the native JS alert for deletion is ugly. Use a better-looking prompt window. If using third-party components, download them for use."
+
+---
+
+## 2026-01-31
+
+### [12:05] PHP 7.x Compatibility Check and Fixes
+- **Task**: Ensure code runs in PHP 7.x environment.
+- **Prompt**: "Check if any PHP files have compatibility issues with PHP 7. If so, fix them."
+- **Fixes**: Replaced `str_ends_with()` with `substr()`, replaced `match` expressions with array and `??` logic.
+
+### [12:15] Dashboard Database Info Enhancement
+- **Task**: Display detailed MySQL/MariaDB version and connection info.
+- **Prompts**: 
+    - "In admin dashboard, want to add mysql version to connection info."
+    - "Hope to have detailed info like mysql or mariadb."
+
+### [12:30] Hybrid Management System
+- **Task**: Support choosing "Database Mode" or "File System Mode" at login with a unified interface.
+- **Prompt**: "Because my blog architecture currently runs file system and database modes in parallel, I want users to choose the management version after logging in. If the non-database version is chosen, the interface is basically the same, but content is managed from the file system."
+- **Implementation**: Created `admin/data_provider.php` to encapsulate `DataManager` class, abstracting data R/W logic.
+
+### [12:45] Logging System and Dev Conventions Optimization
+- **Task**: Fix log encoding issues and write dev conventions into config.
+- **Prompts**: 
+    - "gemini_log.md is garbled when I open it. Hope it shows correctly in Traditional Chinese."
+    - "I'm on Win11; UTF8 files opened with Notepad are still garbled. Fix it."
+    - "Still issues. Refer to gemini.md recording format for fix."
+    - "Normal now. Help me write this configuration (correct logging) into gemini.md."
+- **Technical Detail**: Enforced UTF-8 with BOM encoding.
+
+### [16:07] Login Health Check
+- **Task**: Automatically detect DB connection and file directory integrity before login.
+- **Prompt**: "Admin login, show if the blog database environment/content/connection is correct, and check if file structure blog required data files/directories exist. If not, show screen prompt and forbid login to unusable systems."
+- **Implementation**: Created `admin/health_check.php` for real-time status display and disabling invalid modes.
+
+### [16:14] File-to-DB Import Tool
+- **Task**: Provide one-click data import from file mode to database.
+- **Prompt**: "After entering file mode, want to add a functional category for importing file content into the database. Refer to migrate_full.php design."
+- **Implementation**: Created `admin/tool_migrate.php` integrated into the admin sidebar.
+
+### [16:20] Database Schema Normalization
+- **Task**: Split category field into independent tables and relation tables.
+- **Prompt**: "Hope to fix the database version category architecture. Create two more tables: one for category names, one for which posts use which categories. Fix affected programs and screens; i.e., category management should have an add function."
+- **Implementation**: Created `blog_categories` and `blog_post_categories` tables, updated `DataManager` and category management UI.
+
+### [16:26] Redundant Field Cleanup and Logic Refactoring
+- **Task**: Remove `post_categories` from `blog_posts` and refactor queries.
+- **Prompt**: "Seems post_categories in blog_posts is no longer needed. Can I delete it from the DB? Do programs need corresponding changes?"
+- **Implementation**: Refactored `getAllPosts`, `getPost`, etc., to use `GROUP_CONCAT`. Created `admin/db_drop_column.php` for safe deletion.
+
+### [16:39] Documentation and Format Updates
+- Integrated `reme.txt` content into `README.md` and updated third-party package info.
+- `gemini_log.txt` transitioned to `gemini_log.md` with mandatory UTF-8 BOM encoding.
+
+### [19:05] Automated Initialization System (Database Initialization)
+- **Task**: Build automated DB table creation and data migration.
+- **Implementation**: 
+    - Created `admin/db_init.php` for one-click migration from file system to DB.
+    - Modified `admin/login.php` to provide guidance links for "Connection set but tables missing" state.
+- **Stability Optimization**: 
+    - Resolved "No active transaction" error caused by MySQL DDL implicit commit.
+    - Split SQL statements and enhanced Transaction state detection to improve initialization success rate.
+
+### [20:20] File System Recovery Tool
+- **Task**: Build file system structure repair and reverse DB export.
+- **Implementation**:
+    - Created `admin/file_init.php`, symmetric with DB initialization.
+    - Supports reading content from MySQL to automatically rebuild indices in `contents/` and directory structure in `category/`.
+    - Integrated file system health check on login page to guide users in repair.
+
+### [00:05] Admin Version Control and Internationalization (i18n)
+- **Task**: Implement admin version display and multi-language support (T. Chinese/English).
+- **Implementation**:
+    - **Version Mechanism**: Initial attempt at scanning file times, later changed to static version in `admin/version_config.php` (vYYYY.MM.DD.HH.MM).
+    - **i18n Architecture**: Created `langs/admin/` directory, distinguishing languages by filename (`zh_TW.php`, `en_US.php`).
+    - **Login Page Revamp**: `admin/login.php` added language dropdown and version display.
+
+### [00:20] Full Admin Internationalization
+- **Task**: Extend multi-language support to the entire admin system.
+- **Implementation**:
+    - Created `admin/lang_init.php` for loading languages and `__()` translation function.
+    - Modified `admin/auth.php` for global i18n introduction.
+    - Replaced hardcoded text in `index.php` (Dashboard), `posts.php` (Post Mgmt), `categories.php` (Category Mgmt), `post_edit.php` (Post Edit), and `tool_migrate.php` (Import Tool).
+    - Support for frontend JS i18n: Created `zh_TW.js` / `en_US.js`, dynamically included via `admin/common_js_inc.php` for SweetAlert2 prompts.
+    - Fixed `admin/health_check.php` to support multi-language status messages.
+
+### [00:50] Vibe Coding Info Integration
+- **Task**: Display AI tool versions used for development on the login page.
+- **Implementation**:
+    - **Automation**: Updated `gemini.md` "Update" macro to automatically query Gemini CLI version and AI model name.
+    - **Config Write**: Wrote Runtime info (CLI v0.26.0, Model gemini-3-pro-preview) into `admin/version_config.php`.
+    - **Login Page Display**: Showed "Vibe coded with Gemini CLI..." on `admin/login.php`.
+
+### [01:10] Development Specification Refactoring
+- **Task**: Optimize Prompt instruction documents.
+- **Implementation**: Refactored `gemini.txt` into structured `gemini.md`, defining core guidelines, automated flows, and logging specs.
+
+### [01:30] Environment and Timezone Specifications
+- **Task**: Ensure timezone correctness for logs and versions and fix garbled text.
+- **Implementation**:
+    - Updated `gemini.md` to include UTC+8 timezone specs and Git Bash execution recommendations.
+    - Fixed BOM (`\xEF\xBB\xBF`) encoding issues in `gemini_log.md`.
+
+### [21:30] System Time Calibration and Specification Strengthening
+- **Task**: Uniformly calibrate all站 time stamps to correct UTC+8 evening period.
+- **Implementation**:
+    - Corrected time deviations in `HISTORY.md`, `admin/version_config.php`, and `gemini_log.md`.
+    - Explicitly required all future records to use UTC+8 directly in `gemini.md`.
+
+### [21:35] Execute Macro Instruction: Update
+- **Task**: Execute document updates, version sync, and Git publishing per `gemini.md`.
+- **Implementation**:
+    - Updated version to v2026.01.31.21.35.
+    - Synced Gemini CLI (v0.26.0) and model (gemini-3-flash-preview) info.
+
+### [23:45] Log Recovery and Mechanism Strengthening
+- **Task**: Recover the overwritten `gemini_log.md` and prevent recurrence.
+- **Implementation**:
+    - Retrieved missing log records from Git history and merged them.
+    - Saved long-term memory and updated `gemini.md`: stipulated that log updates must use "Append" mode.
+    - Enhanced `gemini.md`: required inquisitive Prompts to record a summary of the response.
+
+### [23:58] File Format Unification and i18n Synchronization
+- **Task**: Unify readme file formats and implement site-wide bilingualism.
+- **Implementation**:
+    - Renamed all `readme.txt` files under `category/`, `contents/`, `preview/`, and `static/` to `readme.md`.
+    - Completed English translation and synchronization for core root documents `ARCHITECTURE.md` and `HISTORY.md`.
+    - Added a mandatory rule to the "Update" process in `gemini.md`: "All documents must maintain synchronized Chinese and English content."
+
+---
+
+# Vibe Coding History (繁體中文)
+
 紀錄本專案透過 Gemini CLI 進行 Vibe Coding 的開發歷程與原始 Prompt 指令。
 
 ---
@@ -24,21 +235,21 @@
     - "google驗證用檔案也移除"
     - "preview目錄底下所有圖檔也排除" (後續修正為 preview內 .jpg .png類型檔案移除)
     - "pic目錄移除"
-    - "category目錄下除了readme.txt外,其他都排除"
-    - "contents目錄內除了readme.txt外,其他檔案都排除"
+    - "category目錄下除了readme.md外,其他都排除"
+    - "contents目錄內除了readme.md外,其他檔案都排除"
     - "排除static裡面的圖檔"
 
 ### [12:30] 目錄用途文件化 (READMEs)
 - **任務**: 為主要目錄建立中英文對照的說明文件，並更新專案架構文件。
 - **Prompts**: 
-    - "幫我依照專案的實做,在contents目錄中把這目錄的用途說明寫到裡面的readme.txt檔內,先用英文表達,再用中文表達."
+    - "幫我依照專案的實做,在contents目錄中把這目錄的用途說明寫到裡面的readme.md檔內,先用英文表達,再用中文表達."
     - "補充說明標籤可以用 , 號分隔多筆"
     - "是的 一起幫我建立" (針對 category 目錄)
     - "分類的說明可以用現在category內的目錄與檔案做範例說明"
-    - "在static中建立一個readme.txt , 大概說一下這個目錄的放置用途"
-    - "在preview下也建立一個readme.txt,並且說明一下這目錄用途"
+    - "在static中建立一個readme.md , 大概說一下這個目錄的放置用途"
+    - "在preview下也建立一個readme.md,並且說明一下這目錄用途"
     - "依照現在目錄架構現況以及排除後的內容,更新一下 ARCHITECTURE.md"
-    - "幫我為這個專案做一個簡單介紹,在專案根目錄建立readme.txt"
+    - "幫我為這個專案做一個簡單介紹,在專案根目錄建立readme.md"
 
 ### [12:45] 儲存庫發布 (GitHub)
 - **任務**: 初始化 Git 並推送到 GitHub。
@@ -57,7 +268,7 @@
 
 ### [13:10] 建置工具調整 (Python)
 - **任務**: 優化壓縮腳本。
-- **Prompt**: 
+- **Prompts**: 
     - "執行mini.py"
     - "幫我改寫mini.py , config.example.js不需要壓縮"
 
@@ -102,10 +313,10 @@
 ### [12:45] 日誌系統與開發配置優化
 - **任務**: 修復日誌亂碼並將開發慣例寫入配置。
 - **Prompts**: 
-    - "gemini_log.txt 我這邊打開看是亂碼,希望能夠讓它在繁體中文環境中正常顯示."
+    - "gemini_log.md 我這邊打開看是亂碼,希望能夠讓它在繁體中文環境中正常顯示."
     - "我這邊是win11,utf8檔案用筆記本開還是亂碼請修正."
-    - "還是有問題,請參考gemini.txt的紀錄形式去修正."
-    - "這次正常了 幫我將這動作配置(寫入正確紀錄)寫到gemini.txt內"
+    - "還是有問題,請參考gemini.md的紀錄形式去修正."
+    - "這次正常了 幫我將這動作配置(寫入正確紀錄)寫到gemini.md內"
 - **技術細節**: 強制使用 UTF-8 with BOM 編碼。
 
 ### [16:07] 登入環境健康檢查
@@ -188,7 +399,39 @@
     - 在 `gemini.md` 中明確要求未來所有紀錄必須直接使用 UTC+8。
 
 ### [21:35] 執行巨集指令: 更新
+
 - **任務**: 依照 gemini.md 規範執行文件更新、版本號同步與 Git 發佈。
+
 - **實作**:
+
     - 更新版本號至 v2026.01.31.21.35。
-    - 同步 Gemini CLI (v0.26.0) 與模型 (gemini-3-flash-preview) 資訊。
+
+    - 同步 Gemini CLI (v0.26.0) 與模型 (gemini-3-flash-preview) info.
+
+
+
+### [23:45] 日誌恢復與機制強化
+
+- **任務**: 恢復被覆蓋的 `gemini_log.md` 並防止再次發生。
+
+- **實作**:
+
+    - 從 Git 歷史中找回消失的日誌紀錄並完成合併。
+
+    - 儲存長期記憶並更新 `gemini.md`：規定日誌更新必須使用「追加」模式。
+
+    - 強化 `gemini.md`：要求詢問式 Prompt 必須記錄回答內容摘要。
+
+
+
+### [23:58] 檔案格式統一與多語系同步
+
+- **任務**: 統一 readme 檔案格式並落實全站雙語化。
+
+- **實作**:
+
+    - 將 `category/`, `contents/`, `preview/`, `static/` 子目錄下的 `readme.txt` 全部更名為 `readme.md`。
+
+    - 完成根目錄核心文件 `ARCHITECTURE.md` 與 `HISTORY.md` 的中英文翻譯與同步。
+
+    - 在 `gemini.md` 的「更新」流程中加入「文件必須維持中英文同步」的硬性規定。
