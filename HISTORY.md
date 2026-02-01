@@ -400,7 +400,15 @@ Recorded the development journey and original Prompt commands of this project th
     - **phpMyAdmin**: Automated installation and integration with the custom port.
     - **Permission Fixes**: Enhanced `install.php` to detect WSL2 NTFS mounts and bypass incompatible `chmod` checks.
     - **OS Detection**: Created `admin/system_helper.php` for shared OS distribution and version detection (e.g., Ubuntu 24.04.1 LTS (WSL2) or Windows 11 Build info).
-    - **Dashboard Update**: Integrated detailed OS info into `admin/index.php` and `install.php`.
+    - Dashboard Update: Integrated detailed OS info into `admin/index.php` and `install.php`.
+
+### [23:20] Enhanced Windows OS Detection & UI Layout Optimization
+- **Task**: Improve Windows version detection reliability and refine installation UI layout.
+- **Implementation**:
+    - **Advanced OS Detection**: Added COM/WMI support in `admin/system_helper.php` as the primary method for native Windows PHP environments, providing precise product names (e.g., Windows 11 Pro).
+    - **Encoding Correction**: Implemented aggressive CP950 to UTF-8 conversion for PowerShell output to prevent garbled text in Traditional Chinese environments.
+    - **UI Optimization**: Reorganized `install.php` system information into a 2x2 grid, doubling the display width for better readability of detailed OS strings.
+    - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules to utilize `git.exe` for authenticated pushes.
 
 ---
 
@@ -736,3 +744,10 @@ Recorded the development journey and original Prompt commands of this project th
     - **OS 偵測**: 建立 `admin/system_helper.php` 提供詳細 OS 資訊 (如 Ubuntu 發行版或 Windows Build 號)。
     - **介面整合**: 在儀表板與安裝精靈中同步顯示詳細作業系統環境。
         
+### [23:20] 強化 Windows OS 偵測與 UI 佈局優化
+- **任務**: 提升 Windows 版本偵測可靠性並精煉安裝介面佈局。
+- **實作**:
+    - **進階 OS 偵測**: 在 `admin/system_helper.php` 中加入 COM/WMI 支援，作為原生 Windows PHP 環境的第一優先偵測方式，提供精確的產品名稱（如 Windows 11 專業版）。
+    - **編碼校正**: 針對 PowerShell 輸出實作了強制的 CP950 轉 UTF-8 轉換，防止在繁體中文環境下出現亂碼。
+    - **UI 優化**: 將 `install.php` 系統資訊重構為 2x2 網格顯示，將顯示寬度提升一倍，以利閱讀長的作業系統版本字串。
+    - **Git 策略**: 更新 `gemini.md` 加入 WSL2 專屬回退規則，自動調用 `git.exe` 處理需要憑證驗證的推送操作。

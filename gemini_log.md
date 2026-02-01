@@ -177,3 +177,19 @@
     回答內容摘要：更新了 OS 偵測邏輯，現在能顯示 Linux 發行版名稱（如 Ubuntu 24.04）或 Windows 的具體建置版本號，並標註 WSL2 環境。
 - [2026-02-01 22:27:14] 重構並強化系統資訊顯示功能
     回答內容摘要：建立了共用 system_helper.php，統一了詳細 OS 資訊的偵測邏輯，並同步更新至安裝精靈與管理後台儀表板。
+- [2026-02-01 22:46:16] 執行巨集指令：「更新」
+    回答內容摘要：已完成全站文件同步 (HISTORY.md, ARCHITECTURE.md)，更新版本號至 v2026.02.01.22.43，並完成本地 Git Commit。Push 操作因 GitHub 驗證限制失敗，需由使用者手動執行。
+- [2026-02-01 22:53:01] 整合 Windows PowerShell OS 偵測
+    回答內容摘要：透過 shell_exec 呼叫 powershell.exe 取得 Win32_OperatingSystem 資訊，使 Windows 環境下的 OS 顯示能包含完整的產品名稱 (Caption) 與架構。
+- [2026-02-01 22:56:43] 修正 Windows OS 偵測解析失敗問題
+    回答內容摘要：針對 PowerShell 可能回傳的 UTF-16 編碼進行轉換，並加入純文字抓取備案，解決 json_decode 失敗導致回退到 Build 9200 的問題。
+- [2026-02-01 22:57:25] 強化 Windows OS 偵測編碼相容性
+    回答內容摘要：改用直接字串輸出並加入編碼偵測轉換邏輯，解決在 AppServ/Windows 環境下因 Big5 編碼衝突導致 OS 資訊抓取失敗的問題。
+- [2026-02-01 22:59:53] 最終修正 Windows OS 偵測路徑與編碼問題
+    回答內容摘要：加入了 PowerShell 完整路徑備案，並強化了 CP950 到 UTF-8 的強制編碼轉換，確保在任何 Windows PHP 環境下都能正確抓取詳細系統資訊。
+- [2026-02-01 23:00:36] 引入 COM/WMI 提升 Windows OS 偵測成功率
+    回答內容摘要：新增了基於 PHP COM 元件的 WMI 查詢作為 Windows 系統偵測的第一優先級，以解決在某些權限受限的環境下無法執行 PowerShell 的問題。
+- [2026-02-01 23:06:10] 優化 install.php 系統資訊佈局
+    回答內容摘要：將系統資訊欄位從一行四個改為兩行四個，提升各欄位顯示寬度，以利閱讀長的作業系統版本資訊。
+- [2026-02-01 23:14:24] 更新 gemini.md 加入 WSL2 Git 推送策略
+    回答內容摘要：在 gemini.md 中明確規範當 Linux git push 失敗時，應自動切換為呼叫 Windows 版本的 git.exe 以利用 Windows 憑證管理員完成推送。

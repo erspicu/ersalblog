@@ -221,17 +221,18 @@ if (isset($_GET['action'])) {
                 }
                 ?>
                 <div class="row g-3">
-                    <!-- App & Gemini Version -->
-                    <div class="col-md-3">
+                    <!-- Row 1: Versions -->
+                    <div class="col-md-6">
                         <label class="form-label"><?php echo _t('app_version'); ?></label>
                         <input type="text" class="form-control" value="<?php echo $app_ver; ?>" readonly>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label class="form-label"><?php echo _t('gemini_version'); ?></label>
                         <input type="text" class="form-control" value="<?php echo $gemini_ver; ?>" readonly>
                     </div>
-                    <!-- PHP Version -->
-                    <div class="col-md-3">
+                    
+                    <!-- Row 2: PHP & OS -->
+                    <div class="col-md-6">
                         <label class="form-label"><?php echo _t('php_version'); ?></label>
                         <div class="input-group">
                             <input type="text" class="form-control" value="<?php echo phpversion(); ?>" readonly>
@@ -242,8 +243,7 @@ if (isset($_GET['action'])) {
                             <?php endif; ?>
                         </div>
                     </div>
-                    <!-- OS Info -->
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label class="form-label"><?php echo _t('os_info'); ?></label>
                         <input type="text" class="form-control" value="<?php echo get_detailed_os_info(); ?>" readonly title="<?php echo php_uname('a'); ?>">
                     </div>

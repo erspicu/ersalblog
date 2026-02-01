@@ -3,6 +3,7 @@
 - **互動語言**: 繁體中文 (Traditional Chinese)
 - **程式相容性**: 程式碼必須相容 PHP 7.x 及以上版本。
 - **執行環境**: 使用者將切換至 **WIN11上WSL2 Ubuntu 24.04** 環境。執行 Shell 指令時應優先考慮 Bash/Linux 相容性（如 `&&`, `grep`, `tail` 等），並確保輸出與寫入均採用 **UTF-8** 編碼以避免亂碼。
+- **WSL2 Git 策略**: 在 WSL2 環境下，若使用 Linux 原生 `git push` 因憑證驗證 (Credentials) 失敗（如 GitHub 不支援密碼登入），應嘗試改為呼叫 Windows 側的 `git.exe push`。這能利用 Windows 的 Credential Manager 進行自動驗證，提升自動化推送的成功率。
 - **時區規範**: 所有時間記錄、日誌 (尤其是 `gemini_log.md`) 與版本號必須統一使用 **UTC+8** 時區。在執行任何記錄動作前，請務必確認並轉換為 UTC+8 時間。
 - **後台開發**: 後台開發的部分都要考慮到多語支援，利用現在已經架構好得多語框架，不要把文字直接寫死在 code 裡。
 
