@@ -1,4 +1,8 @@
 <?php
+$blog_title = "Baxermux的攝影Blog";//Blog網站標題
+$blog_description = ""; //Blog SEO描述屬性
+$blog_introduce = "";//描述一下你的blog用途或是特色
+
 $sqlite_path = "blog.sqlite3"; // SQLite 資料庫檔案名稱 (若使用 SQLite 模式)
 
 $dbConfig = [

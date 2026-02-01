@@ -21,8 +21,8 @@ A lightweight, high-performance blog system designed specifically for photograph
 
 ## Quick Start
 1. Clone the repository.
-2. Copy `config.example.php` to `config.php` and configure your database settings.
-3. Copy `config.example.js` to `config.js` and set your API type and Google Search Console ID.
+2. Run `install.php` in your browser. This wizard will help you check the environment and generate `config.php` and `config.js`.
+3. Alternatively, manually copy `config.example.php` to `config.php` and configure your settings.
 4. Access `/admin`, select **Database Mode**. If the database is not initialized, follow the on-screen link to the **Initialization Wizard** to create tables and import data.
 5. Alternatively, add posts in `contents/index_post.txt` for File mode.
 6. Run `make_html.php` to generate static pages.
@@ -52,8 +52,8 @@ A lightweight, high-performance blog system designed specifically for photograph
 
 ## 快速開始
 1. 複製儲存庫。
-2. 將 `config.example.php` 重新命名為 `config.php` 並設定資料庫資訊。
-3. 將 `config.example.js` 重新命名為 `config.js` 並設定 API 類型與 Google 搜尋主控台 ID。
+2. 在瀏覽器中執行 `install.php`。此安裝精靈將協助您檢測環境並自動生成 `config.php` 與 `config.js`。
+3. 您也可以手動將 `config.example.php` 重新命名為 `config.php` 並設定資料庫資訊。
 4. 進入 `/admin` 並選擇 **資料庫模式**。若尚未初始化，請點擊畫面提示進入 **初始化精靈** 以建立資料表並匯入資料。
 5. 若選擇 **檔案模式** 且目錄結構缺失，系統亦會引導進入 **檔案建構精靈**，可選擇從資料庫還原內容。
 6. 執行 `make_html.php` 以生成靜態頁面。

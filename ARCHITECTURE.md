@@ -31,6 +31,7 @@ The system supports two operating modes:
     *   `config.php` and `config.js` contain database passwords and API settings and are ignored by Git.
     *   Developers should copy `config.example.php` and `config.example.js` to create local settings.
 *   **Initialization and Health Check**:
+    *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system, check environment compatibility (PHP 7.4+ and OS permissions), and generate `config.php` and `config.js`.
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity before login.
     *   **Database Initialization Wizard**: If the database is connected but missing tables, the system guides to `admin/db_init.php`, supporting import from files or creating sample data.
     *   **File System Initialization Wizard**: If the file structure is incomplete (e.g., missing directories), the system guides to `admin/file_init.php`, supporting reverse export from the database to rebuild the file structure.
@@ -120,7 +121,8 @@ Listed below are key directories and file rules in the Git repository:
 *   **敏感資料分離**: 
     *   `config.php` 與 `config.js` 包含資料庫密碼與 API 設定，已被 Git 忽略。
     *   開發者應複製 `config.example.php` 與 `config.example.js` 來建立本地設定。
-*   **初始化與健康檢查**:
+*   **初始化與健康檢查 (Initialization)**:
+    *   **安裝精靈**: `install.php` 提供友善的介面協助使用者進行系統初始化，包含環境相容性檢測 (PHP 7.4+ 與作業系統權限) 並自動生成 `config.php` 與 `config.js`。
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php`，在登入前自動驗證資料庫連線與檔案系統完整性。
     *   **資料庫初始化精靈**: 若資料庫已連線但缺少資料表，系統會引導至 `admin/db_init.php`，支援從檔案匯入或建立範例資料。
     - **檔案系統初始化精靈**: 若檔案結構不完整（如缺少目錄），系統會引導至 `admin/file_init.php`，支援從資料庫反向匯出資料以重建檔案結構。
