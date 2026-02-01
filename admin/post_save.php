@@ -3,9 +3,8 @@ require_once 'auth.php';
 require_once 'data_provider.php';
 requireLogin();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Invalid Request');
-}
+// 驗證 CSRF Token
+validateCSRFRequest();
 
 $dataManager = new DataManager();
 

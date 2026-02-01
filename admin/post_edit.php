@@ -115,7 +115,11 @@ $currentCats = array_map('trim', $currentCats);
                 <h4 class="mb-0"><?php echo $pageTitle; ?></h4>
             </div>
             <div class="card-body">
-                <form action="post_save.php" method="POST">
+        <form action="post_save.php" method="POST">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+            
+            <input type="hidden" name="old_filename" value="<?php echo htmlspecialchars($filename); ?>">
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
                     
                     <div class="mb-3">

@@ -7,6 +7,9 @@ $dataManager = new DataManager();
 
 // 處理刪除請求
 if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['id'])) {
+    // 驗證 CSRF Token
+    validateCSRFRequest();
+    
     $dataManager->deletePost($_POST['id']);
     header("Location: posts.php?msg=deleted");
     exit;
@@ -168,6 +171,7 @@ function truncate($text, $limit = 60) {
                                 <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="btn btn-sm btn-outline-primary mb-1 w-100"><?php echo __('btn_edit'); ?></a>
                                 <!-- 加入 delete-form class 並移除 onsubmit -->
                                 <form method="POST" class="d-block delete-form">
+                                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($post['id']); ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100"><?php echo __('btn_delete'); ?></button>

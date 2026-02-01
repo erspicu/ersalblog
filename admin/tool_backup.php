@@ -1,12 +1,14 @@
 <?php
 // admin/tool_backup.php
 require_once 'auth.php';
-require_once 'health_check.php';
-require_once 'data_provider.php'; // Needed for DB connection
-
 requireLogin();
 
-$currentSource = getAdminSource();
+// 驗證 CSRF Token
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validateCSRFRequest();
+}
+
+$dataManager = new DataManager();$currentSource = getAdminSource();
 $backupDir = dirname(__DIR__) . '/backup';
 if (!is_dir($backupDir)) mkdir($backupDir, 0755, true);
 
@@ -521,7 +523,9 @@ function cleanupTempDir($dir) {
                 <h5 class="card-title"><?php echo __('backup_create_title'); ?></h5>
                 <p class="text-muted"><?php echo __('backup_desc'); ?></p>
                 
-                <form method="POST" id="createBackupForm">
+                <form method="POST" id="backupForm">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     <input type="hidden" name="action" value="create_backup">
                     <button type="button" class="btn btn-primary" onclick="confirmAction('create')">
                         💾 <?php echo __('btn_create_backup'); ?>
@@ -552,6 +556,8 @@ max_input_time = 300</pre>
                 </div>
                 
                 <form method="POST" enctype="multipart/form-data" id="uploadBackupForm">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     <input type="hidden" name="action" value="upload_backup">
                     <div class="input-group">
                         <input type="file" class="form-control" name="backup_file" accept=".zip" required>

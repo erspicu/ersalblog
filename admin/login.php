@@ -11,6 +11,53 @@ $adminVersion = $versionConfig['version'];
 
 $error = '';
 
+// --- 暴力破解防護 (Rate Limiting) ---
+$max_attempts = 5;
+$lockout_time = 15 * 60; // 15 分鐘
+$attempts_log = __DIR__ . '/attempts.log';
+
+function getIpAttempts($ip) {
+    global $attempts_log;
+    if (!file_exists($attempts_log)) return 0;
+    $attempts = 0;
+    $now = time();
+    $lines = @file($attempts_log);
+    if (!$lines) return 0;
+    foreach ($lines as $line) {
+        $parts = explode('|', trim($line));
+        if (count($parts) < 2) continue;
+        list($logIp, $timestamp) = $parts;
+        if ($logIp === $ip && ($now - $timestamp) < (15 * 60)) {
+            $attempts++;
+        }
+    }
+    return $attempts;
+}
+
+function recordFailedAttempt($ip) {
+    global $attempts_log;
+    $entry = $ip . '|' . time() . PHP_EOL;
+    @file_put_contents($attempts_log, $entry, FILE_APPEND | LOCK_EX);
+}
+
+function clearAttempts($ip) {
+    global $attempts_log;
+    if (!file_exists($attempts_log)) return;
+    $lines = @file($attempts_log);
+    if (!$lines) return;
+    $newLines = [];
+    foreach ($lines as $line) {
+        $parts = explode('|', trim($line));
+        if (count($parts) < 2) continue;
+        if ($parts[0] !== $ip) $newLines[] = $line;
+    }
+    @file_put_contents($attempts_log, implode('', $newLines), LOCK_EX);
+}
+
+$user_ip = $_SERVER['REMOTE_ADDR'];
+$current_attempts = getIpAttempts($user_ip);
+$is_locked = ($current_attempts >= $max_attempts);
+
 // 執行系統檢查
 $dbStatus = SystemHealth::checkDB();
 $fileStatus = SystemHealth::checkFile();
@@ -26,20 +73,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     $dataSource = $_POST['data_source'] ?? 'db'; 
+    $csrf_token = $_POST['csrf_token'] ?? '';
 
-    // Server-side check
-    $isSourceValid = false;
-    if ($dataSource === 'db') $isSourceValid = $dbStatus['status'];
-    elseif ($dataSource === 'file') $isSourceValid = $fileStatus['status'];
-    elseif ($dataSource === 'sqlite') $isSourceValid = $sqliteStatus['status'];
-
-    if (!$isSourceValid) {
-        $error = __('error_mode_unavailable');
-    } elseif (login($username, $password, $dataSource)) {
-        header('Location: index.php');
-        exit;
+    if (!verifyCSRFToken($csrf_token)) {
+        $error = "Security Error: Invalid CSRF Token.";
+    } elseif ($is_locked) {
+        $error = __('login_locked_msg');
     } else {
-        $error = __('error_auth_fail');
+        // Server-side check
+        $isSourceValid = false;
+        if ($dataSource === 'db') $isSourceValid = $dbStatus['status'];
+        elseif ($dataSource === 'file') $isSourceValid = $fileStatus['status'];
+        elseif ($dataSource === 'sqlite') $isSourceValid = $sqliteStatus['status'];
+
+        if (!$isSourceValid) {
+            $error = __('error_mode_unavailable');
+        } elseif (login($username, $password, $dataSource)) {
+            clearAttempts($user_ip);
+            header('Location: index.php');
+            exit;
+        } else {
+            recordFailedAttempt($user_ip);
+            $remaining = $max_attempts - ($current_attempts + 1);
+            if ($remaining <= 0) {
+                $error = __('login_locked_msg');
+                $is_locked = true;
+            } else {
+                $error = sprintf(__('login_failed_msg'), $remaining);
+            }
+        }
     }
 }
 
@@ -108,17 +170,18 @@ if ($hasSQLite && !$sqliteStatus['status']) {
     <?php endif; ?>
 
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
         <div class="mb-3">
             <label for="username" class="form-label"><?php echo __('login_username'); ?></label>
-            <input type="text" class="form-control" id="username" name="username" required autofocus>
+            <input type="text" class="form-control" id="username" name="username" required autofocus <?php echo $is_locked ? 'disabled' : ''; ?>>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label"><?php echo __('login_password'); ?></label>
-            <input type="password" class="form-control" id="password" name="password" required>
+            <input type="password" class="form-control" id="password" name="password" required <?php echo $is_locked ? 'disabled' : ''; ?>>
         </div>
         <div class="mb-3">
             <label for="data_source" class="form-label"><?php echo __('login_mode'); ?></label>
-            <select class="form-select" id="data_source" name="data_source">
+            <select class="form-select" id="data_source" name="data_source" <?php echo $is_locked ? 'disabled' : ''; ?>>
                 <option value="db"><?php echo __('mode_db'); ?></option>
                 <option value="file"><?php echo __('mode_file'); ?></option>
                 <?php if ($hasSQLite): ?>
@@ -148,7 +211,7 @@ if ($hasSQLite && !$sqliteStatus['status']) {
                 </div>
             <?php endif; ?>
         </div>
-        <button type="submit" id="login_btn" class="btn btn-primary w-100"><?php echo __('login_btn'); ?></button>
+        <button type="submit" id="login_btn" class="btn btn-primary w-100" <?php echo $is_locked ? 'disabled' : ''; ?>><?php echo __('login_btn'); ?></button>
     </form>
     
     <div class="mt-3 text-center">

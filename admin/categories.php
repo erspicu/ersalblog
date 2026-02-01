@@ -8,6 +8,9 @@ $msg = '';
 
 // --- 處理表單提交 ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 驗證 CSRF Token
+    validateCSRFRequest();
+    
     $action = $_POST['action'] ?? '';
     
     // [改名功能]
@@ -61,6 +64,8 @@ $catStats = $dataManager->getAllCategories();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF Token for AJAX -->
+    <meta name="csrf-token" content="<?php echo getCSRFToken(); ?>">
     <title><?php echo __('cat_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -159,6 +164,8 @@ $catStats = $dataManager->getAllCategories();
 <div class="modal fade" id="createModal" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <input type="hidden" name="action" value="create">
             <div class="modal-header">
                 <h5 class="modal-title"><?php echo __('modal_create_title'); ?></h5>
@@ -182,6 +189,8 @@ $catStats = $dataManager->getAllCategories();
 <div class="modal fade" id="renameModal" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <input type="hidden" name="action" value="rename">
             <input type="hidden" name="old_name" id="renameOldName">
             <div class="modal-header">
@@ -213,6 +222,8 @@ $catStats = $dataManager->getAllCategories();
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="delete_name" id="deleteName">
             <div class="modal-header">

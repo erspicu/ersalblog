@@ -10,18 +10,21 @@ This document organizes the discussions and evaluations regarding future feature
 *   **Reasoning**: As the post count grows, loading all posts via a single JSON request will impact performance and UX.
 *   **Recommendation**: Implement `limit` and `offset` in the DB/File APIs. Essential for both SPA and static list generation.
 
-### 1.2 SQLite Support (Priority: High)
+### 1.2 SQLite Support (Status: COMPLETED ✅)
 *   **Reasoning**: Perfect balance between SQL power and file-system portability. Enables "Zero Configuration" deployment.
-*   **Implementation**: Leverage existing PDO architecture; only requires a connection string change and a database file (`.sqlite`).
+*   **Implementation**: Leveraged existing PDO architecture; implemented via `api_sqlitebase.php` and `DataManager`.
 
-### 1.3 Advanced Database Export & Backup (Priority: High)
+### 1.3 Advanced Database Export & Backup (Status: COMPLETED ✅)
 *   **Reasoning**: Data is the soul of the blog. Dual-mode support allows for unique backup strategies.
-*   **Proposal**: 
-    *   One-click SQL dump and full-site ZIP (database + images).
-    *   **Hot Backup**: Use the existing "DB to File" sync as a disaster recovery tool. If the DB fails, the site can instantly revert to File Mode.
+*   **Implementation**: 
+    *   One-click SQL dump and full-site ZIP (database + static resources).
+    *   **Hot Backup**: Built-in "DB to File" and "File to DB" bidirectional migration tools.
 
-### 1.4 Security Enhancements
-*   **Proposal**: Login rate limiting (anti-brute force), CSRF protection for post saving, and secure session management.
+### 1.4 Security Enhancements (Status: COMPLETED ✅)
+*   **Implementation**: 
+    *   **CSRF Protection**: Token-based validation for all data-changing actions.
+    *   **Rate Limiting**: Login lockout mechanism via `attempts.log` (5 fails / 15 mins).
+    *   **Session Hardening**: HttpOnly, SameSite=Strict, and ID regeneration.
 
 ---
 
@@ -102,18 +105,21 @@ This document organizes the discussions and evaluations regarding future feature
 *   **理由**：隨著文章數量增加，單次載入所有內容會影響效能與體驗。
 *   **建議**：API 應支援 `limit` 與 `offset`。對 SPA 與靜態列表生成皆為必要。
 
-### 1.2 SQLite 支援 (優先級：高)
+### 1.2 SQLite 支援 (狀態：已完成 ✅)
 *   **理由**：兼具 SQL 功能與檔案系統的便攜性，達成「零設定」佈署。
-*   **實作**：利用現有的 PDO 架構，僅需修改連線字串並建立資料庫檔案。
+*   **實作**：已實作 `api_sqlitebase.php` 與 `DataManager` 支援，並提供初始化工具。
 
-### 1.3 進階資料庫匯出與備份 (優先級：高)
+### 1.3 進階資料庫匯出與備份 (狀態：已完成 ✅)
 *   **理由**：數據是部落格的靈魂。雙模架構提供了獨特的備份優勢。
-*   **提案**：
-    *   一鍵匯出 SQL 語句與全站 ZIP 包（含圖片）。
-    *   **熱備份**：將「資料庫轉檔案」功能定位為災難復原工具。若資料庫掛掉，切換為檔案模式即可恢復運行。
+*   **實作**：
+    *   實作一鍵產生 SQL 備份與全站 ZIP（含資料庫與靜態資源）。
+    *   **資料遷移**：實作了完善的資料庫與檔案系統雙向遷移與還原工具。
 
-### 1.4 安全性強化
-*   **提案**：加入登入錯誤次數限制、CSRF 防護以及更安全的 Session 管理。
+### 1.4 安全性強化 (狀態：已完成 ✅)
+*   **實作**：
+    *   **CSRF 防護**：所有資料變更操作均已加入 Token 驗證。
+    *   **登入限制**：實作基於 IP 的 `attempts.log` 鎖定機制（5 次失敗鎖 15 分鐘）。
+    *   **Session 強化**：強制 HttpOnly、SameSite=Strict 以及登入後 ID 重生。
 
 ---
 

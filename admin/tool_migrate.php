@@ -5,6 +5,11 @@ require_once 'health_check.php';
 
 requireLogin();
 
+// 驗證 CSRF Token
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    validateCSRFRequest();
+}
+
 $dataManager = new DataManager();
 $currentSource = $dataManager->getSource(); // 'file', 'db', 'sqlite'
 
@@ -105,6 +110,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                         <div class="col-md-6 border-end">
                             <h6 class="text-primary fw-bold"><?php echo __('migrate_export_to_db'); ?></h6>
                             <form method="POST" onsubmit="return confirm('<?php echo __('confirm_start_migration'); ?>');">
+                                <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                 <input type="hidden" name="start_migration" value="1">
                                 <!-- Import Source implicitly File -->
                                 <div class="mb-3">
@@ -130,6 +136,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                         <div class="col-md-6">
                             <h6 class="text-success fw-bold"><?php echo __('migrate_restore_from_db'); ?></h6>
                             <form method="POST" onsubmit="return confirm('<?php echo __('confirm_restore_warn'); ?>');">
+                                <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                 <input type="hidden" name="start_export" value="1">
                                 <!-- Export Target implicitly File -->
                                 <div class="mb-3">
@@ -167,6 +174,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                             <p class="small text-muted"><?php echo __('migrate_export_desc'); ?></p>
                             
                             <form method="POST" onsubmit="return confirm('<?php echo __('confirm_export_warn'); ?>');">
+                                <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                 <input type="hidden" name="start_export" value="1">
                                 
                                 <div class="mb-3">
@@ -204,6 +212,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                             <p class="small text-muted"><?php echo __('migrate_import_desc'); ?></p>
                             
                             <form method="POST" onsubmit="return confirm('<?php echo __('confirm_import_warn'); ?>');">
+                                <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                 <input type="hidden" name="start_migration" value="1">
                                 
                                 <div class="mb-3">

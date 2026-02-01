@@ -49,6 +49,12 @@
     - 將上述資訊寫入 `admin/version_config.php`。
 3. **發佈**: 執行本地 Git Commit 操作。完成後，提示使用者手動在適當環境中執行 `git push`。
 
+## "簡單更新" (Simple Update)
+當使用者輸入關鍵字 **"簡單更新"** 時，僅執行純粹的 Git 同步流程：
+1. **自動 Commit**: 直接執行 `git add .` 並進行本地 Commit。
+2. **訊息規範**: Commit 訊息格式應為 `Simple Update: vYYYY.MM.DD.HH.MM` (使用當前 UTC+8 時間)。
+3. **提醒**: 完成後，提示使用者手動在適當環境中執行 `git push`。
+
 ## "重讀" (Reload)
 當使用者輸入關鍵字 **"重讀"** 時，請執行以下流程以同步外部編輯器的修改：
 1. **差異分析**: 使用 `git diff` 檢查工作區中所有相對於上次 Commit 的變更，並找出被修改、新增或刪除的檔案清單。

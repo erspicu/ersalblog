@@ -1,5 +1,24 @@
 <?php
 // admin/auth.php
+
+// 設定安全的 Session Cookie
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    ini_set('session.cookie_secure', 1);
+}
+// PHP 7.3+ 支援 SameSite 屬性
+if (PHP_VERSION_ID >= 70300) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'),
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
+}
+
 session_start();
 
 // 引入系統輔助函式
@@ -10,6 +29,39 @@ require_once __DIR__ . '/lang_init.php';
 
 // 引入上層的設定檔
 require_once __DIR__ . '/../config.php';
+
+// --- CSRF 防禦機制 ---
+
+/**
+ * 生成或獲取現有的 CSRF Token
+ */
+function getCSRFToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * 驗證請求中的 CSRF Token
+ */
+function verifyCSRFToken($token) {
+    if (!isset($_SESSION['csrf_token']) || empty($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/**
+ * 快速驗證 POST 請求中的 CSRF
+ */
+function validateCSRFRequest() {
+    $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (!verifyCSRFToken($token)) {
+        header('HTTP/1.1 403 Forbidden');
+        die("Invalid CSRF Token. Request denied.");
+    }
+}
 
 // 初始化資料庫連線 (供後台全域使用)
 $pdo = null;
@@ -28,17 +80,7 @@ function connectAdminDB() {
     try {
         if ($source === 'sqlite') {
             if (isset($sqlite_path) && !empty($sqlite_path)) {
-                $dsn = "sqlite:" . __DIR__ . "/../" . $sqlite_path; // Assume relative to admin/ or absolute? config says "123.sqlite".Usually relative to entry point.
-                // Let's try relative to web root (parent of admin)
-                // config.php is in root.
-                // If script is in admin/, then ../$sqlite_path
-                
-                // Better approach: use absolute path if possible or ensure path is correct.
-                // In api_sqlitebase, we used $sqlite_path directly (assuming it's in same dir as api file).
-                // Let's assume $sqlite_path is relative to Project Root.
-                
                 $target = __DIR__ . '/../' . $sqlite_path;
-                
                 $pdo = new PDO("sqlite:" . $target, null, null, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
@@ -55,7 +97,6 @@ function connectAdminDB() {
         }
     } catch (Exception $e) {
         $dbConnectionError = $e->getMessage();
-        // Do not die here, allow login page to render
     }
 }
 
@@ -88,9 +129,14 @@ function login($username, $password, $dataSource = 'db') {
     
     // 簡單的明文比對 (建議未來改用 password_verify)
     if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
+        // 安全強化：登入成功後重生 Session ID
+        session_regenerate_id(true);
+        
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_user'] = $username;
-        $_SESSION['admin_source'] = $dataSource; // Store the selected source
+        $_SESSION['admin_source'] = $dataSource;
+        // 登入後重置 CSRF Token 以增加安全性
+        getCSRFToken(); 
         return true;
     }
     return false;

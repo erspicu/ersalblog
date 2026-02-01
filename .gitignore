@@ -67,3 +67,4 @@ test/
 
 # Backup artifacts
 /backup/*.zip
+/admin/attempts.log
