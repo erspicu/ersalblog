@@ -2,12 +2,14 @@
 // admin/sqlite_init.php
 session_start();
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/lang_init.php';
 
 $error = '';
 $success = '';
 $step = isset($_SESSION['sqlite_init_authorized']) ? 'options' : 'login';
 
 // --- Functions ---
+// ... (No changes to connection functions)
 
 function getSQLitePath() {
     global $sqlite_path;
@@ -180,16 +182,16 @@ function initSQLiteDatabase($pdo, $mode) {
         }
         else {
             // Clean Install (Sample Data)
-            $pdo->exec("INSERT INTO blog_categories (category_name) VALUES ('未分類')");
+            $pdo->exec("INSERT INTO blog_categories (category_name) VALUES ('".__('sqlite_sample_cat')."')");
             $catId = $pdo->lastInsertId();
 
-            $sampleTitle = "歡迎使用 BaxerMux Blog (SQLite版)";
+            $sampleTitle = __('sqlite_sample_title');
             $sampleFile = "hello-sqlite.html";
             $sampleDate = date("Y-m-d H:i:s");
-            $sampleContent = "<p>這是 SQLite 版本的範例文章。</p>";
+            $sampleContent = __('sqlite_sample_content');
             
             $stmt = $pdo->prepare("INSERT INTO blog_posts (post_title, post_filename, post_date, post_content, post_tags, post_description) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$sampleTitle, $sampleFile, $sampleDate, $sampleContent, "SQLite", "測試"]);
+            $stmt->execute([$sampleTitle, $sampleFile, $sampleDate, $sampleContent, "SQLite", "Test"]);
             $postId = $pdo->lastInsertId();
 
             $pdo->exec("INSERT INTO blog_post_categories (post_id, category_id) VALUES ($postId, $catId)");
@@ -214,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['sqlite_init_authorized'] = true;
             $step = 'options';
         } else {
-            $error = "管理員驗證失敗";
+            $error = __('sqlite_auth_fail');
         }
     } elseif (isset($_POST['do_init'])) {
         if (!isset($_SESSION['sqlite_init_authorized'])) {
@@ -228,13 +230,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($pdo) {
             try {
                 initSQLiteDatabase($pdo, $mode);
-                $success = "SQLite 資料庫初始化成功！";
+                $success = __('sqlite_init_success');
                 $step = 'complete';
             } catch (Exception $e) {
-                $error = "初始化失敗: " . $e->getMessage();
+                $error = sprintf(__('sqlite_init_fail'), $e->getMessage());
             }
         } else {
-            $error = "無法建立 SQLite 連線，請檢查路徑權限。";
+            $error = __('sqlite_conn_fail');
         }
     }
 }
@@ -245,11 +247,11 @@ $canImportMySQL = hasMySQLData();
 
 ?>
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQLite 初始化 - BaxerMux Blog</title>
+    <title><?php echo __('sqlite_init_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
@@ -260,7 +262,7 @@ $canImportMySQL = hasMySQLData();
 
 <div class="card">
     <div class="card-header bg-success text-white">
-        <h5 class="mb-0">SQLite 資料庫初始化</h5>
+        <h5 class="mb-0"><?php echo __('sqlite_init_title'); ?></h5>
     </div>
     <div class="card-body">
         <?php if ($error): ?>
@@ -268,44 +270,44 @@ $canImportMySQL = hasMySQLData();
         <?php endif; ?>
         
         <?php if ($step === 'login'): ?>
-            <p>您已啟用 SQLite 模式，但資料庫檔案尚未建立或初始化。</p>
-            <p>請輸入後台管理密碼以繼續：</p>
+            <p><?php echo __('sqlite_init_msg'); ?></p>
+            <p><?php echo __('sqlite_enter_pass'); ?></p>
             <form method="POST">
                 <input type="hidden" name="login_check" value="1">
                 <div class="mb-3">
-                    <label class="form-label">帳號</label>
+                    <label class="form-label"><?php echo __('login_username'); ?></label>
                     <input type="text" name="username" class="form-control" required autofocus>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">密碼</label>
+                    <label class="form-label"><?php echo __('login_password'); ?></label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">驗證身分</button>
+                <button type="submit" class="btn btn-primary w-100"><?php echo __('sqlite_verify_btn'); ?></button>
             </form>
 
         <?php elseif ($step === 'options'): ?>
-            <h5 class="card-title">初始化選項</h5>
+            <h5 class="card-title"><?php echo __('sqlite_init_options'); ?></h5>
             
             <form method="POST" class="d-grid gap-2">
                 <input type="hidden" name="do_init" value="1">
                 
                 <?php if ($canImportFile): ?>
                     <button type="submit" name="init_mode" value="import_file" class="btn btn-info text-white">
-                        📂 從檔案系統匯入
-                        <div class="fs-6 fw-normal">將現有檔案文章轉入 SQLite</div>
+                        <?php echo __('sqlite_import_file'); ?>
+                        <div class="fs-6 fw-normal"><?php echo __('sqlite_import_file_desc'); ?></div>
                     </button>
                 <?php endif; ?>
 
                 <?php if ($canImportMySQL): ?>
                     <button type="submit" name="init_mode" value="import_mysql" class="btn btn-warning text-dark">
-                        🐬 從 MySQL 資料庫匯入
-                        <div class="fs-6 fw-normal">複製 MySQL 資料到 SQLite</div>
+                        <?php echo __('sqlite_import_mysql'); ?>
+                        <div class="fs-6 fw-normal"><?php echo __('sqlite_import_mysql_desc'); ?></div>
                     </button>
                 <?php endif; ?>
                 
                 <button type="submit" name="init_mode" value="clean" class="btn btn-outline-secondary">
-                    🆕 全新安裝
-                    <div class="fs-6 fw-normal">建立空的資料庫</div>
+                    <?php echo __('sqlite_clean_install'); ?>
+                    <div class="fs-6 fw-normal"><?php echo __('sqlite_clean_install_desc'); ?></div>
                 </button>
             </form>
 
@@ -313,7 +315,7 @@ $canImportMySQL = hasMySQLData();
             <div class="text-center">
                 <div class="text-success display-1 mb-3">✅</div>
                 <h4><?php echo $success; ?></h4>
-                <a href="index.php" class="btn btn-primary w-100 mt-3">進入後台管理</a>
+                <a href="index.php" class="btn btn-primary w-100 mt-3"><?php echo __('sqlite_goto_admin'); ?></a>
             </div>
         <?php endif; ?>
     </div>

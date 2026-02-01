@@ -209,18 +209,18 @@ if ($source === 'db') {
                                 <h6 class="card-title mb-0"><?php echo __('stat_connection'); ?></h6>
                                 <?php if ($source === 'db'): ?>
                                     <p class="my-2 fw-bold">Host: <?php echo htmlspecialchars($dbHost); ?></p>
-                                    <small>Type: <?php echo $dbType; ?></small><br>
-                                    <small title="<?php echo htmlspecialchars($serverInfo); ?>">Ver: <?php echo htmlspecialchars($serverVersion); ?></small><br>
-                                    <small>Driver: PDO MySQL</small>
+                                    <small><?php echo sprintf(__('stat_type'), $dbType); ?></small><br>
+                                    <small title="<?php echo htmlspecialchars($serverInfo); ?>"><?php echo sprintf(__('stat_ver'), htmlspecialchars($serverVersion)); ?></small><br>
+                                    <small><?php echo sprintf(__('stat_driver'), 'PDO MySQL'); ?></small>
                                 <?php elseif ($source === 'sqlite'): ?>
                                     <p class="my-2 fw-bold" style="font-size: 0.9em;"><?php echo htmlspecialchars($dbName); ?></p>
-                                    <small>Type: <?php echo $dbType; ?></small><br>
-                                    <small>Ver: <?php echo htmlspecialchars($serverVersion); ?></small><br>
-                                    <small>Driver: PDO SQLite</small>
+                                    <small><?php echo sprintf(__('stat_type'), $dbType); ?></small><br>
+                                    <small><?php echo sprintf(__('stat_ver'), htmlspecialchars($serverVersion)); ?></small><br>
+                                    <small><?php echo sprintf(__('stat_driver'), 'PDO SQLite'); ?></small>
                                 <?php else: ?>
-                                    <p class="my-2 fw-bold">Mode: File System</p>
-                                    <small>Path: contents/</small><br>
-                                    <small>Log: index_post.txt</small>
+                                    <p class="my-2 fw-bold"><?php echo __('stat_mode_file'); ?></p>
+                                    <small><?php echo __('stat_path'); ?></small><br>
+                                    <small><?php echo __('stat_log'); ?></small>
                                 <?php endif; ?>
                             </div>
                             <span class="fs-1">🔌</span>

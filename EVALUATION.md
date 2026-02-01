@@ -1,4 +1,4 @@
-# Project Evaluation: BaxerMux Photography Blog (v2026.02.01)
+﻿# Project Evaluation: BaxerMux Photography Blog (v2026.02.01)
 
 ## Overall Rating: **Professional, Lightweight, and Highly Customized**
 

@@ -102,12 +102,12 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                     <div class="row">
                         <!-- Push: File -> DB -->
                         <div class="col-md-6 border-end">
-                            <h6 class="text-primary fw-bold">1. 匯出至資料庫 (File &rarr; DB)</h6>
+                            <h6 class="text-primary fw-bold"><?php echo __('migrate_export_to_db'); ?></h6>
                             <form method="POST" onsubmit="return confirm('<?php echo __('confirm_start_migration'); ?>');">
                                 <input type="hidden" name="start_migration" value="1">
                                 <!-- Import Source implicitly File -->
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">目標資料庫:</label>
+                                    <label class="form-label small fw-bold"><?php echo __('migrate_target_db'); ?></label>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="export_target" value="mysql" id="target_mysql" <?php echo ($dbReady) ? 'checked' : 'disabled'; ?>/>
                                         <label class="form-check-label" for="target_mysql">MySQL <?php if(!$dbReady) echo '(N/A)'; ?></label>
@@ -127,12 +127,12 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
 
                         <!-- Pull: DB -> File -->
                         <div class="col-md-6">
-                            <h6 class="text-success fw-bold">2. 從資料庫還原 (DB &rarr; File)</h6>
-                            <form method="POST" onsubmit="return confirm('確定要還原嗎？這將覆寫 contents 目錄。');">
+                            <h6 class="text-success fw-bold"><?php echo __('migrate_restore_from_db'); ?></h6>
+                            <form method="POST" onsubmit="return confirm('<?php echo __('confirm_restore_warn'); ?>');">
                                 <input type="hidden" name="start_export" value="1">
                                 <!-- Export Target implicitly File -->
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">來源資料庫:</label>
+                                    <label class="form-label small fw-bold"><?php echo __('migrate_source_db'); ?></label>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="import_source" value="mysql" id="source_mysql" <?php echo ($dbReady) ? 'checked' : 'disabled'; ?>/> 
                                         <label class="form-check-label" for="source_mysql">MySQL <?php if(!$dbReady) echo '(N/A)'; ?></label>
@@ -145,7 +145,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                                     <?php endif; ?>
                                 </div>
                                 <?php if (!$startMigration && !$startExport): ?>
-                                    <button type="submit" class="btn btn-success w-100" <?php echo (!$dbReady && !$hasSqliteConfig) ? 'disabled' : ''; ?>/>📥 開始還原</button>
+                                    <button type="submit" class="btn btn-success w-100" <?php echo (!$dbReady && !$hasSqliteConfig) ? 'disabled' : ''; ?>/><?php echo __('btn_start_restore'); ?></button>
                                 <?php endif; ?>
                             </form>
                         </div>
@@ -156,26 +156,26 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                     <!-- Mode: DB / SQLite                          -->
                     <!-- ========================================== -->
                     <p class="card-text">
-                        當前模式：<strong><?php echo ($currentSource === 'db') ? 'MySQL 資料庫' : 'SQLite 資料庫'; ?></strong>
+                        <?php echo __('migrate_current_mode'); ?> <strong><?php echo ($currentSource === 'db') ? 'MySQL' : 'SQLite'; ?></strong>
                     </p>
                     
                     <div class="row">
                         <!-- Left: Export (Push) -->
                         <div class="col-md-6 border-end">
-                            <h6 class="text-success fw-bold">1. 匯出資料 (Export)</h6>
-                            <p class="small text-muted">將當前資料庫內容匯出至...</p>
+                            <h6 class="text-success fw-bold"><?php echo __('migrate_export_data'); ?></h6>
+                            <p class="small text-muted"><?php echo __('migrate_export_desc'); ?></p>
                             
-                            <form method="POST" onsubmit="return confirm('確定要匯出嗎？目標資料將被覆寫/更新。');">
+                            <form method="POST" onsubmit="return confirm('<?php echo __('confirm_export_warn'); ?>');">
                                 <input type="hidden" name="start_export" value="1">
                                 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">目標位置:</label>
+                                    <label class="form-label small fw-bold"><?php echo __('migrate_target_loc'); ?></label>
                                     
                                     <!-- Option: File System -->
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="export_target" value="file" id="exp_file" checked>
                                         <label class="form-check-label" for="exp_file">
-                                            📁 檔案系統 (File System)
+                                            📁 <?php echo __('mode_file'); ?>
                                         </label>
                                     </div>
 
@@ -192,27 +192,27 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                                 </div>
 
                                 <?php if (!$startMigration && !$startExport): ?>
-                                    <button type="submit" class="btn btn-success w-100">📤 執行匯出</button>
+                                    <button type="submit" class="btn btn-success w-100"><?php echo __('btn_exec_export'); ?></button>
                                 <?php endif; ?>
                             </form>
                         </div>
 
                         <!-- Right: Import (Pull) -->
                         <div class="col-md-6">
-                            <h6 class="text-primary fw-bold">2. 匯入資料 (Import)</h6>
-                            <p class="small text-muted">從外部來源匯入至當前資料庫...</p>
+                            <h6 class="text-primary fw-bold"><?php echo __('migrate_import_data'); ?></h6>
+                            <p class="small text-muted"><?php echo __('migrate_import_desc'); ?></p>
                             
-                            <form method="POST" onsubmit="return confirm('確定要匯入嗎？當前資料庫的同名文章將被更新。');">
+                            <form method="POST" onsubmit="return confirm('<?php echo __('confirm_import_warn'); ?>');">
                                 <input type="hidden" name="start_migration" value="1">
                                 
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">來源位置:</label>
+                                    <label class="form-label small fw-bold"><?php echo __('migrate_source_loc'); ?></label>
                                     
                                     <!-- Option: File System -->
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="import_source" value="file" id="imp_file" checked>
                                         <label class="form-check-label" for="imp_file">
-                                            📁 檔案系統 (File System)
+                                            📁 <?php echo __('mode_file'); ?>
                                         </label>
                                     </div>
 
@@ -229,7 +229,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
                                 </div>
 
                                 <?php if (!$startMigration && !$startExport): ?>
-                                    <button type="submit" class="btn btn-primary w-100">📥 執行匯入</button>
+                                    <button type="submit" class="btn btn-primary w-100"><?php echo __('btn_exec_import'); ?></button>
                                 <?php endif; ?>
                             </form>
                         </div>
@@ -342,15 +342,15 @@ function runImport($targetDB) {
     set_time_limit(600); @ini_set('implicit_flush', 1);
 
     $pdo = connectTo($targetDB);
-    if (!$pdo) { output_log("目標資料庫連線失敗: $targetDB", 'error'); return; }
-    output_log("目標資料庫連線成功: ".strtoupper($targetDB), 'success');
+    if (!$pdo) { output_log(sprintf(__('log_target_connect_fail'), $targetDB), 'error'); return; }
+    output_log(sprintf(__('log_target_connect_success'), strtoupper($targetDB)), 'success');
 
     // Create Schema
     ensureSchema($pdo, $targetDB);
 
     $baseDir = dirname(__DIR__);
     $indexFile = $baseDir . '/contents/index_post.txt';
-    if (!file_exists($indexFile)) { output_log("找不到索引檔", 'error'); return; }
+    if (!file_exists($indexFile)) { output_log(sprintf(__('log_file_missing'), 'index_post.txt'), 'error'); return; }
 
     $lines = file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $total = count($lines);
@@ -374,12 +374,12 @@ function runImport($targetDB) {
         }
 
         if (processPostImport($pdo, $stmt, $targetDB, $fname, $title, $date, $tags, $desc, $content, $cats)) {
-            output_log("匯入成功: $title", 'success');
+            output_log(sprintf(__('log_imported'), $title), 'success');
             $count++;
         }
         update_progress($index + 1, $total);
     }
-    output_log("匯入完成! 成功: $count", 'system');
+    output_log(sprintf(__('log_complete'), $count), 'system');
 }
 
 // ==========================================
@@ -387,7 +387,7 @@ function runImport($targetDB) {
 // ==========================================
 function runExport($pdo = null) {
     if ($pdo === null) { global $pdo; }
-    if (!$pdo) { output_log("來源資料庫連線無效", 'error'); return; }
+    if (!$pdo) { output_log(__('log_db_connect_fail'), 'error'); return; }
     
     set_time_limit(600); @ini_set('implicit_flush', 1);
     
@@ -397,11 +397,11 @@ function runExport($pdo = null) {
     }
 
     try {
-        output_log("讀取來源資料庫...", 'system');
+        output_log(__('log_reading_source'), 'system');
         $stmt = $pdo->query("SELECT p.*, GROUP_CONCAT(c.category_name) as cats FROM blog_posts p LEFT JOIN blog_post_categories pc ON p.id = pc.post_id LEFT JOIN blog_categories c ON pc.category_id = c.id GROUP BY p.id ORDER BY p.post_date DESC");
         $posts = $stmt->fetchAll();
         $total = count($posts);
-        output_log("共找到 $total 篇文章", 'system');
+        output_log(sprintf(__('log_found_posts'), $total), 'system');
 
         $lines = [];
         $i = 0;
@@ -417,13 +417,13 @@ function runExport($pdo = null) {
                 touch($baseDir."/category/$c/$fname");
             }
             $i++;
-            output_log("已匯出: {$p['post_title']}", 'success');
+            output_log(sprintf(__('log_exported'), $p['post_title']), 'success');
             update_progress($i, $total);
         }
         file_put_contents($baseDir."/contents/index_post.txt", implode("\n", $lines));
-        output_log("匯出完成! index_post.txt 已更新。", 'system');
+        output_log(__('log_export_complete'), 'system');
     } catch (Exception $e) {
-        output_log("匯出錯誤: " . $e->getMessage(), 'error');
+        output_log(sprintf(__('log_sys_error'), $e->getMessage()), 'error');
     }
 }
 
@@ -433,14 +433,14 @@ function runExport($pdo = null) {
 function runDBMigration($sourceType, $targetType) {
     set_time_limit(600); @ini_set('implicit_flush', 1);
     
-    output_log("準備遷移: " . strtoupper($sourceType) . " -> " . strtoupper($targetType), 'system');
+    output_log(sprintf(__('log_prepare_migration'), strtoupper($sourceType), strtoupper($targetType)), 'system');
 
     // 1. Connect Both
     $srcPdo = connectTo($sourceType);
     $tgtPdo = connectTo($targetType);
 
-    if (!$srcPdo) { output_log("來源資料庫連線失敗", 'error'); return; }
-    if (!$tgtPdo) { output_log("目標資料庫連線失敗", 'error'); return; }
+    if (!$srcPdo) { output_log(sprintf(__('log_target_connect_fail'), 'Source ' . $sourceType), 'error'); return; }
+    if (!$tgtPdo) { output_log(sprintf(__('log_target_connect_fail'), 'Target ' . $targetType), 'error'); return; }
 
     // 2. Init Target Schema
     ensureSchema($tgtPdo, $targetType);
@@ -455,7 +455,7 @@ function runDBMigration($sourceType, $targetType) {
         // SQLite uses slightly different GROUP_CONCAT but we fixed it to use standard comma
         $rows = $srcPdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
         $total = count($rows);
-        output_log("來源資料共 $total 筆", 'system');
+        output_log(sprintf(__('log_source_count'), $total), 'system');
 
         // 4. Write Target
         $stmt = prepareUpsertStmt($tgtPdo, $targetType);
@@ -466,17 +466,17 @@ function runDBMigration($sourceType, $targetType) {
             $cats = explode(',', $row['cats']??'');
             
             if (processPostImport($tgtPdo, $stmt, $targetType, $fname, $row['post_title'], $row['post_date'], $row['post_tags'], $row['post_description'], $row['post_content'], $cats)) {
-                output_log("遷移成功: {$row['post_title']}", 'success');
+                output_log(sprintf(__('log_migration_success'), $row['post_title']), 'success');
                 $count++;
             } else {
-                output_log("遷移失敗: {$row['post_title']}", 'error');
+                output_log(sprintf(__('log_migration_fail'), $row['post_title']), 'error');
             }
             update_progress($index + 1, $total);
         }
-        output_log("資料庫遷移完成!", 'system');
+        output_log(__('log_migration_complete'), 'system');
 
     } catch (Exception $e) {
-        output_log("遷移過程發生錯誤: " . $e->getMessage(), 'error');
+        output_log(sprintf(__('log_migration_error'), $e->getMessage()), 'error');
     }
 }
 

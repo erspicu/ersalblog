@@ -19,11 +19,11 @@ class SystemHealth {
         ];
 
         if (!extension_loaded('pdo')) {
-            $result['message'] = "PHP PDO Extension missing";
+            $result['message'] = __('health_php_pdo_missing');
             return $result;
         }
         if (!extension_loaded('pdo_mysql')) {
-            $result['message'] = "PHP PDO MySQL Driver missing";
+            $result['message'] = __('health_php_mysql_missing');
             return $result;
         }
 
@@ -61,23 +61,23 @@ class SystemHealth {
         ];
 
         if (!isset($sqlite_path) || empty($sqlite_path)) {
-            $result['message'] = "Config \$sqlite_path not set";
+            $result['message'] = __('health_sqlite_config_missing');
             return $result;
         }
 
         if (!extension_loaded('pdo')) {
-            $result['message'] = "PHP PDO Extension missing";
+            $result['message'] = __('health_php_pdo_missing');
             return $result;
         }
         if (!extension_loaded('pdo_sqlite')) {
-            $result['message'] = "PHP PDO SQLite Driver missing";
+            $result['message'] = __('health_php_sqlite_missing');
             return $result;
         }
 
         $target = __DIR__ . '/../' . $sqlite_path;
 
         if (!file_exists($target)) {
-            $result['message'] = "SQLite file missing";
+            $result['message'] = __('health_sqlite_file_missing');
             return $result;
         }
 
@@ -93,12 +93,12 @@ class SystemHealth {
                  $countStmt = $pdo->query("SELECT COUNT(*) FROM blog_posts");
                  $count = $countStmt->fetchColumn();
                  $result['status'] = true;
-                 $result['message'] = "SQLite Ready ($count posts)";
+                 $result['message'] = sprintf(__('health_sqlite_ready'), $count);
             } else {
-                 $result['message'] = "SQLite Tables Missing";
+                 $result['message'] = __('health_sqlite_table_missing');
             }
         } catch (Exception $e) {
-            $result['message'] = "SQLite Error: " . $e->getMessage();
+            $result['message'] = sprintf(__('health_sqlite_error'), $e->getMessage());
         }
 
         return $result;

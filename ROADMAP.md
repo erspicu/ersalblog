@@ -1,4 +1,4 @@
-# Blog Project Roadmap & Feature Proposals (v2026.02.01)
+﻿# Blog Project Roadmap & Feature Proposals (v2026.02.01)
 
 This document organizes the discussions and evaluations regarding future feature expansions for the BaxerMux Photography Blog. It serves as a strategic reference for long-term development.
 

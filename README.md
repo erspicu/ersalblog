@@ -6,7 +6,7 @@ A lightweight, high-performance blog system designed specifically for photograph
 - **Photography Focused**: Automatically extracts and displays EXIF metadata (Camera, Aperture, Shutter, ISO, GPS) from your photos using `exif.js`.
 - **Hybrid Data Management**:
   - **Flat-file Mode**: Uses simple text files (`index_post.txt`) and directory structures for content management.
-  - **Database Mode**: Supports MySQL/MariaDB with a normalized schema (`blog_posts`, `blog_categories`) for robust data handling.
+  - **Database Mode**: Supports MySQL/MariaDB and **SQLite 3** with a normalized schema (`blog_posts`, `blog_categories`) for robust data handling.
 - **Dual-Mode Admin Panel**: A unified administration interface that allows you to switch between managing local files or the database seamlessly.
     - **Multi-language Support**: Fully localized admin interface (Traditional Chinese / English).
     - **Vibe Coding**: Developed with Gemini CLI & Gemini AI Models, featuring automated version tracking.
@@ -36,7 +36,7 @@ A lightweight, high-performance blog system designed specifically for photograph
 - **攝影導向**：整合 `exif.js`，自動從您的照片中提取並顯示 EXIF 元數據（相機、光圈、快門、ISO、GPS）。
 - **混合數據管理**：
   - **檔案模式 (Flat-file)**：使用簡單的文字檔 (`index_post.txt`) 與目錄結構進行內容管理。
-  - **資料庫模式 (Database)**：支援 MySQL/MariaDB，並採用正規化架構 (`blog_posts`, `blog_categories`) 處理更強大的數據需求。
+  - **資料庫模式 (Database)**：支援 MySQL/MariaDB 與 **SQLite 3**，並採用正規化架構 (`blog_posts`, `blog_categories`) 處理更強大的數據需求。
 - **雙模式管理後台**：統一的管理介面，讓您能在管理本地檔案或資料庫之間無縫切換。
     - **多語系支援**：完整的後台介面本地化（繁體中文 / 英文）。
     - **Vibe Coding**：由 Gemini CLI 與 Gemini AI 模型開發，具備自動化版本追蹤。

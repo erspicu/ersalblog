@@ -572,6 +572,13 @@ Recorded the development journey and original Prompt commands of this project th
     - Updated Admin UI to dynamically display available migration targets based on current mode and configuration.
     - Added strict environment checks for PDO extensions in `auth.php` and `health_check.php` to prevent fatal errors.
 
+### [14:05] Internationalization (i18n) Completion
+- **Task**: Complete missing translations for new modules.
+- **Implementation**:
+    - Updated `langs/admin/zh_TW.php` and `en_US.php` with missing keys for Migration Tool, SQLite Init, and Dashboard.
+    - Replaced hardcoded text in `admin/tool_migrate.php`, `admin/sqlite_init.php`, `admin/index.php`, and `admin/health_check.php`.
+    - Ensured full bilingual support across all new features (SQLite, Migration).
+
 ---
 
 ## 2026-02-01 (繁體中文)
@@ -594,4 +601,11 @@ Recorded the development journey and original Prompt commands of this project th
     - å¯¦ä½ `runDBMigration` å½æ¸ï¼èçè³æåº«å°è³æåº« (MySQL <-> SQLite) çç´æ¥è³æå³è¼¸ã
     - æ´æ°å¾®å°ä»é¢ï¼æ ¹æç¶åæ¨¡å¼èè¨­å®åæé¡¯ç¤ºå¯ç¨çé·ç§»ç®æ¨ã
     - å¨ `auth.php` è `health_check.php` ä¸­å å¥å´æ ¼ç PDO æ´åæª¢æ¥ï¼é²æ­¢å ç°å¢ä¸æ¯æ´å°è´çè´å½é¯èª¤ã
+
+### [14:05] åéå (i18n) å®æ´æ¯æ´
+- **ä»»å**: è£é½æ°æ¨¡çµç¼ºå¤±çç¿»è­¯ã
+- **å¯¦ä½**:
+    - æ´æ° `langs/admin/zh_TW.php` è `en_US.php`ï¼è£ä¸é·ç§»å·¥å·ãSQLite åå§åèåè¡¨æ¿ç¸éçç¿»è­¯éµå¼ã
+    - æffæ `admin/tool_migrate.php`ã`admin/sqlite_init.php`ã`admin/index.php` è `admin/health_check.php` ä¸­çç¡¬ç·¨ç¢¼æå­ã
+    - ç¢ºä¿æææ°åoè½ (SQLite, Migration) çæ¯æ´å®æ´éèªé¡¯ç¤ºã
 

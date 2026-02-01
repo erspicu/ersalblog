@@ -141,4 +141,5 @@
 - [2026-02-01 13:45:00] (UTC+8) 實現全方位資料遷移 (File <-> MySQL <-> SQLite)：
   - 更新 admin/tool_migrate.php，在資料庫模式下新增 DB 對 DB 的遷移選項。
   - 實作 runDBMigration 函數，支援跨資料庫類型的資料同步 (Schema Sync + UPSERT)。
-  - UI 介面全面升級，支援動態偵測並顯示可用的匯出/匯入目標。
+  - UI 介面全面升級，支援動態偵測並顯示可用的匯出/匯入目標。﻿
+- [2026-02-01 13:50:00] (UTC+8) 更新 gemini.md，將偏好執行環境設定為 Git Bash (MinGW)，以解決編碼亂碼問題並提升指令相容性。
