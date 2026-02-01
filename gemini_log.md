@@ -119,4 +119,26 @@
   - 修正 admin/file_init.php (確保 SQLite 轉檔案模式相容性)。﻿
 - [2026-02-01 12:20:00] (UTC+8) 修正後台介面顯示：
   - 更新 admin/index.php 儀表板，支援顯示 SQLite 檔案大小與詳細連線資訊。
-  - 更新 admin/posts.php, admin/categories.php, admin/tool_migrate.php 的 Sidebar，正確顯示 SQLite 模式標籤。
+  - 更新 admin/posts.php, admin/categories.php, admin/tool_migrate.php 的 Sidebar，正確顯示 SQLite 模式標籤。﻿
+- [2026-02-01 12:35:00] (UTC+8) 強化環境相容性防護：
+  - 修正 admin/health_check.php，增加 PDO Extension 與 Drivers (mysql, sqlite) 的存在檢查，避免 Fatal Error。
+  - 修正 admin/auth.php，增加連線前的 PDO 檢查。﻿
+- [2026-02-01 12:45:00] (UTC+8) 優化資料遷移工具：
+  - 將「資料匯入」更名為「資料遷移」(Data Migration)，避免語意混淆。
+  - 更新 admin/tool_migrate.php，新增 File to SQLite 遷移功能。
+  - 支援 MySQL 與 SQLite 雙目標選擇，並自動處理 SQL 語法差異 (UPSERT)。﻿
+- [2026-02-01 13:00:00] (UTC+8) 實作雙向資料遷移：
+  - 更新 admin/tool_migrate.php 支援「反向遷移」(Database -> File System)。
+  - 開放 Sidebar 連結，讓資料庫模式下也能存取遷移工具。
+  - 根據當前登入模式自動切換「匯入」或「匯出」介面。﻿
+- [2026-02-01 13:15:00] (UTC+8) 強化資料遷移工具：
+  - 在檔案模式下新增「從資料庫還原」(DB -> File) 功能。
+  - 支援從 MySQL 或 SQLite 來源還原資料至檔案系統。
+  - 實現了完整的雙向資料同步 (Push/Pull) 介面。﻿
+- [2026-02-01 13:30:00] (UTC+8) 完善雙向遷移功能：
+  - 更新 admin/tool_migrate.php，在資料庫模式下新增「從檔案系統匯入」(Import from File) 選項。
+  - 實現了 File Mode 與 DB Mode 下完全對稱的 Push/Pull 遷移功能。﻿
+- [2026-02-01 13:45:00] (UTC+8) 實現全方位資料遷移 (File <-> MySQL <-> SQLite)：
+  - 更新 admin/tool_migrate.php，在資料庫模式下新增 DB 對 DB 的遷移選項。
+  - 實作 runDBMigration 函數，支援跨資料庫類型的資料同步 (Schema Sync + UPSERT)。
+  - UI 介面全面升級，支援動態偵測並顯示可用的匯出/匯入目標。

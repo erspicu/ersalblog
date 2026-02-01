@@ -79,13 +79,11 @@ function truncate($text, $limit = 60) {
                     <?php echo __('nav_categories'); ?>
                 </a>
             </li>
-            <?php if ($dataManager->getSource() === 'file'): ?>
             <li>
                 <a href="tool_migrate.php">
                     <?php echo __('nav_import'); ?>
                 </a>
             </li>
-            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">

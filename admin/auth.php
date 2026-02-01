@@ -16,6 +16,11 @@ function connectAdminDB() {
     global $dbConfig, $sqlite_path, $pdo, $dbConnectionError;
     
     $source = getAdminSource();
+
+    if (!extension_loaded('pdo')) {
+        $dbConnectionError = "PHP PDO Extension missing";
+        return;
+    }
     
     try {
         if ($source === 'sqlite') {

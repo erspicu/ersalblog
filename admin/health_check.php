@@ -18,6 +18,15 @@ class SystemHealth {
             'message' => ''
         ];
 
+        if (!extension_loaded('pdo')) {
+            $result['message'] = "PHP PDO Extension missing";
+            return $result;
+        }
+        if (!extension_loaded('pdo_mysql')) {
+            $result['message'] = "PHP PDO MySQL Driver missing";
+            return $result;
+        }
+
         try {
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
             $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
@@ -53,6 +62,15 @@ class SystemHealth {
 
         if (!isset($sqlite_path) || empty($sqlite_path)) {
             $result['message'] = "Config \$sqlite_path not set";
+            return $result;
+        }
+
+        if (!extension_loaded('pdo')) {
+            $result['message'] = "PHP PDO Extension missing";
+            return $result;
+        }
+        if (!extension_loaded('pdo_sqlite')) {
+            $result['message'] = "PHP PDO SQLite Driver missing";
             return $result;
         }
 

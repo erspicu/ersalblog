@@ -32,7 +32,7 @@ return [
     'nav_dashboard' => '📊 Dashboard',
     'nav_posts' => '📝 Posts',
     'nav_categories' => '📂 Categories',
-    'nav_import' => '🔄 Import',
+    'nav_import' => '🔄 Data Migration',
     'nav_preview' => '🌍 Preview Site',
     'nav_logout' => '🚪 Logout',
     'mode_label' => 'Mode',
@@ -97,11 +97,11 @@ return [
     'btn_confirm_remove' => 'Remove',
 
     // Messages
-    'msg_rename_success' => 'Successfully renamed category from "%s" to "%s".',
+    'msg_rename_success' => 'Successfully renamed category from \"%s\" to \"%s\".',
     'msg_rename_fail' => 'Rename failed or category not found.',
-    'msg_remove_success' => 'Successfully removed category "%s".',
+    'msg_remove_success' => 'Successfully removed category \"%s\".',
     'msg_remove_fail' => 'Remove failed or category not found.',
-    'msg_create_success' => 'Successfully created category "%s".',
+    'msg_create_success' => 'Successfully created category \"%s\".',
     'msg_create_fail' => 'Creation failed. Category might already exist.',
 
     // Post Edit
@@ -127,12 +127,12 @@ return [
     'vibe_info' => 'Vibe coded with Gemini CLI & Gemini AI Models',
 
     // Migrate Tool
-    'migrate_title' => 'Import Data (File to DB)',
+    'migrate_title' => 'Data Migration Tool',
     'migrate_info_title' => 'Info',
-    'migrate_desc' => 'Reads current "File System" content (contents, category) and imports it into the configured MySQL database.',
+    'migrate_desc' => 'Migrates content from \"File System\" to the designated database (MySQL or SQLite).',
     'migrate_warn' => 'Note: If a post with the same filename exists in DB, it will be UPDATED. Otherwise, it will be INSERTED.',
     'db_status' => 'Target Database Status',
-    'btn_start_migration' => '🚀 Start Import',
+    'btn_start_migration' => '🚀 Start Migration',
     'confirm_start_migration' => 'Are you sure? This might take a while.',
     'btn_db_unreachable' => 'Database Unreachable',
     'log_header' => 'Execution Log',
@@ -142,6 +142,6 @@ return [
     'log_start_process' => 'Processing %d posts...', 
     'log_imported' => 'Imported: %s',
     'log_failed' => 'Failed [%s]: %s',
-    'log_complete' => 'Import Complete! Success: %d',
+    'log_complete' => 'Migration Complete! Success: %d',
     'log_sys_error' => 'System Error: %s',
 ];

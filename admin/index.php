@@ -130,13 +130,11 @@ if ($source === 'db') {
                     <?php echo __('nav_categories'); ?>
                 </a>
             </li>
-            <?php if ($source === 'file'): ?>
             <li>
                 <a href="tool_migrate.php">
                     <?php echo __('nav_import'); ?>
                 </a>
             </li>
-            <?php endif; ?>
         </ul>
         <hr>
         <div class="dropdown">
