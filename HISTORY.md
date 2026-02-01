@@ -310,6 +310,100 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
+## 2026-02-01
+
+### [12:30] SQLite 3 Database Support and Interface Optimization
+- **Task**: Implement SQLite 3 support as an alternative to MySQL and the file system, and fix UI inconsistencies.
+- **Implementation**:
+    - Added SQLite support to `DataManager` in `admin/data_provider.php`.
+    - Created `admin/sqlite_init.php` for database initialization and data migration (from file system or MySQL).
+    - Created `api_sqlitebase.php` for frontend SQLite data access.
+    - Updated `admin/login.php` and `admin/health_check.php` to support SQLite status detection and mode selection.
+    - Fixed `GROUP_CONCAT` syntax compatibility issues between MySQL and SQLite.
+    - Optimized Admin UI (Dashboard and Sidebar) to correctly identify and display SQLite connection details and file information.
+    - Updated `.gitignore` and `config.example.php` for SQLite integration.
+
+### [13:45] Comprehensive Data Migration System
+- **Task**: Implement a robust two-way migration system supporting File System, MySQL, and SQLite.
+- **Implementation**:
+    - Enhanced `admin/tool_migrate.php` to support both Import (Pull) and Export (Push) operations in all modes.
+    - Implemented `runDBMigration` to handle direct database-to-database data transfer (MySQL <-> SQLite).
+    - Updated Admin UI to dynamically display available migration targets based on current mode and configuration.
+    - Added strict environment checks for PDO extensions in `auth.php` and `health_check.php` to prevent fatal errors.
+
+### [14:05] Internationalization (i18n) Completion
+- **Task**: Complete missing translations for new modules.
+- **Implementation**:
+    - Updated `langs/admin/zh_TW.php` and `en_US.php` with missing keys for Migration Tool, SQLite Init, and Dashboard.
+    - Replaced hardcoded text in `admin/tool_migrate.php`, `admin/sqlite_init.php`, `admin/index.php` and `admin/health_check.php`.
+    - Ensured full bilingual support across all new features (SQLite, Migration).
+
+### [14:45] Backup Infrastructure
+- **Task**: Establish a dedicated directory for backups.
+- **Implementation**:
+    - Created `/backup` directory and added a bilingual `readme.md`.
+    - Updated `.gitignore` to exclude `/backup/*.zip`.
+
+### [15:15] Backup Restore & Upload
+- **Task**: Enhance backup tool with restore and upload capabilities.
+- **Implementation**:
+    - Implemented system restoration from local ZIP backups (overwrites contents).
+    - Added file upload functionality for importing external backups, with file size limit checks and hints.
+    - Integrated SweetAlert2 for operation confirmations (Delete, Restore, Create) and status messages (Success/Error).
+    - Added loading overlays for time-consuming operations (Upload, Create, Restore).
+    - Updated i18n support for all new backup features.
+
+### [15:30] Backup Tool Optimization (PHP Config & Hints)
+- **Task**: Add user guidance for handling large backup files.
+- **Implementation**:
+    - Added PHP configuration hints (upload_max_filesize, post_max_size, etc.) in `admin/tool_backup.php` upload section.
+    - Provided example PHP.ini settings and FTP alternatives for large files.
+    - Updated language files (`zh_TW.php`, `en_US.php`) with new hint text.
+
+### [15:45] MySQL Database Backup & Restore
+- **Task**: Extend backup tool to support MySQL database mode.
+- **Implementation**:
+    - Implemented `createMysqlDump` to generate SQL structure and data dumps.
+    - Implemented `restoreMysqlDump` to parse and execute SQL dumps from ZIP.
+    - Updated `create_backup` to pack SQL dump + static resources (`preview`, `pic`, `static/icon-192.png`) into `dbsqlbase-*.zip`.
+    - Updated `restore_backup` to handle `dbsqlbase` files by restoring DB first, then static files.
+
+### [16:15] SQLite Database Backup & Restore
+- **Task**: Extend backup tool to support SQLite database mode.
+- **Implementation**:
+    - Added logic to pack the active SQLite database file + static resources into `sqlitebase-*.zip`.
+    - Added logic to restore SQLite DB file from ZIP to the configured path.
+    - Added helper functions (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) to fix 500 errors and reuse code.
+
+### [16:30] Backup List Filtering
+- **Task**: Avoid confusion by showing only relevant backup files.
+- **Implementation**:
+    - Updated `admin/tool_backup.php` to filter the backup list based on current mode:
+        - DB Mode: Show only `dbsqlbase-*.zip`
+        - SQLite Mode: Show only `sqlitebase-*.zip`
+        - File Mode: Show only `filebase-*.zip`
+
+### [19:30] Universal Installation Wizard
+- **Task**: Design and implement a user-friendly initialization system.
+- **Implementation**:
+    - Created `install.php` in the root directory.
+    - Features: Environment check (PHP version & Unix-like permission fixes), Multi-mode DB test (MySQL/SQLite/File), Admin setup, and Frontend config generation.
+    - Multi-language Support: Created `langs/admin/install_zh_TW.php` and `install_en_US.php`.
+    - Integrated `admin/version_config.php` display and versioning.
+
+### [22:15] WSL2 Development Environment & OS Detection Enhancement
+- **Task**: Automate LAMP stack setup in WSL2 and provide detailed OS distribution info.
+- **Implementation**:
+    - **Environment Setup**: Fully automated installation of Apache2, MySQL 8.0, and PHP 8.3 in WSL2 Ubuntu 24.04.
+    - **Web Integration**: Configured Apache to listen on port 8086 and linked the Windows project directory via symlinks.
+    - **Database Setup**: Initialized MySQL user and database matching `config.php`.
+    - **phpMyAdmin**: Automated installation and integration with the custom port.
+    - **Permission Fixes**: Enhanced `install.php` to detect WSL2 NTFS mounts and bypass incompatible `chmod` checks.
+    - **OS Detection**: Created `admin/system_helper.php` for shared OS distribution and version detection (e.g., Ubuntu 24.04.1 LTS (WSL2) or Windows 11 Build info).
+    - **Dashboard Update**: Integrated detailed OS info into `admin/index.php` and `install.php`.
+
+---
+
 ## 2026-01-31 (繁體中文)
 
 ### [12:05] PHP 7.x 相容性檢查與修復
@@ -630,4 +724,15 @@ Recorded the development journey and original Prompt commands of this project th
     - 特性：環境檢測 (PHP 版本與 Unix 權限修復)、多模式資料庫測試 (MySQL/SQLite/File)、管理員設定與前端配置生成。
     - 多語系支援：建立 `langs/admin/install_zh_TW.php` 與 `install_en_US.php` 並將語系獨立管理。
     - 整合 `admin/version_config.php` 顯示系統版本資訊。
+
+### [22:15] WSL2 開發環境建置與 OS 偵測強化
+- **任務**: 自動化 WSL2 中的 LAMP 環境配置並提供詳細 OS 資訊。
+- **實作**:
+    - **環境配置**: 自動在 WSL2 Ubuntu 24.04 安裝 Apache2, MySQL 8.0, PHP 8.3。
+    - **網頁整合**: 設定 Apache 監聽 8086 埠並透過軟連結掛載 Windows 專案目錄。
+    - **資料庫初始化**: 建立符合專案設定的 MySQL 使用者與資料庫。
+    - **phpMyAdmin**: 自動安裝並整合至自訂埠號。
+    - **權限處理**: 修正 `install.php` 偵測 WSL2 NTFS 掛載點並自動跳過無效的權限修正步驟。
+    - **OS 偵測**: 建立 `admin/system_helper.php` 提供詳細 OS 資訊 (如 Ubuntu 發行版或 Windows Build 號)。
+    - **介面整合**: 在儀表板與安裝精靈中同步顯示詳細作業系統環境。
         

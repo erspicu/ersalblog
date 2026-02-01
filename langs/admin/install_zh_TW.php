@@ -72,6 +72,7 @@ return [
     'file_ok' => '檢測通過！所有必要目錄皆有寫入權限。',
     'file_failed' => '權限檢測失敗：',
     'win_no_perms' => 'Windows 環境通常不需要檢查標準 Unix 權限位元。',
+    'wsl_ntfs_perms' => '檢測到您正在 WSL2 環境中存取 Windows 掛載目錄 (NTFS)。在此環境下，Linux 權限位元 (chmod) 的行為可能與預期不符，通常 PHP 已具備執行權限。系統將略過權限修復。',
     'fix_finished_errors' => '修正完成，但有 %d 個項目無法更改權限。',
     'fix_success' => '已成功修正檔案與目錄權限。',
     'ajax_error' => '無法執行請求，請檢查網路或伺服器狀態。',

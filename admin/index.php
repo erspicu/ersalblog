@@ -151,7 +151,10 @@ if ($source === 'db') {
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><?php echo __('welcome_msg'); ?>，<?php echo htmlspecialchars($_SESSION['admin_user']); ?>！</h2>
+            <div>
+                <h2 class="mb-0"><?php echo __('welcome_msg'); ?>，<?php echo htmlspecialchars($_SESSION['admin_user']); ?>！</h2>
+                <small class="text-muted"><?php echo get_detailed_os_info(); ?></small>
+            </div>
             <span class="badge bg-secondary">PHP v<?php echo $phpVersion; ?></span>
         </div>
         

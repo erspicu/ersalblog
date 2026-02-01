@@ -35,6 +35,9 @@ The system supports two operating modes:
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity before login.
     *   **Database Initialization Wizard**: If the database is connected but missing tables, the system guides to `admin/db_init.php`, supporting import from files or creating sample data.
     *   **File System Initialization Wizard**: If the file structure is incomplete (e.g., missing directories), the system guides to `admin/file_init.php`, supporting reverse export from the database to rebuild the file structure.
+*   **System Environment Detection**:
+    - **Detailed OS Info**: `admin/system_helper.php` provides granular detection of Linux distributions (via `/etc/os-release`) and Windows build numbers.
+    - **WSL2 Optimization**: Automatically identifies WSL2 environments and NTTFS mount points to bypass incompatible permission checks during installation.
 *   **Backup & Recovery System**:
     - **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives based on the current active mode (filebase, dbsqlbase, or sqlitebase).
     - **Intelligent Restore**: Automatically identifies backup types and performs SQL imports or file overwrites along with static resource restoration.
@@ -126,6 +129,9 @@ Listed below are key directories and file rules in the Git repository:
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php`，在登入前自動驗證資料庫連線與檔案系統完整性。
     *   **資料庫初始化精靈**: 若資料庫已連線但缺少資料表，系統會引導至 `admin/db_init.php`，支援從檔案匯入或建立範例資料。
     - **檔案系統初始化精靈**: 若檔案結構不完整（如缺少目錄），系統會引導至 `admin/file_init.php`，支援從資料庫反向匯出資料以重建檔案結構。
+*   **系統環境偵測 (Environment Detection)**:
+    - **詳細 OS 資訊**: 透過 `admin/system_helper.php` 偵測 Linux 發行版詳細名稱 (透過 `/etc/os-release`) 或 Windows 具體建置版本號。
+    - **WSL2 優化**: 自動識別 WSL2 環境及其掛載的 NTFS 目錄，在安裝精靈中自動跳過無效的權限修正步驟。
 *   **備份與還原系統**:
     - **多模式備份**: `admin/tool_backup.php` 根據當前模式建立 ZIP 壓縮包 (filebase, dbsqlbase, 或 sqlitebase)。
     - **智慧還原**: 自動識別備份類型，執行 SQL 匯入或檔案覆蓋，並同步還原靜態資源。
@@ -164,6 +170,13 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **`/PHP_LIB`**:
     *   包含 `html2text` 與 `dindent` 等第三方 PHP 函式庫，用於格式化生成的 HTML。
+
+*   **`/admin`**:
+    *   `auth.php`: Core authentication and global includes.
+    *   `system_helper.php`: Shared system utility functions (OS detection).
+    *   `data_provider.php`: Abstract data manager for DB/File/SQLite modes.
+    *   `health_check.php`: Pre-login system integrity verification.
+    *   `tool_backup.php`: Integrated backup and restore tool.
 
 ---
 

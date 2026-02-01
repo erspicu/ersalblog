@@ -2,6 +2,9 @@
 // admin/auth.php
 session_start();
 
+// 引入系統輔助函式
+require_once __DIR__ . '/system_helper.php';
+
 // 初始化多語系支援
 require_once __DIR__ . '/lang_init.php';
 

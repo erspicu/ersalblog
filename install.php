@@ -21,11 +21,29 @@ setcookie('lang', $lang, time() + (86400 * 30), "/");
 $lang_file = __DIR__ . "/langs/admin/install_{$lang}.php";
 $translations = file_exists($lang_file) ? include $lang_file : [];
 
+// 引入共用系統輔助函式
+require_once __DIR__ . '/admin/system_helper.php';
+
 // 輔助函式：取得翻譯文字
 function _t($key) {
     global $translations;
     return $translations[$key] ?? $key;
 }
+
+/**
+ * 檢測是否為 WSL2 環境且正在存取 Windows 掛載目錄 (NTFS)
+ */
+function is_wsl_ntfs() {
+    if (strtoupper(substr(PHP_OS, 0, 3)) !== 'LIN') return false;
+    if (file_exists('/proc/version')) {
+        $version = file_get_contents('/proc/version');
+        if (strpos(strtolower($version), 'microsoft') !== false) {
+            if (strpos(__DIR__, '/mnt/') === 0) return true;
+        }
+    }
+    return false;
+}
+
 // --- 處理 AJAX 請求 ---
 if (isset($_GET['action'])) {
     header('Content-Type: application/json');
@@ -109,6 +127,11 @@ if (isset($_GET['action'])) {
             $response['success'] = true; $response['message'] = _t('win_no_perms');
             echo json_encode($response); exit;
         }
+        if (is_wsl_ntfs()) {
+            $response['success'] = true; $response['message'] = _t('wsl_ntfs_perms');
+            $response['is_wsl_ntfs'] = true;
+            echo json_encode($response); exit;
+        }
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
         $invalidCount = 0;
         foreach ($iterator as $item) {
@@ -123,7 +146,10 @@ if (isset($_GET['action'])) {
         echo json_encode($response); exit;
 
     } elseif ($_GET['action'] === 'fix_system_permissions') {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') { $response['message'] = "Not supported on Windows."; echo json_encode($response); exit; }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' || is_wsl_ntfs()) { 
+            $response['message'] = "Not supported or not needed in this environment."; 
+            echo json_encode($response); exit; 
+        }
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
         $fixed = 0; $failed = 0;
         foreach ($iterator as $item) {
@@ -219,7 +245,7 @@ if (isset($_GET['action'])) {
                     <!-- OS Info -->
                     <div class="col-md-3">
                         <label class="form-label"><?php echo _t('os_info'); ?></label>
-                        <input type="text" class="form-control" value="<?php echo php_uname('s'); ?>" readonly title="<?php echo php_uname('r'); ?>">
+                        <input type="text" class="form-control" value="<?php echo get_detailed_os_info(); ?>" readonly title="<?php echo php_uname('a'); ?>">
                     </div>
                     
                     <?php if (version_compare(phpversion(), '7.0.0', '<')): ?>
@@ -392,8 +418,12 @@ if (isset($_GET['action'])) {
         const area = document.getElementById('perm_status_area');
         area.innerHTML = '⏳...';
         fetch('?action=check_system_permissions', { method: 'POST' }).then(r => r.json()).then(data => {
-            if (data.success) area.innerHTML = `<div class="text-success fw-bold">✅ ${data.message}</div>`;
-            else area.innerHTML = `<div class="alert alert-warning mb-2">⚠️ ${data.message}</div><button type="button" class="btn btn-warning btn-sm" onclick="fixSystemPermissions()"><?php echo _t('btn_fix_perms'); ?></button>`;
+            if (data.success) {
+                area.innerHTML = `<div class="text-success fw-bold">✅ ${data.message}</div>`;
+                // If it's WSL NTFS, we don't need a fix button even if it was successful (it's a bypass)
+            } else {
+                area.innerHTML = `<div class="alert alert-warning mb-2">⚠️ ${data.message}</div><button type="button" class="btn btn-warning btn-sm" onclick="fixSystemPermissions()"><?php echo _t('btn_fix_perms'); ?></button>`;
+            }
         }).catch(() => area.innerHTML = `<span class="text-danger">${ajaxError}</span>`);
     }
 

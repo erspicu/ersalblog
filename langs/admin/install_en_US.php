@@ -72,6 +72,7 @@ return [
     'file_ok' => 'Check passed! All required directories are writable.',
     'file_failed' => 'Permission check failed:',
     'win_no_perms' => 'Windows environment usually does not require standard Unix permission bit checks.',
+    'wsl_ntfs_perms' => 'Detected that you are accessing Windows mounted directory (NTFS) in WSL2. In this environment, Linux permission bits (chmod) may not behave as expected, but PHP usually already has execution permissions. Permission fixing will be skipped.',
     'fix_finished_errors' => 'Fix finished, but %d items failed. Please check file ownership or run chmod manually.',
     'fix_success' => 'Successfully fixed file and directory permissions.',
     'ajax_error' => 'Unable to execute request. Please check network or server status.',
