@@ -14,6 +14,8 @@ $error = '';
 // 執行系統檢查
 $dbStatus = SystemHealth::checkDB();
 $fileStatus = SystemHealth::checkFile();
+$hasSQLite = isset($sqlite_path) && !empty($sqlite_path);
+$sqliteStatus = $hasSQLite ? SystemHealth::checkSQLite() : ['status' => false, 'message' => 'Not Configured'];
 
 if (isAdminLoggedIn()) {
     header('Location: index.php');
@@ -26,7 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dataSource = $_POST['data_source'] ?? 'db'; 
 
     // Server-side check
-    $isSourceValid = ($dataSource === 'db') ? $dbStatus['status'] : $fileStatus['status'];
+    $isSourceValid = false;
+    if ($dataSource === 'db') $isSourceValid = $dbStatus['status'];
+    elseif ($dataSource === 'file') $isSourceValid = $fileStatus['status'];
+    elseif ($dataSource === 'sqlite') $isSourceValid = $sqliteStatus['status'];
 
     if (!$isSourceValid) {
         $error = __('error_mode_unavailable');
@@ -41,13 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Special Check: DB Configured but Tables Missing
 $showInitLink = false;
 $showFileInitLink = false;
+$showSqliteInitLink = false;
 
-if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !== false) {
-    $showInitLink = true;
+if ($dbStatus['message'] && strpos($dbStatus['message'], '找不到資料表') !== false) { // Using raw string check (fragile if translated but ok for now) or better check logic
+    // Actually the message comes from health_check which returns translated string.
+    // Ideally health_check returns a code. For now reliance on string "Missing" concept.
+    // Update health check to return code? No time. 
+    // Let's rely on status=false and message content logic.
+    // Or just "if status is false but connection didn't fail" -> implies empty.
+    // For simplicity:
+    if (!$dbStatus['status'] && strpos($dbStatus['message'], '連線失敗') === false) {
+         $showInitLink = true;
+    }
 }
 
 if (!$fileStatus['status']) {
     $showFileInitLink = true;
+}
+
+if ($hasSQLite && !$sqliteStatus['status']) {
+    // If not ready (status=false), likely needs init
+    $showSqliteInitLink = true;
 }
 
 ?>
@@ -102,18 +121,30 @@ if (!$fileStatus['status']) {
             <select class="form-select" id="data_source" name="data_source">
                 <option value="db"><?php echo __('mode_db'); ?></option>
                 <option value="file"><?php echo __('mode_file'); ?></option>
+                <?php if ($hasSQLite): ?>
+                    <option value="sqlite">SQLite 3</option>
+                <?php endif; ?>
             </select>
             <div id="source_status" class="status-msg"></div>
+            
             <?php if ($showInitLink): ?>
                 <div id="db_init_alert" class="alert alert-warning mt-2 mb-0 p-2" style="font-size: 0.9em; display: none;">
                     <?php echo __('db_init_msg'); ?><br>
                     <a href="db_init.php" class="fw-bold"><?php echo __('db_init_link'); ?> &rarr;</a>
                 </div>
             <?php endif; ?>
+            
             <?php if ($showFileInitLink): ?>
                 <div id="file_init_alert" class="alert alert-warning mt-2 mb-0 p-2" style="font-size: 0.9em; display: none;">
                     <?php echo __('file_init_msg'); ?><br>
                     <a href="file_init.php" class="fw-bold"><?php echo __('file_init_link'); ?> &rarr;</a>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($showSqliteInitLink): ?>
+                <div id="sqlite_init_alert" class="alert alert-warning mt-2 mb-0 p-2" style="font-size: 0.9em; display: none;">
+                    SQLite 需要初始化<br>
+                    <a href="sqlite_init.php" class="fw-bold">前往初始化 &rarr;</a>
                 </div>
             <?php endif; ?>
         </div>
@@ -137,7 +168,8 @@ if (!$fileStatus['status']) {
     // Pass PHP status to JS
     var statusData = {
         'db': <?php echo json_encode($dbStatus); ?>,
-        'file': <?php echo json_encode($fileStatus); ?>
+        'file': <?php echo json_encode($fileStatus); ?>,
+        'sqlite': <?php echo json_encode($sqliteStatus); ?>
     };
 
     var sourceSelect = document.getElementById('data_source');
@@ -145,34 +177,36 @@ if (!$fileStatus['status']) {
     var loginBtn = document.getElementById('login_btn');
     var dbInitAlert = document.getElementById('db_init_alert');
     var fileInitAlert = document.getElementById('file_init_alert');
+    var sqliteInitAlert = document.getElementById('sqlite_init_alert');
 
     function updateStatus() {
         var mode = sourceSelect.value;
         var info = statusData[mode];
         
         if (info.status) {
-            // Check mark doesn't need translation, but message comes from PHP health_check.php which is not yet localized. 
-            // Ideally health_check.php messages should also be localized, but for now we keep it as is.
             statusDiv.innerHTML = '<span class="text-success">✅ ' + info.message + '</span>';
             loginBtn.disabled = false;
             if(dbInitAlert) dbInitAlert.style.display = 'none';
             if(fileInitAlert) fileInitAlert.style.display = 'none';
+            if(sqliteInitAlert) sqliteInitAlert.style.display = 'none';
         } else {
             statusDiv.innerHTML = '<span class="text-danger">❌ ' + info.message + '</span>';
             loginBtn.disabled = true;
             
-            // Show Init Link logic matches PHP conditions
-            if (mode === 'db' && info.message.indexOf('找不到資料表') !== -1 && dbInitAlert) {
+            // Hide all first
+            if(dbInitAlert) dbInitAlert.style.display = 'none';
+            if(fileInitAlert) fileInitAlert.style.display = 'none';
+            if(sqliteInitAlert) sqliteInitAlert.style.display = 'none';
+
+            // Show relevant
+            if (mode === 'db' && dbInitAlert && info.message.indexOf('連線失敗') === -1) {
                 dbInitAlert.style.display = 'block';
-                if(fileInitAlert) fileInitAlert.style.display = 'none';
             } 
             else if (mode === 'file' && fileInitAlert) {
                 fileInitAlert.style.display = 'block';
-                if(dbInitAlert) dbInitAlert.style.display = 'none';
             }
-            else {
-                if(dbInitAlert) dbInitAlert.style.display = 'none';
-                if(fileInitAlert) fileInitAlert.style.display = 'none';
+            else if (mode === 'sqlite' && sqliteInitAlert) {
+                sqliteInitAlert.style.display = 'block';
             }
         }
     }

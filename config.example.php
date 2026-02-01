@@ -1,4 +1,6 @@
 <?php
+$sqlite_path = "blog.sqlite3"; // SQLite 資料庫檔案名稱 (若使用 SQLite 模式)
+
 $dbConfig = [
     // --- 資料庫連線設定 ---
     'host'     => 'localhost',      // 資料庫主機 (通常是 localhost)

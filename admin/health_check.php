@@ -44,6 +44,48 @@ class SystemHealth {
         return $result;
     }
 
+    public static function checkSQLite() {
+        global $sqlite_path;
+        $result = [
+            'status' => false,
+            'message' => ''
+        ];
+
+        if (!isset($sqlite_path) || empty($sqlite_path)) {
+            $result['message'] = "Config \$sqlite_path not set";
+            return $result;
+        }
+
+        $target = __DIR__ . '/../' . $sqlite_path;
+
+        if (!file_exists($target)) {
+            $result['message'] = "SQLite file missing";
+            return $result;
+        }
+
+        try {
+            $pdo = new PDO("sqlite:" . $target, null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]);
+
+            // Check table
+            $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='blog_posts'");
+            if ($stmt->fetch()) {
+                 $countStmt = $pdo->query("SELECT COUNT(*) FROM blog_posts");
+                 $count = $countStmt->fetchColumn();
+                 $result['status'] = true;
+                 $result['message'] = "SQLite Ready ($count posts)";
+            } else {
+                 $result['message'] = "SQLite Tables Missing";
+            }
+        } catch (Exception $e) {
+            $result['message'] = "SQLite Error: " . $e->getMessage();
+        }
+
+        return $result;
+    }
+
     public static function checkFile() {
         $baseDir = dirname(__DIR__);
         $result = [

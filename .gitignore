@@ -58,3 +58,8 @@ test/
 # IDE Settings
 .vscode/
 .idea/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db

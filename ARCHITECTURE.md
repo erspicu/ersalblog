@@ -10,6 +10,7 @@ This project is a photography blog system featuring a hybrid mode of **Static Si
 The project does not rely on a traditional database but utilizes the file system and plain text files:
 *   **Post Index**: Located at `contents/index_post.txt` (Git only tracks `readme.md`), using Pipe (`|`) separators to record publication time, filename, title, tags, and description.
 *   **Category System**: Located at `category/` (Git only tracks `readme.md`), utilizing directory structures to represent categories, containing empty files with names matching post filenames as indices.
+*   **SQLite 3 Database**: Supported as a flexible relational storage option via $sqlite_path in config.php, maintaining same schema as MySQL.
 *   **Original Content**: Located at `contents/post_files/`, storing the original HTML fragments of the articles.
 
 ### 1.2 Hybrid Rendering Mode
@@ -79,7 +80,7 @@ Listed below are key directories and file rules in the Git repository:
 *   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`, ensuring a lightweight repository without sensitive data.
 
 ---
-**Document Maintenance**: This document reflects the project architecture as of January 2026.
+**Document Maintenance**: This document reflects the project architecture as of February 2026.
 
 ---
 
@@ -95,6 +96,7 @@ Listed below are key directories and file rules in the Git repository:
 專案不依賴傳統資料庫，而是使用檔案系統與純文字檔案：
 *   **文章索引**: 位於 `contents/index_post.txt` (Git 僅追蹤 `readme.md`)，採用 Pipe (`|`) 分隔，記錄發布時間、檔名、標題、標籤及摘要。
 *   **分類系統**: 位於 `category/` (Git 僅追蹤 `readme.md`)，利用資料夾結構代表分類，內含對應文章檔名的空檔案作為索引。
+*   **SQLite 3 資料庫**: 支援透過 config.php 中的 $sqlite_path 啟用輕量化關聯式儲存，與 MySQL 共享相同的資料表架構。
 *   **原始內容**: 位於 `contents/post_files/`，儲存文章的原始 HTML 片段。
 
 ### 1.2 混合渲染模式 (Hybrid Rendering)
@@ -164,4 +166,4 @@ Listed below are key directories and file rules in the Git repository:
 *   **版本控制**: 透過 `.gitignore` 嚴格區分「程式碼」(Code) 與「內容/生成物」(Content/Artifacts)，確保儲存庫輕量且無敏感資料。
 
 ---
-**文件維護**: 本文件反映 2026 年 1 月之專案架構。
+**文件維護**: 本文件反映 2026 年 2 月之專案架構。

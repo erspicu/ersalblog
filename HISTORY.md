@@ -548,3 +548,33 @@ Recorded the development journey and original Prompt commands of this project th
 
 
 
+
+---
+
+## 2026-02-01
+
+### [12:30] SQLite 3 Database Support and Interface Optimization
+- **Task**: Implement SQLite 3 support as an alternative to MySQL and the file system, and fix UI inconsistencies.
+- **Implementation**:
+    - Added SQLite support to DataManager in dmin/data_provider.php.
+    - Created dmin/sqlite_init.php for database initialization and data migration (from file system or MySQL).
+    - Created pi_sqlitebase.php for frontend SQLite data access.
+    - Updated dmin/login.php and dmin/health_check.php to support SQLite status detection and mode selection.
+    - Fixed GROUP_CONCAT syntax compatibility issues between MySQL and SQLite.
+    - Optimized Admin UI (Dashboard and Sidebar) to correctly identify and display SQLite connection details and file information.
+    - Updated .gitignore and config.example.php for SQLite integration.
+
+---
+
+## 2026-02-01 (繁體中文)
+
+### [12:30] SQLite 3 資料庫支援與介面顯示優化
+- **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
+- **實作**:
+    - 在 dmin/data_provider.php 的 DataManager 中新增 SQLite 支援。
+    - 建立 dmin/sqlite_init.php 負責資料庫初始化與資料遷移（支援從檔案或 MySQL 匯入）。
+    - 建立 pi_sqlitebase.php 供前端存取 SQLite 資料。
+    - 更新 dmin/login.php 與 dmin/health_check.php 支援 SQLite 狀態偵測與模式切換。
+    - 修正 MySQL 與 SQLite 間 GROUP_CONCAT 的語法相容性問題。
+    - 優化後台介面（儀表板與側邊欄），使其能正確辨識並顯示 SQLite 連線詳情與檔案資訊。
+    - 更新 .gitignore 與 config.example.php 以整合 SQLite 設定。

@@ -59,7 +59,7 @@ function initFileSystem($pdo = null, $importDB = false) {
         // --- Export from DB ---
         
         // Fetch All Posts
-        $sql = "SELECT p.*, GROUP_CONCAT(c.category_name SEPARATOR ',') as cats 
+        $sql = "SELECT p.*, GROUP_CONCAT(c.category_name) as cats 
                 FROM blog_posts p
                 LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
                 LEFT JOIN blog_categories c ON pc.category_id = c.id

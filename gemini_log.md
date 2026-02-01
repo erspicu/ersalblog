@@ -100,3 +100,23 @@
 
 - [2026-02-01 02:00:00] (UTC+8) 把前面討論的問題和回覆詳細整理出一個檔案供日後參考.
     回答內容摘要：已將所有未來功能擴充的討論、優缺點分析與優先級建議整理至獨立檔案 ROADMAP.md 中，供長期開發參考。
+
+- [2026-02-01 02:30:00] (UTC+8) 執行巨集指令：「更新」。
+    回答內容摘要：更新了 HISTORY.md 與 version_config.php 以紀錄戰略藍圖 ROADMAP.md 的建立，同步版本號至 v2026.02.01.02.30，並成功推送至 GitHub。
+﻿
+- [2026-02-01 11:23:46] (UTC+8) 幫我git忽略設定檔新增 排除 .sqlite .db .sqlite3 等sqlite可能常見使用的副檔名.﻿
+- [2026-02-01 11:27:00] (UTC+8) 更新 config.example.php，新增 \ 設定範例以同步 config.php 的結構。﻿
+- [2026-02-01 11:55:00] (UTC+8) 實作後台 SQLite3 支援：
+  - 建立 admin/sqlite_init.php 初始化與匯入腳本。
+  - 建立 api_sqlitebase.php。
+  - 更新 admin/auth.php 支援動態 DB 連線。
+  - 更新 admin/health_check.php 新增 SQLite 檢查。
+  - 更新 admin/login.php 新增 SQLite 登入選項。
+  - 更新 admin/data_provider.php 兼容 SQLite 語法 (移除 NOW(), INSERT IGNORE)。﻿
+- [2026-02-01 12:05:00] (UTC+8) 修正 SQLite 下文章列表 500 錯誤：移除 GROUP_CONCAT 中的 SEPARATOR 關鍵字，改用預設逗號分隔以相容 MySQL 與 SQLite。﻿
+- [2026-02-01 12:10:00] (UTC+8) 全面檢查並修正 GROUP_CONCAT 語法：
+  - 修正 api_sqlitebase.php。
+  - 修正 admin/file_init.php (確保 SQLite 轉檔案模式相容性)。﻿
+- [2026-02-01 12:20:00] (UTC+8) 修正後台介面顯示：
+  - 更新 admin/index.php 儀表板，支援顯示 SQLite 檔案大小與詳細連線資訊。
+  - 更新 admin/posts.php, admin/categories.php, admin/tool_migrate.php 的 Sidebar，正確顯示 SQLite 模式標籤。

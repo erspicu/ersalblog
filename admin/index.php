@@ -4,7 +4,7 @@ require_once 'data_provider.php'; // Include DataManager
 requireLogin();
 
 $dataManager = new DataManager();
-$source = $dataManager->getSource(); // 'db' or 'file'
+$source = $dataManager->getSource(); // 'db', 'file', or 'sqlite'
 
 // 收集系統資訊
 $phpVersion = phpversion();
@@ -12,18 +12,19 @@ $phpVersion = phpversion();
 // 1. 文章總數
 $postCount = $dataManager->getPostCount();
 
-// 2. DB 大小 & 連線資訊 (Only for DB mode)
+// 2. DB 大小 & 連線資訊 (For DB / SQLite)
 $dbSize = 'N/A';
 $dbHost = 'N/A';
 $serverVersion = 'N/A';
 $serverInfo = '';
 $dbType = 'File System';
+$dbName = '';
 
 if ($source === 'db') {
     $dbHost = $dbConfig['host'];
     $dbName = $dbConfig['dbname'];
     
-    // DB Size
+    // DB Size (MySQL)
     try {
         $stmt = $pdo->prepare("SELECT round(SUM(data_length + index_length) / 1024 / 1024, 2) 
                                FROM information_schema.TABLES 
@@ -43,6 +44,24 @@ if ($source === 'db') {
     } catch (Exception $e) {
         $serverVersion = "Unknown";
     }
+} elseif ($source === 'sqlite') {
+    $dbType = 'SQLite';
+    // DB Size (File Size)
+    // $sqlite_path is available from config via auth.php
+    $target = __DIR__ . '/../' . $sqlite_path;
+    $dbName = basename($sqlite_path);
+    if (file_exists($target)) {
+        $dbSize = round(filesize($target) / 1024 / 1024, 2);
+    } else {
+        $dbSize = 0;
+    }
+
+    // Version
+    try {
+        $serverVersion = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
+    } catch (Exception $e) {
+        $serverVersion = "Unknown";
+    }
 }
 
 // 3. 磁碟空間 (GB)
@@ -53,6 +72,17 @@ $diskTotalGB = $diskTotal ? round($diskTotal / 1024 / 1024 / 1024, 2) : 'N/A';
 
 // 4. 最新文章
 $recentPosts = $dataManager->getRecentPosts(5);
+
+// Sidebar Logic
+$badgeClass = 'bg-warning text-dark';
+$modeText = __('mode_file_short');
+if ($source === 'db') {
+    $badgeClass = 'bg-success';
+    $modeText = __('mode_db_short');
+} elseif ($source === 'sqlite') {
+    $badgeClass = 'bg-info text-dark';
+    $modeText = 'SQLite';
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
@@ -80,8 +110,8 @@ $recentPosts = $dataManager->getRecentPosts(5);
         </a>
         <hr>
         <div class="text-center mb-3">
-            <span class="badge <?php echo ($source === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                <?php echo __('mode_label'); ?>: <?php echo ($source === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
+            <span class="badge <?php echo $badgeClass; ?>">
+                <?php echo __('mode_label'); ?>: <?php echo $modeText; ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -147,8 +177,8 @@ $recentPosts = $dataManager->getRecentPosts(5);
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0"><?php echo __('stat_db_size'); ?></h6>
-                                <h2 class="my-2"><?php echo $dbSize; ?> <span class="fs-6"><?php echo ($source === 'db') ? 'MB' : ''; ?></span></h2>
-                                <small><?php echo ($source === 'db') ? 'DB: '.htmlspecialchars($dbName) : __('not_applicable'); ?></small>
+                                <h2 class="my-2"><?php echo $dbSize; ?> <span class="fs-6"><?php echo ($source === 'db' || $source === 'sqlite') ? 'MB' : ''; ?></span></h2>
+                                <small><?php echo ($source === 'db' || $source === 'sqlite') ? 'DB: '.htmlspecialchars($dbName) : __('not_applicable'); ?></small>
                             </div>
                             <span class="fs-1">💾</span>
                         </div>
@@ -184,6 +214,11 @@ $recentPosts = $dataManager->getRecentPosts(5);
                                     <small>Type: <?php echo $dbType; ?></small><br>
                                     <small title="<?php echo htmlspecialchars($serverInfo); ?>">Ver: <?php echo htmlspecialchars($serverVersion); ?></small><br>
                                     <small>Driver: PDO MySQL</small>
+                                <?php elseif ($source === 'sqlite'): ?>
+                                    <p class="my-2 fw-bold" style="font-size: 0.9em;"><?php echo htmlspecialchars($dbName); ?></p>
+                                    <small>Type: <?php echo $dbType; ?></small><br>
+                                    <small>Ver: <?php echo htmlspecialchars($serverVersion); ?></small><br>
+                                    <small>Driver: PDO SQLite</small>
                                 <?php else: ?>
                                     <p class="my-2 fw-bold">Mode: File System</p>
                                     <small>Path: contents/</small><br>

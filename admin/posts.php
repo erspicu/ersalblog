@@ -59,8 +59,8 @@ function truncate($text, $limit = 60) {
         </a>
         <hr>
         <div class="text-center mb-3">
-            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
+            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : (($dataManager->getSource() === 'sqlite') ? 'bg-info text-dark' : 'bg-warning text-dark'); ?>">
+                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : (($dataManager->getSource() === 'sqlite') ? 'SQLite' : __('mode_file_short')); ?>
             </span>
         </div>
         <ul class="nav nav-pills flex-column mb-auto">

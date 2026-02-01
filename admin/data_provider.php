@@ -6,14 +6,16 @@ class DataManager {
     private $source;
     private $pdo;
     private $baseDir;
+    private $isSQLite = false;
 
     public function __construct() {
         $this->source = getAdminSource();
         $this->baseDir = dirname(__DIR__); // Project root
         
-        if ($this->source === 'db') {
-            global $pdo; // Use the global PDO connection from auth.php
+        if ($this->source === 'db' || $this->source === 'sqlite') {
+            global $pdo; 
             $this->pdo = $pdo;
+            $this->isSQLite = ($this->source === 'sqlite');
         }
     }
 
@@ -24,7 +26,7 @@ class DataManager {
     // --- Statistics ---
 
     public function getPostCount() {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             $stmt = $this->pdo->query("SELECT COUNT(*) FROM blog_posts");
             return $stmt->fetchColumn();
         } else {
@@ -36,7 +38,7 @@ class DataManager {
     }
 
     public function getRecentPosts($limit = 5) {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             $stmt = $this->pdo->prepare("SELECT post_title, post_date FROM blog_posts ORDER BY post_date DESC LIMIT ?");
             // PDO::PARAM_INT is important for LIMIT
             $stmt->bindValue(1, $limit, PDO::PARAM_INT); 
@@ -58,9 +60,9 @@ class DataManager {
     // --- Posts Management ---
 
     public function getAllPosts() {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             $sql = "SELECT p.id, p.post_date, p.post_title, p.post_filename, p.post_tags, p.post_description, 
-                           GROUP_CONCAT(c.category_name SEPARATOR ',') as post_categories
+                           GROUP_CONCAT(c.category_name) as post_categories
                     FROM blog_posts p
                     LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
                     LEFT JOIN blog_categories c ON pc.category_id = c.id
@@ -102,8 +104,8 @@ class DataManager {
     }
 
     public function getPost($id) {
-        if ($this->source === 'db') {
-            $sql = "SELECT p.*, GROUP_CONCAT(c.category_name SEPARATOR ',') as post_categories
+        if ($this->source === 'db' || $this->source === 'sqlite') {
+            $sql = "SELECT p.*, GROUP_CONCAT(c.category_name) as post_categories
                     FROM blog_posts p
                     LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
                     LEFT JOIN blog_categories c ON pc.category_id = c.id
@@ -143,20 +145,21 @@ class DataManager {
     public function savePost($data) {
         $id = $data['id'] ?? null;
         
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             try {
                 $this->pdo->beginTransaction();
+                $now = date('Y-m-d H:i:s');
 
                 if ($id) {
                     // Update
                     $sql = "UPDATE blog_posts SET 
                             post_title = ?, post_filename = ?, post_date = ?, post_content = ?, 
-                            post_tags = ?, post_description = ?, updated_at = NOW()
+                            post_tags = ?, post_description = ?, updated_at = ?
                             WHERE id = ?";
                     $stmt = $this->pdo->prepare($sql);
                     $stmt->execute([
                         $data['title'], $data['filename'], $data['date'], $data['content'],
-                        $data['tags'], $data['desc'], $id
+                        $data['tags'], $data['desc'], $now, $id
                     ]);
                     $postId = $id;
                 } else {
@@ -170,11 +173,11 @@ class DataManager {
 
                     $sql = "INSERT INTO blog_posts 
                             (post_title, post_filename, post_date, post_content, post_tags, post_description, created_at, updated_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $this->pdo->prepare($sql);
                     $stmt->execute([
                         $data['title'], $data['filename'], $data['date'], $data['content'],
-                        $data['tags'], $data['desc']
+                        $data['tags'], $data['desc'], $now, $now
                     ]);
                     $postId = $this->pdo->lastInsertId();
                 }
@@ -196,14 +199,22 @@ class DataManager {
                     $catId = $checkCat->fetchColumn();
 
                     if (!$catId) {
-                        $insCat = $this->pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)");
-                        $insCat->execute([$catName]);
-                        $catId = $this->pdo->lastInsertId();
+                        try {
+                            $insCat = $this->pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)");
+                            $insCat->execute([$catName]);
+                            $catId = $this->pdo->lastInsertId();
+                        } catch (Exception $e) {
+                            // Race condition or constraint violation, try select again
+                            $checkCat->execute([$catName]);
+                            $catId = $checkCat->fetchColumn();
+                        }
                     }
 
                     // Insert Pivot
-                    $insPivot = $this->pdo->prepare("INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)");
-                    $insPivot->execute([$postId, $catId]);
+                    if ($catId) {
+                        $insPivot = $this->pdo->prepare("INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)");
+                        $insPivot->execute([$postId, $catId]);
+                    }
                 }
 
                 $this->pdo->commit();
@@ -272,7 +283,7 @@ class DataManager {
     }
 
     public function deletePost($id) {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             $stmt = $this->pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
             $stmt->execute([$id]);
         } else {
@@ -307,13 +318,19 @@ class DataManager {
         $name = trim($name);
         if ($name === '') return false;
 
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             try {
-                $stmt = $this->pdo->prepare("INSERT IGNORE INTO blog_categories (category_name) VALUES (?)");
+                // Compatible "INSERT IGNORE" logic
+                // Try insert, catch exception if unique constraint fails
+                $stmt = $this->pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)");
                 $stmt->execute([$name]);
                 return $stmt->rowCount() > 0;
             } catch (Exception $e) {
-                return false;
+                // If using MySQL, maybe error 1062. SQLite error 19.
+                // If it fails, it likely exists, so return false (as no row inserted)
+                // But functionally we might want to return true if it exists? 
+                // The interface expects boolean "created or not". 
+                return false; 
             }
         } else {
             // File System
@@ -326,7 +343,7 @@ class DataManager {
     }
 
     public function getAllCategories() {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             $catStats = [];
             // Use LEFT JOIN to get all categories even with 0 posts
             $sql = "SELECT c.category_name, COUNT(pc.post_id) as cnt 
@@ -369,7 +386,7 @@ class DataManager {
     }
 
     public function renameCategory($oldName, $newName) {
-         if ($this->source === 'db') {
+         if ($this->source === 'db' || $this->source === 'sqlite') {
             // 1. Update Category Table
             $stmt = $this->pdo->prepare("UPDATE blog_categories SET category_name = ? WHERE category_name = ?");
             $stmt->execute([$newName, $oldName]);
@@ -386,7 +403,7 @@ class DataManager {
     }
 
     public function deleteCategory($name) {
-        if ($this->source === 'db') {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
             // 1. Get ID
             $stmt = $this->pdo->prepare("SELECT id FROM blog_categories WHERE category_name = ?");
             $stmt->execute([$name]);
@@ -394,6 +411,16 @@ class DataManager {
 
             if ($catId) {
                 // 2. Delete from Category Table (Cascade deletes from pivot)
+                // Note: SQLite FK constraint support needs to be enabled via "PRAGMA foreign_keys = ON" 
+                // However, standard DELETE works. 
+                // If cascade is defined in CREATE TABLE, it works if enabled.
+                // Our sqlite_init.php defined ON DELETE CASCADE.
+                // But PDO defaults might not enable foreign_keys pragma by default in some versions.
+                // For safety, we can rely on DB definition.
+                if ($this->isSQLite) {
+                     $this->pdo->exec("PRAGMA foreign_keys = ON");
+                }
+                
                 $del = $this->pdo->prepare("DELETE FROM blog_categories WHERE id = ?");
                 $del->execute([$catId]);
                 return true;
