@@ -130,9 +130,14 @@ if ($source === 'db') {
                     <?php echo __('nav_categories'); ?>
                 </a>
             </li>
-            <li>
+            <li class="nav-item">
                 <a href="tool_migrate.php">
                     <?php echo __('nav_import'); ?>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="tool_backup.php">
+                    <?php echo __('nav_backup'); ?>
                 </a>
             </li>
         </ul>

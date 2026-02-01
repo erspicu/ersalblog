@@ -270,12 +270,20 @@ Recorded the development journey and original Prompt commands of this project th
     - **Task**: Establish a dedicated directory for backups.
     - **Implementation**:
         - Created `/backup` directory and added a bilingual `readme.md`.
-        - Updated `.gitignore` to exclude `/backup/*.zip`.
-    
-    ---
-    
-    ## 2026-02-01 (繁體中文)
-    
+            - Updated `.gitignore` to exclude `/backup/*.zip`.
+        
+        ### [15:15] Backup Restore & Upload
+        - **Task**: Enhance backup tool with restore and upload capabilities.
+        - **Implementation**:
+            - Implemented system restoration from local ZIP backups (overwrites contents).
+            - Added file upload functionality for importing external backups, with file size limit checks and hints.
+            - Integrated SweetAlert2 for operation confirmations (Delete, Restore, Create) and status messages (Success/Error).
+            - Added loading overlays for time-consuming operations (Upload, Create, Restore).
+            - Updated i18n support for all new backup features.
+        
+        ---
+        
+        ## 2026-02-01 (繁體中文)    
     ### [12:30] SQLite 3 資料庫支援與介面顯示優化
     - **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
     - **實作**:
@@ -305,6 +313,15 @@ Recorded the development journey and original Prompt commands of this project th
     ### [14:45] 備份基礎建設
     - **任務**: 建立專用的備份目錄。
     - **實作**:
-        - 建立 `/backup` 目錄並新增雙語 `readme.md`。
-        - 更新 `.gitignore` 排除 `/backup/*.zip` 檔案。
-    
+            - 建立 `/backup` 目錄並新增雙語 `readme.md`。
+            - 更新 `.gitignore` 排除 `/backup/*.zip` 檔案。
+        
+        ### [15:15] 備份還原與上傳
+        - **任務**: 強化備份工具，新增還原與上傳功能。
+        - **實作**:
+            - 實作從本地 ZIP 備份檔還原系統的功能 (覆蓋內容)。
+            - 新增檔案上傳功能以匯入外部備份，並加入檔案大小限制檢查與提示。
+            - 整合 SweetAlert2 處理操作確認 (刪除、還原、建立) 與狀態訊息 (成功/失敗)。
+            - 加入 Loading 遮罩以處理耗時操作 (上傳、建立、還原) 的等待狀態。
+            - 更新所有新備份功能的 i18n 支援。
+        

@@ -76,6 +76,7 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
             <li class="nav-item"><a href="posts.php"><?php echo __('nav_posts'); ?></a></li>
             <li class="nav-item"><a href="categories.php"><?php echo __('nav_categories'); ?></a></li>
             <li class="nav-item"><a href="tool_migrate.php" class="active"><?php echo __('nav_import'); ?></a></li>
+            <li class="nav-item"><a href="tool_backup.php"><?php echo __('nav_backup'); ?></a></li>
         </ul>
         <hr>
         <div class="dropdown">

@@ -84,6 +84,11 @@ function truncate($text, $limit = 60) {
                     <?php echo __('nav_import'); ?>
                 </a>
             </li>
+            <li>
+                <a href="tool_backup.php">
+                    <?php echo __('nav_backup'); ?>
+                </a>
+            </li>
         </ul>
         <hr>
         <div class="dropdown">

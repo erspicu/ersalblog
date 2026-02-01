@@ -1,6 +1,6 @@
 <?php
 return [
-    'version' => 'v2026.02.01.14.45',
+    'version' => 'v2026.02.01.15.15',
     'cli_version' => '0.26.0',
     'model_name' => 'gemini-3-flash-preview'
 ];
