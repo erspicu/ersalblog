@@ -62,4 +62,8 @@ test/
 # Database files
 *.sqlite
 *.sqlite3
+*.sqlite3-journal
 *.db
+
+# Backup artifacts
+/backup/*.zip

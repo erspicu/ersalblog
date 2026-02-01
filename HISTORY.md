@@ -264,34 +264,47 @@ Recorded the development journey and original Prompt commands of this project th
 - **Implementation**:
     - Updated `langs/admin/zh_TW.php` and `en_US.php` with missing keys for Migration Tool, SQLite Init, and Dashboard.
     - Replaced hardcoded text in `admin/tool_migrate.php`, `admin/sqlite_init.php`, `admin/index.php`, and `admin/health_check.php`.
-    - Ensured full bilingual support across all new features (SQLite, Migration).
-
----
-
-## 2026-02-01 (繁體中文)
-
-### [12:30] SQLite 3 資料庫支援與介面顯示優化
-- **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
-- **實作**:
-    - 在 `admin/data_provider.php` 的 `DataManager` 中新增 SQLite 支援。
-    - 建立 `admin/sqlite_init.php` 負責資料庫初始化與資料遷移（支援從檔案或 MySQL 匯入）。
-    - 建立 `api_sqlitebase.php` 供前端存取 SQLite 資料。
-    - 更新 `admin/login.php` 與 `admin/health_check.php` 支援 SQLite 狀態偵測與模式切換。
-    - 修正 MySQL 與 SQLite 間 `GROUP_CONCAT` 的語法相容性問題。
-    - 優化後台介面（儀表板與側邊欄），使其能正確辨識並顯示 SQLite 連線詳情與檔案資訊。
-    - 更新 `.gitignore` 與 `config.example.php` 以整合 SQLite 設定。
-
-### [13:45] 全方位資料遷移系統
-- **任務**: 實作支援檔案系統、MySQL 與 SQLite 三方互轉的強大遷移系統。
-- **實作**:
-    - 強化 `admin/tool_migrate.php`，在所有模式下皆支援匯入 (Pull) 與匯出 (Push) 操作。
-    - 實作 `runDBMigration` 函數，處理資料庫對資料庫 (MySQL <-> SQLite) 的直接資料傳輸。
-    - 更新後台介面，根據當前模式與設定動態顯示可用的遷移目標。
-    - 在 `auth.php` 與 `health_check.php` 中加入嚴格的 PDO 擴充檢查，防止因環境不支援導致的致命錯誤。
-
-### [14:05] 國際化 (i18n) 完整支援
-- **任務**: 補齊新模組缺失的翻譯。
-- **實作**:
-    - 更新 `langs/admin/zh_TW.php` 與 `en_US.php`，補上遷移工具、SQLite 初始化與儀表板相關的翻譯鍵值。
-    - 替換 `admin/tool_migrate.php`、`admin/sqlite_init.php`、`admin/index.php` 與 `admin/health_check.php` 中的硬編碼文字。
-    - 確保所有新功能 (SQLite, Migration) 皆支援完整雙語顯示。
+        - Ensured full bilingual support across all new features (SQLite, Migration).
+    
+    ### [14:45] Backup Infrastructure
+    - **Task**: Establish a dedicated directory for backups.
+    - **Implementation**:
+        - Created `/backup` directory and added a bilingual `readme.md`.
+        - Updated `.gitignore` to exclude `/backup/*.zip`.
+    
+    ---
+    
+    ## 2026-02-01 (繁體中文)
+    
+    ### [12:30] SQLite 3 資料庫支援與介面顯示優化
+    - **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
+    - **實作**:
+        - 在 `admin/data_provider.php` 的 `DataManager` 中新增 SQLite 支援。
+        - 建立 `admin/sqlite_init.php` 負責資料庫初始化與資料遷移（支援從檔案或 MySQL 匯入）。
+        - 建立 `api_sqlitebase.php` 供前端存取 SQLite 資料。
+        - 更新 `admin/login.php` 與 `admin/health_check.php` 支援 SQLite 狀態偵測與模式切換。
+        - 修正 MySQL 與 SQLite 間 `GROUP_CONCAT` 的語法相容性問題。
+        - 優化後台介面（儀表板與側邊欄），使其能正確辨識並顯示 SQLite 連線詳情與檔案資訊。
+        - 更新 `.gitignore` 與 `config.example.php` 以整合 SQLite 設定。
+    
+    ### [13:45] 全方位資料遷移系統
+    - **任務**: 實作支援檔案系統、MySQL 與 SQLite 三方互轉的強大遷移系統。
+    - **實作**:
+        - 強化 `admin/tool_migrate.php`，在所有模式下皆支援匯入 (Pull) 與匯出 (Push) 操作。
+        - 實作 `runDBMigration` 函數，處理資料庫對資料庫 (MySQL <-> SQLite) 的直接資料傳輸。
+        - 更新後台介面，根據當前模式與設定動態顯示可用的遷移目標。
+        - 在 `auth.php` 與 `health_check.php` 中加入嚴格的 PDO 擴充檢查，防止因環境不支援導致的致命錯誤。
+    
+    ### [14:05] 國際化 (i18n) 完整支援
+    - **任務**: 補齊新模組缺失的翻譯。
+    - **實作**:
+        - 更新 `langs/admin/zh_TW.php` 與 `en_US.php`，補上遷移工具、SQLite 初始化與儀表板相關的翻譯鍵值。
+        - 替換 `admin/tool_migrate.php`、`admin/sqlite_init.php`、`admin/index.php` 與 `admin/health_check.php` 中的硬編碼文字。
+        - 確保所有新功能 (SQLite, Migration) 皆支援完整雙語顯示。
+    
+    ### [14:45] 備份基礎建設
+    - **任務**: 建立專用的備份目錄。
+    - **實作**:
+        - 建立 `/backup` 目錄並新增雙語 `readme.md`。
+        - 更新 `.gitignore` 排除 `/backup/*.zip` 檔案。
+    
