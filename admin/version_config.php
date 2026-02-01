@@ -4,5 +4,5 @@
 
 define('GEMINI_CLI_VERSION', '0.26.0');
 define('GEMINI_AI_MODEL', 'gemini-3-flash-preview');
-define('APP_VERSION', 'v2026.02.01.23.21');
-define('LAST_UPDATE_TIME', '2026-02-01 23:21:11 (UTC+8)');
+define('APP_VERSION', 'v2026.02.01.23.30');
+define('LAST_UPDATE_TIME', '2026-02-01 23:30:00 (UTC+8)');

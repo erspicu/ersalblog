@@ -81,78 +81,6 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
-## 2026-01-30 (繁體中文)
-
-### [12:05] 初步專案掃描與分析
-- **任務**: 理解專案架構 (混合式 SSG + SPA)。
-- **Prompt**: "再次掃描此專案目錄下的開發檔案 *.js *.css *.php *.py (不需要測試目錄)，以及 blog.html，以理解內容。稍後將進行修改。"
-
-### [12:15] 資料庫遷移工具優化
-- **任務**: 修改 `migrate_full.php` 以讀取中央設定檔 `config.php`。
-- **Prompt**: "希望 migrate_full.php 內的資料庫連線設定可以改成讀取 config.php。"
-
-### [12:20] Git 版本控制初始化 (.gitignore)
-- **任務**: 建立完整的過濾規則，排除敏感資訊、大型相片資源與自動生成的 HTML 檔。
-- **Prompts**: 
-    - "之後想要用 git 管理，但在此之前，請 Gemini 幫我建立 git ignore 設定檔。首先，含有敏感資料的程式不要上傳。"
-    - "除了 blog.html 樣板檔外，根目錄下其他生成的檔案都加入排除。"
-    - "Google 驗證檔也移除。"
-    - "preview 目錄下的所有圖片檔都排除。" (後續修正為移除 .jpg .png)
-    - "移除 pic 目錄。"
-    - "排除 category 目錄下除了 readme.md 以外的所有內容。"
-    - "排除 contents 目錄下除了 readme.md 以外的所有內容。"
-    - "排除 static 內的圖片檔。"
-
-### [12:30] 目錄用途文件化 (READMEs)
-- **任務**: 為主要目錄建立雙語說明文件並更新專案架構文件。
-- **Prompts**: 
-    - "請根據專案實作，幫我在 contents 目錄內寫入 readme.md 說明此目錄用途。先用英文表達，再用中文。"
-    - "補充說明 tags 可以用逗號 (`,`) 分隔。"
-    - "category 目錄也幫我一起建立。"
-    - "分類描述可以拿現有的目錄和檔案當範例。"
-    - "在 static 建立 readme.md，簡述其用途。"
-    - "在 preview 也建立 readme.md 並說明其用途。"
-    - "根據目前的目錄結構和排除內容，更新 ARCHITECTURE.md。"
-    - "為此專案做一個簡單介紹，並在根目錄建立 readme.md。"
-
-### [12:45] 儲存庫發佈 (GitHub)
-- **任務**: 初始化 Git 並推送到 GitHub。
-- **Prompt**: "我想將此專案上傳到我的 GitHub https://github.com/erspicu/ersalblog"
-
-### [12:50] 致謝與開源授權
-- **任務**: 在 README 中註記使用的第三方 PHP 與 JS 函式庫以尊重原作者。
-- **Prompt**: "我的 PHP_LIB 內有一些第三方的套件，還有 static 內有一個讀取 exif 的函式庫。將這些套件說明寫入根目錄 readme 以尊重原版本，然後 push 到 git。"
-
-### [13:00] 資料庫 API 開發 (SQL-based)
-- **任務**: 建立 `api_dbsqlbase.php` 以支援從 MySQL 讀取內容，同時維持與 SPA 格式的相容性。
-- **Prompt**: "幫我改寫一個資料庫版本的 api_filebase.php。api_dbsqlbase.php 將處理 db 版本 api。"
-
-### [13:10] 建置工具調整 (Python)
-- **任務**: 優化壓縮腳本。
-- **Prompts**: 
-    - "執行 mini.py"
-    - "改寫 mini.py，config.example.js 不需要壓縮。"
-
-### [13:20] 後台管理系統建置
-- **任務**: 建立包含登入、文章管理與分類管理的後台系統。
-- **Prompts**: 
-    - "需要建立一個後台管理機制。從資料庫版本開始。首先幫我修改 config.php 加入後台帳號密碼設定，並在移除敏感資訊後更新到 config.example.php。"
-    - "建立一個 admin 目錄存放後台相關 PHP 代碼。首先建立登入驗證介面，登入後可以登出。後續再增加更多功能。"
-    - "建立文章管理功能：可以發表新文章、編輯舊文章、刪除舊文章、編輯標籤與指派分類。"
-    - "如果後台管理有使用第三方元件，請將它們打包進 admin 目錄，避免來源消失時遺失。"
-    - "加入分類管理功能：可以新增、移除或重新命名分類。"
-    - "儀表板應顯示 PHP 版本、DB 連線資訊、DB 剩餘大小、DB 佔用大小、總文章數等。"
-
-### [13:45] UI/UX 打磨與版面統一
-- **任務**: 將後台統一為側邊欄佈局，優化文章列表顯示，並引入 SweetAlert2。
-- **Prompts**: 
-    - "登入後的後台版面有點怪。希望點擊文章或分類管理後，版面能跟登入頁保持一致——左邊是側邊欄，右邊是管理介面，就像儀表板一樣。"
-    - "在文章管理的文章列表中，將描述與標題放在檔案 URL 下方。如果太長則換行。"
-    - "編輯和刪除操作垂直排列且顏色不同。這是刻意的設計嗎？"
-    - "沒關係，保留它。但原生的 JS刪除警告很醜。使用好看一點的提示視窗。如果要用第三方元件，請下載使用。"
-
----
-
 ## 2026-01-31
 
 ### [12:05] PHP 7.x Compatibility Check and Fixes
@@ -251,7 +179,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Ensure timezone correctness for logs and versions and fix garbled text.
 - **Implementation**:
     - Updated `gemini.md` to include UTC+8 timezone specs and Git Bash execution recommendations.
-    - Fixed BOM (`\xEF\xBB\xBF`) encoding issues in `gemini_log.md`.
+    - Fixed BOM (`ï»¿`) encoding issues in `gemini_log.md`.
 
 ### [21:30] System Time Calibration and Specification Strengthening
 - **Task**: Uniformly calibrate all站 time stamps to correct UTC+8 evening period.
@@ -400,7 +328,7 @@ Recorded the development journey and original Prompt commands of this project th
     - **phpMyAdmin**: Automated installation and integration with the custom port.
     - **Permission Fixes**: Enhanced `install.php` to detect WSL2 NTFS mounts and bypass incompatible `chmod` checks.
     - **OS Detection**: Created `admin/system_helper.php` for shared OS distribution and version detection (e.g., Ubuntu 24.04.1 LTS (WSL2) or Windows 11 Build info).
-    - Dashboard Update: Integrated detailed OS info into `admin/index.php` and `install.php`.
+    - **Dashboard Update**: Integrated detailed OS info into `admin/index.php` and `install.php`.
 
 ### [23:20] Enhanced Windows OS Detection & UI Layout Optimization
 - **Task**: Improve Windows version detection reliability and refine installation UI layout.
@@ -408,7 +336,85 @@ Recorded the development journey and original Prompt commands of this project th
     - **Advanced OS Detection**: Added COM/WMI support in `admin/system_helper.php` as the primary method for native Windows PHP environments, providing precise product names (e.g., Windows 11 Pro).
     - **Encoding Correction**: Implemented aggressive CP950 to UTF-8 conversion for PowerShell output to prevent garbled text in Traditional Chinese environments.
     - **UI Optimization**: Reorganized `install.php` system information into a 2x2 grid, doubling the display width for better readability of detailed OS strings.
-    - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules to utilize `git.exe` for authenticated pushes.
+    - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules to utilize `git.exe` for authenticated pushes (later refined to manual user push).
+
+### [23:30] Git Strategy Refinement for WSL2
+- **Task**: Standardize remote repository synchronization workflow in WSL2.
+- **Implementation**:
+    - **Policy Update**: Updated `gemini.md` to explicitly state that while code commits are handled within WSL2, the final `git push` action is to be performed manually by the user in an environment with proper credentials (e.g., Windows terminal).
+    - **Macro Sync**: Adjusted the "Update" macro process to stop at the commit stage and provide a manual push reminder.
+
+---
+
+## 2026-01-30 (繁體中文)
+
+### [12:05] 初步專案掃描與分析
+- **任務**: 理解專案架構 (混合式 SSG + SPA)。
+- **Prompt**: "再次掃描此專案目錄下的開發檔案 *.js *.css *.php *.py (不需要測試目錄)，以及 blog.html，以理解內容。稍後將進行修改。"
+
+### [12:15] 資料庫遷移工具優化
+- **任務**: 修改 `migrate_full.php` 以讀取中央設定檔 `config.php`。
+- **Prompt**: "希望 migrate_full.php 內的資料庫連線設定可以改成讀取 config.php。"
+
+### [12:20] Git 版本控制初始化 (.gitignore)
+- **任務**: 建立完整的過濾規則，排除敏感資訊、大型相片資源與自動生成的 HTML 檔。
+- **Prompts**: 
+    - "之後想要用 git 管理，但在此之前，請 Gemini 幫我建立 git ignore 設定檔。首先，含有敏感資料的程式不要上傳。"
+    - "除了 blog.html 樣板檔外，根目錄下其他生成的檔案都加入排除。"
+    - "Google 驗證檔也移除。"
+    - "preview 目錄下的所有圖片檔都排除。" (後續修正為移除 .jpg .png)
+    - "移除 pic 目錄。"
+    - "排除 category 目錄下除了 readme.md 以外的所有內容。"
+    - "排除 contents 目錄下除了 readme.md 以外的所有內容。"
+    - "排除 static 內的圖片檔。"
+
+### [12:30] 目錄用途文件化 (READMEs)
+- **任務**: 為主要目錄建立雙語說明文件並更新專案架構文件。
+- **Prompts**: 
+    - "請根據專案實作，幫我在 contents 目錄內寫入 readme.md 說明此目錄用途。先用英文表達，再用中文。"
+    - "補充說明 tags 可以用逗號 (`,`) 分隔。"
+    - "category 目錄也幫我一起建立。"
+    - "分類描述可以拿現有的目錄和檔案當範例。"
+    - "在 static 建立 readme.md，簡述其用途。"
+    - "在 preview 也建立 readme.md 並說明其用途。"
+    - "根據目前的目錄結構和排除內容，更新 ARCHITECTURE.md。"
+    - "為此專案做一個簡單介紹，並在根目錄建立 readme.md。"
+
+### [12:45] 儲存庫發佈 (GitHub)
+- **任務**: 初始化 Git 並推送到 GitHub。
+- "我想將此專案上傳到我的 GitHub https://github.com/erspicu/ersalblog"
+
+### [12:50] 致謝與開源授權
+- **任務**: 在 README 中註記使用的第三方 PHP 與 JS 函式庫以尊重原作者。
+- **Prompt**: "我的 PHP_LIB 內有一些第三方的套件，還有 static 內有一個讀取 exif 的函式庫。將這些套件說明寫入根目錄 readme 以尊重原版本，然後 push 到 git。"
+
+### [13:00] 資料庫 API 開發 (SQL-based)
+- **任務**: 建立 `api_dbsqlbase.php` 以支援從 MySQL 讀取內容，同時維持與 SPA 格式的相容性。
+- **Prompt**: "幫我改寫一個資料庫版本的 api_filebase.php。api_dbsqlbase.php 將處理 db 版本 api。"
+
+### [13:10] 建置工具調整 (Python)
+- **任務**: 優化壓縮腳本。
+- **Prompts**: 
+    - "執行 mini.py"
+    - "改寫 mini.py，config.example.js 不需要壓縮。"
+
+### [13:20] 後台管理系統建置
+- **任務**: 建立包含登入、文章管理與分類管理的後台系統。
+- **Prompts**: 
+    - "需要建立一個後台管理機制。從資料庫版本開始。首先幫我修改 config.php 加入後台帳號密碼設定，並在移除敏感資訊後更新到 config.example.php。"
+    - "建立一個 admin 目錄存放後台相關 PHP 代碼。首先建立登入驗證介面，登入後可以登出。後續再增加更多功能。"
+    - "建立文章管理功能：可以發表新文章、編輯舊文章、刪除舊文章、編輯標籤與指派分類。"
+    - "如果後台管理有使用第三方元件，請將它們打包進 admin 目錄，避免來源消失時遺失。"
+    - "加入分類管理功能：可以新增、移除或重新命名分類。"
+    - "儀表板應顯示 PHP 版本、DB 連線資訊、DB 剩餘大小、DB 佔用大小、總文章數等。"
+
+### [13:45] UI/UX 打磨與版面統一
+- **任務**: 將後台統一為側邊欄佈局，優化文章列表顯示，並引入 SweetAlert2。
+- **Prompts**: 
+    - "登入後的後台版面有點怪。希望點擊文章或分類管理後，版面能跟登入頁保持一致——左邊是側邊欄，右邊是管理介面，就像儀表板一樣。"
+    - "在文章管理的文章列表中，將描述與標題放在檔案 URL 下方。如果太長則換行。"
+    - "編輯和刪除操作垂直排列且顏色不同。這是刻意的設計嗎？"
+    - "沒關係，保留它。但原生的 JS刪除警告很醜。使用好看一點的提示視窗。如果要用第三方元件，請下載使用。"
 
 ---
 
@@ -563,96 +569,13 @@ Recorded the development journey and original Prompt commands of this project th
 ### [02:30] 戰略藍圖與未來規劃
 - **任務**: 構思未來功能並建立長期開發藍圖。
 - **實作**:
-    - 深入分析高價值功能：伺服器端分頁、SQLite 支援、進階編輯器 (Editor.js) 與 Flickr/Google Sheets 整合。
+    - 深入分析 high-value 功能：伺服器端分頁、SQLite 支援、進階編輯器 (Editor.js) 與 Flickr/Google Sheets 整合。
     - 評估社群互動與技術基礎建設的重要性。
     - 將所有提案、優先級評等與可行性分析彙整至結構化的 `ROADMAP.md` 文件。
 
 ---
 
-## 2026-02-01
-
-### [12:30] SQLite 3 Database Support and Interface Optimization
-- **Task**: Implement SQLite 3 support as an alternative to MySQL and the file system, and fix UI inconsistencies.
-- **Implementation**:
-    - Added SQLite support to `DataManager` in `admin/data_provider.php`.
-    - Created `admin/sqlite_init.php` for database initialization and data migration (from file system or MySQL).
-    - Created `api_sqlitebase.php` for frontend SQLite data access.
-    - Updated `admin/login.php` and `admin/health_check.php` to support SQLite status detection and mode selection.
-    - Fixed `GROUP_CONCAT` syntax compatibility issues between MySQL and SQLite.
-    - Optimized Admin UI (Dashboard and Sidebar) to correctly identify and display SQLite connection details and file information.
-    - Updated `.gitignore` and `config.example.php` for SQLite integration.
-
-### [13:45] Comprehensive Data Migration System
-- **Task**: Implement a robust two-way migration system supporting File System, MySQL, and SQLite.
-- **Implementation**:
-    - Enhanced `admin/tool_migrate.php` to support both Import (Pull) and Export (Push) operations in all modes.
-    - Implemented `runDBMigration` to handle direct database-to-database data transfer (MySQL <-> SQLite).
-    - Updated Admin UI to dynamically display available migration targets based on current mode and configuration.
-    - Added strict environment checks for PDO extensions in `auth.php` and `health_check.php` to prevent fatal errors.
-
-### [14:05] Internationalization (i18n) Completion
-- **Task**: Complete missing translations for new modules.
-- **Implementation**:
-    - Updated `langs/admin/zh_TW.php` and `en_US.php` with missing keys for Migration Tool, SQLite Init, and Dashboard.
-    - Replaced hardcoded text in `admin/tool_migrate.php`, `admin/sqlite_init.php`, `admin/index.php`, and `admin/health_check.php`.
-    - Ensured full bilingual support across all new features (SQLite, Migration).
-
-### [14:45] Backup Infrastructure
-- **Task**: Establish a dedicated directory for backups.
-- **Implementation**:
-    - Created `/backup` directory and added a bilingual `readme.md`.
-    - Updated `.gitignore` to exclude `/backup/*.zip`.
-
-### [15:15] Backup Restore & Upload
-- **Task**: Enhance backup tool with restore and upload capabilities.
-- **Implementation**:
-    - Implemented system restoration from local ZIP backups (overwrites contents).
-    - Added file upload functionality for importing external backups, with file size limit checks and hints.
-    - Integrated SweetAlert2 for operation confirmations (Delete, Restore, Create) and status messages (Success/Error).
-    - Added loading overlays for time-consuming operations (Upload, Create, Restore).
-    - Updated i18n support for all new backup features.
-
-### [15:30] Backup Tool Optimization (PHP Config & Hints)
-- **Task**: Add user guidance for handling large backup files.
-- **Implementation**:
-    - Added PHP configuration hints (upload_max_filesize, post_max_size, etc.) in `admin/tool_backup.php` upload section.
-    - Provided example PHP.ini settings and FTP alternatives for large files.
-    - Updated language files (`zh_TW.php`, `en_US.php`) with new hint text.
-
-### [15:45] MySQL Database Backup & Restore
-- **Task**: Extend backup tool to support MySQL database mode.
-- **Implementation**:
-    - Implemented `createMysqlDump` to generate SQL structure and data dumps.
-    - Implemented `restoreMysqlDump` to parse and execute SQL dumps from ZIP.
-    - Updated `create_backup` to pack SQL dump + static resources (`preview`, `pic`, `static/icon-192.png`) into `dbsqlbase-*.zip`.
-    - Updated `restore_backup` to handle `dbsqlbase` files by restoring DB first, then static files.
-
-### [16:15] SQLite Database Backup & Restore
-- **Task**: Extend backup tool to support SQLite database mode.
-- **Implementation**:
-    - Added logic to pack the active SQLite database file + static resources into `sqlitebase-*.zip`.
-    - Added logic to restore SQLite DB file from ZIP to the configured path.
-    - Added helper functions (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) to fix 500 errors and reuse code.
-
-### [16:30] Backup List Filtering
-- **Task**: Avoid confusion by showing only relevant backup files.
-- **Implementation**:
-    - Updated `admin/tool_backup.php` to filter the backup list based on current mode:
-        - DB Mode: Show only `dbsqlbase-*.zip`
-        - SQLite Mode: Show only `sqlitebase-*.zip`
-        - File Mode: Show only `filebase-*.zip`
-
-### [19:30] Universal Installation Wizard
-- **Task**: Design and implement a user-friendly initialization system.
-- **Implementation**:
-    - Created `install.php` in the root directory.
-    - Features: Environment check (PHP version & Unix-like permission fixes), Multi-mode DB test (MySQL/SQLite/File), Admin setup, and Frontend config generation.
-    - Multi-language Support: Created `langs/admin/install_zh_TW.php` and `install_en_US.php`.
-    - Integrated system versioning from `admin/version_config.php`.
-
----
-
-## 2026-01-31 (繁體中文)
+## 2026-02-01 (繁體中文)
 
 ### [12:30] SQLite 3 資料庫支援與介面顯示優化
 - **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
@@ -743,7 +666,7 @@ Recorded the development journey and original Prompt commands of this project th
     - **權限處理**: 修正 `install.php` 偵測 WSL2 NTFS 掛載點並自動跳過無效的權限修正步驟。
     - **OS 偵測**: 建立 `admin/system_helper.php` 提供詳細 OS 資訊 (如 Ubuntu 發行版或 Windows Build 號)。
     - **介面整合**: 在儀表板與安裝精靈中同步顯示詳細作業系統環境。
-        
+
 ### [23:20] 強化 Windows OS 偵測與 UI 佈局優化
 - **任務**: 提升 Windows 版本偵測可靠性並精煉安裝介面佈局。
 - **實作**:
@@ -751,3 +674,9 @@ Recorded the development journey and original Prompt commands of this project th
     - **編碼校正**: 針對 PowerShell 輸出實作了強制的 CP950 轉 UTF-8 轉換，防止在繁體中文環境下出現亂碼。
     - **UI 優化**: 將 `install.php` 系統資訊重構為 2x2 網格顯示，將顯示寬度提升一倍，以利閱讀長的作業系統版本字串。
     - **Git 策略**: 更新 `gemini.md` 加入 WSL2 專屬回退規則，自動調用 `git.exe` 處理需要憑證驗證的推送操作。
+
+### [23:30] WSL2 Git 策略精煉
+- **任務**: 規範 WSL2 下的遠端儲存庫同步流程。
+- **實作**:
+    - **規範更新**: 更新 `gemini.md` 明確規定 WSL2 僅負責完成 Commit，最終的 `git push` 由使用者於具備憑證的環境 (如 Windows 終端機) 手動執行。
+    - **巨集同步**: 調整「更新」關鍵字指令的流程，自動化執行至本地 Commit 為止，並加入手動推送提醒。

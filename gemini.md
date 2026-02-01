@@ -3,7 +3,7 @@
 - **互動語言**: 繁體中文 (Traditional Chinese)
 - **程式相容性**: 程式碼必須相容 PHP 7.x 及以上版本。
 - **執行環境**: 使用者將切換至 **WIN11上WSL2 Ubuntu 24.04** 環境。執行 Shell 指令時應優先考慮 Bash/Linux 相容性（如 `&&`, `grep`, `tail` 等），並確保輸出與寫入均採用 **UTF-8** 編碼以避免亂碼。
-- **WSL2 Git 策略**: 在 WSL2 環境下，若使用 Linux 原生 `git push` 因憑證驗證 (Credentials) 失敗（如 GitHub 不支援密碼登入），應嘗試改為呼叫 Windows 側的 `git.exe push`。這能利用 Windows 的 Credential Manager 進行自動驗證，提升自動化推送的成功率。
+- **WSL2 Git 推送策略**: 考量到 WSL2 環境下 GitHub 憑證驗證 (Credentials) 的互動性限制，本環境僅負責完成本地端代碼的 `git add` 與 `git commit` 操作。**最終將變更推送 (Push) 至遠端儲存庫的動作，由使用者手動在其他適當環境 (如 Windows 終端機) 執行。** 這樣可避免自動化腳本因無法取得認證而中斷。
 - **時區規範**: 所有時間記錄、日誌 (尤其是 `gemini_log.md`) 與版本號必須統一使用 **UTC+8** 時區。在執行任何記錄動作前，請務必確認並轉換為 UTC+8 時間。
 - **後台開發**: 後台開發的部分都要考慮到多語支援，利用現在已經架構好得多語框架，不要把文字直接寫死在 code 裡。
 
@@ -47,7 +47,7 @@
     - 呼叫 `cli_help` 查詢當前的 **Gemini CLI 版本** 與 **AI 模型名稱**。
     - 獲取當前 **UTC+8** 日期時間作為版本號 (格式：`vYYYY.MM.DD.HH.MM`)。
     - 將上述資訊寫入 `admin/version_config.php`。
-3. **發佈**: 執行 Git Commit 與 Push 操作。
+3. **發佈**: 執行本地 Git Commit 操作。完成後，提示使用者手動在適當環境中執行 `git push`。
 
 ## "重讀" (Reload)
 當使用者輸入關鍵字 **"重讀"** 時，請執行以下流程以同步外部編輯器的修改：
