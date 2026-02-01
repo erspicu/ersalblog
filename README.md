@@ -9,6 +9,7 @@ A lightweight, high-performance blog system designed specifically for photograph
   - **Database Mode**: Supports MySQL/MariaDB and **SQLite 3** with a normalized schema (`blog_posts`, `blog_categories`) for robust data handling.
 - **Dual-Mode Admin Panel**: A unified administration interface that allows you to switch between managing local files or the database seamlessly.
     - **Multi-language Support**: Fully localized admin interface (Traditional Chinese / English).
+    - **Backup & Restore**: Integrated tool to pack data and static resources into ZIP archives, supporting file system, MySQL, and SQLite modes with automatic restoration.
     - **Vibe Coding**: Developed with Gemini CLI & Gemini AI Models, featuring automated version tracking.
 - **Hybrid Rendering**: Serve content dynamically as a SPA for rich interaction or pre-render static HTML pages for SEO and speed.
 - **Performance Optimized**: Built-in lazy loading for images and automatic JS/CSS minification via Python scripts.
@@ -39,6 +40,7 @@ A lightweight, high-performance blog system designed specifically for photograph
   - **資料庫模式 (Database)**：支援 MySQL/MariaDB 與 **SQLite 3**，並採用正規化架構 (`blog_posts`, `blog_categories`) 處理更強大的數據需求。
 - **雙模式管理後台**：統一的管理介面，讓您能在管理本地檔案或資料庫之間無縫切換。
     - **多語系支援**：完整的後台介面本地化（繁體中文 / 英文）。
+    - **備份與還原**：內建備份工具，支援將資料與靜態資源打包為 ZIP 檔，涵蓋檔案模式、MySQL 與 SQLite 模式，並支援自動還原。
     - **Vibe Coding**：由 Gemini CLI 與 Gemini AI 模型開發，具備自動化版本追蹤。
 - **混合渲染**：內容可透過 SPA 動態呈現以獲得豐富互動，或預先渲染為靜態 HTML 頁面以提升 SEO 與載入速度。
 - **效能優化**：內建圖片延遲載入 (Lazy Loading) 機制，並透過 Python 腳本自動壓縮 JS/CSS。

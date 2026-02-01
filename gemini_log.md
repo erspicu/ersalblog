@@ -144,3 +144,11 @@
   - UI 介面全面升級，支援動態偵測並顯示可用的匯出/匯入目標。﻿
 - [2026-02-01 13:50:00] (UTC+8) 更新 gemini.md，將偏好執行環境設定為 Git Bash (MinGW)，以解決編碼亂碼問題並提升指令相容性。
 - [2026-02-01 14:15:00] (UTC+8) 刪除誤上傳的備份檔案 filebase-20260201-140447-backup.zip 並從 Git 紀錄中移除。
+- [2026-02-01 14:30:00] (UTC+8) 後台備份工具 (admin/tool_backup.php) 新增 PHP 設定提示，提醒使用者在還原大型備份檔時需調整 php.ini 參數 (upload_max_filesize, post_max_size, memory_limit, max_execution_time, max_input_time)，並提供範例參數與 FTP 替代方案提示。
+- [2026-02-01 14:45:00] (UTC+8) 實作後台 MySQL 資料庫備份還原功能 (admin/tool_backup.php)。新增 createMysqlDump 與 restoreMysqlDump 函數，支援匯出 SQL 結構與資料並打包靜態資源 (dbsqlbase-*.zip)，以及從 ZIP 還原資料庫與檔案。
+- [2026-02-01 15:00:00] (UTC+8) 優化後台備份列表顯示：根據當前模式 (File System 或 Database) 自動過濾備份檔，避免混淆 (filebase-* vs dbsqlbase-*)。
+- [2026-02-01 15:15:00] (UTC+8) 實作後台 SQLite 備份還原功能 (admin/tool_backup.php)。支援打包 SQLite 資料庫檔與靜態資源 (sqlitebase-*.zip)，並實作相應的還原與列表過濾邏輯。
+- [2026-02-01 15:30:00] (UTC+8) 修正後台備份工具 (admin/tool_backup.php) 錯誤：補充缺失的 Helper Functions (addStaticFilesToZip, restoreStaticFiles, cleanupTempDir) 以解決 500 錯誤；修正備份列表過濾邏輯，確保 SQLite 模式下正確顯示 sqlitebase-* 檔案。
+- [2026-02-01 15:50:00] (UTC+8) 修正 HISTORY.md 文件，重新整理並補全 2026-02-01 的開發紀錄，確保所有新功能 (Backup/Restore, SQLite Support, Filtering) 的中英文內容完整對應且格式一致。
+- [2026-02-01 16:00:00] (UTC+8) 補全 HISTORY.md 中 2026-01-30 與 2026-01-31 的繁體中文翻譯，確保全站歷史紀錄皆符合中英文同步規範。
+- [2026-02-01 15:21:41] (UTC+8) 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.15.21，並準備執行 Git 發佈。

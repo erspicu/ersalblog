@@ -2,6 +2,7 @@
 // admin/tool_backup.php
 require_once 'auth.php';
 require_once 'health_check.php';
+require_once 'data_provider.php'; // Needed for DB connection
 
 requireLogin();
 
@@ -12,17 +13,87 @@ if (!is_dir($backupDir)) mkdir($backupDir, 0755, true);
 $msg = '';
 $msgType = '';
 
-// Check for Post Max Size violation (Upload too big)
+// Check for Post Max Size violation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
-    // Need to define $uploadLimitStr early or calculate it here
-    // But $uploadLimitStr is defined lower down. Let's move the helper up or just calc it here.
-    // Helper is at bottom. Let's look at the file structure.
-    // We can move helper function to top or just use a generic message first, 
-    // but the user wants the hint. 
-    // Let's rely on the Helper being defined later? No, PHP needs function definition or use it after.
-    // Functions in PHP can be called before definition if defined in global scope.
     $msg = sprintf(__('upload_fail'), getUploadLimit());
     $msgType = 'danger';
+}
+
+// --- Helper: MySQL Dump ---
+function createMysqlDump($pdo) {
+    $out = "-- MySQL Dump\n-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
+    $out .= "SET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n\n";
+
+    $tables = [];
+    $stmt = $pdo->query("SHOW TABLES");
+    while ($row = $stmt->fetch(PDO::FETCH_NUM)) $tables[] = $row[0];
+
+    foreach ($tables as $table) {
+        // Structure
+        $out .= "-- Table structure for `$table`\n";
+        $out .= "DROP TABLE IF EXISTS `$table`;\n";
+        $stmt = $pdo->query("SHOW CREATE TABLE `$table`");
+        $row = $stmt->fetch(PDO::FETCH_NUM);
+        $out .= $row[1] . ";\n\n";
+
+        // Data
+        $out .= "-- Dumping data for `$table`\n";
+        $stmt = $pdo->query("SELECT * FROM `$table`");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (count($rows) > 0) {
+            $out .= "INSERT INTO `$table` VALUES \n";
+            $valuesArr = [];
+            foreach ($rows as $row) {
+                $vals = [];
+                foreach ($row as $val) {
+                    if ($val === null) $vals[] = "NULL";
+                    else $vals[] = $pdo->quote($val);
+                }
+                $valuesArr[] = "(" . implode(',', $vals) . ")";
+            }
+            $out .= implode(",\n", $valuesArr) . ";\n";
+        }
+        $out .= "\n";
+    }
+    $out .= "SET FOREIGN_KEY_CHECKS=1;\n";
+    return $out;
+}
+
+// --- Helper: Restore MySQL ---
+function restoreMysqlDump($pdo, $sqlFile) {
+    $sql = file_get_contents($sqlFile);
+    // Split by semicolon only if not inside quotes is hard with regex. 
+    // But mysqldump output usually has simple structure. 
+    // PDO exec handles multiple queries in some drivers, but safer to split or use specific importer.
+    // For simplicity with generated dump, we execute big chunks or rely on PDO multiple queries if enabled.
+    // MySQL PDO default does not allow multiple queries. We must split.
+    // However, INSERTs can be large. 
+    // Simple splitter for standard dumps:
+    
+    $lines = file($sqlFile);
+    $query = '';
+    
+    // Disable foreign key checks for session
+    $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+    
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '--') === 0 || strpos($line, '#') === 0) continue;
+        
+        $query .= $line;
+        if (substr(trim($line), -1) === ';') {
+            try {
+                $pdo->exec($query);
+            } catch (Exception $e) {
+                // Log error but continue? Or fail?
+                // For restore, usually fail is safer.
+                throw $e;
+            }
+            $query = '';
+        }
+    }
+    $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
 }
 
 // --- Handle Upload Action ---
@@ -52,7 +123,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'upload_backup') {
 
 // --- Handle Restore Action ---
 if (isset($_POST['action']) && $_POST['action'] === 'restore_backup' && isset($_POST['filename'])) {
-    set_time_limit(0); // Prevent timeout
+    set_time_limit(600); 
     
     $filename = basename($_POST['filename']);
     $zipPath = $backupDir . '/' . $filename;
@@ -61,10 +132,93 @@ if (isset($_POST['action']) && $_POST['action'] === 'restore_backup' && isset($_
         $zip = new ZipArchive();
         if ($zip->open($zipPath) === TRUE) {
             $baseDir = dirname(__DIR__);
-            $zip->extractTo($baseDir);
-            $zip->close();
-            $msg = __('restore_success');
-            $msgType = 'success';
+            
+            // Check mode compatibility
+            $isDbBackup = (strpos($filename, 'dbsqlbase') === 0);
+            $isSqliteBackup = (strpos($filename, 'sqlitebase') === 0);
+            $isFileBackup = (strpos($filename, 'filebase') === 0);
+            
+            if ($currentSource === 'db' && $isDbBackup) {
+                // DB Restore
+                $tempExtractDir = $backupDir . '/temp_' . time();
+                if (!is_dir($tempExtractDir)) mkdir($tempExtractDir);
+                $zip->extractTo($tempExtractDir);
+                $zip->close();
+                
+                try {
+                    $sqlFiles = glob($tempExtractDir . '/*.sql');
+                    if (!empty($sqlFiles)) {
+                        global $dbConfig;
+                        $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
+                        $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                        
+                        restoreMysqlDump($pdo, $sqlFiles[0]);
+                        restoreStaticFiles($tempExtractDir, $baseDir);
+                        
+                        $msg = __('restore_success');
+                        $msgType = 'success';
+                    } else {
+                        $msg = "SQL file not found in backup.";
+                        $msgType = 'danger';
+                    }
+                } catch (Exception $e) {
+                    $msg = __('restore_fail') . ': ' . $e->getMessage();
+                    $msgType = 'danger';
+                }
+                cleanupTempDir($tempExtractDir);
+
+            } elseif ($currentSource === 'sqlite' && $isSqliteBackup) {
+                // SQLite Restore
+                global $sqlite_path;
+                if (!isset($sqlite_path)) {
+                    $msg = "SQLite path config missing.";
+                    $msgType = 'danger';
+                    $zip->close();
+                } else {
+                    $tempExtractDir = $backupDir . '/temp_' . time();
+                    if (!is_dir($tempExtractDir)) mkdir($tempExtractDir);
+                    $zip->extractTo($tempExtractDir);
+                    $zip->close();
+
+                    try {
+                        $sqliteFiles = [];
+                        foreach (scandir($tempExtractDir) as $f) {
+                            if ($f === '.' || $f === '..') continue;
+                            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                            if (in_array($ext, ['sqlite', 'db', 'sqlite3', 'db3'])) {
+                                $sqliteFiles[] = $f;
+                            }
+                        }
+
+                        if (!empty($sqliteFiles)) {
+                            $targetDbPath = $baseDir . '/' . $sqlite_path;
+                            copy($tempExtractDir . '/' . $sqliteFiles[0], $targetDbPath);
+                            
+                            restoreStaticFiles($tempExtractDir, $baseDir);
+                            $msg = __('restore_success');
+                            $msgType = 'success';
+                        } else {
+                            $msg = "SQLite database file not found in backup.";
+                            $msgType = 'danger';
+                        }
+                    } catch (Exception $e) {
+                         $msg = __('restore_fail') . ': ' . $e->getMessage();
+                         $msgType = 'danger';
+                    }
+                    cleanupTempDir($tempExtractDir);
+                }
+
+            } elseif ($currentSource === 'file' && $isFileBackup) {
+                // File System Restore
+                $zip->extractTo($baseDir);
+                $zip->close();
+                $msg = __('restore_success');
+                $msgType = 'success';
+            } else {
+                $zip->close();
+                $msg = "Backup type mismatch. Current mode: $currentSource, Backup file: $filename";
+                $msgType = 'danger';
+            }
         } else {
             $msg = __('restore_fail');
             $msgType = 'danger';
@@ -77,57 +231,103 @@ if (isset($_POST['action']) && $_POST['action'] === 'restore_backup' && isset($_
 
 // --- Handle Backup Action ---
 if (isset($_POST['action']) && $_POST['action'] === 'create_backup') {
-    set_time_limit(0); // Prevent timeout
+    set_time_limit(0); 
     
     $timestamp = date('Ymd-His');
-    $zipFilename = "filebase-{$timestamp}-backup.zip";
-    $zipPath = $backupDir . '/' . $zipFilename;
+    $baseDir = dirname(__DIR__);
     
-    $zip = new ZipArchive();
-    if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-        $baseDir = dirname(__DIR__);
+    if ($currentSource === 'db') {
+        // --- DB Mode Backup ---
+        $zipFilename = "dbsqlbase-{$timestamp}-backup.zip";
+        $zipPath = $backupDir . '/' . $zipFilename;
+        $sqlFilename = "backup-{$timestamp}.sql";
+        $sqlPath = $backupDir . '/' . $sqlFilename;
         
-        // Directories to include
-        $dirs = ['category', 'contents', 'preview', 'pic'];
-        
-        foreach ($dirs as $dir) {
-            $fullPath = $baseDir . '/' . $dir;
-            if (is_dir($fullPath)) {
-                // Recursive add
-                $files = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST
-                );
+        try {
+            global $dbConfig;
+            $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
+            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            
+            // 1. Generate SQL
+            $sqlContent = createMysqlDump($pdo);
+            file_put_contents($sqlPath, $sqlContent);
+            
+            // 2. Zip it
+            $zip = new ZipArchive();
+            if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+                $zip->addFile($sqlPath, $sqlFilename);
+                addStaticFilesToZip($zip, $baseDir);
+                $zip->close();
+                unlink($sqlPath); // Remove raw SQL after zip
+                
+                $msg = __('backup_success') . ": " . $zipFilename;
+                $msgType = 'success';
+            } else {
+                $msg = __('backup_fail');
+                $msgType = 'danger';
+            }
+        } catch (Exception $e) {
+            $msg = __('backup_fail') . ': ' . $e->getMessage();
+            $msgType = 'danger';
+        }
 
-                foreach ($files as $file) {
-                    $filePath = $file->getRealPath();
-                    // Relative path for ZIP
-                    $relativePath = substr($filePath, strlen($baseDir) + 1);
-                    // Standardize slashes
-                    $relativePath = str_replace('\\', '/', $relativePath);
-                    
-                    if ($file->isDir()) {
-                        $zip->addEmptyDir($relativePath);
-                    } else {
-                        $zip->addFile($filePath, $relativePath);
+    } elseif ($currentSource === 'sqlite') {
+        // --- SQLite Mode Backup ---
+        global $sqlite_path;
+        if (isset($sqlite_path) && file_exists($baseDir . '/' . $sqlite_path)) {
+            $zipFilename = "sqlitebase-{$timestamp}-backup.zip";
+            $zipPath = $backupDir . '/' . $zipFilename;
+            
+            $zip = new ZipArchive();
+            if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+                $zip->addFile($baseDir . '/' . $sqlite_path, basename($sqlite_path));
+                addStaticFilesToZip($zip, $baseDir);
+                $zip->close();
+                $msg = __('backup_success') . ": " . $zipFilename;
+                $msgType = 'success';
+            } else {
+                 $msg = __('backup_fail');
+                 $msgType = 'danger';
+            }
+        } else {
+            $msg = __('backup_fail') . ": SQLite file not found.";
+            $msgType = 'danger';
+        }
+
+    } else {
+        // --- File Mode Backup (Existing) ---
+        $zipFilename = "filebase-{$timestamp}-backup.zip";
+        $zipPath = $backupDir . '/' . $zipFilename;
+        
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+            $dirs = ['category', 'contents', 'preview', 'pic'];
+            foreach ($dirs as $dir) {
+                $fullPath = $baseDir . '/' . $dir;
+                if (is_dir($fullPath)) {
+                    $files = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    foreach ($files as $file) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($baseDir) + 1);
+                        $relativePath = str_replace('\\', '/', $relativePath);
+                        if ($file->isDir()) $zip->addEmptyDir($relativePath);
+                        else $zip->addFile($filePath, $relativePath);
                     }
                 }
             }
+            $iconPath = $baseDir . '/static/icon-192.png';
+            if (file_exists($iconPath)) $zip->addFile($iconPath, 'static/icon-192.png');
+            
+            $zip->close();
+            $msg = __('backup_success') . ": " . $zipFilename;
+            $msgType = 'success';
+        } else {
+            $msg = __('backup_fail');
+            $msgType = 'danger';
         }
-        
-        // Specific file: static/icon-192.png
-        $iconPath = $baseDir . '/static/icon-192.png';
-        if (file_exists($iconPath)) {
-            $zip->addFile($iconPath, 'static/icon-192.png');
-        }
-        
-        $zip->close();
-        
-        $msg = __('backup_success') . ": " . $zipFilename;
-        $msgType = 'success';
-    } else {
-        $msg = __('backup_fail');
-        $msgType = 'danger';
     }
 }
 
@@ -142,9 +342,20 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['fi
 }
 
 // --- List Backups ---
-$backups = glob($backupDir . '/*.zip');
+$allBackups = glob($backupDir . '/*.zip');
+$backups = [];
+foreach ($allBackups as $file) {
+    $bn = basename($file);
+    if ($currentSource === 'db') {
+        if (strpos($bn, 'dbsqlbase') === 0) $backups[] = $file;
+    } elseif ($currentSource === 'sqlite') {
+        if (strpos($bn, 'sqlitebase') === 0) $backups[] = $file;
+    } else {
+        if (strpos($bn, 'filebase') === 0) $backups[] = $file;
+    }
+}
 usort($backups, function($a, $b) {
-    return filemtime($b) - filemtime($a); // Newest first
+    return filemtime($b) - filemtime($a); 
 });
 
 // --- Helper: Get PHP Upload Limit ---
@@ -168,6 +379,72 @@ function getUploadLimit() {
     else return round($limit / 1024 / 1024, 2) . ' MB';
 }
 $uploadLimitStr = getUploadLimit();
+
+// --- Shared Helpers ---
+
+function addStaticFilesToZip($zip, $baseDir) {
+    $dirs = ['preview', 'pic'];
+    foreach ($dirs as $dir) {
+        $fullPath = $baseDir . '/' . $dir;
+        if (is_dir($fullPath)) {
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            foreach ($files as $file) {
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($baseDir) + 1);
+                $relativePath = str_replace('\\', '/', $relativePath);
+                if ($file->isDir()) {
+                    $zip->addEmptyDir($relativePath);
+                } else {
+                    $zip->addFile($filePath, $relativePath);
+                }
+            }
+        }
+    }
+    // Specific file: static/icon-192.png
+    $iconPath = $baseDir . '/static/icon-192.png';
+    if (file_exists($iconPath)) {
+        $zip->addFile($iconPath, 'static/icon-192.png');
+    }
+}
+
+function restoreStaticFiles($srcDir, $destDir) {
+     foreach(['preview', 'pic', 'static'] as $d) {
+         if (is_dir($srcDir . '/' . $d)) {
+             $src = $srcDir . '/' . $d;
+             $dst = $destDir . '/' . $d;
+             if (!is_dir($dst)) mkdir($dst, 0755, true);
+             
+             $it = new RecursiveIteratorIterator(
+                 new RecursiveDirectoryIterator($src, RecursiveDirectoryIterator::SKIP_DOTS),
+                 RecursiveIteratorIterator::SELF_FIRST
+             );
+             foreach ($it as $item) {
+                 $subPath = $it->getSubPathName();
+                 if ($item->isDir()) {
+                     if (!is_dir($dst . '/' . $subPath)) mkdir($dst . '/' . $subPath);
+                 } else {
+                     copy($item, $dst . '/' . $subPath);
+                 }
+             }
+         }
+     }
+}
+
+function cleanupTempDir($dir) {
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($it as $file) {
+        if ($file->isDir()) rmdir($file->getRealPath());
+        else unlink($file->getRealPath());
+    }
+    rmdir($dir);
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -257,6 +534,19 @@ $uploadLimitStr = getUploadLimit();
             <div class="card-body">
                 <h5 class="card-title"><?php echo __('backup_upload_title'); ?></h5>
                 <p class="text-muted mb-1"><?php echo __('backup_upload_desc'); ?></p>
+                
+                <div class="alert alert-info alert-dismissible fade show my-3" role="alert">
+                    <strong><i class="bi bi-info-circle"></i> <?php echo __('php_ini_hint_title'); ?></strong><br>
+                    <small><?php echo __('php_ini_hint_desc'); ?></small>
+                    <pre class="bg-dark text-light p-2 mt-2 rounded small mb-2">upload_max_filesize = 100M
+post_max_size = 100M
+memory_limit = 256M
+max_execution_time = 300
+max_input_time = 300</pre>
+                    <small><?php echo __('php_ini_hint_fail'); ?></small>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
                 <div class="small text-danger mb-3">
                     <i class="bi bi-exclamation-triangle"></i> <?php echo sprintf(__('upload_limit_hint'), $uploadLimitStr); ?>
                 </div>

@@ -81,6 +81,78 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
+## 2026-01-30 (繁體中文)
+
+### [12:05] 初步專案掃描與分析
+- **任務**: 理解專案架構 (混合式 SSG + SPA)。
+- **Prompt**: "再次掃描此專案目錄下的開發檔案 *.js *.css *.php *.py (不需要測試目錄)，以及 blog.html，以理解內容。稍後將進行修改。"
+
+### [12:15] 資料庫遷移工具優化
+- **任務**: 修改 `migrate_full.php` 以讀取中央設定檔 `config.php`。
+- **Prompt**: "希望 migrate_full.php 內的資料庫連線設定可以改成讀取 config.php。"
+
+### [12:20] Git 版本控制初始化 (.gitignore)
+- **任務**: 建立完整的過濾規則，排除敏感資訊、大型相片資源與自動生成的 HTML 檔。
+- **Prompts**: 
+    - "之後想要用 git 管理，但在此之前，請 Gemini 幫我建立 git ignore 設定檔。首先，含有敏感資料的程式不要上傳。"
+    - "除了 blog.html 樣板檔外，根目錄下其他生成的檔案都加入排除。"
+    - "Google 驗證檔也移除。"
+    - "preview 目錄下的所有圖片檔都排除。" (後續修正為移除 .jpg .png)
+    - "移除 pic 目錄。"
+    - "排除 category 目錄下除了 readme.md 以外的所有內容。"
+    - "排除 contents 目錄下除了 readme.md 以外的所有內容。"
+    - "排除 static 內的圖片檔。"
+
+### [12:30] 目錄用途文件化 (READMEs)
+- **任務**: 為主要目錄建立雙語說明文件並更新專案架構文件。
+- **Prompts**: 
+    - "請根據專案實作，幫我在 contents 目錄內寫入 readme.md 說明此目錄用途。先用英文表達，再用中文。"
+    - "補充說明 tags 可以用逗號 (`,`) 分隔。"
+    - "category 目錄也幫我一起建立。"
+    - "分類描述可以拿現有的目錄和檔案當範例。"
+    - "在 static 建立 readme.md，簡述其用途。"
+    - "在 preview 也建立 readme.md 並說明其用途。"
+    - "根據目前的目錄結構和排除內容，更新 ARCHITECTURE.md。"
+    - "為此專案做一個簡單介紹，並在根目錄建立 readme.md。"
+
+### [12:45] 儲存庫發佈 (GitHub)
+- **任務**: 初始化 Git 並推送到 GitHub。
+- **Prompt**: "我想將此專案上傳到我的 GitHub https://github.com/erspicu/ersalblog"
+
+### [12:50] 致謝與開源授權
+- **任務**: 在 README 中註記使用的第三方 PHP 與 JS 函式庫以尊重原作者。
+- **Prompt**: "我的 PHP_LIB 內有一些第三方的套件，還有 static 內有一個讀取 exif 的函式庫。將這些套件說明寫入根目錄 readme 以尊重原版本，然後 push 到 git。"
+
+### [13:00] 資料庫 API 開發 (SQL-based)
+- **任務**: 建立 `api_dbsqlbase.php` 以支援從 MySQL 讀取內容，同時維持與 SPA 格式的相容性。
+- **Prompt**: "幫我改寫一個資料庫版本的 api_filebase.php。api_dbsqlbase.php 將處理 db 版本 api。"
+
+### [13:10] 建置工具調整 (Python)
+- **任務**: 優化壓縮腳本。
+- **Prompts**: 
+    - "執行 mini.py"
+    - "改寫 mini.py，config.example.js 不需要壓縮。"
+
+### [13:20] 後台管理系統建置
+- **任務**: 建立包含登入、文章管理與分類管理的後台系統。
+- **Prompts**: 
+    - "需要建立一個後台管理機制。從資料庫版本開始。首先幫我修改 config.php 加入後台帳號密碼設定，並在移除敏感資訊後更新到 config.example.php。"
+    - "建立一個 admin 目錄存放後台相關 PHP 代碼。首先建立登入驗證介面，登入後可以登出。後續再增加更多功能。"
+    - "建立文章管理功能：可以發表新文章、編輯舊文章、刪除舊文章、編輯標籤與指派分類。"
+    - "如果後台管理有使用第三方元件，請將它們打包進 admin 目錄，避免來源消失時遺失。"
+    - "加入分類管理功能：可以新增、移除或重新命名分類。"
+    - "儀表板應顯示 PHP 版本、DB 連線資訊、DB 剩餘大小、DB 佔用大小、總文章數等。"
+
+### [13:45] UI/UX 打磨與版面統一
+- **任務**: 將後台統一為側邊欄佈局，優化文章列表顯示，並引入 SweetAlert2。
+- **Prompts**: 
+    - "登入後的後台版面有點怪。希望點擊文章或分類管理後，版面能跟登入頁保持一致——左邊是側邊欄，右邊是管理介面，就像儀表板一樣。"
+    - "在文章管理的文章列表中，將描述與標題放在檔案 URL 下方。如果太長則換行。"
+    - "編輯和刪除操作垂直排列且顏色不同。這是刻意的設計嗎？"
+    - "沒關係，保留它。但原生的 JS刪除警告很醜。使用好看一點的提示視窗。如果要用第三方元件，請下載使用。"
+
+---
+
 ## 2026-01-31
 
 ### [12:05] PHP 7.x Compatibility Check and Fixes
@@ -238,6 +310,163 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
+## 2026-01-31 (繁體中文)
+
+### [12:05] PHP 7.x 相容性檢查與修復
+- **任務**: 確保程式碼能在 PHP 7.x 環境中執行。
+- **Prompt**: "檢查是否有任何 PHP 檔案與 PHP 7 有相容性問題。如果有，請修復。"
+- **修復**: 將 `str_ends_with()` 替換為 `substr()`，將 `match` 表達式替換為陣列與 `??` 邏輯。
+
+### [12:15] 儀表板資料庫資訊強化
+- **任務**: 顯示詳細的 MySQL/MariaDB 版本與連線資訊。
+- **Prompts**: 
+    - "在後台儀表板中，希望在連線資訊增加 mysql 版本。"
+    - "希望能有 mysql 或 mariadb 這種詳細資訊。"
+
+### [12:30] 混合式管理系統
+- **任務**: 支援在登入時選擇「資料庫模式」或「檔案系統模式」，並提供統一介面。
+- **Prompt**: "因為我的 blog 架構目前呈現檔案系統、資料庫系統併行，我希望在登入階段能夠讓 user 選擇進入後的管理版本。如果選擇非資料庫版本，登入後介面基本上跟資料庫版本一樣，但管理的內容從檔案 blog 的檔案系統而來。"
+- **實作**: 建立 `admin/data_provider.php` 封裝 `DataManager` 類別，抽象化資料讀寫邏輯。
+
+### [12:45] 日誌系統與開發規範優化
+- **任務**: 修復日誌編碼問題並將開發規範寫入設定。
+- **Prompts**: 
+    - "gemini_log.md 我這邊打開看是亂碼，希望能夠讓它在繁體中文環境中正常顯示。"
+    - "我這邊是 win11，utf8 檔案用筆記本開還是亂碼請修正。"
+    - "還是有問題，請參考 gemini.md 的紀錄形式去修正。"
+    - "這次正常了。幫我將這動作配置 (寫入正確紀錄) 寫到 gemini.md 內。"
+- **技術細節**: 強制使用 UTF-8 with BOM 編碼。
+
+### [16:07] 登入健康檢查
+- **任務**: 在登入前自動偵測 DB 連線與檔案目錄完整性。
+- **Prompt**: "後臺管理登入，顯示目前是否有正確的 blog 資料庫環境和資料內容與連線能力，也檢查是否有檔案架構 blog 所需之資料檔和目錄架構。如果沒有請做畫面提示，並且禁止登入無法使用的系統。"
+- **實作**: 建立 `admin/health_check.php` 用於即時狀態顯示與禁用無效模式。
+
+### [16:14] 檔案轉資料庫匯入工具
+- **任務**: 提供從檔案模式一鍵匯入資料至資料庫的功能。
+- **Prompt**: "登入檔案模式後，希望可以增加一個功能分類，用來將檔案內容匯入到資料庫內。請參考 migrate_full.php 的設計概念。"
+- **實作**: 建立 `admin/tool_migrate.php` 並整合至後台側邊欄。
+
+### [16:20] 資料庫架構正規化
+- **任務**: 將分類欄位拆分為獨立資料表與關聯表。
+- **Prompt**: "我希望可以修正資料庫版本的分類架構設計，請再建立兩個 table，一個紀錄分類名稱，一個紀錄有哪些文章使用哪個分類，並且修正相關受影響的程式和畫面，也就是說分類管理畫面要增加新增功能。"
+- **實作**: 建立 `blog_categories` 與 `blog_post_categories` 資料表，更新 `DataManager` 與分類管理 UI。
+
+### [16:26] 冗餘欄位清理與邏輯重構
+- **任務**: 移除 `blog_posts` 中的 `post_categories` 並重構查詢。
+- **Prompt**: "目前看起來 blog_posts 內已經不需要 post_categories 欄位？我可以在資料庫中直接刪除那個欄位嗎？程式有需要相對應修改嗎？"
+- **實作**: 重構 `getAllPosts`、`getPost` 等方法改用 `GROUP_CONCAT`。建立 `admin/db_drop_column.php` 進行安全刪除。
+
+### [16:39] 文件與格式更新
+- 將 `reme.txt` 內容整合至 `README.md` 並更新第三方套件資訊。
+- `gemini_log.txt` 轉換為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
+
+### [19:05] 自動化初始化系統 (資料庫初始化)
+- **任務**: 建立自動化 DB 資料表建立與資料遷移。
+- **實作**: 
+    - 建立 `admin/db_init.php` 支援從檔案系統一鍵遷移至 DB。
+    - 修改 `admin/login.php` 為「已設定連線但缺資料表」的狀態提供引導連結。
+- **穩定性優化**: 
+    - 解決 MySQL DDL 隱式提交導致的 "No active transaction" 錯誤。
+    - 拆分 SQL 語句並增強 Transaction 狀態偵測以提升初始化成功率。
+
+### [20:20] 檔案系統修復工具
+- **任務**: 建立檔案系統結構修復與反向 DB 匯出功能。
+- **實作**:
+    - 建立 `admin/file_init.php`，與 DB 初始化對稱。
+    - 支援從 MySQL 讀取內容以自動重建 `contents/` 索引與 `category/` 目錄結構。
+    - 在登入頁整合檔案系統健康檢查，引導使用者進行修復。
+
+### [00:05] 後台版本控管與國際化 (i18n)
+- **任務**: 實作後台版本顯示與多語系支援 (繁中/英文)。
+- **實作**:
+    - **版本機制**: 初步嘗試掃描檔案時間，後改為在 `admin/version_config.php` 中的靜態版本 (vYYYY.MM.DD.HH.MM)。
+    - **i18n 架構**: 建立 `langs/admin/` 目錄，以檔名區分語言 (`zh_TW.php`, `en_US.php`)。
+    - **登入頁改版**: `admin/login.php` 加入語言下拉選單與版本顯示。
+
+### [00:20] 後台全面國際化
+- **任務**: 將多語系支援擴展至整個後台系統。
+- **實作**:
+    - 建立 `admin/lang_init.php` 負責載入語言與 `__()` 翻譯函數。
+    - 修改 `admin/auth.php` 進行全域 i18n 引入。
+    - 替換 `index.php` (儀表板)、`posts.php` (文章管理)、`categories.php` (分類管理)、`post_edit.php` (文章編輯) 與 `tool_migrate.php` (匯入工具) 中的硬編碼文字。
+    - 支援前端 JS i18n: 建立 `zh_TW.js` / `en_US.js`，透過 `admin/common_js_inc.php` 動態引入以支援 SweetAlert2 提示。
+    - 修正 `admin/health_check.php` 以支援多語系狀態訊息。
+
+### [00:50] Vibe Coding 資訊整合
+- **任務**: 在登入頁顯示用於開發的 AI 工具版本。
+- **實作**:
+    - **自動化**: 更新 `gemini.md` "Update" 巨集以自動查詢 Gemini CLI 版本與 AI 模型名稱。
+    - **設定寫入**: 將 Runtime 資訊 (CLI v0.26.0, Model gemini-3-pro-preview) 寫入 `admin/version_config.php`。
+    - **登入頁顯示**: 在 `admin/login.php` 顯示 "Vibe coded with Gemini CLI..."。
+
+### [01:10] 開發規範重構
+- **任務**: 優化 Prompt 指令文件。
+- **實作**: 將 `gemini.txt` 重構為結構化的 `gemini.md`，定義核心準則、自動化流程與日誌規範。
+
+### [01:30] 環境與時區規範
+- **任務**: 確保日誌與版本的時區正確性並修復亂碼。
+- **實作**:
+    - 更新 `gemini.md` 加入 UTC+8 時區規範與 Git Bash 執行建議。
+    - 修復 `gemini_log.md` 的 BOM (`\xEF\xBB\xBF`) 編碼問題。
+
+### [21:30] 系統時間校正與規範強化
+- **任務**: 統一校正全站時間戳記至正確的 UTC+8 晚間時段。
+- **實作**:
+    - 校正 `HISTORY.md`、`admin/version_config.php` 與 `gemini_log.md` 的時間偏差。
+    - 在 `gemini.md` 中明確要求未來所有紀錄直接使用 UTC+8。
+
+### [21:35] 執行巨集指令: Update
+- **任務**: 依照 `gemini.md` 執行文件更新、版本同步與 Git 發佈。
+- **實作**:
+    - 更新版本至 v2026.01.31.21.35。
+    - 同步 Gemini CLI (v0.26.0) 與模型 (gemini-3-flash-preview) 資訊。
+
+### [23:45] 日誌恢復與機制強化
+- **任務**: 找回被覆蓋的 `gemini_log.md` 並防止重演。
+- **實作**:
+    - 從 Git 歷史中找回遺失的日誌紀錄並完成合併。
+    - 儲存長期記憶並更新 `gemini.md`：規定日誌更新必須使用「追加」(Append) 模式。
+    - 強化 `gemini.md`：要求詢問式 Prompt 需記錄回答摘要。
+
+### [23:58] 檔案格式統一與 i18n 同步
+- **任務**: 統一 readme 檔案格式並實作全站雙語化。
+- **實作**:
+    - 將 `category/`、`contents/`、`preview/` 與 `static/` 下的所有 `readme.txt` 重新命名為 `readme.md`。
+    - 完成核心根目錄文件 `ARCHITECTURE.md` 與 `HISTORY.md` 的英文翻譯與同步。
+    - 在 `gemini.md` 的 "Update" 流程中加入強制規則：「所有文件必須維持中英文內容同步」。
+
+### [00:20] README 同步與巨集優化
+- **任務**: 修正 README 內容差異並優化 Gemini CLI 指令。
+- **實作**:
+    - 同步 `README.md` (中文版) 缺失的段落以符合英文內容。
+    - 在 `gemini.md` 新增 "Reload" (重讀) 巨集指令，用於透過 `git diff` 同步外部編輯。
+    - 清理 `gemini.md` 中過多的空行以提升可讀性。
+
+### [00:50] 開發評價與最終打磨
+- **任務**: 進行部落格系統的綜合評價並執行最終巨集更新。
+- **實作**:
+    - 評價系統為「專業級、輕量且高度客製化」，並給予架構與文件 5 星評價。
+    - 執行 "Update" 巨集以同步所有核心文件與版本資訊。
+
+### [02:00] 可靠性強化與評價匯出
+- **任務**: 強化日誌機制並匯出專案評價。
+- **實作**:
+    - 更新 `gemini.md` 要求詢問式 Prompt 需記錄回答摘要。
+    - 新增 "Reload" 巨集以透過 `git diff` 同步外部編輯。
+    - 透過切換至 Python 處理 (`utf-8-sig` 編碼) 修復 `.md` 檔案損壞 (中文亂碼) 問題。
+    - 強制 `.md` 格式規範 (單一空行)。
+    - 將綜合專案評價匯出至新的雙語文件 `EVALUATION.md`。
+
+### [02:30] 戰略藍圖與未來規劃
+- **任務**: 構思未來功能並建立長期開發藍圖。
+- **實作**:
+    - 深入分析高價值功能：伺服器端分頁、SQLite 支援、進階編輯器 (Editor.js) 與 Flickr/Google Sheets 整合。
+    - 評估社群互動與技術基礎建設的重要性。
+    - 將所有提案、優先級評等與可行性分析彙整至結構化的 `ROADMAP.md` 文件。
+
+---
+
 ## 2026-02-01
 
 ### [12:30] SQLite 3 Database Support and Interface Optimization
@@ -264,64 +493,125 @@ Recorded the development journey and original Prompt commands of this project th
 - **Implementation**:
     - Updated `langs/admin/zh_TW.php` and `en_US.php` with missing keys for Migration Tool, SQLite Init, and Dashboard.
     - Replaced hardcoded text in `admin/tool_migrate.php`, `admin/sqlite_init.php`, `admin/index.php`, and `admin/health_check.php`.
-        - Ensured full bilingual support across all new features (SQLite, Migration).
-    
-    ### [14:45] Backup Infrastructure
-    - **Task**: Establish a dedicated directory for backups.
-    - **Implementation**:
-        - Created `/backup` directory and added a bilingual `readme.md`.
-            - Updated `.gitignore` to exclude `/backup/*.zip`.
-        
-        ### [15:15] Backup Restore & Upload
-        - **Task**: Enhance backup tool with restore and upload capabilities.
-        - **Implementation**:
-            - Implemented system restoration from local ZIP backups (overwrites contents).
-            - Added file upload functionality for importing external backups, with file size limit checks and hints.
-            - Integrated SweetAlert2 for operation confirmations (Delete, Restore, Create) and status messages (Success/Error).
-            - Added loading overlays for time-consuming operations (Upload, Create, Restore).
-            - Updated i18n support for all new backup features.
-        
-        ---
-        
-        ## 2026-02-01 (繁體中文)    
-    ### [12:30] SQLite 3 資料庫支援與介面顯示優化
-    - **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
-    - **實作**:
-        - 在 `admin/data_provider.php` 的 `DataManager` 中新增 SQLite 支援。
-        - 建立 `admin/sqlite_init.php` 負責資料庫初始化與資料遷移（支援從檔案或 MySQL 匯入）。
-        - 建立 `api_sqlitebase.php` 供前端存取 SQLite 資料。
-        - 更新 `admin/login.php` 與 `admin/health_check.php` 支援 SQLite 狀態偵測與模式切換。
-        - 修正 MySQL 與 SQLite 間 `GROUP_CONCAT` 的語法相容性問題。
-        - 優化後台介面（儀表板與側邊欄），使其能正確辨識並顯示 SQLite 連線詳情與檔案資訊。
-        - 更新 `.gitignore` 與 `config.example.php` 以整合 SQLite 設定。
-    
-    ### [13:45] 全方位資料遷移系統
-    - **任務**: 實作支援檔案系統、MySQL 與 SQLite 三方互轉的強大遷移系統。
-    - **實作**:
-        - 強化 `admin/tool_migrate.php`，在所有模式下皆支援匯入 (Pull) 與匯出 (Push) 操作。
-        - 實作 `runDBMigration` 函數，處理資料庫對資料庫 (MySQL <-> SQLite) 的直接資料傳輸。
-        - 更新後台介面，根據當前模式與設定動態顯示可用的遷移目標。
-        - 在 `auth.php` 與 `health_check.php` 中加入嚴格的 PDO 擴充檢查，防止因環境不支援導致的致命錯誤。
-    
-    ### [14:05] 國際化 (i18n) 完整支援
-    - **任務**: 補齊新模組缺失的翻譯。
-    - **實作**:
-        - 更新 `langs/admin/zh_TW.php` 與 `en_US.php`，補上遷移工具、SQLite 初始化與儀表板相關的翻譯鍵值。
-        - 替換 `admin/tool_migrate.php`、`admin/sqlite_init.php`、`admin/index.php` 與 `admin/health_check.php` 中的硬編碼文字。
-        - 確保所有新功能 (SQLite, Migration) 皆支援完整雙語顯示。
-    
-    ### [14:45] 備份基礎建設
-    - **任務**: 建立專用的備份目錄。
-    - **實作**:
-            - 建立 `/backup` 目錄並新增雙語 `readme.md`。
-            - 更新 `.gitignore` 排除 `/backup/*.zip` 檔案。
-        
-        ### [15:15] 備份還原與上傳
-        - **任務**: 強化備份工具，新增還原與上傳功能。
-        - **實作**:
-            - 實作從本地 ZIP 備份檔還原系統的功能 (覆蓋內容)。
-            - 新增檔案上傳功能以匯入外部備份，並加入檔案大小限制檢查與提示。
-            - 整合 SweetAlert2 處理操作確認 (刪除、還原、建立) 與狀態訊息 (成功/失敗)。
-            - 加入 Loading 遮罩以處理耗時操作 (上傳、建立、還原) 的等待狀態。
-            - 更新所有新備份功能的 i18n 支援。
+    - Ensured full bilingual support across all new features (SQLite, Migration).
+
+### [14:45] Backup Infrastructure
+- **Task**: Establish a dedicated directory for backups.
+- **Implementation**:
+    - Created `/backup` directory and added a bilingual `readme.md`.
+    - Updated `.gitignore` to exclude `/backup/*.zip`.
+
+### [15:15] Backup Restore & Upload
+- **Task**: Enhance backup tool with restore and upload capabilities.
+- **Implementation**:
+    - Implemented system restoration from local ZIP backups (overwrites contents).
+    - Added file upload functionality for importing external backups, with file size limit checks and hints.
+    - Integrated SweetAlert2 for operation confirmations (Delete, Restore, Create) and status messages (Success/Error).
+    - Added loading overlays for time-consuming operations (Upload, Create, Restore).
+    - Updated i18n support for all new backup features.
+
+### [15:30] Backup Tool Optimization (PHP Config & Hints)
+- **Task**: Add user guidance for handling large backup files.
+- **Implementation**:
+    - Added PHP configuration hints (upload_max_filesize, post_max_size, etc.) in `admin/tool_backup.php` upload section.
+    - Provided example PHP.ini settings and FTP alternatives for large files.
+    - Updated language files (`zh_TW.php`, `en_US.php`) with new hint text.
+
+### [15:45] MySQL Database Backup & Restore
+- **Task**: Extend backup tool to support MySQL database mode.
+- **Implementation**:
+    - Implemented `createMysqlDump` to generate SQL structure and data dumps.
+    - Implemented `restoreMysqlDump` to parse and execute SQL dumps from ZIP.
+    - Updated `create_backup` to pack SQL dump + static resources (`preview`, `pic`, `static/icon-192.png`) into `dbsqlbase-*.zip`.
+    - Updated `restore_backup` to handle `dbsqlbase` files by restoring DB first, then static files.
+
+### [16:15] SQLite Database Backup & Restore
+- **Task**: Extend backup tool to support SQLite database mode.
+- **Implementation**:
+    - Added logic to pack the active SQLite database file + static resources into `sqlitebase-*.zip`.
+    - Added logic to restore SQLite DB file from ZIP to the configured path.
+    - Added helper functions (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) to fix 500 errors and reuse code.
+
+### [16:30] Backup List Filtering
+- **Task**: Avoid confusion by showing only relevant backup files.
+- **Implementation**:
+    - Updated `admin/tool_backup.php` to filter the backup list based on current mode:
+        - DB Mode: Show only `dbsqlbase-*.zip`
+        - SQLite Mode: Show only `sqlitebase-*.zip`
+        - File Mode: Show only `filebase-*.zip`
+
+---
+
+## 2026-02-01 (繁體中文)
+
+### [12:30] SQLite 3 資料庫支援與介面顯示優化
+- **任務**: 實作 SQLite 3 支援作為 MySQL 與檔案系統外的第三種選擇，並修正介面顯示不一致的問題。
+- **實作**:
+    - 在 `admin/data_provider.php` 的 `DataManager` 中新增 SQLite 支援。
+    - 建立 `admin/sqlite_init.php` 負責資料庫初始化與資料遷移（支援從檔案或 MySQL 匯入）。
+    - 建立 `api_sqlitebase.php` 供前端存取 SQLite 資料。
+    - 更新 `admin/login.php` 與 `admin/health_check.php` 支援 SQLite 狀態偵測與模式切換。
+    - 修正 MySQL 與 SQLite 間 `GROUP_CONCAT` 的語法相容性問題。
+    - 優化後台介面（儀表板與側邊欄），使其能正確辨識並顯示 SQLite 連線詳情與檔案資訊。
+    - 更新 `.gitignore` 與 `config.example.php` 以整合 SQLite 設定。
+
+### [13:45] 全方位資料遷移系統
+- **任務**: 實作支援檔案系統、MySQL 與 SQLite 三方互轉的強大遷移系統。
+- **實作**:
+    - 強化 `admin/tool_migrate.php`，在所有模式下皆支援匯入 (Pull) 與匯出 (Push) 操作。
+    - 實作 `runDBMigration` 函數，處理資料庫對資料庫 (MySQL <-> SQLite) 的直接資料傳輸。
+    - 更新後台介面，根據當前模式與設定動態顯示可用的遷移目標。
+    - 在 `auth.php` 與 `health_check.php` 中加入嚴格的 PDO 擴充檢查，防止因環境不支援導致的致命錯誤。
+
+### [14:05] 國際化 (i18n) 完整支援
+- **任務**: 補齊新模組缺失的翻譯。
+- **實作**:
+    - 更新 `langs/admin/zh_TW.php` 與 `en_US.php`，補上遷移工具、SQLite 初始化與儀表板相關的翻譯鍵值。
+    - 替換 `admin/tool_migrate.php`、`admin/sqlite_init.php`、`admin/index.php` 與 `admin/health_check.php` 中的硬編碼文字。
+    - 確保所有新功能 (SQLite, Migration) 皆支援完整雙語顯示。
+
+### [14:45] 備份基礎建設
+- **任務**: 建立專用的備份目錄。
+- **實作**:
+    - 建立 `/backup` 目錄並新增雙語 `readme.md`。
+    - 更新 `.gitignore` 排除 `/backup/*.zip` 檔案。
+
+### [15:15] 備份還原與上傳
+- **任務**: 強化備份工具，新增還原與上傳功能。
+- **實作**:
+    - 實作從本地 ZIP 備份檔還原系統的功能 (覆蓋內容)。
+    - 新增檔案上傳功能以匯入外部備份，並加入檔案大小限制檢查與提示。
+    - 整合 SweetAlert2 處理操作確認 (刪除、還原、建立) 與狀態訊息 (成功/失敗)。
+    - 加入 Loading 遮罩以處理耗時操作 (上傳、建立、還原) 的等待狀態。
+    - 更新所有新備份功能的 i18n 支援。
+
+### [15:30] 備份工具優化 (PHP 設定提示)
+- **任務**: 增加對大型備份檔處理的使用者引導。
+- **實作**:
+    - 在 `admin/tool_backup.php` 上傳區塊新增 PHP 設定提示 (upload_max_filesize, post_max_size 等)。
+    - 提供 PHP.ini 參數範例與大檔案的 FTP 替代方案建議。
+    - 更新語系檔 (`zh_TW.php`, `en_US.php`) 加入相關提示文字。
+
+### [15:45] MySQL 資料庫備份與還原
+- **任務**: 擴充備份工具以支援 MySQL 資料庫模式。
+- **實作**:
+    - 實作 `createMysqlDump` 產生 SQL 結構與資料備份。
+    - 實作 `restoreMysqlDump` 解析並執行 ZIP 內的 SQL 備份。
+    - 更新 `create_backup` 將 SQL 檔 + 靜態資源 (`preview`, `pic`, `static/icon-192.png`) 打包為 `dbsqlbase-*.zip`。
+    - 更新 `restore_backup` 支援 `dbsqlbase` 檔案，先還原資料庫再還原靜態檔案。
+
+### [16:15] SQLite 資料庫備份與還原
+- **任務**: 擴充備份工具以支援 SQLite 資料庫模式。
+- **實作**:
+    - 新增邏輯將使用中的 SQLite 資料庫檔 + 靜態資源打包為 `sqlitebase-*.zip`。
+    - 新增邏輯從 ZIP 中還原 SQLite DB 檔案至設定路徑。
+    - 新增 Helper 函數 (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) 修復 500 錯誤並重用程式碼。
+
+### [16:30] 備份列表過濾
+- **任務**: 避免混淆，僅顯示與當前模式相關的備份檔。
+- **實作**:
+    - 更新 `admin/tool_backup.php` 根據當前模式過濾列表：
+        - 資料庫模式: 僅顯示 `dbsqlbase-*.zip`
+        - SQLite 模式: 僅顯示 `sqlitebase-*.zip`
+        - 檔案模式: 僅顯示 `filebase-*.zip`
         
