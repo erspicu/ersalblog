@@ -10,38 +10,43 @@ This project is a photography blog system featuring a hybrid mode of **Static Si
 The project does not rely on a traditional database but utilizes the file system and plain text files:
 *   **Post Index**: Located at `contents/index_post.txt` (Git only tracks `readme.md`), using Pipe (`|`) separators to record publication time, filename, title, tags, and description.
 *   **Category System**: Located at `category/` (Git only tracks `readme.md`), utilizing directory structures to represent categories, containing empty files with names matching post filenames as indices.
-*   **SQLite 3 Database**: Supported as a flexible relational storage option via $sqlite_path in config.php, maintaining same schema as MySQL.
+*   **SQLite 3 Database**: Supported as a flexible relational storage option via `$sqlite_path` in `config.php`, maintaining same schema as MySQL.
 *   **Original Content**: Located at `contents/post_files/`, storing the original HTML fragments of the articles.
 
 ### 1.2 Hybrid Rendering Mode
 The system supports two operating modes:
 1.  **Dynamic SPA Mode (`blog.html`)**: 
     *   User accesses `blog.html`.
-    *   `static/blog.js` calls `api_filebase.php` via AJAX.
+    *   `static/blog.js` calls `api/api_filebase.php` via AJAX (path configurable in `config.js`).
     *   The PHP backend reads the text file database and returns JSON.
     *   The frontend uses the `<template>` tag for client-side rendering.
 2.  **Static Generation Mode (`make_html.php`)**:
     *   Executes a PHP script to read the database.
-    *   Uses `blog.html` as the base template.
-    *   Pre-renders all article pages (e.g., `2025xxxx.html`) and list pages (`blog_list.html`).
-    *   **Note**: These generated `.html` files are excluded by `.gitignore` and not included in version control.
+    *   Uses `blog.html` (specifically `static/blog_template.html`) as the base template.
+    *   Pre-renders all article pages into the `post/` directory (e.g., `post/2025xxxx.html`).
+    *   Generates list pages (`blog_list.html`) in the root directory.
+    *   **Note**: These generated `.html` files (and the `post/` directory) are excluded by `.gitignore`.
 
 ### 1.3 Configuration and Environment
 *   **Sensitive Data Separation**: 
     *   `config.php` and `config.js` contain database passwords and API settings and are ignored by Git.
     *   Developers should copy `config.example.php` and `config.example.js` to create local settings.
+*   **Theming System**:
+    *   Configurable via `config.js` (`theme_file` option).
+    *   Supports multiple CSS themes (e.g., `blog.css`, `blog-dark.css`).
+    *   Frontend dynamically loads the appropriate stylesheet based on configuration.
 *   **Initialization and Health Check**:
-    *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system, check environment compatibility (PHP 7.4+ and OS permissions), and generate `config.php` and `config.js`.
-    *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity before login.
-    *   **Database Initialization Wizard**: If the database is connected but missing tables, the system guides to `admin/db_init.php`, supporting import from files or creating sample data.
-    *   **File System Initialization Wizard**: If the file structure is incomplete (e.g., missing directories), the system guides to `admin/file_init.php`, supporting reverse export from the database to rebuild the file structure.
+    *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system, check environment compatibility, choose themes, and generate config files.
+    *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity.
+    *   **Database Initialization**: `admin/db_init.php` supports import from files or creating sample data.
+    -   **File System Initialization**: `admin/file_init.php` supports reverse export from the database to rebuild the file structure.
 *   **System Environment Detection**:
-    - **Detailed OS Info**: `admin/system_helper.php` provides granular detection of Linux distributions (via `/etc/os-release`) and Windows build numbers.
-    - **WSL2 Optimization**: Automatically identifies WSL2 environments and NTTFS mount points to bypass incompatible permission checks during installation.
+    - **Detailed OS Info**: `admin/system_helper.php` provides granular detection of Linux and Windows environments.
+    - **WSL2 Optimization**: Automatically identifies WSL2/NTFS environments to bypass incompatible permission checks.
 *   **Backup & Recovery System**:
-    - **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives based on the current active mode (filebase, dbsqlbase, or sqlitebase).
-    - **Intelligent Restore**: Automatically identifies backup types and performs SQL imports or file overwrites along with static resource restoration.
-    - **Environment Optimization**: Provides PHP.ini configuration guidance for handling large backup files.
+    - **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives based on the current active mode.
+    - **Optimization**: The `pic/` directory (original photos) is excluded from backups to reduce file size.
+    - **Intelligent Restore**: Automatically identifies backup types and restores data and static resources.
 
 ---
 
@@ -50,42 +55,51 @@ The system supports two operating modes:
 Listed below are key directories and file rules in the Git repository:
 
 *   **Root Directory**:
-    *   `blog.html`: Core SPA template and entry point.
+    *   `blog.html`: Core SPA entry point.
     *   `index.html`: Site homepage redirection.
-    *   `api_filebase.php`: Backend API providing JSON data.
     *   `make_html.php`: Static site generator.
-    *   `migrate_full.php`: Database migration tool (supports MySQL import).
-    *   `mini.py`: Python automation script for minification.
+    *   `mini.py`: Python automation script for minification (optimized to skip large directories).
+    *   `install.php`: System installation wizard.
+    *   `blog.css` / `blog-dark.css`: Main stylesheets (source).
+
+*   **`/api`**:
+    *   Contains backend API endpoints (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`).
+
+*   **`/post`**:
+    *   (Ignored) Destination for statically generated article HTML files.
+
+*   **`/MD`**:
+    *   Project documentation (`ARCHITECTURE.md`, `HISTORY.md`, `ROADMAP.md`, `gemini_log.md`).
 
 *   **`/contents`**:
-    *   Core of blog content. `index_post.txt` and `post_files/` are ignored by default; only `readme.md` is kept for description.
+    *   Core of blog content. `index_post.txt` and `post_files/` are ignored by default.
 
 *   **`/category`**:
-    *   Category index directory. Actual category folders are ignored; only `readme.md` is kept for description.
+    *   Category index directory. Actual category folders are ignored.
 
 *   **`/static`**:
-    *   Contains `blog.js` (core logic), `blog.css` (styles), `exif.js` (EXIF parsing library), and icons.
-    *   Image resources (`*.png`, `*.jpg`, `*.ico`) and minified resources (`*.min.*`) are ignored.
+    *   Contains `blog.js` (core logic), `blog_template.html` (SPA template source), `exif.js`, and icons.
+    *   Image resources and minified resources (`*.min.*`) are ignored.
 
 *   **`/preview`**:
     *   Contains article preview images and Open Graph images.
-    *   Actual image files (`*.jpg`) are ignored; only `readme.md` is kept.
 
 *   **`/pic`**:
     *   (Ignored) Stores a large number of original photos used within articles.
 
-*   **`/PHP_LIB`**:
-    *   Contains third-party PHP libraries like `html2text` and `dindent` used for formatting generated HTML.
+*   **`/admin`**:
+    *   Backend management system (`auth.php`, `index.php`, `posts.php`, etc.).
 
 ---
 
 ## 3. Key Technical Features
 
-*   **Photography Features**: Frontend integrates `exif.js` to automatically parse photo metadata (aperture, shutter, ISO, GPS) and dynamically display them in articles.
+*   **Photography Features**: Frontend integrates `exif.js` to automatically parse and display photo metadata.
 *   **Performance Optimization**: 
     *   `mini.py` automatically compresses JS/CSS.
     *   Image loading strategy: LCP (first image) Eager Loading, others Lazy Loading.
-*   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`, ensuring a lightweight repository without sensitive data.
+    *   Static generation optimizes resource paths (`../`) for subdirectories.
+*   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`.
 
 ---
 **Document Maintenance**: This document reflects the project architecture as of February 2026.
@@ -104,38 +118,42 @@ Listed below are key directories and file rules in the Git repository:
 專案不依賴傳統資料庫，而是使用檔案系統與純文字檔案：
 *   **文章索引**: 位於 `contents/index_post.txt` (Git 僅追蹤 `readme.md`)，採用 Pipe (`|`) 分隔，記錄發布時間、檔名、標題、標籤及摘要。
 *   **分類系統**: 位於 `category/` (Git 僅追蹤 `readme.md`)，利用資料夾結構代表分類，內含對應文章檔名的空檔案作為索引。
-*   **SQLite 3 資料庫**: 支援透過 config.php 中的 $sqlite_path 啟用輕量化關聯式儲存，與 MySQL 共享相同的資料表架構。
+*   **SQLite 3 資料庫**: 支援透過 config.php 中的 `$sqlite_path` 啟用輕量化關聯式儲存，與 MySQL 共享相同的資料表架構。
 *   **原始內容**: 位於 `contents/post_files/`，儲存文章的原始 HTML 片段。
 
 ### 1.2 混合渲染模式 (Hybrid Rendering)
 本系統支援兩種運作模式：
 1.  **動態 SPA 模式 (`blog.html`)**: 
     *   使用者存取 `blog.html`。
-    *   `static/blog.js` 透過 AJAX 呼叫 `api_filebase.php`。
+    *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php` (路徑於 `config.js` 設定)。
     *   PHP 後端讀取文字檔資料庫，回傳 JSON。
     *   前端利用 `<template>` 標籤進行客戶端渲染。
 2.  **靜態生成模式 (`make_html.php`)**:
     *   執行 PHP 腳本讀取資料庫。
-    *   利用 `blog.html` 作為基底樣板。
-    *   預先渲染所有文章頁面 (如 `2025xxxx.html`) 與列表頁 (`blog_list.html`)。
-    *   **注意**: 這些生成的 `.html` 檔案已被 `.gitignore` 排除，不納入版本控制。
+    *   利用 `static/blog_template.html` 作為基底樣板。
+    *   預先渲染所有文章頁面至 `post/` 目錄 (如 `post/2025xxxx.html`)。
+    *   在根目錄生成列表頁 (`blog_list.html`)。
+    *   **注意**: 這些生成的 `.html` 檔案與 `post/` 目錄已被 `.gitignore` 排除，不納入版本控制。
 
 ### 1.3 設定與環境 (Configuration)
 *   **敏感資料分離**: 
     *   `config.php` 與 `config.js` 包含資料庫密碼與 API 設定，已被 Git 忽略。
     *   開發者應複製 `config.example.php` 與 `config.example.js` 來建立本地設定。
+*   **主題系統 (Theming)**:
+    *   透過 `config.js` 中的 `theme_file` 選項進行設定。
+    *   支援多重 CSS 主題 (如 `blog.css`, `blog-dark.css`)。
+    *   前端根據設定動態載入對應的樣式表。
 *   **初始化與健康檢查 (Initialization)**:
-    *   **安裝精靈**: `install.php` 提供友善的介面協助使用者進行系統初始化，包含環境相容性檢測 (PHP 7.4+ 與作業系統權限) 並自動生成 `config.php` 與 `config.js`。
-    *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php`，在登入前自動驗證資料庫連線與檔案系統完整性。
-    *   **資料庫初始化精靈**: 若資料庫已連線但缺少資料表，系統會引導至 `admin/db_init.php`，支援從檔案匯入或建立範例資料。
-    - **檔案系統初始化精靈**: 若檔案結構不完整（如缺少目錄），系統會引導至 `admin/file_init.php`，支援從資料庫反向匯出資料以重建檔案結構。
+    *   **安裝精靈**: `install.php` 提供友善的介面協助使用者進行系統初始化、環境檢測、主題選擇並自動生成設定檔。
+    *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。
+    *   **資料庫/檔案系統初始化**: 透過 `admin/db_init.php` 與 `admin/file_init.php` 支援雙向資料遷移與結構重建。
 *   **系統環境偵測 (Environment Detection)**:
-    - **詳細 OS 資訊**: 透過 `admin/system_helper.php` 偵測 Linux 發行版詳細名稱 (透過 `/etc/os-release`) 或 Windows 具體建置版本號。
-    - **WSL2 優化**: 自動識別 WSL2 環境及其掛載的 NTFS 目錄，在安裝精靈中自動跳過無效的權限修正步驟。
+    - **詳細 OS 資訊**: 支援 Linux 發行版與 Windows 版本偵測。
+    - **WSL2 優化**: 自動識別 WSL2 環境並跳過無效的權限修正步驟。
 *   **備份與還原系統**:
-    - **多模式備份**: `admin/tool_backup.php` 根據當前模式建立 ZIP 壓縮包 (filebase, dbsqlbase, 或 sqlitebase)。
-    - **智慧還原**: 自動識別備份類型，執行 SQL 匯入或檔案覆蓋，並同步還原靜態資源。
-    - **環境優化**: 提供 PHP.ini 設定指引以處理大型備份檔案的上傳限制。
+    - **多模式備份**: 支援 File/MySQL/SQLite 模式備份。
+    - **優化**: `pic/` 目錄 (原始照片) 被排除在備份之外以縮減檔案大小。
+    - **智慧還原**: 自動識別並還原資料與靜態資源。
 
 ---
 
@@ -144,49 +162,51 @@ Listed below are key directories and file rules in the Git repository:
 以下列出 Git 儲存庫中的關鍵目錄與檔案規則：
 
 *   **根目錄**:
-    *   `blog.html`: 核心 SPA 樣板與入口。
-    *   `index.html`: 網站首頁導向。
-    *   `api_filebase.php`: 提供 JSON 資料的後端 API。
+    *   `blog.html`: 核心 SPA 入口。
+    *   `index.html`: 首頁導向。
     *   `make_html.php`: 靜態網站生成器。
-    *   `migrate_full.php`: 資料庫遷移工具 (支援 MySQL 匯入)。
-    *   `mini.py`: Python 自動化壓縮腳本 (Minify)。
+    *   `mini.py`: Python 自動化壓縮腳本 (已優化掃描效能)。
+    *   `install.php`: 系統安裝精靈。
+    *   `blog.css` / `blog-dark.css`: 主要樣式表原始檔。
+
+*   **`/api`**:
+    *   存放後端 API 程式 (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`)。
+
+*   **`/post`**:
+    *   (已忽略) 靜態生成文章的輸出目錄。
+
+*   **`/MD`**:
+    *   專案文件 (`ARCHITECTURE.md`, `HISTORY.md`, `ROADMAP.md`, `gemini_log.md`)。
 
 *   **`/contents`**:
-    *   部落格內容核心。`index_post.txt` 與 `post_files/` 預設被忽略，僅保留 `readme.md` 說明。
+    *   部落格內容核心。`index_post.txt` 與 `post_files/` 預設被忽略。
 
 *   **`/category`**:
-    *   分類索引目錄。實際分類資料夾被忽略，僅保留 `readme.md` 說明。
+    *   分類索引目錄。實際分類資料夾被忽略。
 
 *   **`/static`**:
-    *   存放 `blog.js` (核心邏輯)、`blog.css` (樣式)、`exif.js` (EXIF 解析庫) 與圖示。
-    *   圖片資源 (`*.png`, `*.jpg`, `*.ico`) 與壓縮後的資源 (`*.min.*`) 已被忽略。
+    *   存放 `blog.js` (核心邏輯)、`blog_template.html` (SPA 樣板原始碼)、`exif.js` 與圖示。
+    *   圖片資源與壓縮後的資源 (`*.min.*`) 已被忽略。
 
 *   **`/preview`**:
     *   存放文章預覽圖與 Open Graph 圖片。
-    *   實際圖檔 (`*.jpg`) 已被忽略，僅保留 `readme.md`。
 
 *   **`/pic`**:
     *   (已忽略) 存放文章內使用的大量原始照片。
 
-*   **`/PHP_LIB`**:
-    *   包含 `html2text` 與 `dindent` 等第三方 PHP 函式庫，用於格式化生成的 HTML。
-
 *   **`/admin`**:
-    *   `auth.php`: Core authentication and global includes.
-    *   `system_helper.php`: Shared system utility functions (OS detection).
-    *   `data_provider.php`: Abstract data manager for DB/File/SQLite modes.
-    *   `health_check.php`: Pre-login system integrity verification.
-    *   `tool_backup.php`: Integrated backup and restore tool.
+    *   後台管理系統核心程式 (`auth.php`, `index.php`, `posts.php` 等)。
 
 ---
 
 ## 3. 關鍵技術特性
 
-*   **攝影功能**: 前端整合 `exif.js` 自動解析照片元數據 (光圈、快門、ISO、GPS)，並在文章中動態展示。
+*   **攝影功能**: 前端整合 `exif.js` 自動解析並展示照片元數據。
 *   **效能優化**: 
     *   `mini.py` 自動壓縮 JS/CSS。
     *   圖片載入策略：LCP (首張圖) Eager Loading，其餘 Lazy Loading。
-*   **版本控制**: 透過 `.gitignore` 嚴格區分「程式碼」(Code) 與「內容/生成物」(Content/Artifacts)，確保儲存庫輕量且無敏感資料。
+    *   靜態生成支援自動修正子目錄資源路徑 (`../`)。
+*   **版本控制**: 透過 `.gitignore` 嚴格區分「程式碼」與「內容/生成物」。
 
 ---
 **文件維護**: 本文件反映 2026 年 2 月之專案架構。
