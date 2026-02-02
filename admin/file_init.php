@@ -42,7 +42,8 @@ function initFileSystem($pdo = null, $importDB = false) {
         $baseDir . '/contents/post_files',
         $baseDir . '/category',
         $baseDir . '/preview',
-        $baseDir . '/static'
+        $baseDir . '/static',
+        $baseDir . '/post'
     ];
 
     // 1. Create Directories

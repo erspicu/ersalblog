@@ -5,19 +5,26 @@
  */
 
 error_reporting(E_ALL & ~E_NOTICE);
-require_once 'config.php';
+require_once '../config.php';
 
 // Initialize Database Connection
 try {
     if (!isset($sqlite_path) || empty($sqlite_path)) {
         throw new Exception("SQLite path not configured in config.php");
     }
-    // Check if file exists. If not, API cannot function (Init must be done in Admin)
-    if (!file_exists($sqlite_path)) {
-         throw new Exception("SQLite database file not found: " . $sqlite_path);
+    
+    // Adjust path for API subdirectory context
+    $dbPath = $sqlite_path;
+    if (strpos($sqlite_path, '/') !== 0 && strpos($sqlite_path, ':') === false) {
+        $dbPath = __DIR__ . '/../' . $sqlite_path;
     }
 
-    $dsn = "sqlite:" . $sqlite_path;
+    // Check if file exists. If not, API cannot function (Init must be done in Admin)
+    if (!file_exists($dbPath)) {
+         throw new Exception("SQLite database file not found: " . $dbPath);
+    }
+
+    $dsn = "sqlite:" . $dbPath;
     $pdo = new PDO($dsn, null, null, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC

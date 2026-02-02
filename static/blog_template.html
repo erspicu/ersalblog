@@ -3,23 +3,23 @@
 <html lang="zh-hant">
     <head>
         <!--title-->
-        <title>Baxermux的攝影Blog</title>
+        <title>{blog_title}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <!--canonical-->
-        <link rel="canonical" href="https://www.baxermux.org/ersalblog/blog.html" />
+        <link rel="canonical" href="{site_url}blog.html" />
         <!--description-->
-        <meta name="description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
+        <meta name="description" content="{blog_description}" />
         <!--og:title-->
-        <meta property="og:title" content="Baxermux的攝影Blog" />
+        <meta property="og:title" content="{blog_title}" />
         <!--og:description-->
-        <meta property="og:description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
+        <meta property="og:description" content="{blog_description}" />
         <!--og:image-->
-        <meta property="og:image" content="https://www.baxermux.org/ersalblog/preview/BaxerMuxBlog.jpg" />
+        <meta property="og:image" content="{blog_preview}" />
         <meta property="og:type" content="article" />
         <!--og:url-->
-        <meta property="og:url" content="https://www.baxermux.org/ersalblog/blog.html" />
-        <meta property="og:site_name" content="Baxermux的攝影Blog" />
+        <meta property="og:url" content="{site_url}blog.html" />
+        <meta property="og:site_name" content="{blog_title}" />
         <!--twitter:card-->
         <meta name="twitter:card" content="summary_large_image" />
 
@@ -49,9 +49,9 @@
         <div class="outermost">
             <div class="head">
                 <a href="blog.html" class="blog_name_link">
-                    <p id="blog_title_loader" class="blog_name">Baxermux的攝影Blog</p>
+                    <p id="blog_title_loader" class="blog_name">{blog_title}</p>
                 </a>
-                <p id="blog_comment_loader" class="blog_comment">這個blog就拿來放置一些攝影的作品集好了.</p>
+                <p id="blog_comment_loader" class="blog_comment">{blog_introduce}</p>
             </div>
             <main id="post_body">
                 <!--loading過場動畫start https://css-loaders.com/classic/ -->
@@ -108,7 +108,7 @@
                 <div style="max-width: 100vw; padding: 5px">
                     <div
                         class="fb-like"
-                        data-href="https://www.baxermux.org/ersalblog/{{link}}"
+                        data-href="{site_url}{{link}}"
                         data-width=""
                         data-layout=""
                         data-action=""

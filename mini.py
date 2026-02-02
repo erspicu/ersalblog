@@ -45,10 +45,15 @@ def minify_files():
     count_js = 0
     count_css = 0
 
-    for dirpath, _, filenames in os.walk(root_dir):
-        # 忽略 .git, node_modules 等目錄
-        if 'node_modules' in dirpath or '.git' in dirpath:
-            continue
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # 優化：直接從 dirnames 中移除要忽略的目錄，阻止 os.walk 進入
+        # 這樣可以大幅提升掃描速度，特別是當 node_modules 很大時
+        dirs_to_ignore = ['.git', 'node_modules', 'backup', '.vscode', '.idea']
+        
+        # 必須倒序移除，避免修改 list 時 index 錯亂
+        for d in list(dirnames):
+            if d in dirs_to_ignore:
+                dirnames.remove(d)
 
         for filename in filenames:
             full_path = os.path.join(dirpath, filename)

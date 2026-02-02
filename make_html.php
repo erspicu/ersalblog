@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/config.php';
+
 require_once(__DIR__ . "/PHP_LIB/html2text/Html2Text.php");
 require_once(__DIR__ . "/PHP_LIB/html2text/Html2TextException.php");
 
@@ -212,8 +215,78 @@ function remove_templates($html)
 
     return preg_replace('/<template\b[^>]*>.*?<\/template>\s*/is', '', $html);
 }
+
+/**
+ * 修正 post/ 目錄下靜態檔案的資源路徑
+ * 將原本指向根目錄的資源加上 "../"
+ */
+function fix_resource_paths_for_post_dir($html)
+{
+    // 1. 處理 CSS/JS/Images 等靜態資源引用
+    // 針對 href="static/...", src="static/...", href="blog.css" 等
+    // 注意：不處理已經是絕對路徑 (http://, https://, /) 或 data URI 的連結
+    
+    // 替換 static 目錄引用
+    $html = str_replace('href="static/', 'href="../static/', $html);
+    $html = str_replace('src="static/', 'src="../static/', $html);
+    
+    // 替換根目錄下的核心檔案引用
+    $root_files = [
+        'config.js',
+        'blog.css', 'blog.min.css',
+        'favicon.ico', 'apple-touch-icon.png',
+        'blog.html', 'blog_list.html'
+    ];
+    
+    foreach ($root_files as $file) {
+        $html = str_replace('href="' . $file, 'href="../' . $file, $html);
+        $html = str_replace('src="' . $file, 'src="../' . $file, $html);
+    }
+    
+    // 修正 OG Image 預覽圖路徑 (原本可能是 preview/...)
+    // 假設 preview 目錄也在根目錄
+    $html = str_replace('content="preview/', 'content="../preview/', $html);
+    
+    // 修正 JS 中可能動態載入的 CSS 路徑 (blog_template.html 中的 script)
+    // var css_load = '<link rel="stylesheet" href="' + themeFile + min + ".css" + ver + '"/>';
+    // 我們需要將 href="' + themeFile 替換為 href="../' + themeFile
+    $html = str_replace("href=\"' + themeFile", "href=\"../' + themeFile", $html);
+
+    return $html;
+}
+
+function build_index()
+{
+// ... (rest of function remains same)
+
+    $html_blog_template = file_get_contents("static/blog_template.html");
+
+    // 直接從 $GLOBALS 抓取
+    $replace_map = [
+        '{blog_title}'       => $GLOBALS['blog_title'],
+        '{blog_description}' => $GLOBALS['blog_description'],
+        '{blog_introduce}'   => $GLOBALS['blog_introduce'],
+        '{blog_preview}'     => $GLOBALS['blog_preview'],
+        '{site_url}'         => $GLOBALS['site_url']
+    ];
+
+
+    $result_html = str_replace(
+        array_keys($replace_map),
+        array_values($replace_map),
+        $html_blog_template
+    );
+
+    file_put_contents("blog.html", $result_html);
+
+    echo "blog.html render ok!<br>\r\n";
+}
+
 function build()
 {
+
+    build_index();
+
     $index_file = "contents/index_post.txt";
     $index = file_get_contents($index_file);
     $index = str_replace("\r\n", "\n", $index);
@@ -231,6 +304,11 @@ function build()
     $indenter = new Indenter();
     $blog_template_mtime = filemtime("blog.html");
 
+    // 確保 post 目錄存在
+    if (!is_dir("post")) {
+        mkdir("post", 0755, true);
+    }
+
     // --- 文章分類功能準備 ---
     $category = array();
     if (is_dir("category")) {
@@ -238,6 +316,14 @@ function build()
         $dirs = del_by_value($dirs, ".");
         $dirs = del_by_value($dirs, "..");
         foreach ($dirs as $dir) {
+
+            // 1. 組合出完整的路徑，因為 is_dir 需要完整路徑判斷
+            $full_path = "category/" . $dir;
+
+            // 2. 關鍵判斷：如果它「不是」目錄，就跳過 (continue)
+            if (!is_dir($full_path)) {
+                continue;
+            }
             $files = scandir("category/" . $dir);
             $files = del_by_value($files, ".");
             $files = del_by_value($files, "..");
@@ -253,12 +339,16 @@ function build()
 
         $line_arr = explode("|", $val);
         // $line_arr: [0]時間, [1]檔名, [2]標題, [3]標籤, [4]描述
+        
+        $post_filename = $line_arr[1];
+        $post_target_path = "post/" . $post_filename;
 
         // ============================================
         // 1. 生成「文章總列表」的單一項目 (不再 Hardcode)
         // ============================================
         $listItem = $templates['tmpl_blog_list_item'];
-        $listItem = str_replace('{{link}}', $line_arr[1], $listItem);
+        // 列表頁在根目錄，連結需指向 post/檔名
+        $listItem = str_replace('{{link}}', "post/" . $post_filename, $listItem);
         $listItem = str_replace('{{time}}', $line_arr[0], $listItem);
         $listItem = str_replace('{{title}}', $line_arr[2], $listItem);
         $all_posts_list_html .= $listItem . "\r\n";
@@ -267,18 +357,18 @@ function build()
         // ============================================
         // 2. 快取檢查 (Cache Check)
         // ============================================
-        if (file_exists($line_arr[1])) {
-            $org_mtime = file_exists("contents/post_files/" . $line_arr[1]) ? filemtime("contents/post_files/" . $line_arr[1]) : 0;
-            $cached_mtime = filemtime($line_arr[1]);
+        if (file_exists($post_target_path)) {
+            $org_mtime = file_exists("contents/post_files/" . $post_filename) ? filemtime("contents/post_files/" . $post_filename) : 0;
+            $cached_mtime = filemtime($post_target_path);
 
             if ($org_mtime < $cached_mtime && $blog_template_mtime < $cached_mtime) {
-                echo $line_arr[1] . " cached.<br>\r\n";
+                echo $post_target_path . " cached.<br>\r\n";
                 continue;
             }
         }
 
         // 讀取文章原始 HTML
-        $post_html_content = file_exists("contents/post_files/" . $line_arr[1]) ? file_get_contents("contents/post_files/" . $line_arr[1]) : "";
+        $post_html_content = file_exists("contents/post_files/" . $post_filename) ? file_get_contents("contents/post_files/" . $post_filename) : "";
 
 
         // ============================================
@@ -286,44 +376,46 @@ function build()
         // ============================================
         $parts_array = array_merge($begin_html_line_arr);
         $description_exist = (count($line_arr) == 5);
-        $icon_name = "icon-" . str_replace(".html", ".jpg", $line_arr[1]);
+        $icon_name = "icon-" . str_replace(".html", ".jpg", $post_filename);
         $icon_exist = file_exists(__DIR__ . "/preview/" . $icon_name);
 
         foreach ($parts_array as $key => $item) {
             // 檢查是否匹配 (這裡示範完全相同)
             if (str_has($item, '<!--title-->')) {
-                $parts_array[$key] = "	<title>" . "Baxermux的攝影Blog" . "-" . $line_arr[2] . "</title>";
+                $parts_array[$key + 1] = "	<title>" . $GLOBALS['blog_title'] . "-" . $line_arr[2] . "</title>";
             } else if (str_has($item, '<!--og:title-->')) {
-                $parts_array[$key] = '	<meta property="og:title" content="' . $line_arr[2] . '" />';
+                $parts_array[$key + 1] = '	<meta property="og:title" content="' . $line_arr[2] . '" />';
             } else if (str_has($item, '<!--description-->')) {
                 if ($description_exist) {
-                    $parts_array[$key] = '	<meta name="description" content="' . $line_arr[4] . '">';
+                    $parts_array[$key + 1] = '	<meta name="description" content="' . $line_arr[4] . '">';
                 } else {
-                    $parts_array[$key] = "";
+                    $parts_array[$key + 1] = "";
                 }
             } else if (str_has($item, '<!--og:description-->')) {
 
                 if ($description_exist) {
-                    $parts_array[$key] = '	<meta property="og:description" content="' . $line_arr[4] . '">';
+                    $parts_array[$key + 1] = '	<meta property="og:description" content="' . $line_arr[4] . '">';
                 } else {
-                    $parts_array[$key] = "";
+                    $parts_array[$key + 1] = "";
                 }
             } else if (str_has($item, '<!--og:url-->')) {
-                $parts_array[$key] = '	<meta property="og:url" content="https://www.baxermux.org/ersalblog/' . $line_arr[1] . '" />';
+                // OG URL 也要加上 post/
+                $parts_array[$key] = '	<meta property="og:url" content="' . $GLOBALS['site_url'] . 'post/' . $post_filename . '" />';
             } else if (str_has($item, '<!--og:image-->')) {
                 if ($icon_exist) {
-                    $parts_array[$key] = '	<meta property="og:image" content="https://www.baxermux.org/ersalblog/preview/' . $icon_name . '" />';
+                    $parts_array[$key + 1] = '	<meta property="og:image" content="' . $GLOBALS['site_url'] . 'preview/' . $icon_name . '" />';
                 } else {
-                    $parts_array[$key] = "";
+                    $parts_array[$key + 1] = "";
                 }
             } else if (str_has($item, '<!--twitter:card-->')) {
                 if ($icon_exist) {
-                    $parts_array[$key] = '	<meta name="twitter:card" content="summary_large_image" />';
+                    $parts_array[$key + 1] = '	<meta name="twitter:card" content="summary_large_image" />';
                 } else {
-                    $parts_array[$key] = "";
+                    $parts_array[$key + 1] = "";
                 }
             } else if (str_has($item, '<!--canonical-->')) {
-                $parts_array[$key] = '	<link rel="canonical" href="https://www.baxermux.org/ersalblog/' . $line_arr[1] . '" />';
+                // Canonical 也要加上 post/
+                $parts_array[$key + 1] = '	<link rel="canonical" href="' . $GLOBALS['site_url'] . 'post/' . $post_filename . '" />';
             }
         }
         $begin_html = implode("\r\n", $parts_array);
@@ -357,7 +449,7 @@ function build()
         // [B] 處理分類
         $in_category = array();
         foreach ($category as $c) {
-            if (in_array(substr($line_arr[1], 0, 14), $c['posts'])) {
+            if (in_array(substr($post_filename, 0, 14), $c['posts'])) {
                 array_push($in_category, $c['name']);
             }
         }
@@ -376,17 +468,26 @@ function build()
         $postHtml = $templates['tmpl_post_main'];
         $postHtml = str_replace('{{time}}', $line_arr[0], $postHtml);
         $postHtml = str_replace('{{title}}', $line_arr[2], $postHtml);
-        $postHtml = str_replace('{{link}}', $line_arr[1], $postHtml);
+        
+        // 這裡的 {{link}} 用於文章內部的連結（例如標題連結），因為是單頁，連自己或同目錄下的檔案，保持檔名即可
+        // 不過原本的模板在 tmpl_post_main 裡的 {{link}} 是 href="{{link}}"，如果是 post/abc.html 頁面，
+        // 連結 href="abc.html" 會重整頁面，這是正確的。
+        $postHtml = str_replace('{{link}}', $post_filename, $postHtml);
+        
         $postHtml = str_replace('{{content}}', $post_html_content, $postHtml);
         $postHtml = str_replace('{{tags_block}}', $tagsBlockHtml, $postHtml);
         $postHtml = str_replace('{{category_block}}', $catsBlockHtml, $postHtml);
         // [D] 寫入單頁檔案
         $render = $begin_html . "\r\n" . $postHtml . "\r\n" . $html_template_parts[1];
+        
+        // 【新增】修正資源路徑 (static -> ../static)
+        $render = fix_resource_paths_for_post_dir($render);
+
         $render = remove_templates($render);
         $render = '<!doctype html><html  lang="zh-hant">' . optimize_content_images_php($render) . "</html>";
         $render = $indenter->indent($render);
-        file_put_contents($line_arr[1], $render);
-        echo $line_arr[1] . " render ok!<br>\r\n";
+        file_put_contents($post_target_path, $render);
+        echo $post_target_path . " render ok!<br>\r\n";
     }
 
 
@@ -397,25 +498,25 @@ function build()
     $parts_array = array_merge($begin_html_line_arr);
     foreach ($parts_array as $key => $item) {
         if (str_has($item, '<!--title-->')) {
-            $parts_array[$key] = "	<title>" . "Baxermux的攝影Blog-文章總列表</title>";
+            $parts_array[$key + 1] = "	<title>" . $GLOBALS['blog_title'] . "-文章總列表</title>";
         } else if (str_has($item, '<!--og:title-->')) {
-            $parts_array[$key] = '	<meta property="og:title" content="Baxermux的攝影Blog-文章總列表" />';
+            $parts_array[$key + 1] = '	<meta property="og:title" content="' . $GLOBALS['blog_title'] . '-文章總列表" />';
         } else if (str_has($item, '<!--description-->')) {
-            $parts_array[$key] = "";
+            $parts_array[$key + 1] = "";
         } else if (str_has($item, '<!--og:description-->')) {
-            $parts_array[$key] = "";
+            $parts_array[$key + 1] = "";
         } else if (str_has($item, '<!--og:url-->')) {
-            $parts_array[$key] = '	<meta property="og:url" content="https://www.baxermux.org/ersalblog/blog_list.html" />';
+            $parts_array[$key + 1] = '	<meta property="og:url" content="' . $GLOBALS['site_url'] . 'blog_list.html" />';
         } else if (str_has($item, '<!--og:image-->')) {
-            $parts_array[$key] = "";
+            $parts_array[$key + 1] = "";
         } else if (str_has($item, '<!--twitter:card-->')) {
             if ($icon_exist) {
-                $parts_array[$key] = '	<meta name="twitter:card" content="summary_large_image" />';
+                $parts_array[$key + 1] = '	<meta name="twitter:card" content="summary_large_image" />';
             } else {
-                $parts_array[$key] = "";
+                $parts_array[$key + 1] = "";
             }
         } else if (str_has($item, '<!--canonical-->')) {
-            $parts_array[$key] = '	<link rel="canonical" href="https://www.baxermux.org/ersalblog/blog_list.html" />';
+            $parts_array[$key + 1] = '	<link rel="canonical" href="' . $GLOBALS['site_url'] . 'blog_list.html" />';
         }
     }
 
@@ -436,19 +537,36 @@ function build()
     // 6. 處理 Sitemap (保持不變)
     // ============================================
     date_default_timezone_set('Asia/Taipei');
-    $site_path = "https://www.baxermux.org/ersalblog/";
+    $site_path = $GLOBALS['site_url'];
     $site_map_begin = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     $site_map_render = "";
-    $files = scandir(".");
+    
+    // 掃描 post 目錄下的檔案
+    $files = scandir("post");
     $files = del_by_value($files, ".");
     $files = del_by_value($files, "..");
+    
+    // 根目錄需要加入的檔案
     $add_list = array("blog.html", "blog_list.html");
-    foreach ($files as $file) {
-        if (endsWith($file, ".html") || in_array($file, $add_list)) {
-            $last_m = date("c", filemtime($file));
-            $site_map_render .= "\n    <url>\n        <loc>$site_path$file</loc>\n        <lastmod>$last_m</lastmod>\n    </url>";
+    
+    // 先處理根目錄檔案
+    foreach ($add_list as $file) {
+        if (file_exists($file)) {
+             $last_m = date("c", filemtime($file));
+             $site_map_render .= "\n    <url>\n        <loc>$site_path$file</loc>\n        <lastmod>$last_m</lastmod>\n    </url>";
         }
     }
+
+    // 再處理 post 目錄下的檔案
+    foreach ($files as $file) {
+        if (endsWith($file, ".html")) {
+            $full_path = "post/" . $file;
+            $last_m = date("c", filemtime($full_path));
+            // 網址路徑加上 post/
+            $site_map_render .= "\n    <url>\n        <loc>$site_path" . "post/$file</loc>\n        <lastmod>$last_m</lastmod>\n    </url>";
+        }
+    }
+    
     $site_map_render = $site_map_begin . $site_map_render . "\n</urlset>";
     file_put_contents("sitemap.xml", $site_map_render);
     echo "sitemap.xml render ok!<br>\r\n";

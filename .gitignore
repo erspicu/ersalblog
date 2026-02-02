@@ -6,6 +6,7 @@ config.js
 /*.html
 !/blog.html
 !/index.html
+/post/
 
 # Generated Sitemap
 /sitemap.xml

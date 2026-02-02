@@ -1,0 +1,452 @@
+/* blog-dark.css - Dark Mode / High Contrast / A11y Optimized */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background-color: #121212; /* [A11y] 極深灰背景 */
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    line-height: 1.6;
+}
+
+body {
+    background-color: #121212;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    font-size: 16px;
+    color: #e0e0e0; /* [A11y] 淺灰文字，避免純白刺眼 */
+}
+
+/* [HTML5] 通用容器設定 */
+.outermost {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    background-color: #1e1e1e; /* [A11y] 內容區深灰 */
+    padding-bottom: 10px;
+    padding-top: 20px;
+    margin: auto;
+    display: block;
+}
+
+.head {
+    width: 96%;
+    margin: auto;
+    background-color: #2d2d2d; /* [A11y] 標題區稍亮 */
+    border-color: #444444;
+    border-style: solid;
+    margin-bottom: 10px;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    display: block;
+}
+
+.blog_name {
+    font-size: xx-large;
+    font-weight: bold;
+    color: #4caf50; /* [A11y] 淺綠色 */
+    margin: 5px;
+}
+
+.blog_comment {
+    font-size: medium;
+    font-weight: bold;
+    color: #bbbbbb;
+    margin: 5px;
+}
+
+.blog_name_link {
+    text-decoration: none;
+}
+
+.post_content img {
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    max-width: 65%;
+    border-color: #555555;
+    border-style: solid;
+    height: auto;
+    vertical-align: middle;
+}
+
+.post_content hr {
+    width: 98%;
+    height: 1px;
+    background-color: #555555;
+    border: none;
+}
+
+/* 側邊欄與列表區域 */
+#AllPostList,
+#AllTagList,
+#AllcategoryList,
+#blog_search,
+#AllCommentList,
+#AllDateList {
+    background-color: #252525; /* [A11y] 側邊欄深灰 */
+    border-color: #444444;
+    margin: auto;
+    width: 96%;
+    text-align: center;
+    border-style: solid;
+    display: block;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    padding-bottom: 10px;
+}
+
+.post_outermost {
+    width: 96%;
+    background-color: #2d2d2d; /* [A11y] 文章區塊背景 */
+    margin: auto;
+    border-style: solid;
+    border-color: #444444;
+    margin-bottom: 10px;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 10px;
+    display: block;
+}
+
+.post_title_outermost {
+    width: 100%;
+    background-color: #333333;
+    margin: auto;
+    display: block;
+    border: 1px solid #555555;
+    border-radius: 3px;
+    padding: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.post_time {
+    margin: 5px;
+    font-size: medium;
+    display: block;
+    color: #aaaaaa;
+}
+
+.post_outermost .post_title {
+    margin: 5px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: block;
+    line-height: 1.3;
+    color: #66b3ff; /* [A11y] 淺藍色，提升標題辨識度 */
+}
+
+/* [新增] 標題連結樣式 (取代 HTML 行內樣式) */
+.post_outermost .post_title a {
+    color: #66b3ff;
+    text-decoration: none;
+}
+
+/* 內文連結顏色調整 */
+.post_content a {
+    color: #66b3ff; /* [A11y] 淺藍色連結 */
+}
+.post_content a:visited {
+    color: #b388ff; /* [A11y] 淺紫色已讀連結 */
+}
+
+.more_div {
+    margin: auto;
+    text-align: center;
+}
+.more_a {
+    text-decoration: none;
+}
+.more_p {
+    color: #ff6666; /* [A11y] 淺紅色 */
+    font-size: large;
+    font-weight: bold;
+}
+
+.all_a {
+    text-decoration: none;
+}
+.all_p {
+    color: #ff6666;
+    font-size: large;
+    font-weight: bold;
+    margin: 4px;
+}
+
+.back_top {
+    text-align: center;
+    color: #ff6666;
+    font-size: large;
+    font-weight: bold;
+}
+.top_a {
+    text-decoration: none;
+}
+.read_title {
+    color: #e0e0e0;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+.post_list_border {
+    border-style: solid;
+    padding-left: 20px;
+    border-color: #444444;
+}
+
+/* [SEO/A11y] 鍵盤焦點狀態 */
+a:focus {
+    outline: 3px solid #66b3ff;
+    outline-offset: 2px;
+}
+
+/* Loading 動畫 */
+#loading {
+    width: 25%;
+    margin: auto;
+}
+.loader {
+    width: fit-content;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 30px;
+    clip-path: inset(0 3ch 0 0);
+    animation: l4 1s steps(4) infinite;
+    margin: auto;
+    color: #e0e0e0;
+}
+.loader:before {
+    content: "Loading...";
+}
+@keyframes l4 {
+    to {
+        clip-path: inset(0 -1ch 0 0);
+    }
+}
+
+/* 分類與標籤容器 */
+.categorys_title,
+.tags_title {
+    font-size: medium;
+    font-weight: bold;
+    margin: 4px 0 5px 0;
+    color: #dddddd;
+}
+.categorys,
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-left: 5%;
+}
+
+/* [UI] 標籤方塊化設計 */
+.tag_p {
+    display: inline-block;
+    background-color: #333333; /* 深灰背景 */
+    color: #e0e0e0;
+    border: 1px solid #555555;
+    padding: 2px 4px;
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 標籤 Hover 互動效果 */
+.tag_link:hover .tag_p {
+    background-color: #e0e0e0; /* 反白 */
+    color: #121212;
+    border-color: #ffffff;
+}
+
+.category_p {
+    color: #66b3ff; /* 淺藍 */
+    margin: 0 10px 5px 0;
+}
+.tag_link,
+.date_link,
+.category_link {
+    text-decoration: none;
+}
+.category_item_region,
+.tag_item_region {
+    margin-left: 6px;
+    padding-bottom: 0px;
+}
+
+.tag_list_region,
+.date_list_region,
+.category_list_region {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin: 10px 5px 10px 5px;
+    border-style: solid;
+    width: 98%;
+    border-color: #444444;
+    padding: 6px 6px 6px 6px;
+    margin: auto;
+}
+
+/* 文字對齊修正 */
+#AllTagList p,
+#AllcategoryList p,
+#AllDateList p,
+#AllCommentList p,
+#blog_search_google p {
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    align-items: center;
+}
+#AllDateList {
+    text-align: left;
+}
+
+.RegionFunctionTitle {
+    margin: 8px;
+}
+
+/* 日期選單與影片 */
+ul,
+#myUL {
+    list-style-type: none;
+}
+#myUL {
+    margin-left: 5px;
+    padding: 0;
+    width: 95%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.caret {
+    cursor: pointer;
+    user-select: none;
+    color: #e0e0e0;
+}
+.caret::before {
+    content: "\25B6";
+    color: #e0e0e0;
+    display: inline-block;
+    margin-right: 6px;
+}
+.caret-down::before {
+    transform: rotate(90deg);
+}
+.nested {
+    display: none;
+    padding-left: 30px;
+}
+.active {
+    display: block;
+    padding-left: 30px;
+}
+
+.date_link {
+    color: #66b3ff;
+}
+
+.youtube-video {
+    aspect-ratio: 16 / 9;
+    width: 60%;
+    max-width: 100%;
+}
+.youtube-vide-portrait {
+    aspect-ratio: 16 / 9;
+    width: 99%;
+    max-width: 100%;
+}
+
+/* ====================================================== */
+/* 2026-01-26 新增：單頁 vs 列表頁 顯示邏輯控制              */
+/* ====================================================== */
+
+.top_a {
+    display: none;
+}
+
+.more_div {
+    display: block;
+}
+
+body.is-single-page .top_a {
+    display: block;
+}
+
+body.is-single-page .more_div {
+    display: none;
+}
+
+/* --- 優化：內文頁的標題處理 --- */
+body.is-single-page .post_title a {
+    pointer-events: none;
+    cursor: default;
+    color: #e0e0e0; /* [A11y] 內文標題淺灰 */
+    text-decoration: none;
+}
+
+/* ====================================================== */
+/* [2026-01-26 新增] 圖片與影片響應式核心邏輯 (取代 JS)      */
+/* ====================================================== */
+
+#post_body img {
+    display: block;
+    margin: 0 auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    /* [Dark Mode] 降低圖片亮度，避免刺眼 */
+    filter: brightness(0.85);
+    transition: filter 0.3s;
+}
+
+#post_body img:hover {
+    filter: brightness(1); /* Hover 時恢復亮度 */
+}
+
+@media (min-width: 769px) {
+    #post_body img {
+        max-width: 85%;
+    }
+}
+
+#post_body iframe {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 16 / 9;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    @media (orientation: portrait) {
+        #post_body img {
+            max-width: 98%;
+        }
+        #post_body iframe {
+            width: 100%;
+        }
+    }
+    @media (orientation: landscape) {
+        #post_body img {
+            max-width: 65%;
+        }
+        #post_body iframe {
+            width: 70%;
+        }
+    }
+}

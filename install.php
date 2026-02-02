@@ -158,9 +158,76 @@ if (isset($_GET['action'])) {
             if ($item->isDir()) { if (!@chmod($path, 0755)) $failed++; else $fixed++; } 
             else { if (in_array(pathinfo($path, PATHINFO_EXTENSION), ['php', 'html', 'js', 'css'])) { if (!@chmod($path, 0644)) $failed++; else $fixed++; } } 
         }
-        @chmod(__DIR__, 0755);
         if ($failed > 0) { $response['success'] = false; $response['message'] = sprintf(_t('fix_finished_errors'), $failed); } 
         else { $response['success'] = true; $response['message'] = _t('fix_success'); }
+        echo json_encode($response); exit;
+
+    } elseif ($_GET['action'] === 'install') {
+        if (file_exists('config.php')) {
+            $response['message'] = _t('config_exists');
+            echo json_encode($response); exit;
+        }
+
+        $blog_title = $_POST['blog_title'] ?? '';
+        $blog_description = $_POST['blog_description'] ?? '';
+        $blog_introduce = $_POST['blog_introduce'] ?? '';
+        $blog_preview = $_POST['blog_preview'] ?? '';
+        $site_url = $_POST['site_url'] ?? '';
+        $timezone = $_POST['timezone'] ?? 'Asia/Taipei';
+        $debug_mode = isset($_POST['debug_mode']) ? 'true' : 'false';
+
+        $api_type = $_POST['api_type'] ?? 'api_dbsqlbase';
+        $sqlite_path = $_POST['sqlite_path'] ?? 'blog.sqlite3';
+
+        $db_host = $_POST['db_host'] ?? 'localhost';
+        $db_name = $_POST['db_name'] ?? '';
+        $db_user = $_POST['db_user'] ?? '';
+        $db_pass = $_POST['db_pass'] ?? '';
+
+        $admin_user = $_POST['admin_user'] ?? 'admin';
+        $admin_pass = $_POST['admin_pass'] ?? '';
+        $session_secret = $_POST['session_secret'] ?? '';
+
+        $cse_id = $_POST['cse_id'] ?? '';
+        $theme_file = $_POST['theme_file'] ?? 'blog';
+
+        // Generate config.php
+        $config_php = "<?php\n\n";
+        $config_php .= "\$blog_title = " . var_export($blog_title, true) . "; //Blog網站標題\n";
+        $config_php .= "\$blog_description = " . var_export($blog_description, true) . "; //Blog SEO描述屬性\n";
+        $config_php .= "\$blog_introduce = " . var_export($blog_introduce, true) . "; //描述一下你的blog用途或是特色\n";
+        $config_php .= "\$blog_preview = " . var_export($blog_preview, true) . "; //預覽圖網址\n";
+        $config_php .= "\$site_url = " . var_export($site_url, true) . "; // 網站網址\n\n";
+        $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n\n";
+        $config_php .= "\$dbConfig = [\n";
+        $config_php .= "    'host'     => " . var_export($db_host, true) . ",\n";
+        $config_php .= "    'dbname'   => " . var_export($db_name, true) . ",\n";
+        $config_php .= "    'username' => " . var_export($db_user, true) . ",\n";
+        $config_php .= "    'password' => " . var_export($db_pass, true) . ",\n";
+        $config_php .= "    'charset'  => 'utf8mb4',\n";
+        $config_php .= "    'debug_mode' => $debug_mode\n";
+        $config_php .= "];\n\n";
+        $config_php .= "\$adminConfig = [\n";
+        $config_php .= "    'username' => " . var_export($admin_user, true) . ",\n";
+        $config_php .= "    'password' => " . var_export($admin_pass, true) . ",\n";
+        $config_php .= "    'session_secret' => " . var_export($session_secret, true) . "\n";
+        $config_php .= "];\n\n";
+        $config_php .= "date_default_timezone_set(" . var_export($timezone, true) . ");\n";
+        $config_php .= "?>";
+
+        // Generate config.js
+        $config_js = "var AppConfig = {\n";
+        $config_js .= "    api_type: " . var_export($api_type, true) . ",\n";
+        $config_js .= "    theme_file: " . var_export($theme_file, true) . ",\n";
+        $config_js .= "    cse_id: " . var_export($cse_id, true) . "\n";
+        $config_js .= "};";
+
+        if (@file_put_contents('config.php', $config_php) && @file_put_contents('config.js', $config_js)) {
+            $response['success'] = true;
+            $response['message'] = _t('install_success');
+        } else {
+            $response['message'] = _t('install_failed') . " Permission denied or write error.";
+        }
         echo json_encode($response); exit;
     }
 }
@@ -280,6 +347,7 @@ if (isset($_GET['action'])) {
                     <div class="col-md-12"><label for="blog_title" class="form-label"><?php echo _t('blog_title'); ?></label><input type="text" class="form-control" id="blog_title" name="blog_title" placeholder="<?php echo _t('blog_title_placeholder'); ?>" required></div>
                     <div class="col-md-12"><label for="blog_description" class="form-label"><?php echo _t('blog_desc'); ?></label><input type="text" class="form-control" id="blog_description" name="blog_description" placeholder="<?php echo _t('blog_desc_placeholder'); ?>"></div>
                     <div class="col-md-12"><label for="blog_introduce" class="form-label"><?php echo _t('blog_intro'); ?></label><textarea class="form-control" id="blog_introduce" name="blog_introduce" rows="3" placeholder="<?php echo _t('blog_intro_placeholder'); ?>"></textarea></div>
+                    <div class="col-md-12"><label for="blog_preview" class="form-label"><?php echo _t('blog_preview'); ?></label><input type="url" class="form-control" id="blog_preview" name="blog_preview" placeholder="<?php echo _t('blog_preview_placeholder'); ?>"></div>
                     <div class="col-md-6"><label for="site_url" class="form-label"><?php echo _t('site_url'); ?></label><input type="url" class="form-control" id="site_url" name="site_url" required><div class="form-text"><?php echo _t('site_url_help'); ?></div></div>
                     <div class="col-md-6"><label for="timezone" class="form-label"><?php echo _t('timezone'); ?></label>
                         <select class="form-select" id="timezone" name="timezone">
@@ -359,12 +427,20 @@ if (isset($_GET['action'])) {
             <!-- 4. Frontend -->
             <div class="step-section">
                 <h4 class="step-title"><?php echo _t('step_4'); ?></h4>
+                <div class="mb-3">
+                    <label class="form-label"><?php echo _t('theme_file'); ?></label>
+                    <select class="form-select" name="theme_file">
+                        <option value="blog" selected><?php echo _t('theme_light'); ?></option>
+                        <option value="blog-dark"><?php echo _t('theme_dark'); ?></option>
+                    </select>
+                    <div class="form-text"><?php echo _t('theme_file_help'); ?></div>
+                </div>
                 <div class="mb-3"><label class="form-label"><?php echo _t('cse_id'); ?></label><input type="text" class="form-control" id="cse_id" name="cse_id">
                     <div class="form-text"><?php echo _t('cse_id_help'); ?></div>
                 </div>
             </div>
 
-            <div class="d-grid gap-2"><button type="submit" class="btn btn-primary btn-lg" disabled><?php echo _t('btn_install'); ?></button></div>
+            <div class="d-grid gap-2"><button type="submit" class="btn btn-primary btn-lg"><?php echo _t('btn_install'); ?></button></div>
         </form>
     </div>
 </div>
@@ -377,6 +453,36 @@ if (isset($_GET['action'])) {
         const rootUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
         document.getElementById('site_url').value = rootUrl;
         toggleDbSettings();
+
+        // Handle form submission
+        document.getElementById('installForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const orig = btn.innerHTML; btn.disabled = true; btn.innerHTML = '🚀 Installing...';
+            
+            const fd = new FormData(this);
+            fetch('?action=install', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'Success', 
+                            text: data.message,
+                            confirmButtonText: 'Go to Admin Login'
+                        }).then(() => {
+                            window.location.href = 'admin/login.php';
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message });
+                        btn.disabled = false; btn.innerHTML = orig;
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({ icon: 'error', title: 'Error', text: ajaxError });
+                    btn.disabled = false; btn.innerHTML = orig;
+                });
+        });
     });
 
     function toggleDbSettings() {

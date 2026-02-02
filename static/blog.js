@@ -139,7 +139,7 @@ if (pathName.endsWith("blog.html")) {
     if (commentEl) commentEl.style.display = "none";
 
     // 使用 fetch 替代 $.ajax
-    fetch(AppConfig["api_type"] + ".php" + queryString)
+    fetch("api/" + AppConfig["api_type"] + ".php" + queryString)
         .then(function (response) {
             if (!response.ok) {
                 throw new Error("HTTP error " + response.status);
@@ -212,7 +212,8 @@ if (pathName.endsWith("blog.html")) {
                         var day = post.post_index.substring(6, 8);
 
                         html = html.replace(/{{day}}/g, day);
-                        html = html.replace(/{{link}}/g, post.post_index);
+                        // 修正：連結需指向 post/ 目錄
+                        html = html.replace(/{{link}}/g, "post/" + post.post_index);
                         html = html.replace(/{{title}}/g, post.title); // 注意：確認您的資料來源 title 欄位名稱
 
                         return html;
@@ -265,7 +266,8 @@ if (pathName.endsWith("blog.html")) {
                 }
 
                 // 3. 替換主文章欄位
-                mainHtml = mainHtml.replace(/{{link}}/g, post.post_index);
+                // 修正：連結需指向 post/ 目錄
+                mainHtml = mainHtml.replace(/{{link}}/g, "post/" + post.post_index);
                 mainHtml = mainHtml.replace(/{{time}}/g, post.post_time);
                 mainHtml = mainHtml.replace(/{{title}}/g, post.post_title);
 

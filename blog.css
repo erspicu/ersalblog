@@ -157,6 +157,12 @@ body {
     color: #000000;
 }
 
+/* [新增] 標題連結樣式 (取代 HTML 行內樣式) */
+.post_outermost .post_title a {
+    color: #000000;
+    text-decoration: none;
+}
+
 .more_div {
     margin: auto;
     text-align: center;

@@ -1,4 +1,4 @@
-﻿# Blog Project Roadmap & Feature Proposals (v2026.02.01)
+﻿# Blog Project Roadmap & Feature Proposals (v2026.02.03)
 
 This document organizes the discussions and evaluations regarding future feature expansions for the BaxerMux Photography Blog. It serves as a strategic reference for long-term development.
 
@@ -19,12 +19,19 @@ This document organizes the discussions and evaluations regarding future feature
 *   **Implementation**: 
     *   One-click SQL dump and full-site ZIP (database + static resources).
     *   **Hot Backup**: Built-in "DB to File" and "File to DB" bidirectional migration tools.
+    *   **Optimization**: Excluded heavy `pic/` directory from backups to reduce size.
 
 ### 1.4 Security Enhancements (Status: COMPLETED ✅)
 *   **Implementation**: 
     *   **CSRF Protection**: Token-based validation for all data-changing actions.
     *   **Rate Limiting**: Login lockout mechanism via `attempts.log` (5 fails / 15 mins).
     *   **Session Hardening**: HttpOnly, SameSite=Strict, and ID regeneration.
+
+### 1.5 Architecture Refactoring (Status: COMPLETED ✅)
+*   **Implementation**:
+    *   **API Centralization**: Moved `api_*.php` files to `api/` directory.
+    *   **Static Output**: Generated static pages are now organized in `post/` directory.
+    *   **Resource Paths**: Automated `../` relative path correction for static generation.
 
 ---
 
@@ -79,12 +86,12 @@ This document organizes the discussions and evaluations regarding future feature
 
 ## 5. UI/UX & Social Engagement
 
-### 5.1 Style & Theme Settings (Priority: Medium)
+### 5.1 Style & Theme Settings (Status: COMPLETED ✅)
 *   **Reasoning**: Visual "Vibe" is critical for photographers.
-*   **Proposal**: 
-    *   **Dark Mode**: Essential for making photo colors pop.
-    *   **Layout Toggle**: Switch between Grid (Visual) and List (Story) modes.
-    *   **CSS Variables**: Use `:root` variables for easy theme customization without rewriting CSS.
+*   **Implementation**: 
+    *   **Theme Switcher**: Configurable via `config.js` (`theme_file`).
+    *   **Dark Mode**: Implemented `blog-dark.css` with high-contrast accessibility optimizations.
+    *   **Installation**: Integrated theme selection into the installation wizard.
 
 ### 5.2 Social Interaction
 *   **Proposal**: 
@@ -93,7 +100,7 @@ This document organizes the discussions and evaluations regarding future feature
 
 ---
 
-# 部落格專案開發藍圖與功能提案 (v2026.02.01)
+# 部落格專案開發藍圖與功能提案 (v2026.02.03)
 
 此文件整理了關於 BaxerMux 攝影部落格未來功能擴充的討論與評估，作為長期開發的戰略參考。
 
@@ -114,12 +121,19 @@ This document organizes the discussions and evaluations regarding future feature
 *   **實作**：
     *   實作一鍵產生 SQL 備份與全站 ZIP（含資料庫與靜態資源）。
     *   **資料遷移**：實作了完善的資料庫與檔案系統雙向遷移與還原工具。
+    *   **優化**：備份時排除 `pic/` 目錄以減小檔案體積。
 
 ### 1.4 安全性強化 (狀態：已完成 ✅)
 *   **實作**：
     *   **CSRF 防護**：所有資料變更操作均已加入 Token 驗證。
     *   **登入限制**：實作基於 IP 的 `attempts.log` 鎖定機制（5 次失敗鎖 15 分鐘）。
     *   **Session 強化**：強制 HttpOnly、SameSite=Strict 以及登入後 ID 重生。
+
+### 1.5 架構重構 (狀態：已完成 ✅)
+*   **實作**：
+    *   **API 集中化**：將 `api_*.php` 檔案移至 `api/` 目錄。
+    *   **靜態輸出**：靜態網頁現在會統一生成至 `post/` 目錄。
+    *   **路徑修正**：實作了 `../` 相對路徑的自動修正機制。
 
 ---
 
@@ -174,12 +188,12 @@ This document organizes the discussions and evaluations regarding future feature
 
 ## 5. UI/UX 與社群互動
 
-### 5.1 樣式與主題設定 (優先級：中)
+### 5.1 樣式與主題設定 (狀態：已完成 ✅)
 *   **理由**：視覺氛圍是攝影部落格的靈魂。
-*   **提案**：
-    *   **深色模式**：最能突顯照片色彩。
-    *   **佈局切換**：提供網格流與列表流供使用者切換。
-    *   **CSS 變數**：利用變數輕鬆更換品牌主題色。
+*   **實作**：
+    *   **主題切換**：透過 `config.js` (`theme_file`) 進行配置。
+    *   **深色模式**：實作 `blog-dark.css` 並針對無障礙對比度進行優化。
+    *   **安裝整合**：已將主題選擇整合至安裝精靈中。
 
 ### 5.2 社群互動
 *   **提案**：
@@ -188,4 +202,5 @@ This document organizes the discussions and evaluations regarding future feature
 
 ---
 **Document Created**: 2026-02-01
+**Last Updated**: 2026-02-03
 **Source**: Discussion between User & Gemini CLI

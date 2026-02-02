@@ -303,7 +303,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'create_backup') {
         
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-            $dirs = ['category', 'contents', 'preview', 'pic'];
+            $dirs = ['category', 'contents', 'preview', 'post'];
             foreach ($dirs as $dir) {
                 $fullPath = $baseDir . '/' . $dir;
                 if (is_dir($fullPath)) {
@@ -385,7 +385,7 @@ $uploadLimitStr = getUploadLimit();
 // --- Shared Helpers ---
 
 function addStaticFilesToZip($zip, $baseDir) {
-    $dirs = ['preview', 'pic'];
+    $dirs = ['preview', 'post'];
     foreach ($dirs as $dir) {
         $fullPath = $baseDir . '/' . $dir;
         if (is_dir($fullPath)) {
@@ -413,7 +413,7 @@ function addStaticFilesToZip($zip, $baseDir) {
 }
 
 function restoreStaticFiles($srcDir, $destDir) {
-     foreach(['preview', 'pic', 'static'] as $d) {
+     foreach(['preview', 'static', 'post'] as $d) {
          if (is_dir($srcDir . '/' . $d)) {
              $src = $srcDir . '/' . $d;
              $dst = $destDir . '/' . $d;

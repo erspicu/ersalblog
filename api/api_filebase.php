@@ -48,14 +48,14 @@ function get_Category_index($category_ch, $index_page)
   $ret_date = array();
   $ret_date_post = array();
 
-  $category_post_index = scandir("category/" . $category_ch);
+  $category_post_index = scandir("../category/" . $category_ch);
 
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
 
     if (in_array(str_replace(".html", "", $line_arr[1]), $category_post_index)) {
-      $html = file_get_contents("contents/post_files/" . $line_arr[1]);
+      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
       //檢查有沒有在特定分類內start
@@ -89,7 +89,7 @@ function get_daterange_index($date_param, $index_page)
 
     //改成檢查年跟月是否合乎範圍
     if (startsWith($line_arr[0], $year . "-" . $mon)) {
-      $html = file_get_contents("contents/post_files/" . $line_arr[1]);
+      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
       //檢查有沒有在特定分類內start
@@ -135,7 +135,7 @@ function get_tag_index($tag, $index_page)
     $tags = explode(",", trim($line_arr[3]));
 
     if (in_array($tag, $tags)) {
-      $html = file_get_contents("contents/post_files/" . $line_arr[1]);
+      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
       //檢查有沒有在特定分類內
@@ -164,7 +164,7 @@ function get_index($index_page)
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
-    $html = file_get_contents("contents/post_files/" . $line_arr[1]);
+    $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
     $html_split = explode("<!--more-->", $html);
 
     //檢查有沒有在特定分類內start
@@ -291,11 +291,13 @@ function check_category($category, $line)
 function category_deal()
 {
   $category = array();
-  $dirs = scandir("category");
+  $dirs = scandir("../category");
   $dirs = del_by_value($dirs, ".");
   $dirs = del_by_value($dirs, "..");
   foreach ($dirs as $dir) {
-    $files = scandir("category/" . $dir);
+    if (!is_dir("../category/" . $dir)) continue; // 跳過非目錄的檔案 (例如 readme.md)
+    
+    $files = scandir("../category/" . $dir);
     $files = del_by_value($files, ".");
     $files = del_by_value($files, "..");
     array_push($category, array('name' => $dir, 'count' => count($files), 'posts' => $files));
@@ -306,7 +308,7 @@ function category_deal()
 //取得索引資料
 function get_contents()
 {
-  $index_file = "contents/index_post.txt";
+  $index_file = "../contents/index_post.txt";
   $index = file_get_contents($index_file);
   $index  = str_replace("\r\n", "\n", $index);
   $arr = explode("\n", $index);
