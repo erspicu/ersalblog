@@ -131,3 +131,4 @@
 - [2026-02-03 00:52:15] (UTC+8) 修正 api/api_filebase.php：修復 get_index 函式中 file_get_contents 的路徑錯誤，解決 post_content 回傳空值的問題。
 - [2026-02-03 00:58:10] (UTC+8) 修正樣板連結樣式：移除 blog_template.html 中標題連結的行內樣式，並更新 CSS (blog.css/blog-dark.css) 確保各主題下連結顏色顯示正確。
 - [2026-02-03 01:05:30] (UTC+8) 同步配置與安裝：更新 config.example.js 並強化 install.php，在安裝過程中新增佈景主題 (Theme) 選擇功能，確保新舊配置與安裝流程一致。
+- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建議。
