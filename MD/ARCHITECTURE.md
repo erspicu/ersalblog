@@ -47,6 +47,12 @@ The system supports two operating modes:
     - **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives based on the current active mode.
     - **Optimization**: The `pic/` directory (original photos) is excluded from backups to reduce file size.
     - **Intelligent Restore**: Automatically identifies backup types and restores data and static resources.
+*   **Draft & Status System**:
+    - **File Mode**: Uses `.html.tmp` extension for hidden drafts.
+    - **DB Mode**: Added `status` column to track 'draft' vs 'published'.
+    - **Filtering**: Automatically hides drafts from public APIs and static generation.
+*   **Admin Settings GUI**:
+    - **Settings Page**: `admin/settings.php` allows graphical editing of `config.js` settings (API Type, Theme, Google CSE ID).
 
 ---
 
@@ -95,6 +101,7 @@ Listed below are key directories and file rules in the Git repository:
 ## 3. Key Technical Features
 
 *   **Photography Features**: Frontend integrates `exif.js` to automatically parse and display photo metadata.
+*   **Advanced Content Editing**: Integrated **TinyMCE 6** (Local Deployment) with custom `<!--more-->` PageBreak support and dynamic localization.
 *   **Performance Optimization**: 
     *   `mini.py` automatically compresses JS/CSS.
     *   Image loading strategy: LCP (first image) Eager Loading, others Lazy Loading.
@@ -151,9 +158,15 @@ Listed below are key directories and file rules in the Git repository:
     - **詳細 OS 資訊**: 支援 Linux 發行版與 Windows 版本偵測。
     - **WSL2 優化**: 自動識別 WSL2 環境並跳過無效的權限修正步驟。
 *   **備份與還原系統**:
-    - **多模式備份**: 支援 File/MySQL/SQLite 模式備份。
+    - **多模式備份**: 支援 File/MySQL/SQLite 模式備份集。
     - **優化**: `pic/` 目錄 (原始照片) 被排除在備份之外以縮減檔案大小。
     - **智慧還原**: 自動識別並還原資料與靜態資源。
+*   **草稿與狀態系統**:
+    - **檔案模式**: 利用 `.html.tmp` 副檔名達成草稿隱藏。
+    - **資料庫模式**: 新增 `status` 欄位追蹤「草稿」與「發布」狀態。
+    - **自動過濾**: 前台 API 與靜態生成器會自動排除未發布的文章。
+*   **網站設定管理 (GUI)**:
+    - **設定頁面**: `admin/settings.php` 提供圖形介面修改 `config.js` (API 模式、佈景主題、Google CSE ID)。
 
 ---
 
@@ -202,6 +215,7 @@ Listed below are key directories and file rules in the Git repository:
 ## 3. 關鍵技術特性
 
 *   **攝影功能**: 前端整合 `exif.js` 自動解析並展示照片元數據。
+*   **進階內容編輯**: 整合 **TinyMCE 6** (本地化部署)，支援視覺化插入 `<!--more-->` 繼續閱讀標記與語系自動切換。
 *   **效能優化**: 
     *   `mini.py` 自動壓縮 JS/CSS。
     *   圖片載入策略：LCP (首張圖) Eager Loading，其餘 Lazy Loading。

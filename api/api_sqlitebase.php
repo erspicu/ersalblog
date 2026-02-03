@@ -109,6 +109,7 @@ function get_data($filter_type, $filter_value)
             FROM blog_posts p
             LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
             LEFT JOIN blog_categories c ON pc.category_id = c.id
+            WHERE p.status = 'published'
             GROUP BY p.id
             ORDER BY p.post_date DESC";
 

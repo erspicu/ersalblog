@@ -1,0 +1,190 @@
+<?php
+require_once 'auth.php';
+require_once 'data_provider.php';
+requireLogin();
+
+$dataManager = new DataManager();
+$configFile = __DIR__ . '/../config.js';
+$msg = '';
+$error = '';
+
+// Helper to read config values
+function getConfigValues($content) {
+    $values = [];
+    if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
+    if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
+    if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
+    return $values;
+}
+
+// Read current config
+$configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
+$currentConfig = getConfigValues($configContent);
+
+// Handle Save
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate CSRF
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF Validation Failed");
+    }
+
+    $newApi = $_POST['api_type'] ?? 'api_filebase';
+    $newTheme = $_POST['theme_file'] ?? 'blog';
+    $newCse = $_POST['cse_id'] ?? '';
+
+    // Update Content using Regex to preserve formatting/comments
+    $newContent = $configContent;
+    
+    // API Type
+    $newContent = preg_replace("/(api_type:\s*')([^']+)(')/", "$1$newApi$3", $newContent);
+    // Theme
+    $newContent = preg_replace("/(theme_file:\s*')([^']+)(')/", "$1$newTheme$3", $newContent);
+    // CSE ID
+    $newContent = preg_replace("/(cse_id:\s*')([^']*)(')/", "$1$newCse$3", $newContent);
+
+    // Backup check: if regex failed (file structure changed), force rewrite
+    if ($newContent === null || $newContent === $configContent) {
+        // Fallback or just accept it might be same
+        // If content is empty/invalid, reconstruct
+        if (empty($newContent) || strlen($newContent) < 10) {
+             $newContent = "var AppConfig = {\n    api_type: '$newApi',\n    theme_file: '$newTheme',\n    cse_id: '$newCse'\n};";
+        }
+    }
+
+    if (file_put_contents($configFile, $newContent)) {
+        $msg = __('msg_settings_saved');
+        $currentConfig = getConfigValues($newContent); // Refresh
+    } else {
+        $error = __('error_config_write');
+    }
+}
+
+// Scan Themes
+$themeFiles = glob(__DIR__ . '/../blog*.css');
+$themes = [];
+foreach ($themeFiles as $f) {
+    if (strpos($f, '.min.css') !== false) continue; // Skip minified
+    $name = basename($f, '.css');
+    $themes[] = $name;
+}
+if (empty($themes)) $themes = ['blog'];
+
+?>
+<!DOCTYPE html>
+<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo __('settings_title'); ?> - Blog Admin</title>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
+        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
+        .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
+        .main-content { padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
+        <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
+        </a>
+        <hr>
+        <div class="text-center mb-3">
+            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : (($dataManager->getSource() === 'sqlite') ? 'bg-info text-dark' : 'bg-warning text-dark'); ?>">
+                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : (($dataManager->getSource() === 'sqlite') ? 'SQLite' : __('mode_file_short')); ?>
+            </span>
+        </div>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="index.php">
+                    <?php echo __('nav_dashboard'); ?>
+                </a>
+            </li>
+            <li>
+                <a href="posts.php">
+                    <?php echo __('nav_posts'); ?>
+                </a>
+            </li>
+            <li>
+                <a href="categories.php">
+                    <?php echo __('nav_categories'); ?>
+                </a>
+            </li>
+            <li>
+                <a href="tool_migrate.php">
+                    <?php echo __('nav_import'); ?>
+                </a>
+            </li>
+            <li>
+                <a href="tool_backup.php">
+                    <?php echo __('nav_backup'); ?>
+                </a>
+            </li>
+            <li>
+                <a href="settings.php" class="active">
+                    <?php echo __('nav_settings'); ?>
+                </a>
+            </li>
+        </ul>
+        <hr>
+        <div class="dropdown">
+            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
+            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex-grow-1 bg-light">
+        <h2 class="mb-4"><?php echo __('settings_title'); ?></h2>
+
+        <?php if ($msg): ?>
+            <div class="alert alert-success"><?php echo $msg; ?></div>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?php echo $error; ?></div>
+        <?php endif; ?>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_api_type'); ?></label>
+                        <select name="api_type" class="form-select">
+                            <option value="api_filebase" <?php echo ($currentConfig['api_type'] == 'api_filebase') ? 'selected' : ''; ?>><?php echo __('opt_api_file'); ?> (api_filebase)</option>
+                            <option value="api_dbsqlbase" <?php echo ($currentConfig['api_type'] == 'api_dbsqlbase') ? 'selected' : ''; ?>><?php echo __('opt_api_db'); ?> (api_dbsqlbase)</option>
+                            <option value="api_sqlitebase" <?php echo ($currentConfig['api_type'] == 'api_sqlitebase') ? 'selected' : ''; ?>><?php echo __('opt_api_sqlite'); ?> (api_sqlitebase)</option>
+                        </select>
+                        <div class="form-text">控制前端網頁讀取資料的來源 API。</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_theme'); ?></label>
+                        <select name="theme_file" class="form-select">
+                            <?php foreach ($themes as $t): ?>
+                                <option value="<?php echo htmlspecialchars($t); ?>" <?php echo ($currentConfig['theme_file'] == $t) ? 'selected' : ''; ?>><?php echo htmlspecialchars($t); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_cse_id'); ?></label>
+                        <input type="text" name="cse_id" class="form-control" value="<?php echo htmlspecialchars($currentConfig['cse_id'] ?? ''); ?>">
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary"><?php echo __('btn_save_settings'); ?></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require 'common_js_inc.php'; ?>
+</body>
+</html>

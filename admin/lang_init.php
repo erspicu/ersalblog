@@ -7,12 +7,17 @@ $langBaseDir = dirname(__DIR__) . '/langs/admin';
 $availableLangs = [];
 $defaultLang = 'zh_TW';
 
-// 掃描可用語系
+// 掃描可用語系 (僅掃描 admin- 開頭的檔案)
 if (is_dir($langBaseDir)) {
     $scan = scandir($langBaseDir);
     foreach ($scan as $f) {
         if ($f !== '.' && $f !== '..' && pathinfo($f, PATHINFO_EXTENSION) === 'php') {
-            $availableLangs[] = pathinfo($f, PATHINFO_FILENAME);
+            // 過濾掉 install 開頭 (雖然我們只找 admin-，但明確排除也好，不過主要邏輯是只收 admin-)
+            if (strpos($f, 'admin-') === 0) {
+                // 移除 admin- 前綴，只保留語系代碼 (如 en_US)
+                $code = str_replace('admin-', '', pathinfo($f, PATHINFO_FILENAME));
+                $availableLangs[] = $code;
+            }
         }
     }
 }
@@ -28,12 +33,13 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], $availableLangs)) {
     setcookie('admin_lang', $currentLang, time() + 86400 * 30, '/'); 
 }
 
-// 載入語系檔
-$langFile = $langBaseDir . '/' . $currentLang . '.php';
+// 載入語系檔 (加上 admin- 前綴)
+$langFile = $langBaseDir . '/admin-' . $currentLang . '.php';
 if (file_exists($langFile)) {
     $lang = require $langFile;
 } else {
-    $lang = require $langBaseDir . '/' . $defaultLang . '.php';
+    // Fallback
+    $lang = require $langBaseDir . '/admin-' . $defaultLang . '.php';
 }
 
 /**

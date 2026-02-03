@@ -27,6 +27,19 @@ A lightweight, high-performance blog system designed specifically for photograph
 5. Alternatively, add posts in `contents/index_post.txt` for File mode.
 6. Run `make_html.php` to generate static pages.
 
+## Acknowledgements & Third-Party Libraries
+This project utilizes the following open-source libraries:
+
+### Core & Frontend
+- **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas): Used in `make_html.php` for HTML beautification.
+- **[html2text](https://github.com/soundasleep/html2text)** (Jevon Wright): Used for converting HTML to plain text for metadata processing.
+- **[exif-js](https://github.com/exif-js/exif-js)**: Used in the frontend (`static/exif.js`) to read and display EXIF data.
+
+### Admin Panel
+- **[Bootstrap 5](https://getbootstrap.com/)**: Modern responsive UI framework.
+- **[SweetAlert2](https://sweetalert2.github.io/)**: Beautiful and customizable alert dialogs.
+- **[TinyMCE 6](https://www.tiny.cloud/)**: Advanced WYSIWYG editor with custom `<!--more-->` support.
+
 ---
 
 # BaxerMux 攝影部落格 (Photography Blog)
@@ -74,3 +87,5 @@ A lightweight, high-performance blog system designed specifically for photograph
   後台介面採用 Bootstrap 5 框架構建，提供響應式且現代化的 UI。
 - **[SweetAlert2](https://sweetalert2.github.io/)**:
   用於替代 JavaScript 原生彈出視窗，提供美觀且高度可客製化的提示訊息。
+- **[TinyMCE 6](https://www.tiny.cloud/)**:
+  進階視覺化 (WYSIWYG) 文章編輯器，具備自定義 `<!--more-->` 繼續閱讀支援。

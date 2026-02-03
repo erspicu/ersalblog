@@ -53,8 +53,10 @@ function get_Category_index($category_ch, $index_page)
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
+    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
 
     if (in_array(str_replace(".html", "", $line_arr[1]), $category_post_index)) {
+      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -86,9 +88,11 @@ function get_daterange_index($date_param, $index_page)
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
+    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
 
     //改成檢查年跟月是否合乎範圍
     if (startsWith($line_arr[0], $year . "-" . $mon)) {
+      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -133,8 +137,10 @@ function get_tag_index($tag, $index_page)
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
+    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
 
     if (in_array($tag, $tags)) {
+      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -164,6 +170,7 @@ function get_index($index_page)
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
+    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
     $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
     $html_split = explode("<!--more-->", $html);
 
@@ -300,7 +307,16 @@ function category_deal()
     $files = scandir("../category/" . $dir);
     $files = del_by_value($files, ".");
     $files = del_by_value($files, "..");
-    array_push($category, array('name' => $dir, 'count' => count($files), 'posts' => $files));
+
+    // Filter out drafts (check if actual content file exists)
+    $valid_files = [];
+    foreach($files as $f) {
+        if(file_exists("../contents/post_files/" . $f)) {
+            $valid_files[] = $f;
+        }
+    }
+
+    array_push($category, array('name' => $dir, 'count' => count($valid_files), 'posts' => $valid_files));
   }
   return $category;
 }

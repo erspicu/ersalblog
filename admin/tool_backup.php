@@ -504,6 +504,7 @@ function cleanupTempDir($dir) {
             <li class="nav-item"><a href="tool_migrate.php"><?php echo __('nav_import'); ?></a></li>
             <!-- Backup Link (Active) -->
             <li class="nav-item"><a href="tool_backup.php" class="active"><?php echo __('nav_backup'); ?></a></li>
+            <li class="nav-item"><a href="settings.php"><?php echo __('nav_settings'); ?></a></li>
         </ul>
         <hr>
         <div class="dropdown">

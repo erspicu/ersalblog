@@ -42,6 +42,8 @@ return [
     // Dashboard
     'welcome_msg' => '歡迎回來',
     'stat_posts' => '文章總數',
+    'stat_published' => '已發布',
+    'stat_drafts' => '草稿',
     'stat_posts_sub' => '篇已發布文章',
     'stat_db_size' => '資料庫大小',
     'stat_disk_free' => '磁碟剩餘空間',
@@ -110,7 +112,8 @@ return [
     'post_not_found' => '文章不存在',
     'breadcrumb_home' => '文章管理',
     'label_post_title' => '文章標題',
-    'label_filename' => '檔案名稱 (留空則自動以時間生成)',
+    'label_filename' => '檔案名稱 (選填，系統自動加上日期前綴)',
+    'ph_filename' => '例如: tokyo-travel (自動生成 20250101-tokyo-travel.html)',
     'label_post_date' => '發布時間',
     'label_html_content' => 'HTML 內容',
     'hint_html_content' => '請直接輸入 HTML 原始碼。可使用 &lt;!--more--&gt; 設定摘要分隔線。',
@@ -120,8 +123,12 @@ return [
     'label_tags' => '標籤 (Tags)',
     'ph_tags' => '使用逗號分隔，例如: 攝影, 開箱, 心得',
     'label_desc' => '摘要描述 (Meta Description)',
+    'hint_desc_seo' => '這段文字會出現在搜尋引擎結果中，良好的描述有助於 SEO 排名。',
+    'ph_desc_seo' => '請輸入簡短的文章摘要 (建議 160 字以內)',
     'btn_cancel' => '取消',
     'btn_save' => '儲存文章',
+    'btn_save_draft' => '暫存草稿',
+    'btn_save_publish' => '正式發布',
 
     // Vibe Info
     'vibe_info' => '本系統由 Gemini CLI 與 Gemini AI 模型 Vibe Coding 實作而成',
@@ -217,7 +224,20 @@ return [
 
     // Backup Tool
     'nav_backup' => '📦 備份還原',
+    'nav_settings' => '⚙️ 網站設定',
     'backup_title' => '系統備份',
+    
+    // Settings
+    'settings_title' => '網站設定 (config.js)',
+    'label_api_type' => '資料來源模式 (API Type)',
+    'label_theme' => '網站主題 (Theme)',
+    'label_cse_id' => 'Google 搜尋引擎 ID (CSE ID)',
+    'msg_settings_saved' => '設定已成功儲存！',
+    'error_config_write' => '寫入 config.js 失敗，請檢查檔案權限。',
+    'opt_api_file' => '檔案系統 (File System)',
+    'opt_api_db' => 'MySQL 資料庫',
+    'opt_api_sqlite' => 'SQLite 資料庫',
+    'btn_save_settings' => '儲存設定',
     'backup_create_title' => '建立新備份',
     'backup_desc' => '系統將依據目前模式 (檔案或資料庫) 打包所有必要資料與資源。過程可能需要幾分鐘。',
     'backup_confirm' => '確定要開始備份嗎？請耐心等待執行完成。',

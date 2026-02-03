@@ -92,6 +92,11 @@ function truncate($text, $limit = 60) {
                     <?php echo __('nav_backup'); ?>
                 </a>
             </li>
+            <li>
+                <a href="settings.php">
+                    <?php echo __('nav_settings'); ?>
+                </a>
+            </li>
         </ul>
         <hr>
         <div class="dropdown">
@@ -137,6 +142,16 @@ function truncate($text, $limit = 60) {
                                 <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="text-decoration-none fw-bold text-dark fs-5">
                                     <?php echo htmlspecialchars($post['post_title'] ?? __('no_title')); ?>
                                 </a>
+                                
+                                <!-- 狀態標籤 -->
+                                <?php if (isset($post['status'])): ?>
+                                    <?php if ($post['status'] === 'draft'): ?>
+                                        <span class="badge bg-warning text-dark ms-2">草稿</span>
+                                    <?php elseif ($post['status'] === 'missing'): ?>
+                                        <span class="badge bg-danger ms-2">檔案遺失</span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
                                 <br>
                                 <!-- 檔名 -->
                                 <span class="meta-text text-monospace">

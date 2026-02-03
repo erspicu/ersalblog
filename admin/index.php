@@ -10,7 +10,8 @@ $source = $dataManager->getSource(); // 'db', 'file', or 'sqlite'
 $phpVersion = phpversion();
 
 // 1. 文章總數
-$postCount = $dataManager->getPostCount();
+$postCounts = $dataManager->getPostCounts();
+$postCount = $postCounts['total'];
 
 // 2. DB 大小 & 連線資訊 (For DB / SQLite)
 $dbSize = 'N/A';
@@ -140,6 +141,11 @@ if ($source === 'db') {
                     <?php echo __('nav_backup'); ?>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="settings.php">
+                    <?php echo __('nav_settings'); ?>
+                </a>
+            </li>
         </ul>
         <hr>
         <div class="dropdown">
@@ -168,7 +174,10 @@ if ($source === 'db') {
                             <div>
                                 <h6 class="card-title mb-0"><?php echo __('stat_posts'); ?></h6>
                                 <h2 class="my-2"><?php echo $postCount; ?></h2>
-                                <small><?php echo __('stat_posts_sub'); ?></small>
+                                <small>
+                                    <?php echo __('stat_published'); ?>: <b><?php echo $postCounts['published']; ?></b> | 
+                                    <?php echo __('stat_drafts'); ?>: <b><?php echo $postCounts['draft']; ?></b>
+                                </small>
                             </div>
                             <span class="fs-1">📝</span>
                         </div>
@@ -254,8 +263,13 @@ if ($source === 'db') {
                     <tbody>
                         <?php foreach ($recentPosts as $post): ?>
                         <tr>
-                            <td><?php echo $post['post_date']; ?></td>
-                            <td><?php echo htmlspecialchars($post['post_title']); ?></td>
+                            <td><?php echo substr($post['post_date'], 0, 10); ?></td>
+                            <td>
+                                <?php echo htmlspecialchars($post['post_title']); ?>
+                                <?php if (isset($post['status']) && $post['status'] === 'draft'): ?>
+                                    <span class="badge bg-warning text-dark ms-1" style="font-size: 0.75em;"><?php echo __('stat_drafts'); ?></span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($recentPosts)): ?>

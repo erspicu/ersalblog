@@ -41,11 +41,19 @@
 
 ---
 
-## 4. 其它建議項目
+## 4. 已完成項目 (Completed Items)
+
+*   [x] **Draft System**：草稿暫存機制 (File/DB/SQLite)。
+*   [x] **Filename Normalization**：自動補全日期前綴與副檔名清理。
+*   [x] **Admin Settings GUI**：後台 `config.js` 設定頁面。
+*   [x] **Dashboard Stats**：詳細區分已發布與草稿數量。
+*   [x] **Advanced Editor**：整合 TinyMCE 6 (Local Host) 並支援 `<!--more-->`。
+*   [x] **Translation**：完整的中英文語系支援 (含 TinyMCE)。
+
+## 5. 其它建議項目
 
 *   [ ] **Server-side Pagination**：為 API 增加 `limit` 與 `offset` 支援。
 *   [ ] **Automatic WebP Conversion**：上傳圖片時自動轉換並生成縮圖。
-*   [ ] **Theme Persistence**：在後台增加一個 UI 介面來切換 `config.js` 中的主題設定。
 
 ---
 **Last Updated**: 2026-02-03

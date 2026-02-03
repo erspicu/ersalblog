@@ -1,4 +1,4 @@
-﻿# Blog Project Roadmap & Feature Proposals (v2026.02.03)
+# Blog Project Roadmap & Feature Proposals (v2026.02.03)
 
 This document organizes the discussions and evaluations regarding future feature expansions for the BaxerMux Photography Blog. It serves as a strategic reference for long-term development.
 
@@ -33,22 +33,42 @@ This document organizes the discussions and evaluations regarding future feature
     *   **Static Output**: Generated static pages are now organized in `post/` directory.
     *   **Resource Paths**: Automated `../` relative path correction for static generation.
 
+### 1.6 Draft System & Status Management (Status: COMPLETED ✅)
+*   **Reasoning**: Users need to save work-in-progress content without publishing it immediately.
+*   **Implementation**:
+    *   **Storage**: 
+        *   File Mode: Uses `.html.tmp` extension for drafts.
+        *   DB Mode: Added `status` column to schema ('published' vs 'draft').
+    *   **Visibility**: Frontend APIs and Static Generator automatically filter out drafts.
+    *   **UI**: Dashboard badges, distinct "Save Draft" buttons, and stats breakdown.
+
 ---
 
 ## 2. Content Creation & Management
 
-### 2.1 Advanced Post Editor (Priority: Medium-High)
-*   **Reasoning**: The current `textarea` requires manual HTML input, which is a barrier for non-technical photographers.
-*   **Options**: 
-    *   **Editor.js (Recommended)**: Modern, block-based UI that fits the minimalist aesthetic.
-    *   **TinyMCE/Quill**: Full-featured WYSIWYG for a Word-like experience.
+### 2.1 Advanced Post Editor (Status: COMPLETED ✅)
+*   **Reasoning**: The previous `textarea` required manual HTML input, which was a barrier for non-technical photographers.
+*   **Implementation**: 
+    *   **TinyMCE 6**: Integrated the Community Edition locally (no CDN dependency).
+    *   **Customization**: Added `<!--more-->` support via the PageBreak plugin.
+    *   **Localization**: Dynamic UI language switching based on user login preference (zh_TW/en_US).
 
 ### 2.2 Media Management Library
 *   **Reasoning**: Managing photos manually in folders is tedious.
 *   **Proposal**: A dedicated UI to browse, search, and reuse uploaded images across different posts.
 
-### 2.3 Drafts & Scheduling
-*   **Proposal**: Support "Draft" status for posts and the ability to set future "Publish Dates."
+### 2.3 Filename Normalization (Status: COMPLETED ✅)
+*   **Reasoning**: Ensure consistent URL structure and file organization.
+*   **Implementation**: 
+    *   Auto-prefixing filenames with `YYYYMMDD-` based on post date.
+    *   Smart detection to avoid duplicate prefixes.
+    *   Input sanitization in Admin UI.
+
+### 2.4 Configuration Management (Status: COMPLETED ✅)
+*   **Reasoning**: Editing `config.js` manually via FTP/Shell is user-unfriendly.
+*   **Implementation**: 
+    *   Added dedicated **Settings Page** in Admin Panel.
+    *   GUI support for API Type switching, Theme selection, and Google CSE ID.
 
 ---
 
@@ -89,7 +109,7 @@ This document organizes the discussions and evaluations regarding future feature
 ### 5.1 Style & Theme Settings (Status: COMPLETED ✅)
 *   **Reasoning**: Visual "Vibe" is critical for photographers.
 *   **Implementation**: 
-    *   **Theme Switcher**: Configurable via `config.js` (`theme_file`).
+    *   **Theme Switcher**: Configurable via `config.js` (`theme_file`) and Admin UI.
     *   **Dark Mode**: Implemented `blog-dark.css` with high-contrast accessibility optimizations.
     *   **Installation**: Integrated theme selection into the installation wizard.
 
@@ -135,22 +155,40 @@ This document organizes the discussions and evaluations regarding future feature
     *   **靜態輸出**：靜態網頁現在會統一生成至 `post/` 目錄。
     *   **路徑修正**：實作了 `../` 相對路徑的自動修正機制。
 
+### 1.6 草稿系統與狀態管理 (狀態：已完成 ✅)
+*   **理由**：使用者需要暫存未完成的文章，而不直接發佈。
+*   **實作**：
+    *   **儲存**：檔案模式使用 `.html.tmp` 副檔名；資料庫模式新增 `status` 欄位。
+    *   **隱蔽性**：前台 API 與靜態生成器會自動過濾草稿，確保不外流。
+    *   **UI**：後台提供「暫存草稿」按鈕、狀態標籤 (Badge) 與詳細統計數據。
+
 ---
 
 ## 2. 內容創作與管理
 
-### 2.1 進階文章編輯器 (優先級：中高)
+### 2.1 進階文章編輯器 (狀態：已完成 ✅)
 *   **理由**：現有的 `textarea` 門檻較高，對非技術背景攝影師不友善。
-*   **選項**：
-    *   **Editor.js (推薦)**：現代、乾淨的區塊式 UI，符合簡約美學。
-    *   **TinyMCE/Quill**：全功能視覺化編輯器，提供類 Word 體驗。
+*   **實作**：
+    *   **TinyMCE 6**：已在本地端完整部署 (Local Host)，不依賴 CDN。
+    *   **客製化**：支援 `<!--more-->` 分頁符號插入與視覺化顯示。
+    *   **本地化**：支援後台介面語系 (中/英) 自動切換。
 
 ### 2.2 媒體管理庫
 *   **理由**：手動管理資料夾內的圖片較為繁瑣。
 *   **提案**：建立統一介面瀏覽、搜尋及重複使用已上傳的照片。
 
-### 2.3 草稿與預約發佈
-*   **提案**：支援「草稿」狀態與設定未來發佈時間。
+### 2.3 檔名標準化 (Status: 已完成 ✅)
+*   **理由**：確保網址結構統一與檔案管理的一致性。
+*   **實作**：
+    *   系統自動檢查並補上 `YYYYMMDD-` 日期前綴。
+    *   智慧偵測使用者輸入，避免產生重複前綴。
+    *   後台欄位提示優化。
+
+### 2.4 系統設定管理 (Status: 已完成 ✅)
+*   **理由**：手動修改 `config.js` 容易出錯且不直覺。
+*   **實作**：
+    *   新增後台 **網站設定 (Settings)** 頁面。
+    *   支援圖形化切換 API 模式、網站主題與設定 Google CSE ID。
 
 ---
 
@@ -191,7 +229,7 @@ This document organizes the discussions and evaluations regarding future feature
 ### 5.1 樣式與主題設定 (狀態：已完成 ✅)
 *   **理由**：視覺氛圍是攝影部落格的靈魂。
 *   **實作**：
-    *   **主題切換**：透過 `config.js` (`theme_file`) 進行配置。
+    *   **主題切換**：透過 `config.js` (`theme_file`) 與後台 UI 進行配置。
     *   **深色模式**：實作 `blog-dark.css` 並針對無障礙對比度進行優化。
     *   **安裝整合**：已將主題選擇整合至安裝精靈中。
 

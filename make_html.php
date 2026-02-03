@@ -341,6 +341,13 @@ function build()
         // $line_arr: [0]時間, [1]檔名, [2]標題, [3]標籤, [4]描述
         
         $post_filename = $line_arr[1];
+        
+        // 檢查檔案是否存在 (忽略草稿 .html.tmp)
+        if (!file_exists("contents/post_files/" . $post_filename)) {
+            echo $post_filename . " skipped (draft or missing).<br>\r\n";
+            continue;
+        }
+
         $post_target_path = "post/" . $post_filename;
 
         // ============================================

@@ -338,11 +338,48 @@ Recorded the development journey and original Prompt commands of this project th
     - **UI Optimization**: Reorganized `install.php` system information into a 2x2 grid, doubling the display width for better readability of detailed OS strings.
     - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules to utilize `git.exe` for authenticated pushes (later refined to manual user push).
 
-### [23:30] Git Strategy Refinement for WSL2
+### [23:30] WSL2 Git Strategy Refinement
 - **Task**: Standardize remote repository synchronization workflow in WSL2.
 - **Implementation**:
     - **Policy Update**: Updated `gemini.md` to explicitly state that while code commits are handled within WSL2, the final `git push` action is to be performed manually by the user in an environment with proper credentials (e.g., Windows terminal).
     - **Macro Sync**: Adjusted the "Update" macro process to stop at the commit stage and provide a manual push reminder.
+
+---
+
+## 2026-02-03
+
+### [19:30] Hybrid Draft System & Filename Normalization
+- **Task**: Implement post draft mechanism and ensure consistent file naming.
+- **Implementation**:
+    - **Draft Mechanism**: 
+        - File Mode: Drafts are saved as `.html.tmp`; published articles as `.html`.
+        - DB/SQLite Mode: Dynamically added `status` column ('draft'/'published').
+        - Frontend Filter: Updated all APIs and `make_html.php` to skip draft files.
+    - **Filename Normalization**: 
+        - Automated `YYYYMMDD-` prefixing based on post date.
+        - Smart validation to support user-entered prefixes and avoid duplication.
+    - **UI Updates**: Added "Save Draft" vs "Publish" buttons and status badges in Admin list and Dashboard.
+
+### [19:40] Admin Settings GUI (config.js Management)
+- **Task**: Provide a user-friendly interface to manage frontend configurations.
+- **Implementation**:
+    - Created `admin/settings.php` to manage `config.js`.
+    - Supports GUI-based switching of API Source (File/DB/SQLite), Theme selection, and Google CSE ID.
+    - Implemented regex-based config writing to preserve file formatting.
+
+### [19:50] Advanced WYSIWYG Editor Integration
+- **Task**: Upgrade the article editor from a raw textarea to a visual editor.
+- **Implementation**:
+    - **TinyMCE 6**: Fully deployed TinyMCE 6.8.2 locally (no CDN dependency).
+    - **PageBreak Customization**: Customized the PageBreak plugin to use `<!--more-->` as the separator, matching existing frontend logic.
+    - **i18n & UX**: Integrated dynamic language switching (zh_TW/en_US) and removed promotional branding for a cleaner interface.
+
+### [20:00] Admin Internationalization Refactoring
+- **Task**: Clean up language files and enforce stricter loading rules.
+- **Implementation**:
+    - Renamed language files to use `admin-` prefix (e.g., `admin-zh_TW.php`) to distinguish from installer files.
+    - Updated scanning logic in `admin/lang_init.php` to exclude `install_` prefixed files.
+    - Simplified language dropdown to show only core language codes.
 
 ---
 
@@ -712,3 +749,40 @@ Recorded the development journey and original Prompt commands of this project th
     - **備份優化**: 修改 `admin/tool_backup.php`，在所有備份模式中排除 `pic/` 目錄（圖片資源），顯著減小備份檔大小。
     - **樣式修正**: 移除樣板中寫死的行內樣式，改用 CSS 控制，確保深色/淺色模式下的標題連結顏色皆能正確顯示。
     - **初始化修正**: 更新 `admin/file_init.php` 將 `post/` 目錄納入初始化清單。
+
+---
+
+## 2026-02-03 (繁體中文)
+
+### [19:30] 混合式草稿系統與檔名標準化
+- **任務**: 實作文章草稿機制並確保檔案命名的一致性。
+- **實作**:
+    - **草稿機制**: 
+        - 檔案模式：草稿存為 `.html.tmp`，正式文章為 `.html`。
+        - 資料庫模式：動態補齊 `status` 欄位 ('draft'/'published')。
+        - 前台過濾：更新所有 API 與 `make_html.php` 自動跳過草稿檔案。
+    - **檔名標準化**: 
+        - 根據發文日期自動補上 `YYYYMMDD-` 前綴。
+        - 智慧偵測使用者輸入，支援手動輸入前綴並避免重複處理。
+    - **UI 更新**: 新增「暫存草稿」與「正式發布」按鈕，並在後台列表與儀表板加入狀態標籤。
+
+### [19:40] 網站設定圖形化介面 (config.js 管理)
+- **任務**: 提供友善的介面來管理前端配置。
+- **實作**:
+    - 建立 `admin/settings.php` 用於管理 `config.js`。
+    - 支援透過 UI 切換資料來源 (File/DB/SQLite)、選擇主題以及設定 Google CSE ID。
+    - 採用正規表達式寫入配置，保留檔案原始格式。
+
+### [19:50] 進階視覺化編輯器整合
+- **任務**: 將文章編輯器從純文字框升級為視覺化編輯器。
+- **實作**:
+    - **TinyMCE 6**: 在本地端完整部署 TinyMCE 6.8.2，不依賴外部 CDN。
+    - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現有前台邏輯。
+    - **語系與體驗**: 整合動態語系切換 (繁中/英文)，並移除升級提示與品牌標記以簡化介面。
+
+### [20:00] 後台語系架構重構
+- **任務**: 清理語系檔案並實施更嚴格的載入規則。
+- **實作**:
+    - 將語系檔更名為 `admin-` 前綴 (如 `admin-zh_TW.php`)，以區別安裝程式檔案。
+    - 更新 `admin/lang_init.php` 掃描邏輯，自動排除 `install_` 開頭的檔案。
+    - 精簡語言下拉選單，僅顯示核心語系代碼。

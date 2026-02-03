@@ -44,6 +44,8 @@ return [
     // Dashboard
     'welcome_msg' => 'Welcome Back',
     'stat_posts' => 'Total Posts',
+    'stat_published' => 'Published',
+    'stat_drafts' => 'Drafts',
     'stat_posts_sub' => 'published posts',
     'stat_db_size' => 'DB Size',
     'stat_disk_free' => 'Disk Free',
@@ -112,7 +114,8 @@ return [
     'post_not_found' => 'Post not found',
     'breadcrumb_home' => 'Posts',
     'label_post_title' => 'Title',
-    'label_filename' => 'Filename (Leave empty for auto-generation)',
+    'label_filename' => 'Filename (Optional, auto date prefixed)',
+    'ph_filename' => 'e.g. tokyo-travel (Auto: 20250101-tokyo-travel.html)',
     'label_post_date' => 'Date',
     'label_html_content' => 'HTML Content',
     'hint_html_content' => 'Enter raw HTML here. Use &lt;!--more--&gt; for summary break.',
@@ -122,8 +125,12 @@ return [
     'label_tags' => 'Tags',
     'ph_tags' => 'Comma separated, e.g., Photo, Life, Tech',
     'label_desc' => 'Meta Description',
+    'hint_desc_seo' => 'This text appears in search results. A good description improves SEO rankings.',
+    'ph_desc_seo' => 'Enter a brief summary (recommended under 160 characters)',
     'btn_cancel' => 'Cancel',
     'btn_save' => 'Save Post',
+    'btn_save_draft' => 'Save Draft',
+    'btn_save_publish' => 'Publish',
 
     // Vibe Info
     'vibe_info' => 'Vibe coded with Gemini CLI & Gemini AI Models',
@@ -219,7 +226,20 @@ return [
 
     // Backup Tool
     'nav_backup' => '📦 Backup',
+    'nav_settings' => '⚙️ Settings',
     'backup_title' => 'System Backup',
+
+    // Settings
+    'settings_title' => 'Site Settings (config.js)',
+    'label_api_type' => 'Data Source (API Type)',
+    'label_theme' => 'Site Theme',
+    'label_cse_id' => 'Google CSE ID',
+    'msg_settings_saved' => 'Settings saved successfully!',
+    'error_config_write' => 'Failed to write config.js. Check permissions.',
+    'opt_api_file' => 'File System',
+    'opt_api_db' => 'MySQL Database',
+    'opt_api_sqlite' => 'SQLite Database',
+    'btn_save_settings' => 'Save Settings',
     'backup_create_title' => 'Create New Backup',
     'backup_desc' => 'System will pack all necessary data and resources based on current mode (File or DB). This may take a few minutes.',
     'backup_confirm' => 'Start backup? Please wait patiently.',

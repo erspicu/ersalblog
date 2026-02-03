@@ -41,6 +41,7 @@ function initDatabase($pdo, $importFiles = false) {
           `post_content` longtext COLLATE utf8mb4_unicode_ci,
           `post_tags` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
           `post_description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+          `status` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'published',
           `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
           `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY (`id`),

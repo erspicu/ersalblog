@@ -16,6 +16,25 @@ class DataManager {
             global $pdo; 
             $this->pdo = $pdo;
             $this->isSQLite = ($this->source === 'sqlite');
+            $this->ensureSchema();
+        }
+    }
+
+    private function ensureSchema() {
+        try {
+            // Check if 'status' column exists
+            $stmt = $this->pdo->query("SELECT status FROM blog_posts LIMIT 1");
+        } catch (Exception $e) {
+            // Column likely missing, try to add it
+            try {
+                if ($this->isSQLite) {
+                    $this->pdo->exec("ALTER TABLE blog_posts ADD COLUMN status TEXT DEFAULT 'published'");
+                } else {
+                    $this->pdo->exec("ALTER TABLE blog_posts ADD COLUMN status VARCHAR(20) DEFAULT 'published'");
+                }
+            } catch (Exception $ex) {
+                // Ignore if it fails (e.g. concurrent update), user might need manual fix if strictly broken
+            }
         }
     }
 
@@ -37,9 +56,70 @@ class DataManager {
         }
     }
 
+    public function getPostCounts() {
+        if ($this->source === 'db' || $this->source === 'sqlite') {
+            $sql = "SELECT status, COUNT(*) as cnt FROM blog_posts GROUP BY status";
+            try {
+                $stmt = $this->pdo->query($sql);
+                $counts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // Returns ['published' => 10, 'draft' => 2]
+            } catch (Exception $e) {
+                // Fallback if status column missing (shouldn't happen due to ensureSchema)
+                $counts = [];
+            }
+            
+            $published = $counts['published'] ?? 0;
+            $draft = $counts['draft'] ?? 0;
+            
+            // Recalculate total from parts or DB count (total might include other statuses if any)
+            // Or just sum them.
+            $total = $this->getPostCount(); // Keep consistent with total rows
+
+            return [
+                'total' => $total,
+                'published' => $published,
+                'draft' => $draft
+            ];
+        } else {
+            $file = $this->baseDir . '/contents/index_post.txt';
+            if (!file_exists($file)) return ['total'=>0, 'published'=>0, 'draft'=>0];
+            
+            $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $total = 0;
+            $published = 0;
+            $draft = 0;
+
+            foreach ($lines as $line) {
+                $parts = explode('|', $line);
+                if (count($parts) < 2) continue;
+                $filename = trim($parts[1]);
+                
+                $pubPath = $this->baseDir . '/contents/post_files/' . $filename;
+                $draftPath = $pubPath . '.tmp';
+                
+                if (file_exists($pubPath)) {
+                    $published++;
+                    $total++;
+                } elseif (file_exists($draftPath)) {
+                    $draft++;
+                    $total++;
+                } else {
+                    // Missing file, still counts as total? 
+                    // Usually yes, it's an entry. But maybe separate?
+                    // Let's count as total but not published/draft.
+                    $total++;
+                }
+            }
+            return [
+                'total' => $total,
+                'published' => $published,
+                'draft' => $draft
+            ];
+        }
+    }
+
     public function getRecentPosts($limit = 5) {
         if ($this->source === 'db' || $this->source === 'sqlite') {
-            $stmt = $this->pdo->prepare("SELECT post_title, post_date FROM blog_posts ORDER BY post_date DESC LIMIT ?");
+            $stmt = $this->pdo->prepare("SELECT post_title, post_date, status FROM blog_posts ORDER BY post_date DESC LIMIT ?");
             // PDO::PARAM_INT is important for LIMIT
             $stmt->bindValue(1, $limit, PDO::PARAM_INT); 
             $stmt->execute();
@@ -51,7 +131,8 @@ class DataManager {
             return array_map(function($p) {
                 return [
                     'post_title' => $p['post_title'],
-                    'post_date' => $p['post_date']
+                    'post_date' => $p['post_date'],
+                    'status' => $p['status'] ?? 'published'
                 ];
             }, $recent);
         }
@@ -61,7 +142,7 @@ class DataManager {
 
     public function getAllPosts() {
         if ($this->source === 'db' || $this->source === 'sqlite') {
-            $sql = "SELECT p.id, p.post_date, p.post_title, p.post_filename, p.post_tags, p.post_description, 
+            $sql = "SELECT p.id, p.post_date, p.post_title, p.post_filename, p.post_tags, p.post_description, p.status, 
                            GROUP_CONCAT(c.category_name) as post_categories
                     FROM blog_posts p
                     LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
@@ -69,7 +150,8 @@ class DataManager {
                     GROUP BY p.id
                     ORDER BY p.post_date DESC";
             $stmt = $this->pdo->query($sql);
-            return $stmt->fetchAll();
+            $posts = $stmt->fetchAll();
+            return $posts;
         } else {
             $file = $this->baseDir . '/contents/index_post.txt';
             if (!file_exists($file)) return [];
@@ -81,9 +163,17 @@ class DataManager {
                 $parts = explode('|', $line);
                 if (count($parts) < 3) continue;
                 
-                // Get Categories
                 $filename = trim($parts[1]);
                 $cats = $this->getFilePostCategories($filename);
+
+                // Determine Status
+                $basePath = $this->baseDir . '/contents/post_files/' . $filename;
+                $status = 'missing';
+                if (file_exists($basePath)) {
+                    $status = 'published';
+                } elseif (file_exists($basePath . '.tmp')) {
+                    $status = 'draft';
+                }
 
                 $posts[] = [
                     'id' => $filename, // Use filename as ID for file system
@@ -92,7 +182,8 @@ class DataManager {
                     'post_title' => trim($parts[2]),
                     'post_tags' => isset($parts[3]) ? trim($parts[3]) : '',
                     'post_description' => isset($parts[4]) ? trim($parts[4]) : '',
-                    'post_categories' => $cats
+                    'post_categories' => $cats,
+                    'status' => $status
                 ];
             }
             // Sort by date DESC
@@ -123,8 +214,24 @@ class DataManager {
             foreach ($lines as $line) {
                 $parts = explode('|', $line);
                 if (trim($parts[1]) === $filename) {
+                    
                     $contentPath = $this->baseDir . '/contents/post_files/' . $filename;
-                    $content = file_exists($contentPath) ? file_get_contents($contentPath) : '';
+                    $status = 'published';
+                    
+                    // Try Normal (Published)
+                    if (file_exists($contentPath)) {
+                        $content = file_get_contents($contentPath);
+                    } 
+                    // Try Draft
+                    elseif (file_exists($contentPath . '.tmp')) {
+                        $content = file_get_contents($contentPath . '.tmp');
+                        $status = 'draft';
+                    } 
+                    // Missing
+                    else {
+                        $content = '';
+                        $status = 'missing';
+                    }
                     
                     return [
                         'id' => $filename,
@@ -134,7 +241,8 @@ class DataManager {
                         'post_tags' => isset($parts[3]) ? trim($parts[3]) : '',
                         'post_description' => isset($parts[4]) ? trim($parts[4]) : '',
                         'post_categories' => $this->getFilePostCategories($filename),
-                        'post_content' => $content
+                        'post_content' => $content,
+                        'status' => $status
                     ];
                 }
             }
@@ -149,17 +257,18 @@ class DataManager {
             try {
                 $this->pdo->beginTransaction();
                 $now = date('Y-m-d H:i:s');
+                $status = (!empty($data['is_draft'])) ? 'draft' : 'published';
 
                 if ($id) {
                     // Update
                     $sql = "UPDATE blog_posts SET 
                             post_title = ?, post_filename = ?, post_date = ?, post_content = ?, 
-                            post_tags = ?, post_description = ?, updated_at = ?
+                            post_tags = ?, post_description = ?, status = ?, updated_at = ?
                             WHERE id = ?";
                     $stmt = $this->pdo->prepare($sql);
                     $stmt->execute([
                         $data['title'], $data['filename'], $data['date'], $data['content'],
-                        $data['tags'], $data['desc'], $now, $id
+                        $data['tags'], $data['desc'], $status, $now, $id
                     ]);
                     $postId = $id;
                 } else {
@@ -172,12 +281,12 @@ class DataManager {
                     }
 
                     $sql = "INSERT INTO blog_posts 
-                            (post_title, post_filename, post_date, post_content, post_tags, post_description, created_at, updated_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                            (post_title, post_filename, post_date, post_content, post_tags, post_description, status, created_at, updated_at) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $this->pdo->prepare($sql);
                     $stmt->execute([
                         $data['title'], $data['filename'], $data['date'], $data['content'],
-                        $data['tags'], $data['desc'], $now, $now
+                        $data['tags'], $data['desc'], $status, $now, $now
                     ]);
                     $postId = $this->pdo->lastInsertId();
                 }
@@ -226,17 +335,31 @@ class DataManager {
             }
         } else {
             // File System Save
-            // 1. Save Content HTML
-            $contentPath = $this->baseDir . '/contents/post_files/' . $data['filename'];
-            file_put_contents($contentPath, $data['content']);
+            
+            $isDraft = !empty($data['is_draft']);
+            $baseFilename = $data['filename']; // This is always xxxx.html
+            
+            // Define paths
+            $publishedPath = $this->baseDir . '/contents/post_files/' . $baseFilename;
+            $draftPath     = $publishedPath . '.tmp';
+            
+            // 1. Save Content HTML to the correct location and clean up the other
+            if ($isDraft) {
+                file_put_contents($draftPath, $data['content']);
+                if (file_exists($publishedPath)) unlink($publishedPath); // Unpublish if it was published
+            } else {
+                file_put_contents($publishedPath, $data['content']);
+                if (file_exists($draftPath)) unlink($draftPath); // Remove draft if publishing
+            }
 
             // 2. Update Index File
+            // Note: Index file always records the "base" filename (xxxx.html), regardless of draft status.
             $indexFile = $this->baseDir . '/contents/index_post.txt';
             $lines = file_exists($indexFile) ? file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
             
             $newLine = implode('|', [
                 $data['date'],
-                $data['filename'],
+                $baseFilename,
                 $data['title'],
                 $data['tags'],
                 $data['desc']
@@ -245,19 +368,21 @@ class DataManager {
             $found = false;
             // If ID exists (filename), we might be updating or renaming. 
             // In File mode, ID is old filename. 
-            $targetFilename = $id ?: $data['filename']; 
+            $targetFilename = $id ?: $baseFilename; 
 
             foreach ($lines as $k => $line) {
                 $parts = explode('|', $line);
                 if (trim($parts[1]) === $targetFilename) {
                     $lines[$k] = $newLine;
                     $found = true;
-                    // If filename changed (rename), delete old content file? 
-                    // For safety, we keep it or manual cleanup. But if we renamed, we should write to new file (done above)
-                    // and maybe remove old one. 
-                    if ($id && $id !== $data['filename']) {
-                         $oldPath = $this->baseDir . '/contents/post_files/' . $id;
-                         if (file_exists($oldPath)) @unlink($oldPath);
+                    
+                    // Handle Rename
+                    if ($id && $id !== $baseFilename) {
+                         // Remove old files
+                         $oldPub = $this->baseDir . '/contents/post_files/' . $id;
+                         $oldDraft = $oldPub . '.tmp';
+                         if (file_exists($oldPub)) @unlink($oldPub);
+                         if (file_exists($oldDraft)) @unlink($oldDraft);
                          
                          // Also remove old category references
                          $this->updateFileCategories($id, ''); 
@@ -267,8 +392,7 @@ class DataManager {
             }
 
             if (!$found) {
-                // Add new at top (or append and sort?)
-                // Usually append, rendering sorts it. Or prepend.
+                // New Post: Add to top
                 array_unshift($lines, $newLine); 
             }
 
@@ -276,7 +400,9 @@ class DataManager {
             file_put_contents($indexFile, implode("\n", $lines));
 
             // 3. Update Categories (Folders)
-            $this->updateFileCategories($data['filename'], $data['categories']);
+            // Note: We use the base filename for category folders too, even if draft.
+            // This is fine as empty files in category/xxx/ serve as DB indices.
+            $this->updateFileCategories($baseFilename, $data['categories']);
             
             return true;
         }

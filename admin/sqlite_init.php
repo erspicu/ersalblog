@@ -73,6 +73,7 @@ function initSQLiteDatabase($pdo, $mode) {
           post_content TEXT,
           post_tags TEXT,
           post_description TEXT,
+          status TEXT DEFAULT 'published',
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )",

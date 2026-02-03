@@ -1,8 +1,6 @@
 <?php
-// admin/version_config.php
-// This file is automatically updated by Gemini CLI Update Macro.
-
-define('GEMINI_CLI_VERSION', '0.26.0');
-define('GEMINI_AI_MODEL', 'gemini-3-flash-preview');
-define('APP_VERSION', 'v2026.02.01.23.30');
-define('LAST_UPDATE_TIME', '2026-02-01 23:30:00 (UTC+8)');
+return [
+    'version' => 'v2026.02.03.19.55',
+    'cli_version' => '0.26.0',
+    'model_name' => 'gemini-3-pro-preview'
+];

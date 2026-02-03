@@ -90,6 +90,11 @@ $currentCats = array_map('trim', $currentCats);
                 </a>
             </li>
             <?php endif; ?>
+            <li>
+                <a href="settings.php">
+                    <?php echo __('nav_settings'); ?>
+                </a>
+            </li>
         </ul>
         <hr>
         <div class="dropdown">
@@ -130,7 +135,7 @@ $currentCats = array_map('trim', $currentCats);
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted"><?php echo __('label_filename'); ?></label>
-                            <input type="text" name="post_filename" class="form-control" value="<?php echo htmlspecialchars($post['post_filename']); ?>" placeholder="例如: 20260101-my-post.html">
+                            <input type="text" name="post_filename" class="form-control" value="<?php echo htmlspecialchars($post['post_filename']); ?>" placeholder="<?php echo __('ph_filename'); ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><?php echo __('label_post_date'); ?></label>
@@ -167,13 +172,21 @@ $currentCats = array_map('trim', $currentCats);
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label"><?php echo __('label_desc'); ?></label>
-                        <textarea name="post_description" class="form-control" rows="2"><?php echo htmlspecialchars($post['post_description']); ?></textarea>
+                        <label class="form-label fw-bold"><?php echo __('label_desc'); ?></label>
+                        <div class="form-text mb-1"><?php echo __('hint_desc_seo'); ?></div>
+                        <input type="text" name="post_description" class="form-control" value="<?php echo htmlspecialchars($post['post_description']); ?>" placeholder="<?php echo __('ph_desc_seo'); ?>">
                     </div>
 
-                    <div class="d-grid gap-2 d-md-block text-end">
-                        <a href="posts.php" class="btn btn-secondary me-2"><?php echo __('btn_cancel'); ?></a>
-                        <button type="submit" class="btn btn-primary btn-lg px-5"><?php echo __('btn_save'); ?></button>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="posts.php" class="btn btn-outline-secondary me-md-2"><?php echo __('btn_cancel'); ?></a>
+                        
+                        <button type="submit" name="is_draft" value="1" class="btn btn-warning text-dark px-4">
+                            <i class="bi bi-journal-text"></i> <?php echo __('btn_save_draft') ?? '暫存草稿'; ?>
+                        </button>
+                        
+                        <button type="submit" name="is_draft" value="0" class="btn btn-success px-5">
+                            <i class="bi bi-send"></i> <?php echo __('btn_save_publish') ?? '正式發布'; ?>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -182,5 +195,39 @@ $currentCats = array_map('trim', $currentCats);
 </div>
 
 <?php require 'common_js_inc.php'; ?>
+<script src="assets/js/tinymce/tinymce.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        tinymce.init({
+            selector: 'textarea[name="post_content"]',
+            height: 500,
+            menubar: true,
+            plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
+            toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview | image media link anchor codesample | code',
+            toolbar_sticky: true,
+            promotion: false, // 關閉升級提示
+            branding: false,  // 關閉右下角品牌標記
+            
+            // 語系設定
+            <?php echo ($currentLang === 'zh_TW') ? "language: 'zh_TW'," : ""; ?>
+
+            // 關鍵設定：繼續閱讀
+            pagebreak_separator: '<!--more-->',
+            pagebreak_split_block: true,
+            
+            image_advtab: true,
+            valid_elements: '*[*]', // 允許所有 HTML
+            extended_valid_elements: '*[*]',
+            verify_html: false,
+            
+            // 自動同步內容回 textarea
+            setup: function (editor) {
+                editor.on('change', function () {
+                    editor.save();
+                });
+            }
+        });
+    });
+</script>
 </body>
 </html>
