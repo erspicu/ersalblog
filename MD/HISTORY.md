@@ -752,6 +752,61 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
+---
+
+## 2026-02-03
+
+### [19:30] Hybrid Draft System & Filename Normalization
+- **Task**: Implement post draft mechanism and ensure consistent file naming.
+- **Implementation**:
+    - **Draft Mechanism**: 
+        - File Mode: Drafts are saved as `.html.tmp`; published articles as `.html`.
+        - DB/SQLite Mode: Dynamically added `status` column ('draft'/'published').
+        - Frontend Filter: Updated all APIs and `make_html.php` to skip draft files.
+    - **Filename Normalization**: 
+        - Automated `YYYYMMDD-` prefixing based on post date.
+        - Smart validation to support user-entered prefixes and avoid duplication.
+    - **UI Updates**: Added "Save Draft" vs "Publish" buttons and status badges in Admin list and Dashboard.
+
+### [19:40] Admin Settings GUI (config.js Management)
+- **Task**: Provide a user-friendly interface to manage frontend configurations.
+- **Implementation**:
+    - Created `admin/settings.php` to manage `config.js`.
+    - Supports GUI-based switching of API Source (File/DB/SQLite), Theme selection, and Google CSE ID.
+    - Implemented regex-based config writing to preserve file formatting.
+
+### [19:50] Advanced WYSIWYG Editor Integration
+- **Task**: Upgrade the article editor from a raw textarea to a visual editor.
+- **Implementation**:
+    - **TinyMCE 6**: Fully deployed TinyMCE 6.8.2 locally (no CDN dependency).
+    - **PageBreak Customization**: Customized the PageBreak plugin to use `<!--more-->` as the separator, matching existing frontend logic.
+    - **i18n & UX**: Integrated dynamic language switching (zh_TW/en_US) and removed promotional branding for a cleaner interface.
+
+### [20:00] Admin Internationalization Refactoring
+- **Task**: Clean up language files and enforce stricter loading rules.
+- **Implementation**:
+    - Renamed language files to use `admin-` prefix (e.g., `admin-zh_TW.php`) to distinguish from installer files.
+    - Updated scanning logic in `admin/lang_init.php` to exclude `install_` prefixed files.
+    - Simplified language dropdown to show only core language codes.
+
+### [23:00] Promotional Website Development (Vibe Coding Experiment)
+- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
+- **Implementation**:
+    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
+    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
+    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
+    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
+    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
+
+### [23:33] Model Switch & Global Update
+- **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
+- **Implementation**:
+    - Updated `admin/version_config.php` to reflect the switch to `gemini-3-pro-preview`.
+    - Executed the "Update" macro to synchronize HISTORY.md, ARCHITECTURE.md, and README.md.
+    - Completed local Git commit to baseline the new promotional assets and technical refinements.
+
+---
+
 ## 2026-02-03 (繁體中文)
 
 ### [19:30] 混合式草稿系統與檔名標準化
@@ -786,3 +841,19 @@ Recorded the development journey and original Prompt commands of this project th
     - 將語系檔更名為 `admin-` 前綴 (如 `admin-zh_TW.php`)，以區別安裝程式檔案。
     - 更新 `admin/lang_init.php` 掃描邏輯，自動排除 `install_` 開頭的檔案。
     - 精簡語言下拉選單，僅顯示核心語系代碼。
+
+### [23:00] 專案宣傳網站開發 (Vibe Coding 實驗)
+- **任務**: 建立一個現代化、攝影導向的宣傳網站來展示 ErsalBlog。
+- **實作**:
+    - **技術棧**: React + Vite + Bootstrap 5 + Framer Motion。
+    - **內容**: 詳細規劃了開發動機 (匠人初心)、演進歷程 (Vibe 飛躍)、技術架構與未來藍圖。
+    - **4K 優化**: 為超寬螢幕實作了自定義容器邏輯與響應式字體，確保版面完美置中且視覺平衡。
+    - **部署**: 設定 Vite 編譯路徑，確保與現有 Apache 環境無縫整合。
+    - **驗證**: 成功驗證宣傳網站作為 Vibe Coding 開發效率的強力證明。
+
+### [23:33] 模型切換與全域更新
+- **任務**: 將開發模型切換回 Gemini 3 Pro 並同步所有專案文件。
+- **實作**:
+    - 更新 `admin/version_config.php` 以反映切換至 `gemini-3-pro-preview`。
+    - 執行「更新」巨集同步 HISTORY.md、ARCHITECTURE.md 與 README.md。
+    - 執行本地 Git Commit，將宣傳網站資產與技術優化內容入庫。
