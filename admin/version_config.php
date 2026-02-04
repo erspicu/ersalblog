@@ -5,8 +5,8 @@
  */
 
 return [
-    'version' => 'v2026.02.04.15.15',
+    'version' => 'v2026.02.04.15.30',
     'cli_version' => 'v0.26.0',
     'model_name' => 'gemini-3-flash-preview',
-    'last_update' => '2026-02-04 15:15:00'
+    'last_update' => '2026-02-04 15:30:00'
 ];

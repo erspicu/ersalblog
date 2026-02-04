@@ -1,155 +1,101 @@
 <?php
-/**
- * ErsalBlog Modern Template Manager
- * A lightweight, logic-aware template engine for <template> based layouts.
- * Compatible with PHP 5.4+
- */
 
+/**
+ * 微型樣板管理器 (Micro Template Manager)
+ * 負責樣板載入、解析與變數替換
+ * PHP 5.x Compatible
+ */
 class TemplateManager {
-    protected $templates = array();
-    protected $rawContent = "";
-    
+    protected $sourceHtml = '';
+    protected $subTemplates = array();
+
     /**
-     * Load a file containing <template id="..."> blocks
+     * 載入主樣板檔案
      */
-    public function load($filepath) {
-        if (!file_exists($filepath)) {
-            throw new Exception("Template file not found: $filepath");
+    public function load($filePath) {
+        if (!file_exists($filePath)) {
+            throw new Exception("Template file not found: " . $filePath);
         }
-        $this->rawContent = file_get_contents($filepath);
-        $this->parseTemplates($this->rawContent);
+        $this->sourceHtml = file_get_contents($filePath);
+        $this->parseSubTemplates();
     }
 
     /**
-     * Parse <template> tags using Regex (Faster than DOM for fragments)
+     * 解析 <template id="xxx"> 區塊
      */
-    protected function parseTemplates($content) {
-        // Match <template id="key">content</template>
-        // Uses dotall modifier (s) to match across newlines
-        if (preg_match_all('/<template\s+id=["\']([^"\']+)["\'][^>]*>(.*?)<\/template>/is', $content, $matches)) {
-            foreach ($matches[1] as $index => $id) {
-                // Decode specific encoded entities if previously saved by DOM
-                $html = str_replace(array('%7B%7B', '%7D%7D'), array('{{', '}}'), $matches[2][$index]);
-                $this->templates[$id] = $html;
+    protected function parseSubTemplates() {
+        // 使用 Regex 抓取 <template id="...">...</template>
+        if (preg_match_all('/<template\s+id="([^"]+)"[^>]*>(.*?)<\/template>/is', $this->sourceHtml, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $id = $match[1];
+                $innerHTML = $match[2];
+                $this->subTemplates[$id] = $innerHTML;
             }
         }
     }
 
     /**
-     * Render a specific template ID with data
-     * @param string $id The template ID (e.g., 'tmpl_post_main')
-     * @param array $data Associative array of variables ['title' => 'Hi', 'show' => true]
+     * 取得原始主樣板內容
+     */
+    public function getSource() {
+        return $this->sourceHtml;
+    }
+
+    /**
+     * 取得特定 ID 的子樣板內容
+     */
+    public function getSubTemplate($id) {
+        return isset($this->subTemplates[$id]) ? $this->subTemplates[$id] : '';
+    }
+
+    /**
+     * 核心渲染方法：將數據替換入樣板字串
+     * @param string $templateContent 樣板字串
+     * @param array $data 鍵值對資料 array('title' => 'Hello') 會替換 {{title}}
      * @return string
      */
-    public function render($id, $data = array()) {
-        if (!isset($this->templates[$id])) {
-            return "<!-- Template '$id' not found -->";
+    public function render($templateContent, $data) {
+        if (empty($data)) {
+            return $templateContent;
         }
 
-        $html = $this->templates[$id];
+        $search = array();
+        $replace = array();
 
-        // 1. Handle Logic: {{ if var }} ... {{ else }} ... {{ /if }}
-        $html = $this->compileConditionals($html, $data);
+        foreach ($data as $key => $value) {
+            // 支援直接傳入 {{key}} 或 key，這裡統一處理
+            $searchKey = (strpos($key, '{{') === 0) ? $key : '{{' . $key . '}}';
+            $search[] = $searchKey;
+            $replace[] = $value;
+        }
 
-        // 2. Handle Loops: {{ loop items as item }} ... {{ /loop }}
-        $html = $this->compileLoops($html, $data);
-
-        // 3. Handle Variables: {{ var }}
-        $html = $this->compileVariables($html, $data);
-
-        return $html;
+        return str_replace($search, $replace, $templateContent);
     }
 
     /**
-     * Compile {{ if key }} logic
+     * 列表渲染方法：針對陣列資料重複渲染同一個子樣板
+     * @param string $templateId 子樣板 ID
+     * @param array $dataList 資料列表 (二維陣列)
+     * @return string 串接好的 HTML
      */
-    protected function compileConditionals($html, $data) {
-        // Pattern: {{ if key }} ... {{ else }} ... {{ /if }}
-        // Supports basic boolean check.
-        // Nested logic is complex with regex, handling single level for simplicity.
+    public function renderList($templateId, $dataList) {
+        $html = '';
+        $template = $this->getSubTemplate($templateId);
         
-        $callback = function($matches) use ($data) {
-            $key = trim($matches[1]);
-            $inner = $matches[2];
-            $truthy = isset($data[$key]) && $data[$key];
-            
-            // Check for {{ else }}
-            $parts = preg_split('/{{\s*else\s*}}/', $inner);
-            
-            if ($truthy) {
-                return $parts[0];
-            } else {
-                return isset($parts[1]) ? $parts[1] : '';
-            }
-        };
+        if (empty($template) || empty($dataList)) {
+            return '';
+        }
 
-        // Use preg_replace_callback
-        // Pattern: {{ if key }}(content){{ /if }}
-        return preg_replace_callback('/{{\s*if\s+([a-zA-Z0-9_]+)\s*}}(.*?){{\s*\/if\s*}}/is', $callback, $html);
-    }
-
-    /**
-     * Compile {{ loop array as item }} logic
-     */
-    protected function compileLoops($html, $data) {
-        $callback = function($matches) use ($data) {
-            $listKey = trim($matches[1]);
-            $itemKey = trim($matches[2]);
-            $innerTpl = $matches[3];
-            $output = "";
-
-            if (isset($data[$listKey]) && is_array($data[$listKey])) {
-                foreach ($data[$listKey] as $item) {
-                    // Create a scoped data array for the loop item
-                    $scopedData = $data; 
-                    // If item is array, merge it? Or assign to itemKey?
-                    // Blade style: strict assignment.
-                    // Simple style: Just assign the value.
-                    $scopedData[$itemKey] = $item;
-                    
-                    // Recursive variable compilation for the inner block
-                    // Note: This simple engine doesn't support nested loops efficiently in one pass regex.
-                    $output .= $this->compileVariables($innerTpl, $scopedData);
-                }
-            }
-            return $output;
-        };
-
-        return preg_replace_callback('/{{\s*loop\s+([a-zA-Z0-9_]+)\s+as\s+([a-zA-Z0-9_]+)\s*}}(.*?){{\s*\/loop\s*}}/is', $callback, $html);
-    }
-
-    /**
-     * Compile {{ key }} variables
-     */
-    protected function compileVariables($html, $data) {
-        // Find all {{ var }}
-        if (preg_match_all('/{{\s*([a-zA-Z0-9_]+)\s*}}/', $html, $matches)) {
-            $searches = array();
-            $replaces = array();
-            
-            foreach ($matches[1] as $key) {
-                if (isset($data[$key])) {
-                    $val = $data[$key];
-                    if (is_array($val)) continue; // Don't print arrays
-                    $searches[] = "{{ $key }}";
-                    $searches[] = "{{$key}}"; // Handle tight spacing
-                    $replaces[] = $val;
-                    $replaces[] = $val;
-                }
-            }
-            // Use str_replace for speed on matched keys
-            // But beware of duplicates. Unique them.
-            if (!empty($searches)) {
-                $html = str_replace($searches, $replaces, $html);
-            }
+        foreach ($dataList as $item) {
+            $html .= $this->render($template, $item);
         }
         return $html;
     }
 
     /**
-     * Helper to retrieve all IDs (for debugging)
+     * 工具：移除 HTML 中的特定標籤區塊 (如 <template>)
      */
-    public function getTemplateIds() {
-        return array_keys($this->templates);
+    public function removeTags($html, $tagName) {
+        return preg_replace('/<' . $tagName . '\b[^>]*>.*?<\/' . $tagName . '>\s*/is', '', $html);
     }
 }
