@@ -6,42 +6,49 @@
 
 ## 1. 樣板生成流程解耦 (Decoupling Template Generation)
 
-### 當前問題 (Current Issue)
-目前的 `make_html.php` 採用「鏈式生成」流程：
-1. `static/blog_template.html` (原始碼) -> `blog.html` (SPA 入口/中間產物)
-2. `blog.html` (中間產物) -> 解析後生成 -> `post/xxx.html` (最終產物)
+### 狀態 (Status)
+**已完成 (COMPLETED)** ✅
 
-這導致生成過程依賴於「中間產物」。若 `blog.html` 損壞或被意外修改，將會導致後續所有靜態頁面生成錯誤（即「影印本再影印」的問題）。
-
-### 優化建議 (Proposed Solution)
-*   **確立單一真理來源 (Single Source of Truth)**：修改 `make_html.php`，讓 `build()` 函式直接讀取原始碼 `static/blog_template.html`。
-*   **平行生成**：讓 `blog.html` 與 `post/xxx.html` 成為平行的輸出關係，兩者皆直接由原始樣板生成。
+### 解決方案 (Solution Implemented)
+*   **單一真理來源**：已修改 `make_html.php`，現在所有頁面 (`blog.html`, `post/xxx.html`) 皆直接讀取並解析 `static/blog_template.html` 原始碼。
+*   **平行生成**：移除了對 `blog.html` 生成結果的依賴，徹底解決了「影印本再影印」導致的結構劣化問題。
 
 ---
 
 ## 2. 強化標記與切割邏輯 (Marker & Splitting Logic)
 
-### 當前問題
-目前使用 `explode('<!--post_load-->', $html)` 來切割 Header 與 Footer。這種「魔術註解」法雖然簡單，但若註解被刪除或移動，會導致程式崩潰。
+### 狀態 (Status)
+**已完成 (COMPLETED)** ✅
 
-### 優化建議
-*   **改用佔位符變數**：在樣板中使用如 `{{SPA_CONTAINER}}` 或 `{{POST_CONTENT}}` 之類的自定義標籤。
-*   **字串替換優於切割**：統一使用 `str_replace` 進行內容植入，而非物理切割 HTML 字串。
+### 解決方案 (Solution Implemented)
+*   **變數標準化**：全面將 `{xxx}` 佔位符替換為 `{{xxx}}`，避免與 CSS/JS 語法衝突。
+*   **字串替換**：棄用了脆弱的 `explode` 切割法，改用 `str_replace` 針對預定義的佔位符進行精確替換。
 
 ---
 
 ## 3. 提升樣板解析效能與精確度 (Template Parsing)
 
-### 當前問題
-目前使用 `DOMDocument` 來提取樣板內容。雖然功能強大，但對 HTML5 支援較舊，且會自動補全/修正 HTML 結構，有時會破壞原始排版。
+### 狀態 (Status)
+**已完成 (COMPLETED)** ✅
 
-### 優化建議
-*   **改用正規表達式 (Regex)**：若僅需提取 `<template>` 區塊，使用正規表達式會更輕量且不會更動到非目標區塊的 HTML 原始排版。
-*   **快取樣板物件**：在同一批生成任務中，樣板內容只需解析一次並快取於記憶體中。
+### 解決方案 (Solution Implemented)
+*   **移除 DOMDocument**：鑑於 `DOMDocument` (libxml) 對 HTML5 `<template>` 標籤的巢狀結構支援不佳，已完全移除該依賴。
+*   **導入 Regex 解析**：改用 `preg_match_all` 與 `preg_replace_callback` 處理樣板提取與圖片 Lazy Loading 優化，顯著提升了效能與 PHP 版本相容性 (支援 PHP 5.x+)。
 
 ---
 
-## 4. 已完成項目 (Completed Items)
+## 4. 自動化壓縮與清理 (Compression & Cleanup)
+
+### 狀態 (Status)
+**已完成 (COMPLETED)** ✅
+
+### 解決方案 (Solution Implemented)
+*   **排除機制**：`mini.py` 新增了針對巢狀目錄 (`admin/assets`) 與特定檔案 (`exif.js`) 的排除清單。
+*   **自動清理**：實作了清理邏輯，自動偵測並刪除誤生成的 `.min.js` / `.min.css` 檔案，保持專案目錄整潔。
+
+---
+
+## 5. 已完成項目 (Completed Items)
 
 *   [x] **Draft System**：草稿暫存機制 (File/DB/SQLite)。
 *   [x] **Filename Normalization**：自動補全日期前綴與副檔名清理。
@@ -49,12 +56,13 @@
 *   [x] **Dashboard Stats**：詳細區分已發布與草稿數量。
 *   [x] **Advanced Editor**：整合 TinyMCE 6 (Local Host) 並支援 `<!--more-->`。
 *   [x] **Translation**：完整的中英文語系支援 (含 TinyMCE)。
+*   [x] **Error Handling**：修正後台登入錯誤訊息顯示 (補全語系檔)。
 
-## 5. 其它建議項目
+## 6. 其它建議項目
 
 *   [ ] **Server-side Pagination**：為 API 增加 `limit` 與 `offset` 支援。
 *   [ ] **Automatic WebP Conversion**：上傳圖片時自動轉換並生成縮圖。
 
 ---
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-04
 **Recorded by**: Gemini CLI Discussion

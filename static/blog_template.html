@@ -2,26 +2,22 @@
 <!-- checked by https://validator.w3.org/-->
 <html lang="zh-hant">
     <head>
-        <!--title-->
-        <title>{blog_title}</title>
+        <title>{{page_title}}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!--canonical-->
-        <link rel="canonical" href="{site_url}blog.html" />
-        <!--description-->
-        <meta name="description" content="{blog_description}" />
-        <!--og:title-->
-        <meta property="og:title" content="{blog_title}" />
-        <!--og:description-->
-        <meta property="og:description" content="{blog_description}" />
-        <!--og:image-->
-        <meta property="og:image" content="{blog_preview}" />
+        
+        <link rel="canonical" href="{{page_canonical}}" />
+        
+        <meta name="description" content="{{page_description}}" />
+        
+        <meta property="og:title" content="{{page_og_title}}" />
+        <meta property="og:description" content="{{page_og_description}}" />
+        <meta property="og:image" content="{{page_og_image}}" />
         <meta property="og:type" content="article" />
-        <!--og:url-->
-        <meta property="og:url" content="{site_url}blog.html" />
-        <meta property="og:site_name" content="{blog_title}" />
-        <!--twitter:card-->
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="og:url" content="{{page_og_url}}" />
+        <meta property="og:site_name" content="{{blog_title}}" />
+        
+        <meta name="twitter:card" content="{{page_twitter_card}}" />
 
         <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -45,13 +41,13 @@
         </script>
     </head>
 
-    <body>
+    <body class="{{body_class}}">
         <div class="outermost">
             <div class="head">
                 <a href="blog.html" class="blog_name_link">
-                    <p id="blog_title_loader" class="blog_name">{blog_title}</p>
+                    <p id="blog_title_loader" class="blog_name">{{blog_title}}</p>
                 </a>
-                <p id="blog_comment_loader" class="blog_comment">{blog_introduce}</p>
+                <p id="blog_comment_loader" class="blog_comment">{{blog_introduce}}</p>
             </div>
             <main id="post_body">
                 <!--loading過場動畫start https://css-loaders.com/classic/ -->
@@ -62,7 +58,7 @@
                 </div>
                 <!--loading過場動畫end-->
 
-                <!--post_load-->
+                {{page_main_content}}
             </main>
             <div id="footer_body">
                 <div id="blog_search">
@@ -108,7 +104,7 @@
                 <div style="max-width: 100vw; padding: 5px">
                     <div
                         class="fb-like"
-                        data-href="{site_url}{{link}}"
+                        data-href="{{site_url}}{{link}}"
                         data-width=""
                         data-layout=""
                         data-action=""

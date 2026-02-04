@@ -9,6 +9,8 @@ return [
     'login_btn' => '登入',
     'login_back_home' => '回到部落格首頁',
     'error_auth_fail' => '帳號或密碼錯誤',
+    'login_locked_msg' => '嘗試次數過多，帳號已暫時鎖定 15 分鐘。',
+    'login_failed_msg' => '登入失敗。您還有 %d 次嘗試機會。',
     'error_mode_unavailable' => '選定的管理模式目前不可用，請檢查系統環境。',
     'mode_db' => '資料庫 (Database)',
     'mode_file' => '檔案系統 (File System)',

@@ -2,31 +2,24 @@
 <!-- checked by https://validator.w3.org/-->
 <html lang="zh-hant">
     <head>
-        <!--title-->
         <title>Baxermux的攝影Blog</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!--canonical-->
         <link rel="canonical" href="https://www.baxermux.org/ersalblog/blog.html" />
-        <!--description-->
         <meta name="description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
-        <!--og:title-->
         <meta property="og:title" content="Baxermux的攝影Blog" />
-        <!--og:description-->
         <meta property="og:description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
-        <!--og:image-->
         <meta property="og:image" content="https://www.baxermux.org/ersalblog/preview/BaxerMuxBlog.jpg" />
         <meta property="og:type" content="article" />
-        <!--og:url-->
         <meta property="og:url" content="https://www.baxermux.org/ersalblog/blog.html" />
         <meta property="og:site_name" content="Baxermux的攝影Blog" />
-        <!--twitter:card-->
         <meta name="twitter:card" content="summary_large_image" />
-
         <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <noscript><link rel="stylesheet" href="blog.min.css" /></noscript>
+        <noscript>
+            <link rel="stylesheet" href="blog.min.css" />
+        </noscript>
         <script src="config.js"></script>
         <script>
             var isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
@@ -44,8 +37,7 @@
             }
         </script>
     </head>
-
-    <body>
+    <body class="">
         <div class="outermost">
             <div class="head">
                 <a href="blog.html" class="blog_name_link">
@@ -61,8 +53,6 @@
                     <br />
                 </div>
                 <!--loading過場動畫end-->
-
-                <!--post_load-->
             </main>
             <div id="footer_body">
                 <div id="blog_search">
@@ -95,54 +85,37 @@
             </div>
         </div>
         <div id="fb-root"></div>
-
         <template id="tmpl_post_main">
             <article class="post_outermost">
                 <div class="post_title_outermost">
                     <p class="post_time">{{time}}</p>
-                    <p class="post_title">
-                        <a href="{{link}}">{{title}}</a>
-                    </p>
+                    <p class="post_title"> <a href="{{link}}">{{title}}</a> </p>
                 </div>
-
                 <div style="max-width: 100vw; padding: 5px">
-                    <div
-                        class="fb-like"
-                        data-href="https://www.baxermux.org/ersalblog/{{link}}"
-                        data-width=""
-                        data-layout=""
-                        data-action=""
-                        data-size=""
-                        data-share="true"
-                    ></div>
+                    <div class="fb-like" data-href="https://www.baxermux.org/ersalblog/{{link}}" data-width="" data-layout="" data-action="" data-size="" data-share="true" ></div>
                 </div>
-
                 <div class="post_content">{{content}}</div>
-
                 <a href="javascript:toTop()" class="top_a">
                     <p class="back_top">(回到最上層 ↑)</p>
                 </a>
-
                 <div class="more_div">
-                    <a class="more_a" href="{{link}}"><p class="more_p">(繼續閱讀...)</p></a>
+                    <a class="more_a" href="{{link}}">
+                        <p class="more_p">(繼續閱讀...)</p>
+                    </a>
                 </div>
-
-                {{tags_block}} {{category_block}}
+                {{tags_block}} {{category_block}} 
             </article>
         </template>
-
         <template id="template_category">
             <a href="blog.html?/category/{{name}}" class="category_link">
                 <p class="category_p">{{name}} ({{count}})</p>
             </a>
         </template>
-
         <template id="template_date_post_item">
             <li>
                 <div>{{day}}日　<a href="{{link}}" class="date_link">{{title}}</a></div>
             </li>
         </template>
-
         <template id="template_tag_item">
             <div class="tag_item_region">
                 <a href="blog.html?/tag/{{name}}" class="tag_link">
@@ -150,7 +123,6 @@
                 </a>
             </div>
         </template>
-
         <template id="tmpl_post_tag_item">
             <div class="tag_item_region">
                 <a href="blog.html?/tag/{{name}}" class="tag_link">
@@ -158,7 +130,6 @@
                 </a>
             </div>
         </template>
-
         <template id="tmpl_post_cat_item">
             <div class="category_item_region">
                 <a href="blog.html?/category/{{name}}" class="category_link">
@@ -166,54 +137,53 @@
                 </a>
             </div>
         </template>
-
         <template id="tmpl_post_tag_container">
             <div class="tags">
-                <div><p class="tags_title">文章標籤 :</p></div>
-                {{items}}
+                <div>
+                    <p class="tags_title">文章標籤 :</p>
+                </div>
+                {{items}} 
             </div>
         </template>
-
         <template id="tmpl_post_cat_container">
             <div class="categorys">
-                <div><p class="categorys_title">文章分類 :</p></div>
-                {{items}}
+                <div>
+                    <p class="categorys_title">文章分類 :</p>
+                </div>
+                {{items}} 
             </div>
         </template>
-
         <template id="tmpl_date_year">
             <li>
-                <span class="caret"
-                    >{{year}}年　<a href="blog.html?/date_range/{{year}}" class="date_link">({{count}})</a></span
-                >
+                <span class="caret" >
+                    {{year}}年　<a href="blog.html?/date_range/{{year}}" class="date_link">({{count}})</a>
+                </span >
                 <ul class="nested" id="year_{{year}}"></ul>
             </li>
         </template>
-
         <template id="tmpl_date_month">
             <li>
-                <span class="caret"
-                    >{{mon}}月　<a href="blog.html?/date_range/{{key}}" class="date_link">({{count}})</a></span
-                >
+                <span class="caret" >
+                    {{mon}}月　<a href="blog.html?/date_range/{{key}}" class="date_link">({{count}})</a>
+                </span >
                 <ul class="nested" id="year_mon_{{key}}"></ul>
             </li>
         </template>
-
         <template id="tmpl_blog_list_container">
             <article class="post_outermost">
                 <div class="post_title_outermost">
-                    <h1 class="post_title">文章總列表</h1>
+                    <h1 class="post_title">
+                        文章總列表
+                    </h1>
                 </div>
                 <div class="post_list_border">{{items}}</div>
             </article>
         </template>
-
         <template id="tmpl_blog_list_item">
             <a href="{{link}}" class="more_a">
                 <p class="read_title">{{time}} {{title}}</p>
             </a>
         </template>
-
         <script>
             document.write('<script src="static/blog' + min + ".js" + ver + '" defer><\/script>');
         </script>

@@ -26,7 +26,7 @@
   - 更新 admin/posts.php, admin/categories.php, admin/tool_migrate.php 的 Sidebar，正確顯示 SQLite 模式標籤。﻿
 - [2026-02-01 12:35:00] 強化環境相容性防護：
   - 修正 admin/health_check.php，增加 PDO Extension 與 Drivers (mysql, sqlite) 的存在檢查，避免 Fatal Error。
-  - 修正 admin/auth.php，增加連線前的 PDO 檢查。﻿
+  - 更新 admin/auth.php，增加連線前的 PDO 檢查。﻿
 - [2026-02-01 12:45:00] 優化資料遷移工具：
   - 將「資料匯入」更名為「資料遷移」(Data Migration)，避免語意混淆。
   - 更新 admin/tool_migrate.php，新增 File to SQLite 遷移功能。
@@ -131,4 +131,17 @@
 - [2026-02-03 00:52:15] (UTC+8) 修正 api/api_filebase.php：修復 get_index 函式中 file_get_contents 的路徑錯誤，解決 post_content 回傳空值的問題。
 - [2026-02-03 00:58:10] (UTC+8) 修正樣板連結樣式：移除 blog_template.html 中標題連結的行內樣式，並更新 CSS (blog.css/blog-dark.css) 確保各主題下連結顏色顯示正確。
 - [2026-02-03 01:05:30] (UTC+8) 同步配置與安裝：更新 config.example.js 並強化 install.php，在安裝過程中新增佈景主題 (Theme) 選擇功能，確保新舊配置與安裝流程一致。
-- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建議。- [2026-02-03 23:33:51] Executed Update macro: Switched to Gemini 3 Pro, synced documentation, and baselined promo site development.
+- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建議。
+- [2026-02-03 23:33:51] Executed Update macro: Switched to Gemini 3 Pro, synced documentation, and baselined promo site development.
+- [2026-02-04 12:00:00] (UTC+8) 優化靜態生成流程 (make_html.php)：改用 blog_template.html 為單一來源，移除 blog.html 中繼解析與 header 行比對注入邏輯，統一改用變數佔位符 ({page_title}, {page_content} 等) 進行內容替換，大幅簡化邏輯並提升維護性。
+- [2026-02-04 12:15:00] (UTC+8) 統一樣板變數格式：將 static/blog_template.html 與 make_html.php 中所有的 {xxx} 單大括號變數統一為 {{xxx}} 雙大括號格式，與內層 template 區塊的語法保持一致，避免混淆並提升可讀性。
+- [2026-02-04 12:35:00] (UTC+8) 修正 make_html.php 語法錯誤與模板保留邏輯：修復字串串接錯誤導致的 PHP Warning，並在生成 blog.html 時保留 <template> 標籤，解決前端 blog.js 因找不到樣板而回報的 innerHTML null 錯誤。
+- [2026-02-04 12:55:00] (UTC+8) 修正 make_html.php 模板標籤轉碼問題：針對 DOMDocument saveHTML 會將 {{ }} 轉碼為 %7B%7B %7D%7D 的行為，新增反轉碼邏輯，確保前端 blog.js 的正則替換能正確運作，解決文章標題出現 {{year}} 的顯示錯誤。
+- [2026-02-04 13:10:00] (UTC+8) 修復 blog.html 模板巢狀結構錯亂問題：DOMDocument 解析器在處理 <template> 標籤內的不完整 HTML 時導致內容錯位 (Main Template 被 Date Template 覆蓋)，已修改 make_html.php 跳過 blog.html 的 DOM 解析與圖片優化，直接進行字串替換，確保模板結構完整。
+- [2026-02-04 13:30:00] (UTC+8) 優化 mini.py 壓縮腳本：新增排除清單功能，自動忽略 admin/assets 及 exif.js 等第三方套件，並實作 cleanup_extra_files 函式以自動清除先前誤產生的 .min.js/.min.css 檔案。
+- [2026-02-04 13:45:00] (UTC+8) 清理 make_html.php 程式碼：移除已棄用的 Html2Text 函式庫引用與相關 use 宣告，精簡建置腳本以提升維護性。
+- [2026-02-04 14:05:00] (UTC+8) 重構 make_html.php 核心解析邏輯：完全移除 DOMDocument 依賴，改用 Regex (preg_match_all, preg_replace_callback) 處理樣板解析與圖片優化，徹底解決 HTML5 標籤相容性、屬性自動轉碼及內容巢狀錯誤問題，同時大幅提升 PHP 5.x 相容性與執行效能。
+- [2026-02-04 14:25:00] (UTC+8) 修正 make_html.php 語法與邏輯：修復了 Regex 語法錯誤，並校正了 fix_resource_paths_for_post_dir 函式中的字串替換邏輯 (移除了多餘的空白)，確保靜態網頁 (post/*.html) 能正確載入上一層的 CSS 主題檔案。
+- [2026-02-04 14:40:00] (UTC+8) 修正 mini.py 排除邏輯：更新資料夾排除判斷，支援巢狀路徑 (如 admin/assets) 的正確比對，並新增 langs 與 PHP_LIB 至排除清單，防止誤壓縮第三方語系檔與函式庫。
+- [2026-02-04 14:50:00] (UTC+8) 清理誤生成的壓縮檔案：根據 Git 狀態比對，刪除 admin/assets 目錄下所有未追蹤的 .min.js 檔案，並還原被覆蓋的原始 .min.js 檔案，恢復專案目錄的整潔。
+- [2026-02-04 15:05:00] (UTC+8) 修復後台登入訊息：修正 langs/admin/admin-zh_TW.php 中遺漏的 login_failed_msg 與 login_locked_msg 翻譯鍵值，解決登入失敗時顯示 raw key 的問題。

@@ -32,7 +32,6 @@ This project utilizes the following open-source libraries:
 
 ### Core & Frontend
 - **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas): Used in `make_html.php` for HTML beautification.
-- **[html2text](https://github.com/soundasleep/html2text)** (Jevon Wright): Used for converting HTML to plain text for metadata processing.
 - **[exif-js](https://github.com/exif-js/exif-js)**: Used in the frontend (`static/exif.js`) to read and display EXIF data.
 
 ### Admin Panel
@@ -77,8 +76,6 @@ This project utilizes the following open-source libraries:
 ### 核心與前台
 - **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas):
   用於 `make_html.php` 中，將生成的 HTML 原始碼進行排版美化。
-- **[html2text](https://github.com/soundasleep/html2text)** (Jevon Wright):
-  用於將 HTML 內容轉換為純文字，以便處理元資料。
 - **[exif-js](https://github.com/exif-js/exif-js)**:
   用於前端 (`static/exif.js`)，從圖片中讀取並顯示 EXIF 資訊。
 

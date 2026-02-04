@@ -1,4 +1,4 @@
-# Blog Project Roadmap & Feature Proposals (v2026.02.03)
+# Blog Project Roadmap & Feature Proposals (v2026.02.04)
 
 This document organizes the discussions and evaluations regarding future feature expansions for the BaxerMux Photography Blog. It serves as a strategic reference for long-term development.
 
@@ -32,6 +32,10 @@ This document organizes the discussions and evaluations regarding future feature
     *   **API Centralization**: Moved `api_*.php` files to `api/` directory.
     *   **Static Output**: Generated static pages are now organized in `post/` directory.
     *   **Resource Paths**: Automated `../` relative path correction for static generation.
+    *   **Static Generation Optimization**:
+        *   **Single Source**: Rewrote `make_html.php` to generate all pages directly from `blog_template.html`.
+        *   **Performance**: Replaced `DOMDocument` with RegEx parsing to support HTML5 `<template>` tags correctly and fix PHP version compatibility issues.
+        *   **Path Fixes**: Corrected relative path injection for CSS/JS resources in subdirectories.
 
 ### 1.6 Draft System & Status Management (Status: COMPLETED ✅)
 *   **Reasoning**: Users need to save work-in-progress content without publishing it immediately.
@@ -69,6 +73,13 @@ This document organizes the discussions and evaluations regarding future feature
 *   **Implementation**: 
     *   Added dedicated **Settings Page** in Admin Panel.
     *   GUI support for API Type switching, Theme selection, and Google CSE ID.
+
+### 2.5 Minification Pipeline (Status: COMPLETED ✅)
+*   **Reasoning**: Reduce file size for better performance without manual effort.
+*   **Implementation**:
+    *   `mini.py` script automates JS/CSS compression using `terser` and `clean-css-cli`.
+    *   Smart exclusion logic protects third-party libraries (`admin/assets`, `exif.js`).
+    *   Auto-cleanup features removes mistakenly generated minified files.
 
 ---
 
@@ -120,7 +131,7 @@ This document organizes the discussions and evaluations regarding future feature
 
 ---
 
-# 部落格專案開發藍圖與功能提案 (v2026.02.03)
+# 部落格專案開發藍圖與功能提案 (v2026.02.04)
 
 此文件整理了關於 BaxerMux 攝影部落格未來功能擴充的討論與評估，作為長期開發的戰略參考。
 
@@ -154,6 +165,10 @@ This document organizes the discussions and evaluations regarding future feature
     *   **API 集中化**：將 `api_*.php` 檔案移至 `api/` 目錄。
     *   **靜態輸出**：靜態網頁現在會統一生成至 `post/` 目錄。
     *   **路徑修正**：實作了 `../` 相對路徑的自動修正機制。
+    *   **靜態生成優化**：
+        *   **單一來源**：重寫 `make_html.php`，統一由 `blog_template.html` 生成所有頁面。
+        *   **效能提升**：移除 DOMDocument，改用 Regex 解析，解決了 HTML5 `<template>` 結構錯亂問題並提升了 PHP 版本相容性。
+        *   **路徑修復**：修正了子目錄靜態頁面的 CSS/JS 資源引用路徑。
 
 ### 1.6 草稿系統與狀態管理 (狀態：已完成 ✅)
 *   **理由**：使用者需要暫存未完成的文章，而不直接發佈。
@@ -189,6 +204,13 @@ This document organizes the discussions and evaluations regarding future feature
 *   **實作**：
     *   新增後台 **網站設定 (Settings)** 頁面。
     *   支援圖形化切換 API 模式、網站主題與設定 Google CSE ID。
+
+### 2.5 自動化壓縮流程 (Status: 已完成 ✅)
+*   **理由**：提升網站載入效能，同時簡化發布流程。
+*   **實作**：
+    *   優化 `mini.py` 腳本，自動調用 `terser` 與 `clean-css-cli`。
+    *   加入智慧排除清單，保護第三方套件 (`admin/assets`, `exif.js`) 不被錯誤壓縮。
+    *   自動清理機制，防止產生多餘的 `.min` 檔案。
 
 ---
 
@@ -240,5 +262,5 @@ This document organizes the discussions and evaluations regarding future feature
 
 ---
 **Document Created**: 2026-02-01
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-04
 **Source**: Discussion between User & Gemini CLI
