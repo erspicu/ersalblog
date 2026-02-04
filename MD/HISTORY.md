@@ -1,4 +1,4 @@
-﻿# Vibe Coding History
+# Vibe Coding History
 
 Recorded the development journey and original Prompt commands of this project through Vibe Coding with Gemini CLI.
 
@@ -45,7 +45,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Prompt**: 
     > "I want to upload this project to my GitHub https://github.com/erspicu/ersalblog"
 
-### [12:50] Acknowledgments and Open Source Licenses
+### [12:50] Acknowledgments and Open Source Libraries
 - **Task**: Note the third-party PHP and JS libraries used in README to respect the original authors.
 - **Prompt**: 
     > "My PHP_LIB contains some third-party packages, and there's an exif reading library in static. Write these package descriptions into the root readme to respect original versions, then push to git."
@@ -131,6 +131,10 @@ Recorded the development journey and original Prompt commands of this project th
 ### [16:39] Documentation and Format Updates
 - Integrated `reme.txt` content into `README.md` and updated third-party package info.
 - `gemini_log.txt` transitioned to `gemini_log.md` with mandatory UTF-8 BOM encoding.
+
+---
+
+## 2026-02-01
 
 ### [19:05] Automated Initialization System (Database Initialization)
 - **Task**: Build automated DB table creation and data migration.
@@ -270,7 +274,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Establish a dedicated directory for backups.
 - **Implementation**:
     - Created `/backup` directory and added a bilingual `readme.md`.
-    - Updated `.gitignore` to exclude `/backup/*.zip`.
+    - Updated `.gitignore` to exclude `/backup/*.zip` 檔案.
 
 ### [15:15] Backup Restore & Upload
 - **Task**: Enhance backup tool with restore and upload capabilities.
@@ -381,6 +385,55 @@ Recorded the development journey and original Prompt commands of this project th
     - Updated scanning logic in `admin/lang_init.php` to exclude `install_` prefixed files.
     - Simplified language dropdown to show only core language codes.
 
+### [23:00] Promotional Website Development (Vibe Coding Experiment)
+- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
+- **Implementation**:
+    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
+    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
+    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
+    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
+    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
+
+### [23:33] Model Switch & Global Update
+- **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
+- **Implementation**:
+    - Updated `admin/version_config.php` to reflect the switch to `gemini-3-pro-preview`.
+    - Executed the "Update" macro to synchronize HISTORY.md, ARCHITECTURE.md, and README.md.
+    - Completed local Git commit to baseline the new promotional assets and technical refinements.
+
+---
+
+## 2026-02-04
+
+### [14:05] Core SSG Pipeline Refactoring (Regex Transition)
+- **Task**: Overhaul the static page generation logic for robustness and compatibility.
+- **Implementation**:
+    - **Single Source Architecture**: Rewrote `make_html.php` to generate all outputs directly from `blog_template.html`, eliminating chain-dependencies and structure degradation.
+    - **Regex-Based Parsing**: Replaced `DOMDocument` with high-performance Regex (`preg_match_all`, `preg_replace_callback`). This solved the "auto-corruption" of HTML5 `<template>` tags and fixed attribute URL-encoding issues (`%7B%7B`).
+    - **Placeholder Standardization**: Unified all template variables to the `{{variable}}` format to prevent syntax collisions with CSS/JS.
+    - **PHP 5.x Compatibility**: Maintained backward compatibility with PHP 5.x (using `array()` syntax and removing modern-only dependencies).
+
+### [14:40] Automated Asset Compression Optimization
+- **Task**: Refine the JS/CSS minification workflow.
+- **Implementation**:
+    - **Smart Directory Ignore**: Updated `mini.py` logic to correctly handle nested path matching (e.g., `admin/assets`), preventing accidental compression of third-party libraries.
+    - **Expanded Exclusion List**: Added `langs` and `PHP_LIB` to the global ignore list.
+    - **Auto-Cleanup Routine**: Implemented a cleanup function in `mini.py` to automatically detect and remove mistakenly generated `.min.js` / `.min.css` files.
+
+### [15:15] Micro-Template Framework Development
+- **Task**: Decouple template logic from business logic in the build script.
+- **Implementation**:
+    - **TemplateManager Class**: Created `PHP_LIB/TemplateManager.php` as a lightweight, reusable template engine supporting nested templates and list rendering.
+    - **Script Simplification**: Refactored `make_html.php` to utilize the new manager, reducing boilerplate code and improving maintainability.
+    - **Processing Pipeline**: Centralized "template stripping," "path correction," and "image optimization" into a unified `pipeline()` function.
+
+### [15:45] File-MTIME Based Cache Mechanism
+- **Task**: Implement incremental builds to reduce redundant rendering time.
+- **Implementation**:
+    - **Smart Dependency Tracking**: Added `checkCache()` logic to compare output timestamps against all source dependencies (Source HTML, Global Template, Config).
+    - **Optimized Workflow**: The build script now only processes modified content, significantly speeding up the update process for large blogs.
+    - **Forced Rebuild**: Added CLI support for `-f` / `--force` flags to bypass cache when necessary.
+
 ---
 
 ## 2026-01-30 (繁體中文)
@@ -451,7 +504,7 @@ Recorded the development journey and original Prompt commands of this project th
     - "登入後的後台版面有點怪。希望點擊文章或分類管理後，版面能跟登入頁保持一致——左邊是側邊欄，右邊是管理介面，就像儀表板一樣。"
     - "在文章管理的文章列表中，將描述與標題放在檔案 URL 下方。如果太長則換行。"
     - "編輯和刪除操作垂直排列且顏色不同。這是刻意的設計嗎？"
-    - "沒關係，保留它。但原生的 JS刪除警告很醜。使用好看一點的提示視窗。如果要用第三方元件，請下載使用。"
+    - "沒關係，保留它。但原生的 JS 刪除警告很醜。使用好看一點的提示視窗。如果要用第三方元件，請下載使用。"
 
 ---
 
@@ -470,7 +523,7 @@ Recorded the development journey and original Prompt commands of this project th
 
 ### [12:30] 混合式管理系統
 - **任務**: 支援在登入時選擇「資料庫模式」或「檔案系統模式」，並提供統一介面。
-- **Prompt**: "因為我的 blog 架構目前呈現檔案系統、資料庫系統併行，我希望在登入階段能夠讓 user 選擇進入後的管理版本。如果選擇非資料庫版本，登入後介面基本上跟資料庫版本一樣，但管理的內容從檔案 blog 的檔案系統而來。"
+- **Prompt**: "因為我的 blog 架構目前呈現檔案系統、資料庫系統併行，我希望在登入階段能夠讓 user 選擇進入後的管理版本。如果選擇非資料庫版本，登入後介面基本上跟資料庫版本一樣,但管理的內容從檔案 blog 的檔案系統而來。"
 - **實作**: 建立 `admin/data_provider.php` 封裝 `DataManager` 類別，抽象化資料讀寫邏輯。
 
 ### [12:45] 日誌系統與開發規範優化
@@ -652,7 +705,7 @@ Recorded the development journey and original Prompt commands of this project th
     - 實作從本地 ZIP 備份檔還原系統的功能 (覆蓋內容)。
     - 新增檔案上傳功能以匯入外部備份，並加入檔案大小限制檢查與提示。
     - 整合 SweetAlert2 處理操作確認 (刪除、還原、建立) 與狀態訊息 (成功/失敗)。
-    - 加入 Loading 遮罩以處理耗時操作 (上傳、建立、還原) 的等待狀態。
+    - 加入 Loading 遮罩以處理負時操作 (上傳、建立、還原) 的等待狀態。
     - 更新所有新備份功能的 i18n 支援。
 
 ### [15:30] 備份工具優化 (PHP 設定提示)
@@ -722,93 +775,6 @@ Recorded the development journey and original Prompt commands of this project th
 
 ## 2026-02-03 (繁體中文)
 
-### [00:25] 多重 CSS 主題與深色模式
-- **任務**: 實作可切換的網站佈景主題，並提供無障礙友善的深色模式。
-- **實作**:
-    - **主題架構**: 在 `config.js` 新增 `theme_file` 設定，支援動態載入 CSS。
-    - **深色模式**: 建立 `blog-dark.css`，針對深色背景優化了文字對比度與連結顏色 (使用淺藍色 #66b3ff)。
-    - **樣板更新**: 修改 `static/blog_template.html` 與 JS 邏輯，根據設定載入對應 CSS。
-    - **安裝整合**: 更新 `install.php` 與語言檔，允許在安裝時選擇預設主題。
-
-### [00:38] API 架構重構與靜態生成優化
-- **任務**: 整理雜亂的根目錄檔案，並解決靜態網頁生成路徑問題。
-- **實作**:
-    - **目錄結構**: 將 `api_*.php` 統一移動至 `api/` 目錄。
-    - **靜態輸出**: 修改 `make_html.php` 將生成的靜態文章統一輸出至 `post/` 目錄，保持根目錄整潔。
-    - **路徑修正**: 實作自動化路徑修正函數，解決 `post/` 目錄下靜態頁面讀取上層資源 (`../`) 的問題，並修復了動態 JS 主題載入的路徑錯誤。
-    - **API 路徑**: 更新 `static/blog.js` 指向新的 `api/` 路徑，並修正後端 API 檔案內的相對路徑引用。
-
-### [00:52] 檔案模式 API 修復
-- **任務**: 解決 API 重構後 `post_content` 回傳空值的問題。
-- **實作**:
-    - 修正 `api/api_filebase.php` 中 `get_index` 函數的 `file_get_contents` 路徑，使其能正確讀取上層目錄的 `contents/` 資料。
-
-### [00:58] 備份優化與其他修正
-- **任務**: 減小備份檔體積並修正樣式問題。
-- **實作**:
-    - **備份優化**: 修改 `admin/tool_backup.php`，在所有備份模式中排除 `pic/` 目錄（圖片資源），顯著減小備份檔大小。
-    - **樣式修正**: 移除樣板中寫死的行內樣式，改用 CSS 控制，確保深色/淺色模式下的標題連結顏色皆能正確顯示。
-    - **初始化修正**: 更新 `admin/file_init.php` 將 `post/` 目錄納入初始化清單。
-
----
-
----
-
-## 2026-02-03
-
-### [19:30] Hybrid Draft System & Filename Normalization
-- **Task**: Implement post draft mechanism and ensure consistent file naming.
-- **Implementation**:
-    - **Draft Mechanism**: 
-        - File Mode: Drafts are saved as `.html.tmp`; published articles as `.html`.
-        - DB/SQLite Mode: Dynamically added `status` column ('draft'/'published').
-        - Frontend Filter: Updated all APIs and `make_html.php` to skip draft files.
-    - **Filename Normalization**: 
-        - Automated `YYYYMMDD-` prefixing based on post date.
-        - Smart validation to support user-entered prefixes and avoid duplication.
-    - **UI Updates**: Added "Save Draft" vs "Publish" buttons and status badges in Admin list and Dashboard.
-
-### [19:40] Admin Settings GUI (config.js Management)
-- **Task**: Provide a user-friendly interface to manage frontend configurations.
-- **Implementation**:
-    - Created `admin/settings.php` to manage `config.js`.
-    - Supports GUI-based switching of API Source (File/DB/SQLite), Theme selection, and Google CSE ID.
-    - Implemented regex-based config writing to preserve file formatting.
-
-### [19:50] Advanced WYSIWYG Editor Integration
-- **Task**: Upgrade the article editor from a raw textarea to a visual editor.
-- **Implementation**:
-    - **TinyMCE 6**: Fully deployed TinyMCE 6.8.2 locally (no CDN dependency).
-    - **PageBreak Customization**: Customized the PageBreak plugin to use `<!--more-->` as the separator, matching existing frontend logic.
-    - **i18n & UX**: Integrated dynamic language switching (zh_TW/en_US) and removed promotional branding for a cleaner interface.
-
-### [20:00] Admin Internationalization Refactoring
-- **Task**: Clean up language files and enforce stricter loading rules.
-- **Implementation**:
-    - Renamed language files to use `admin-` prefix (e.g., `admin-zh_TW.php`) to distinguish from installer files.
-    - Updated scanning logic in `admin/lang_init.php` to exclude `install_` prefixed files.
-    - Simplified language dropdown to show only core language codes.
-
-### [23:00] Promotional Website Development (Vibe Coding Experiment)
-- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
-- **Implementation**:
-    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
-    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
-    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
-    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
-    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
-
-### [23:33] Model Switch & Global Update
-- **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
-- **Implementation**:
-    - Updated `admin/version_config.php` to reflect the switch to `gemini-3-pro-preview`.
-    - Executed the "Update" macro to synchronize HISTORY.md, ARCHITECTURE.md, and README.md.
-    - Completed local Git commit to baseline the new promotional assets and technical refinements.
-
----
-
-## 2026-02-03 (繁體中文)
-
 ### [19:30] 混合式草稿系統與檔名標準化
 - **任務**: 實作文章草稿機制並確保檔案命名的一致性。
 - **實作**:
@@ -832,7 +798,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **任務**: 將文章編輯器從純文字框升級為視覺化編輯器。
 - **實作**:
     - **TinyMCE 6**: 在本地端完整部署 TinyMCE 6.8.2，不依賴外部 CDN。
-    - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現有前台邏輯。
+    - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現台邏輯。
     - **語系與體驗**: 整合動態語系切換 (繁中/英文)，並移除升級提示與品牌標記以簡化介面。
 
 ### [20:00] 後台語系架構重構
@@ -857,3 +823,34 @@ Recorded the development journey and original Prompt commands of this project th
     - 更新 `admin/version_config.php` 以反映切換至 `gemini-3-pro-preview`。
     - 執行「更新」巨集同步 HISTORY.md、ARCHITECTURE.md 與 README.md。
     - 執行本地 Git Commit，將宣傳網站資產與技術優化內容入庫。
+
+---
+
+## 2026-02-04 (繁體中文)
+
+### [14:05] 核心 SSG 建置管線重構 (Regex 轉型)
+- **任務**: 全面翻新靜態頁面生成邏輯，提升穩定性與相容性。
+- **實作**:
+    - **單一真理來源**: 重寫 `make_html.php`，讓所有頁面直接從 `blog_template.html` 生成，徹底解決結構劣化問題。
+    - **Regex 解析**: 移除 `DOMDocument` 改用高效能 Regex，解決 HTML5 標籤相容性、屬性自動轉碼 (`%7B%7B`) 及內容巢狀錯誤。
+    - **變數標準化**: 統一所有樣板變數為 `{{variable}}` 格式，防止與 CSS/JS 語法衝突。
+    - **PHP 5.x 相容**: 維持對舊版 PHP 的相容性，移除現代專屬語法依賴。
+
+### [14:40] 自動化資產壓縮優化
+- **任務**: 精煉 JS/CSS 壓縮流程。
+- **實作**:
+    - **智慧路徑排除**: 修正 `mini.py` 目錄排除邏輯，正確處理巢狀路徑 (如 `admin/assets`)，保護第三方套件不被誤壓縮。
+    - **清理機制**: 新增自動清理功能，執行時自動偵測並刪除誤生成的 `.min.js` / `.min.css` 檔案。
+
+### [15:15] 微樣板管理器 (TemplateManager) 開發
+- **任務**: 將樣板處理邏輯與業務邏輯解耦。
+- **實作**:
+    - **TemplateManager**: 建立 `PHP_LIB/TemplateManager.php` 輕量級類別，封裝解析、變數替換與列表渲染。
+    - **建置管線化**: 建立 `pipeline()` 函式統一管理路徑修正與圖片優化，大幅提升 `make_html.php` 的可讀性。
+
+### [15:45] 基於修改時間 (mtime) 的快取機制
+- **任務**: 實作增量建置 (Incremental Build) 以大幅縮短生成時間。
+- **實作**:
+    - **智慧相依偵測**: 新增 `checkCache()`，比對目標檔案與所有來源檔案（原始文章、母樣板、設定檔）的修改時間。
+    - **自動跳過**: 僅針對有變動的內容進行渲染，針對大規模部落格顯著提升效率。
+    - **強制重產**: 支援 CLI 參數 `-f` / `--force` 繞過快取。
