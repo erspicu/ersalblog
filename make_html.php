@@ -198,9 +198,9 @@ function pipeline($html, $indenter, $fixPaths, $removeTemplates, $optimizeImages
     if ($optimizeImages) {
         $html = optimize_images($html);
     }
-    try {
-        $html = $indenter->indent($html);
-    } catch (Exception $e) {}
+    // try {
+    //     $html = $indenter->indent($html);
+    // } catch (Exception $e) {}
     return $html;
 }
 

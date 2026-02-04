@@ -145,3 +145,6 @@
 - [2026-02-04 14:40:00] (UTC+8) 修正 mini.py 排除邏輯：更新資料夾排除判斷，支援巢狀路徑 (如 admin/assets) 的正確比對，並新增 langs 與 PHP_LIB 至排除清單，防止誤壓縮第三方語系檔與函式庫。
 - [2026-02-04 14:50:00] (UTC+8) 清理誤生成的壓縮檔案：根據 Git 狀態比對，刪除 admin/assets 目錄下所有未追蹤的 .min.js 檔案，並還原被覆蓋的原始 .min.js 檔案，恢復專案目錄的整潔。
 - [2026-02-04 15:05:00] (UTC+8) 修復後台登入訊息：修正 langs/admin/admin-zh_TW.php 中遺漏的 login_failed_msg 與 login_locked_msg 翻譯鍵值，解決登入失敗時顯示 raw key 的問題。
+- [2026-02-04 15:20:00] (UTC+8) 樣板 CSS 分離：將 static/blog_template.html 中的行內樣式 (Inline Styles) 提取並獨立至 blog.css 與 blog-dark.css，優化代碼維護性與 CSP 相容性。
+- [2026-02-04 15:35:00] (UTC+8) 修復 HTML 排版工具導致的內容缺失：發現 `dindent` 在處理複雜 HTML5 結構時會導致內容截斷，已暫時禁用 `make_html.php` 中的排版功能以確保生成的 blog.html 完整性。
+- [2026-02-04 15:55:00] (UTC+8) 修復樣板內容缺失問題：還原被錯誤的取代操作破壞的 static/blog_template.html，補回遺失的列表區塊 (AllPostList, AllTagList 等)，確保 blog.html 能正常渲染並執行 JS。

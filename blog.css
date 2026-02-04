@@ -455,3 +455,14 @@ body.is-single-page .post_title a {
         }
     }
 }
+
+/* Extracted Inline Styles */
+.google-search-container {
+    width: 98%;
+    margin: auto;
+}
+
+.fb-like-container {
+    max-width: 100vw;
+    padding: 5px;
+}
