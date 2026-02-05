@@ -161,6 +161,7 @@ if (empty($themes)) $themes = ['blog'];
                             <option value="api_filebase" <?php echo ($currentConfig['api_type'] == 'api_filebase') ? 'selected' : ''; ?>><?php echo __('opt_api_file'); ?> (api_filebase)</option>
                             <option value="api_dbsqlbase" <?php echo ($currentConfig['api_type'] == 'api_dbsqlbase') ? 'selected' : ''; ?>><?php echo __('opt_api_db'); ?> (api_dbsqlbase)</option>
                             <option value="api_sqlitebase" <?php echo ($currentConfig['api_type'] == 'api_sqlitebase') ? 'selected' : ''; ?>><?php echo __('opt_api_sqlite'); ?> (api_sqlitebase)</option>
+                            <option value="json" <?php echo ($currentConfig['api_type'] == 'json') ? 'selected' : ''; ?>>Static JSON (Pre-generated)</option>
                         </select>
                         <div class="form-text">控制前端網頁讀取資料的來源 API。</div>
                     </div>

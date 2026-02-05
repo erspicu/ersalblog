@@ -172,3 +172,8 @@
   - 修正 `make_html.php` 中的靜態生成 XSS 風險，對標題、標籤與分類名稱執行 `htmlspecialchars` 轉義。
   - 修正 `static/blog.js` 中的 DOM XSS 風險，新增 `escapeHtml` 函式並在渲染 API 資料時進行轉義。
   - 確認後台 `post_edit.php` 與 `posts.php` 已具備正確的輸出轉義防護。
+- [2026-02-05 12:30:00] (UTC+8) 實作純靜態 JSON API 模式：
+  - 更新 `config.js` 與 `admin/settings.php`，新增 `api_type: 'json'` 選項。
+  - 更新 `make_html.php`，新增 `-json` 參數。啟用後會自動將所有文章索引、分類、標籤與日期歸檔預先生成為靜態 JSON 檔案 (存於 `api/json/`)。
+  - 更新 `static/blog.js`，實作前端路由邏輯。當檢測到 `api_type: 'json'` 時，自動根據網址參數 (`?/category/`, `?/tag/` 等) 讀取對應的預生成 JSON 檔，達成無 PHP 後端的全靜態瀏覽體驗。
+  - 更新 `install.php`，在安裝流程中加入 Static JSON 模式選項。

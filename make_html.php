@@ -40,11 +40,12 @@ foreach ($langData as $k => $v) {
 
 // 檢查是否強制重產
 $isForce = in_array('-f', $argv) || in_array('--force', $argv);
+$isJson = in_array('-json', $argv); // New Flag
 
 // 執行建置
-build($isForce);
+build($isForce, $isJson);
 
-function build($force = false) {
+function build($force = false, $jsonMode = false) {
     global $langVars; // Access global lang vars
     $indenter = new Indenter();
     $tpl = new TemplateManager();
@@ -63,6 +64,13 @@ function build($force = false) {
     $indexFile = "contents/index_post.txt";
     $posts = loadPosts($indexFile);
     $categories = scanCategories("category");
+
+    // ==========================================
+    // JSON Pre-generation (If flag is set)
+    // ==========================================
+    if ($jsonMode) {
+        generateJsonApi($posts, $categories);
+    }
 
     // ==========================================
     // A. 生成首頁 (blog.html)
@@ -372,4 +380,181 @@ function generateSitemap($force, $indexFile) {
     $xml .= "\n</urlset>";
     file_put_contents($targetSitemap, $xml);
     echo "$targetSitemap render ok!<br>\r\n";
+}
+
+// --- JSON API Generator ---
+
+function generateJsonApi($posts, $categories) {
+    $jsonDir = "api/json";
+    if (!is_dir($jsonDir)) mkdir($jsonDir, 0755, true);
+
+    echo "Generating JSON API files...<br>\r\n";
+
+    // 1. Calculate Global Stats (Shared across all responses)
+    // Replicate logic from api_filebase.php
+    $ret_tag_count = [];
+    $ret_date = [];
+    $ret_date_post = [];
+    $cat_stats = []; // Format matching api: array of {name, count, posts}
+
+    // Process Categories first (from scanCategories which is reliable)
+    foreach ($categories as $cat) {
+        // scanCategories returns full filenames (some might lack .html in old system, but we standardized)
+        // We need to count valid posts that exist in our $posts array
+        // However, $posts contains ALL valid posts from index_post.txt
+        // Let's map filenames for quick lookup
+        $cat_stats[] = array(
+            'name' => $cat['name'],
+            'count' => count($cat['posts']), 
+            'posts' => $cat['posts'] 
+        );
+    }
+
+    // Process Posts for Tags and Dates
+    foreach ($posts as $post) {
+        if (!$post['isValid']) continue;
+
+        // Tags
+        foreach ($post['tags'] as $t) {
+            $t = trim($t);
+            if ($t === '') continue;
+            $ret_tag_count[$t] = ($ret_tag_count[$t] ?? 0) + 1;
+        }
+
+        // Dates
+        // post['date'] is "YYYY-MM-DD HH:MM:SS"
+        $dt_parts = explode(' ', $post['date']);
+        $ymd = explode('-', $dt_parts[0]);
+        if (count($ymd) >= 2) {
+            $year = $ymd[0];
+            $mon  = $ymd[1];
+            $ymKey = $year . $mon;
+
+            $ret_date[$year] = ($ret_date[$year] ?? 0) + 1;
+            $ret_date[$ymKey] = ($ret_date[$ymKey] ?? 0) + 1;
+
+            if (!isset($ret_date_post[$ymKey])) {
+                $ret_date_post[$ymKey] = [];
+            }
+            $ret_date_post[$ymKey][] = array(
+                'title' => $post['title'],
+                'post_index' => $post['filename']
+            );
+        }
+    }
+
+    // Base Response Structure
+    $baseResponse = [
+        'category'    => $cat_stats,
+        'dates_count' => $ret_date,
+        'date_post'   => $ret_date_post,
+        'tags'        => $ret_tag_count,
+        'posts'       => [] 
+    ];
+
+    // Helper to format post for API
+    $formatPost = function($p) use ($categories) {
+        // Need to match content summary logic (split by <!--more-->)
+        $content_parts = explode('<!--more-->', $p['content']);
+        $summary = $content_parts[0];
+        
+        // Find categories for this post
+        $myCats = matchCategories($p['filename'], $categories);
+        $catNames = array_map(function($c){ return $c['name']; }, $myCats);
+
+        return [
+            'post_category' => $catNames,
+            'post_tags'     => $p['tags'],
+            'post_time'     => $p['date'],
+            'post_title'    => $p['title'],
+            'post_content'  => $summary,
+            'post_index'    => $p['filename']
+        ];
+    };
+
+    // 2. Generate all.json (Index)
+    $allPosts = [];
+    foreach ($posts as $p) {
+        if ($p['isValid']) $allPosts[] = $formatPost($p);
+    }
+    $indexData = $baseResponse;
+    $indexData['posts'] = $allPosts;
+    file_put_contents("$jsonDir/all.json", json_encode($indexData));
+    echo "  - all.json created.<br>\r\n";
+
+    // 3. Generate Category JSONs
+    foreach ($categories as $cat) {
+        $catPosts = [];
+        foreach ($posts as $p) {
+            if (!$p['isValid']) continue;
+            // Check if post is in this category
+            // $cat['posts'] contains filenames
+            if (in_array($p['filename'], $cat['posts']) || in_array(str_replace('.html', '', $p['filename']), $cat['posts'])) {
+                $catPosts[] = $formatPost($p);
+            }
+        }
+        $catData = $baseResponse;
+        $catData['posts'] = $catPosts;
+        $safeName = urlencode($cat['name']);
+        file_put_contents("$jsonDir/category_{$safeName}.json", json_encode($catData));
+    }
+    echo "  - Category JSONs created.<br>\r\n";
+
+    // 4. Generate Tag JSONs
+    foreach (array_keys($ret_tag_count) as $tagName) {
+        $tagPosts = [];
+        foreach ($posts as $p) {
+            if (!$p['isValid']) continue;
+            if (in_array($tagName, $p['tags'])) {
+                $tagPosts[] = $formatPost($p);
+            }
+        }
+        $tagData = $baseResponse;
+        $tagData['posts'] = $tagPosts;
+        $safeName = urlencode($tagName);
+        file_put_contents("$jsonDir/tag_{$safeName}.json", json_encode($tagData));
+    }
+    echo "  - Tag JSONs created.<br>\r\n";
+
+    // 5. Generate Date JSONs
+    // Needs to handle Year (2026) and YearMonth (202601)
+    $years = [];
+    $yms = [];
+    foreach (array_keys($ret_date) as $k) {
+        if (strlen($k) == 4) $years[] = $k;
+        if (strlen($k) == 6) $yms[] = $k;
+    }
+
+    // Years
+    foreach ($years as $y) {
+        $datePosts = [];
+        foreach ($posts as $p) {
+            if (!$p['isValid']) continue;
+            if (strpos($p['date'], $y . '-') === 0) {
+                $datePosts[] = $formatPost($p);
+            }
+        }
+        $dData = $baseResponse;
+        $dData['posts'] = $datePosts;
+        file_put_contents("$jsonDir/date_{$y}.json", json_encode($dData));
+    }
+
+    // YearMonths
+    foreach ($yms as $ym) {
+        $y = substr($ym, 0, 4);
+        $m = substr($ym, 4, 2);
+        $prefix = "$y-$m";
+        
+        $datePosts = [];
+        foreach ($posts as $p) {
+            if (!$p['isValid']) continue;
+            if (strpos($p['date'], $prefix) === 0) {
+                $datePosts[] = $formatPost($p);
+            }
+        }
+        $dData = $baseResponse;
+        $dData['posts'] = $datePosts;
+        file_put_contents("$jsonDir/date_{$ym}.json", json_encode($dData));
+    }
+    echo "  - Date JSONs created.<br>\r\n";
 }

@@ -151,8 +151,36 @@ if (pathName.endsWith("blog.html")) {
     var commentEl = document.getElementById("blog_comment");
     if (commentEl) commentEl.style.display = "none";
 
+    var apiUrl = "";
+    if (AppConfig["api_type"] === "json") {
+        // Static JSON Mode Routing
+        // 1. Default (Index): json/all.json
+        // 2. Category: ?/category/Name -> json/category_Name.json
+        // 3. Tag: ?/tag/Name -> json/tag_Name.json
+        // 4. Date: ?/date_range/202601 -> json/date_202601.json
+        
+        var targetFile = "all.json";
+        
+        // Simple router
+        if (queryString.indexOf("/category/") > -1) {
+            var catName = queryString.split("/category/")[1].split("&")[0];
+            targetFile = "category_" + encodeURIComponent(decodeURIComponent(catName)) + ".json";
+        } else if (queryString.indexOf("/tag/") > -1) {
+            var tagName = queryString.split("/tag/")[1].split("&")[0];
+            targetFile = "tag_" + encodeURIComponent(decodeURIComponent(tagName)) + ".json";
+        } else if (queryString.indexOf("/date_range/") > -1) {
+            var dateVal = queryString.split("/date_range/")[1].split("&")[0];
+            targetFile = "date_" + dateVal + ".json";
+        }
+
+        apiUrl = "api/json/" + targetFile;
+    } else {
+        // Dynamic PHP API Mode
+        apiUrl = "api/" + AppConfig["api_type"] + ".php" + queryString;
+    }
+
     // 使用 fetch 替代 $.ajax
-    fetch("api/" + AppConfig["api_type"] + ".php" + queryString)
+    fetch(apiUrl)
         .then(function (response) {
             if (!response.ok) {
                 throw new Error("HTTP error " + response.status);

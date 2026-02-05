@@ -387,6 +387,8 @@ if (isset($_GET['action'])) {
                         <label class="btn btn-outline-secondary" for="type_sqlite"><?php echo _t('engine_sqlite'); ?></label>
                         <input type="radio" class="btn-check" name="api_type" id="type_mysql" value="api_dbsqlbase" checked onchange="toggleDbSettings()">
                         <label class="btn btn-outline-secondary" for="type_mysql"><?php echo _t('engine_mysql'); ?></label>
+                        <input type="radio" class="btn-check" name="api_type" id="type_json" value="json" onchange="toggleDbSettings()">
+                        <label class="btn btn-outline-secondary" for="type_json">Static JSON</label>
                     </div>
                 </div>
 
@@ -500,6 +502,7 @@ if (isset($_GET['action'])) {
         if (type === 'api_filebase') document.getElementById('file_settings').classList.remove('hidden');
         else if (type === 'api_sqlitebase') document.getElementById('sqlite_settings').classList.remove('hidden');
         else if (type === 'api_dbsqlbase') document.getElementById('mysql_settings').classList.remove('hidden');
+        else if (type === 'json') { /* No specific settings for JSON, maybe show file check? */ document.getElementById('file_settings').classList.remove('hidden'); }
     }
 
     function checkDbConnection() {

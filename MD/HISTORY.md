@@ -321,154 +321,164 @@ Recorded the development journey and original Prompt commands of this project th
     - Created `install.php` in the root directory.
     - Features: Environment check (PHP version & Unix-like permission fixes), Multi-mode DB test (MySQL/SQLite/File), Admin setup, and Frontend config generation.
     - Multi-language Support: Created `langs/admin/install_zh_TW.php` and `install_en_US.php`.
-    - Integrated `admin/version_config.php` 顯示系統版本資訊。
+    - Integrated `admin/version_config.php` display and versioning.
 
-### [22:15] WSL2 開發環境建置與 OS 偵測強化
-- **任務**: 自動化 WSL2 中的 LAMP 環境配置並提供詳細 OS 資訊。
-- **實作**:
-    - **環境配置**: 自動在 WSL2 Ubuntu 24.04 安裝 Apache2, MySQL 8.0, PHP 8.3。
-    - **網頁整合**: 設定 Apache 監聽 8086 埠並透過軟連結掛載 Windows 專案目錄。
-    - **資料庫初始化**: 建立符合專案設定的 MySQL 使用者與資料庫。
-    - **phpMyAdmin**: 自動安裝並整合至自訂埠號。
-    - **權限處理**: 修正 `install.php` 偵測 WSL2 NTFS 掛載點並自動跳過無效的權限修正步驟。
-    - **OS 偵測**: 建立 `admin/system_helper.php` 提供詳細 OS 資訊 (如 Ubuntu 發行版或 Windows Build 號)。
-    - **介面整合**: 在儀表板與安裝精靈中同步顯示詳細作業系統環境。
+### [22:15] WSL2 Development Environment & OS Detection Enhancement
+- **Task**: Automate LAMP stack setup in WSL2 and provide detailed OS distribution info.
+- **Implementation**:
+    - **Environment Setup**: Fully automated installation of Apache2, MySQL 8.0, and PHP 8.3 in WSL2 Ubuntu 24.04.
+    - **Web Integration**: Configured Apache to listen on port 8086 and linked the Windows project directory via symlinks.
+    - **Database Setup**: Initialized MySQL user and database matching `config.php`.
+    - **phpMyAdmin**: Automated installation and integration with the custom port.
+    - **Permission Fixes**: Enhanced `install.php` to detect WSL2 NTFS mounts and bypass incompatible `chmod` checks.
+    - **OS Detection**: Created `admin/system_helper.php` for shared OS distribution and version detection (e.g., Ubuntu 24.04.1 LTS (WSL2) or Windows 11 Build info).
+    - **Dashboard Update**: Integrated detailed OS info into `admin/index.php` and `install.php`.
 
-### [23:20] 強化 Windows OS 偵測與 UI 佈局優化
-- **任務**: 提升 Windows 版本偵測可靠性並精煉安裝介面佈局。
-- **實作**:
-    - **進階 OS 偵測**: 在 `admin/system_helper.php` 中加入 COM/WMI 支援，作為原生 Windows PHP 環境的第一優先偵測方式，提供精確的產品名稱（如 Windows 11 專業版）。
-    - **編碼校正**: 針對 PowerShell 輸出實作了強制的 CP950 轉 UTF-8 轉換，防止在繁體中文環境下出現亂碼。
-    - **UI 優化**: 將 `install.php` 系統資訊重構為 2x2 網格顯示，將顯示寬度提升一倍，以利閱讀長的作業系統版本字串。
-    - **Git 策略**: 更新 `gemini.md` 加入 WSL2 專屬回退規則，自動調用 `git.exe` 處理需要憑證驗證的推送操作。
+### [23:20] Enhanced Windows OS Detection & UI Layout Optimization
+- **Task**: Improve Windows version detection reliability and refine installation UI layout.
+- **Implementation**:
+    - **Advanced OS Detection**: Added COM/WMI support in `admin/system_helper.php` as the primary method for native Windows PHP environments, providing precise product names (e.g., Windows 11 Pro).
+    - **Encoding Correction**: Implemented aggressive CP950 to UTF-8 conversion for PowerShell output to prevent garbled text in Traditional Chinese environments.
+    - **UI Optimization**: Reorganized `install.php` system information into a 2x2 grid, doubling the display width for better readability of detailed OS strings.
+    - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules to utilize `git.exe` for authenticated pushes (later refined to manual user push).
 
-### [23:30] WSL2 Git 策略精煉
-- **任務**: 規範 WSL2 下的遠端儲存庫同步流程。
-- **實作**:
-    - **規範更新**: 更新 `gemini.md` 明確規定 WSL2 僅負責完成 Commit，最終的 `git push` 由使用者於具備憑證的環境 (如 Windows 終端機) 手動執行。
-    - **巨集同步**: 調整「更新」關鍵字指令的流程，自動化執行至本地 Commit 為止，並加入手動推送提醒。
-
----
-
-## 2026-02-03 (繁體中文)
-
-### [19:30] 混合式草稿系統與檔名標準化
-- **任務**: 實作文章草稿機制並確保檔案命名的一致性。
-- **實作**:
-    - **草稿機制**: 
-        - 檔案模式：草稿存為 `.html.tmp`，正式文章為 `.html`。
-        - 資料庫模式：動態補齊 `status` 欄位 ('draft'/'published')。
-        - 前台過濾：更新所有 API 與 `make_html.php` 自動跳過草稿檔案。
-    - **檔名標準化**: 
-        - 根據發文日期自動補上 `YYYYMMDD-` 前綴。
-        - 智慧偵測使用者輸入，支援手動輸入前綴並避免重複處理。
-    - **UI 更新**: 新增「暫存草稿」與「正式發布」按鈕，並在後台列表與儀表板加入狀態標籤。
-
-### [19:40] 網站設定圖形化介面 (config.js 管理)
-- **任務**: 提供友善的介面來管理前端配置。
-- **實作**:
-    - 建立 `admin/settings.php` 用於管理 `config.js`。
-    - 支援透過 UI 切換資料來源 (File/DB/SQLite)、選擇主題以及設定 Google CSE ID。
-    - 採用正規表達式寫入配置，保留檔案原始格式。
-
-### [19:50] 進階視覺化編輯器整合
-- **任務**: 將文章編輯器從純文字框升級為視覺化編輯器。
-- **實作**:
-    - **TinyMCE 6**: 在本地端完整部署 TinyMCE 6.8.2，不依賴外部 CDN。
-    - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現台邏輯。
-    - **語系與體驗**: 整合動態語系切換 (繁中/英文)，並移除升級提示與品牌標記以簡化介面。
-
-### [20:00] 後台語系架構重構
-- **任務**: 清理語系檔案並實施更嚴格的載入規則。
-- **實作**:
-    - 將語系檔更名為 `admin-` 前綴 (如 `admin-zh_TW.php`)，以區別安裝程式檔案。
-    - 更新 `admin/lang_init.php` 掃描邏輯，自動排除 `install_` 開頭的檔案。
-    - 精簡語言下拉選單，僅顯示核心語系代碼。
-
-### [23:00] 專案宣傳網站開發 (Vibe Coding 實驗)
-- **任務**: 建立一個現代化、攝影導向的宣傳網站來展示 ErsalBlog。
-- **實作**:
-    - **技術棧**: React + Vite + Bootstrap 5 + Framer Motion。
-    - **內容**: 詳細規劃了開發動機 (匠人初心)、演進歷程 (Vibe 飛躍)、技術架構與未來藍圖。
-    - **4K 優化**: 為超寬螢幕實作了自定義容器邏輯與響應式字體，確保版面完美置中且視覺平衡。
-    - **部署**: 設定 Vite 編譯路徑，確保與現有 Apache 環境無縫整合。
-    - **驗證**: 成功驗證宣傳網站作為 Vibe Coding 開發效率的強力證明。
-
-### [23:33] 模型切換與全域更新
-- **任務**: 將開發模型切換回 Gemini 3 Pro 並同步所有專案文件。
-- **實作**:
-    - 更新 `admin/version_config.php` 以反映切換至 `gemini-3-pro-preview`。
-    - 執行「更新」巨集同步 HISTORY.md、ARCHITECTURE.md 與 README.md。
-    - 執行本地 Git Commit，將宣傳網站資產與技術優化內容入庫。
+### [23:30] WSL2 Git Strategy Refinement
+- **Task**: Standardize remote repository synchronization workflow in WSL2.
+- **Implementation**:
+    - **Policy Update**: Updated `gemini.md` to explicitly state that while code commits are handled within WSL2, the final `git push` action is to be performed manually by the user in an environment with proper credentials (e.g., Windows terminal).
+    - **Macro Sync**: Adjusted the "Update" macro process to stop at the commit stage and provide a manual push reminder.
 
 ---
 
-## 2026-02-04 (繁體中文)
+## 2026-02-03
 
-### [14:05] 核心 SSG 建置管線重構 (Regex 轉型)
-- **任務**: 全面翻新靜態頁面生成邏輯，提升穩定性與相容性。
-- **實作**:
-    - **單一真理來源**: 重寫 `make_html.php`，讓所有頁面直接從 `blog_template.html` 生成，徹底解決結構劣化問題。
-    - **Regex 解析**: 移除 `DOMDocument` 改用高效能 Regex，解決 HTML5 標籤相容性、屬性自動轉碼 (`%7B%7B`) 及內容巢狀錯誤。
-    - **變數標準化**: 統一所有樣板變數為 `{{variable}}` 格式，防止與 CSS/JS 語法衝突。
-    - **PHP 5.x 相容**: 維持對舊版 PHP 的相容性，移除現代專屬語法依賴。
+### [19:30] Hybrid Draft System & Filename Normalization
+- **Task**: Implement post draft mechanism and ensure consistent file naming.
+- **Implementation**:
+    - **Draft Mechanism**: 
+        - File Mode: Drafts are saved as `.html.tmp`; published articles as `.html`.
+        - DB/SQLite Mode: Dynamically added `status` column ('draft'/'published').
+        - Frontend Filter: Updated all APIs and `make_html.php` to skip draft files.
+    - **Filename Normalization**: 
+        - Automated `YYYYMMDD-` prefixing based on post date.
+        - Smart validation to support user-entered prefixes and avoid duplication.
+    - **UI Updates**: Added "Save Draft" vs "Publish" buttons and status badges in Admin list and Dashboard.
 
-### [14:40] 自動化資產壓縮優化
-- **任務**: 精煉 JS/CSS 壓縮流程。
-- **實作**:
-    - **智慧路徑排除**: 修正 `mini.py` 目錄排除邏輯，正確處理巢狀路徑 (如 `admin/assets`)，保護第三方套件不被誤壓縮。
-    - **清理機制**: 新增自動清理功能，執行時自動偵測並刪除誤生成的 `.min.js` / `.min.css` 檔案。
+### [19:40] Admin Settings GUI (config.js Management)
+- **Task**: Provide a user-friendly interface to manage frontend configurations.
+- **Implementation**:
+    - Created `admin/settings.php` to manage `config.js`.
+    - Supports GUI-based switching of API Source (File/DB/SQLite), Theme selection, and Google CSE ID.
+    - Implemented regex-based config writing to preserve file formatting.
 
-### [15:15] 微樣板管理器 (TemplateManager) 開發
-- **任務**: 將樣板處理邏輯與業務邏輯解耦。
-- **實作**:
-    - **TemplateManager**: 建立 `PHP_LIB/TemplateManager.php` 輕量級類別，封裝解析、變數替換與列表渲染。
-    - **建置管線化**: 建立 `pipeline()` 函式統一管理路徑修正與圖片優化，大幅提升 `make_html.php` 的可讀性。
+### [19:50] Advanced WYSIWYG Editor Integration
+- **Task**: Upgrade the article editor from a raw textarea to a visual editor.
+- **Implementation**:
+    - **TinyMCE 6**: Fully deployed TinyMCE 6.8.2 locally (no CDN dependency).
+    - **PageBreak Customization**: Customized the PageBreak plugin to use `<!--more-->` as the separator, matching existing frontend logic.
+    - **i18n & UX**: Integrated dynamic language switching (zh_TW/en_US) and removed promotional branding for a cleaner interface.
 
-### [15:45] 基於修改時間 (mtime) 的快取機制
-- **任務**: 實作增量建置 (Incremental Build) 以大幅縮短生成時間。
-- **實作**:
-    - **智慧相依偵測**: 新增 `checkCache()`，比對目標檔案與所有來源檔案（原始文章、母樣板、設定檔）的修改時間。
-    - **自動跳過**: 僅針對有變動的內容進行渲染，針對大規模部落格顯著提升效率。
-    - **強制重產**: 支援 CLI 參數 `-f` / `--force` 繞過快取。
+### [20:00] Admin Internationalization Refactoring
+- **Task**: Clean up language files and enforce stricter loading rules.
+- **Implementation**:
+    - Renamed language files to use `admin-` prefix (e.g., `admin-zh_TW.php`) to distinguish from installer files.
+    - Updated `admin/lang_init.php` scanning logic to exclude `install_` prefixed files.
+    - Simplified language dropdown to show only core language codes.
+
+### [23:00] Promotional Website Development (Vibe Coding Experiment)
+- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
+- **Implementation**:
+    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
+    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
+    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
+    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
+    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
+
+### [23:33] Model Switch & Global Update
+- **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
+- **Implementation**:
+    - Updated `admin/version_config.php` to reflect the switch to `gemini-3-pro-preview`.
+    - Executed the "Update" macro to synchronize HISTORY.md, ARCHITECTURE.md, and README.md.
+    - Completed local Git commit to baseline the new promotional assets and technical refinements.
 
 ---
 
-## 2026-02-05 (繁體中文)
+## 2026-02-04
 
-### [10:15] 前台多語系與動態配置 (i18n & Config)
-- **任務**: 實作前台多語系支援，並讓時區與語系設定動態化。
-- **實作**:
-    - **i18n 樣板架構**: 建立 `langs/template/` 目錄存放 `zh_TW.php` 與 `en_US.php`。將 `static/blog_template.html` 內的硬編碼文字替換為 `{{variable}}` 變數。
-    - **動態配置**: 更新 `make_html.php` 讀取 `config.js` 的語系 (`blog_lang`) 與時區 (`timezone`) 設定，並動態載入對應語系檔進行替換。
-    - **後台設定**: 強化 `admin/settings.php`，支援透過 GUI 設定部落格語系與時區。
-    - **安裝精靈**: 更新 `install.php`，在初始設定時詢問語系與時區，確保 `config.php` 與 `config.js` 初始化正確。
-    - **翻譯覆蓋**: 更新 `langs/admin/*.php` 補齊所有新 UI 字串的翻譯。
+### [14:05] Core SSG Pipeline Refactoring (Regex Transition)
+- **Task**: Overhaul the static page generation logic for robustness and compatibility.
+- **Implementation**:
+    - **Single Source Architecture**: Rewrote `make_html.php` to generate all outputs directly from `blog_template.html`, eliminating chain-dependencies and structure degradation.
+    - **Regex-Based Parsing**: Replaced `DOMDocument` with high-performance Regex (`preg_match_all`, `preg_replace_callback`). This solved the "auto-corruption" of HTML5 `<template>` tags and fixed attribute URL-encoding issues (`%7B%7B`).
+    - **Placeholder Standardization**: Unified all template variables to the `{{variable}}` format to prevent syntax collisions with CSS/JS.
+    - **PHP 5.x Compatibility**: Maintained backward compatibility with PHP 5.x (using `array()` syntax and removing modern-only dependencies).
 
-### [10:45] 配置邏輯修正 (Config Correction)
-- **任務**: 將語系與時區設定移回 `config.php` 以符合 SSG 邏輯。
-- **實作**:
-    - **配置歸位**: 將 `blog_lang` 與 `blog_timezone` 從 `config.js` 移回 `config.php`。
-    - **SSG 純化**: 更新 `make_html.php` 直接從 `config.php` 讀取變數，移除對 `config.js` 的解析。
-    - **管理更新**: 更新後台儲存與安裝邏輯，確保設定能正確分配到 PHP 與 JS 檔案。
+### [14:40] Automated Asset Compression Optimization
+- **Task**: Refine the JS/CSS minification workflow.
+- **Implementation**:
+    - **Smart Directory Ignore**: Updated `mini.py` logic to correctly handle nested path matching (e.g., `admin/assets`), preventing accidental compression of third-party libraries.
+    - **Expanded Exclusion List**: Added `langs` and `PHP_LIB` to the global ignore list.
+    - **Auto-Cleanup Routine**: Implemented a cleanup function in `mini.py` to automatically detect and remove mistakenly generated `.min.js` / `.min.css` files.
 
-### [11:15] 靜態頁面與分類相容性修正
-- **任務**: 解決語系佔位符失效與舊式分類標記失效問題。
-- **實作**:
-    - **變數傳遞**: 更新 `make_html.php` 在渲染標籤與分類容器時合併語系變數，解決 `{{lang_post_tags_title}}` 顯示問題。
-    - **分類相容**: 優化 `matchCategories`，同時比對完整與無副檔名檔名，確保舊文章能正確歸類。
+### [15:15] Micro-Template Framework Development
+- **Task**: Decouple template logic from business logic in the build script.
+- **Implementation**:
+    - **TemplateManager Class**: Created `PHP_LIB/TemplateManager.php` as a lightweight, reusable template engine supporting nested templates and list rendering.
+    - **Script Simplification**: Refactored `make_html.php` to utilize the new manager, reducing boilerplate code and improving maintainability.
+    - **Processing Pipeline**: Centralized "template stripping," "path correction," and "image optimization" into a unified `pipeline()` function.
 
-### [11:30] 樣板渲染完整化與分類統計優化
-- **任務**: 補齊所有語系佔位符替換，並修正分類文章統計數量。
-- **實作**:
-    - **全域變數補完**: 更新 `make_html.php` 確保所有子樣板（`tmpl_post_main`, `tmpl_blog_list_container`）渲染時皆傳入語系變數，解決 `{{lang_back_to_top}}` 顯示問題。
-    - **精確統計**: 更新 `scanCategories` 與 `api_filebase.php` 的統計邏輯，改為同時偵測實體檔案與 `.html` 版本，並過濾不存在的文章，確保首頁分類計數準確。
-    - **雙向相容**: 強化 `api_filebase.php` 的分類比對邏輯，全面支援含副檔名與不含副檔名的檔案格式。
+### [15:45] File-MTIME Based Cache Mechanism
+- **Task**: Implement incremental builds to reduce redundant rendering time.
+- **Implementation**:
+    - **Smart Dependency Tracking**: Added `checkCache()` logic to compare output timestamps against all source dependencies (Source HTML, Global Template, Config).
+    - **Optimized Workflow**: The build script now only processes modified content, significantly speeding up the update process for large blogs.
+    - **Forced Rebuild**: Added CLI support for `-f` / `--force` flags to bypass cache when necessary.
 
-### [12:00] 安全性強化 (Security Hardening)
-- **任務**: 執行全面的安全性審計與漏洞修復。
-- **實作**:
-    - **路徑遍歷修復**: 修正 `api/api_filebase.php` 中的 `get_Category_index` 函式，對輸入的分類參數強制執行 `basename()` 過濾，防止 `../` 攻擊。
-    - **靜態生成 XSS 防護**: 更新 `make_html.php`，在資料傳入樣板前使用 `htmlspecialchars` 對標題、描述、標籤與分類名稱進行轉義。
-    - **DOM XSS 防護**: 修正 `static/blog.js`，新增 `escapeHtml` 輔助函式，並在前端渲染 JSON 資料（如分類名、標籤名、文章標題）時強制轉義。
-    - **後台防護確認**: 驗證 `admin/post_edit.php` 與 `admin/posts.php` 已具備正確的輸出轉義機制。
+---
+
+## 2026-02-05
+
+### [10:15] Frontend Internationalization & Config Dynamics
+- **Task**: Implement multi-language support for the frontend and make timezone/language configurations dynamic.
+- **Implementation**:
+    - **i18n Template Architecture**: Created `langs/template/` to house `zh_TW.php` and `en_US.php`. Replaced hardcoded text in `static/blog_template.html` with `{{variable}}` placeholders.
+    - **Dynamic Configuration**: Updated `make_html.php` to read `blog_lang` and `timezone` from `config.js` and load the corresponding language file.
+    - **Admin Settings**: Enhanced `admin/settings.php` to support GUI-based configuration of Blog Language and Timezone.
+    - **Installation Wizard**: Updated `install.php` to prompt for language and timezone during setup, ensuring `config.php` and `config.js` are initialized correctly.
+    - **Translation Coverage**: Updated `langs/admin/*.php` with all new UI strings.
+
+### [10:45] Config Logic Correction
+- **Task**: Correct the location of language and timezone settings to align with SSG logic.
+- **Implementation**:
+    - **Config Relocation**: Moved `blog_lang` and `blog_timezone` from `config.js` back to `config.php`.
+    - **SSG Purity**: Updated `make_html.php` to read global variables from `config.php` directly, removing `config.js` parsing.
+    - **Admin Update**: Updated `admin/settings.php` and `install.php` to correctly split writes between PHP and JS config files.
+
+### [11:15] Static Page & Category Fixes
+- **Task**: Fix missing i18n variables in sub-templates and ensure category backward compatibility.
+- **Implementation**:
+    - **Variable Propagation**: Updated `make_html.php` to pass `globalVars` to `tmpl_post_tag_container` and `tmpl_post_cat_container` render calls, fixing the `{{lang_post_tags_title}}` display issue.
+    - **Category Compatibility**: Enhanced `matchCategories` to match both full filenames (with extension) and filenames without extension (old style), resolving category display inconsistencies.
+
+### [11:30] Template Rendering & Category Statistics Optimization
+- **Task**: Fix missing i18n placeholders and correct category post counts.
+- **Implementation**:
+    - **Full i18n Propagation**: Ensured all sub-templates (`tmpl_post_main`, `tmpl_blog_list_container`) in `make_html.php` receive `globalVars`, resolving `{{lang_back_to_top}}` display errors.
+    - **Precise Category Counting**: Updated `scanCategories` and `api_filebase.php` to verify post existence using both exact filenames and `.html` extensions, ensuring accurate statistics for old-style category tags.
+    - **Robust Matching**: Refined `check_category` and `get_Category_index` to support bidirectional compatibility between full and extensionless filenames.
+
+### [12:00] Security Hardening
+- **Task**: Perform comprehensive security audit and vulnerability remediation.
+- **Implementation**:
+    - **Path Traversal Fix**: Corrected `get_Category_index` in `api/api_filebase.php` to enforce `basename()` filtering on category parameters, preventing `../` attacks.
+    - **SSG XSS Protection**: Updated `make_html.php` to use `htmlspecialchars` for escaping titles, descriptions, tags, and category names before template injection.
+    - **DOM XSS Protection**: Patched `static/blog.js` with a new `escapeHtml` helper, ensuring all API-sourced data (titles, tags) is escaped before rendering.
+    - **Admin Verification**: Confirmed that `admin/post_edit.php` and `admin/posts.php` already implement output escaping.
+
+### [12:30] Pure Static JSON API Mode
+- **Task**: Implement a zero-backend JSON API mode for purely static hosting.
+- **Implementation**:
+    - **Config Update**: Added `api_type: 'json'` option to `config.js` and `admin/settings.php`.
+    - **Generator**: Enhanced `make_html.php` with a `-json` flag to pre-generate `api/json/all.json`, `category_*.json`, `tag_*.json`, and `date_*.json`.
+    - **Frontend Routing**: Updated `static/blog.js` to detect JSON mode and map URL query parameters (e.g., `?/category/Name`) to the corresponding static JSON files.
+    - **Installation**: Integrated the Static JSON option into the `install.php` wizard.
