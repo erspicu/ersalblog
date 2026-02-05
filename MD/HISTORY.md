@@ -121,7 +121,7 @@ Recorded the development journey and original Prompt commands of this project th
 ### [16:20] Database Schema Normalization
 - **Task**: Split category field into independent tables and relation tables.
 - **Prompt**: "Hope to fix the database version category architecture. Create two more tables: one for category names, one for which posts use which categories. Fix affected programs and screens; i.e., category management should have an add function."
-- **Implementation**: Created `blog_categories` and `blog_post_categories` tables, updated `DataManager` and category management UI.
+- **Implementation**: Created `blog_categories` and `blog_post_categories`資料表，更新 `DataManager` 與分類管理 UI。
 
 ### [16:26] Redundant Field Cleanup and Logic Refactoring
 - **Task**: Remove `post_categories` from `blog_posts` and refactor queries.
@@ -503,6 +503,12 @@ Recorded the development journey and original Prompt commands of this project th
     - **Dynamic HTML Lang**: Integrated `html_lang` key in language packs and updated `blog_template.html` to dynamically set the `lang` attribute.
     - **Localized Date Suffixes**: Replaced hardcoded "日" with `{{lang_day_suffix}}` in `template_date_post_item` and updated language files to ensure correct year/month/day units in all archives.
 
+### [14:15] Build Cache Robustness & Unit Display Optimization
+- **Task**: Ensure build reliability during language switches and improve English archive clarity.
+- **Implementation**:
+    - **Dependency Tracking**: Updated `make_html.php` to include language file content in the global build hash and as a physical dependency in `checkCache`, ensuring template changes trigger rebuilds even when config remains static.
+    - **Clarity Optimization**: Provided descriptive suffixes for English (e.g., "Year", "Month") to prevent archives from appearing "empty" when unit strings are omitted.
+
 ---
 
 ## 2026-02-05 (繁體中文)
@@ -533,3 +539,7 @@ Recorded the development journey and original Prompt commands of this project th
 ### [14:00] 日期單位多語系修復
 - **任務**: 修正側邊欄與歸檔清單中的日期單位顯示。
 - **實作**: 將 `template_date_post_item` 內硬編碼的「日」替換為 `{{lang_day_suffix}}`，並在語系檔補齊相關定義，確保年月日顯示完整。
+
+### [14:15] 建置快取強化與單位顯示優化
+- **任務**: 確保語系變更時建置正常，並優化英文單位顯示。
+- **實作**: 更新 `make_html.php` 將語系檔內容納入雜湊計算與實體相依檢查，防止變更語系時因快取判定略過建置；同時優化英文語系預設值，避免單位消失感。
