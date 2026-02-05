@@ -385,14 +385,14 @@ Recorded the development journey and original Prompt commands of this project th
     - Updated `admin/lang_init.php` scanning logic to exclude `install_` prefixed files.
     - Simplified language dropdown to show only core language codes.
 
-### [23:00] Promotional Website Development (Vibe Coding Experiment)
-- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
-- **Implementation**:
-    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
-    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
-    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
-    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
-    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
+### [23:00] 專案宣傳網站開發 (Vibe Coding 實驗)
+- **任務**: 建立一個現代化、攝影導向的宣傳網站來展示 ErsalBlog。
+- **實作**:
+    - **技術棧**: React + Vite + Bootstrap 5 + Framer Motion。
+    - **內容**: 詳細規劃了開發動機 (匠人初心)、演進歷程 (Vibe 飛躍)、技術架構與未來藍圖。
+    - **4K 優化**: 為超寬螢幕實作了自定義容器邏輯與響應式字體，確保版面完美置中且視覺平衡。
+    - **部署**: 設定 Vite 編譯路徑，確保與現有 Apache 環境無縫整合。
+    - **驗證**: 成功驗證宣傳網站作為 Vibe Coding 開發效率的強力證明。
 
 ### [23:33] Model Switch & Global Update
 - **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
@@ -408,33 +408,91 @@ Recorded the development journey and original Prompt commands of this project th
 ### [14:05] Core SSG Pipeline Refactoring (Regex Transition)
 - **Task**: Overhaul the static page generation logic for robustness and compatibility.
 - **Implementation**:
-    - **Single Source Architecture**: Rewrote `make_html.php`前頁生成邏輯，徹底解決結構劣化與轉碼問題。
-    - **Regex 解析**: 移除 `DOMDocument` 改用 Regex 處理樣板與圖片優化，大幅提升相容性與效能。
-    - **PHP 5.x 相容**: 維持向後相容性，確保在 AppServ 等舊版環境正常運作。
+    - **Single Source Architecture**: Rewrote `make_html.php` to generate all outputs directly from `blog_template.html`, eliminating chain-dependencies and structure degradation.
+    - **Regex-Based Parsing**: Replaced `DOMDocument` with high-performance Regex (`preg_match_all`, `preg_replace_callback`). This solved the "auto-corruption" of HTML5 `<template>` tags and fixed attribute URL-encoding issues (`%7B%7B`).
+    - **Placeholder Standardization**: Unified all template variables to the `{{variable}}` format to prevent syntax collisions with CSS/JS.
+    - **PHP 5.x Compatibility**: Maintained backward compatibility with PHP 5.x (using `array()` syntax and removing modern-only dependencies).
 
-### [14:40] 自動化資產壓縮優化
-- **任務**: 精煉 JS/CSS 壓縮流程。
-- **實作**: 修正 `mini.py` 目錄排除邏輯，並新增自動清理機制，保持專案目錄整潔。
+### [14:40] Automated Asset Compression Optimization
+- **Task**: Refine the JS/CSS minification workflow.
+- **Implementation**:
+    - **Smart Directory Ignore**: Updated `mini.py` logic to correctly handle nested path matching (e.g., `admin/assets`), preventing accidental compression of third-party libraries.
+    - **Expanded Exclusion List**: Added `langs` and `PHP_LIB` to the global ignore list.
+    - **Auto-Cleanup Routine**: Implemented a cleanup function in `mini.py` to automatically detect and remove mistakenly generated `.min.js` / `.min.css` files.
 
-### [15:15] 微樣板管理器與增量建置
-- **任務**: 提升建置效率與維護性。
-- **實作**: 建立 `TemplateManager` 類別封裝解析邏輯，並實作基於檔案修改時間 (mtime) 的快取機制，大幅縮短生成時間。
+### [15:15] Micro-Template Framework Development
+- **Task**: Decouple template logic from business logic in the build script.
+- **Implementation**:
+    - **TemplateManager Class**: Created `PHP_LIB/TemplateManager.php` as a lightweight, reusable template engine supporting nested templates and list rendering.
+    - **Script Simplification**: Refactored `make_html.php` to utilize the new manager, reducing boilerplate code and improving maintainability.
+    - **Processing Pipeline**: Centralized "template stripping," "path correction," and "image optimization" into a unified `pipeline()` function.
+
+### [15:45] File-MTIME Based Cache Mechanism
+- **Task**: Implement incremental builds to reduce redundant rendering time.
+- **Implementation**:
+    - **Smart Dependency Tracking**: Added `checkCache()` logic to compare output timestamps against all source dependencies (Source HTML, Global Template, Config).
+    - **Optimized Workflow**: The build script now only processes modified content, significantly speeding up the update process for large blogs.
+    - **Forced Rebuild**: Added CLI support for `-f` / `--force` flags to bypass cache when necessary.
 
 ---
 
-## 2026-02-05 (繁體中文)
+## 2026-02-05
 
-### [10:15] 前台多語系與動態配置
-- **任務**: 實作前台多語系支援與動態時區/語系配置。
-- **實作**: 建立 `langs/template/` 架構，將樣板硬編碼文字替換為 `{{variable}}`，並更新建置腳本與後台設定。
+### [10:15] Frontend Internationalization & Config Dynamics
+- **Task**: Implement multi-language support for the frontend and make timezone/language configurations dynamic.
+- **Implementation**:
+    - **i18n Template Architecture**: Created `langs/template/` to house `zh_TW.php` and `en_US.php`. Replaced hardcoded text in `static/blog_template.html` with `{{variable}}` placeholders.
+    - **Dynamic Configuration**: Updated `make_html.php` to read `blog_lang` and `timezone` from `config.js` and load the corresponding language file.
+    - **Admin Settings**: Enhanced `admin/settings.php` to support GUI-based configuration of Blog Language and Timezone.
+    - **Installation Wizard**: Updated `install.php` to prompt for language and timezone during setup, ensuring `config.php` and `config.js` are initialized correctly.
+    - **Translation Coverage**: Updated `langs/admin/*.php` with all new UI strings.
 
-### [12:00] 安全性強化 (Security Hardening)
-- **任務**: 修復路徑遍歷與 XSS 漏洞。
-- **實作**: 在 API 引入 `basename()` 過濾，並在樣板生成與前端渲染流程中全面實作 HTML 轉義防護。
+### [10:45] Config Logic Correction
+- **Task**: Correct the location of language and timezone settings to align with SSG logic.
+- **Implementation**:
+    - **Config Relocation**: Moved `blog_lang` and `blog_timezone` from `config.js` back to `config.php`.
+    - **SSG Purity**: Updated `make_html.php` to read global variables from `config.php` directly, removing `config.js` parsing.
+    - **Admin Update**: Updated `admin/settings.php` and `install.php` to correctly split writes between PHP and JS config files.
 
-### [13:00] 純靜態 JSON API 模式與優化
-- **任務**: 實作無後端 JSON 模式並解決亂碼 404 問題。
-- **實作**: 
-    - **單一資料源**: 將原本分散的 JSON 合併為 `api/json/data.json`，避免中文字元檔名導致的存取錯誤。
-    - **前端過濾**: 在 `blog.js` 實作客戶端路由與篩選邏輯，達成全靜態瀏覽體驗。
-    - **建置支援**: `make_html.php` 新增 `-json` 參數，一鍵導出完整資料包。
+### [11:15] Static Page & Category Fixes
+- **Task**: Fix missing i18n variables in sub-templates and ensure category backward compatibility.
+- **Implementation**:
+    - **Variable Propagation**: Updated `make_html.php` to pass `globalVars` to `tmpl_post_tag_container` and `tmpl_post_cat_container` render calls, fixing the `{{lang_post_tags_title}}` display issue.
+    - **Category Compatibility**: Enhanced `matchCategories` to match both full filenames (with extension) and filenames without extension (old style), resolving category display inconsistencies.
+
+### [11:30] Template Rendering & Category Statistics Optimization
+- **Task**: Fix missing i18n placeholders and correct category post counts.
+- **Implementation**:
+    - **Full i18n Propagation**: Ensured all sub-templates (`tmpl_post_main`, `tmpl_blog_list_container`) in `make_html.php` receive `globalVars`, resolving `{{lang_back_to_top}}` display errors.
+    - **Precise Category Counting**: Updated `scanCategories` and `api_filebase.php` to verify post existence using both exact filenames and `.html` extensions, ensuring accurate statistics for old-style category tags.
+    - **Robust Matching**: Refined `check_category` and `get_Category_index` to support bidirectional compatibility between full and extensionless filenames.
+
+### [12:00] Security Hardening
+- **Task**: Perform comprehensive security audit and vulnerability remediation.
+- **Implementation**:
+    - **Path Traversal Fix**: Corrected `get_Category_index` in `api/api_filebase.php` to enforce `basename()` filtering on category parameters, preventing `../` attacks.
+    - **SSG XSS Protection**: Updated `make_html.php` to use `htmlspecialchars` for escaping titles, descriptions, tags, and category names before template injection.
+    - **DOM XSS Protection**: Patched `static/blog.js` with a new `escapeHtml` helper, ensuring all API-sourced data (titles, tags) is escaped before rendering.
+    - **Admin Verification**: Confirmed that `admin/post_edit.php` and `admin/posts.php` already implement output escaping.
+
+### [12:30] Pure Static JSON API Mode
+- **Task**: Implement a zero-backend JSON API mode for purely static hosting.
+- **Implementation**:
+    - **Config Update**: Added `api_type: 'json'` option to `config.js` and `admin/settings.php`.
+    - **Generator**: Enhanced `make_html.php` with a `-json` flag to pre-generate `api/json/all.json`, `category_*.json`, `tag_*.json`, and `date_*.json`.
+    - **Frontend Routing**: Updated `static/blog.js` to detect JSON mode and map URL query parameters (e.g., `?/category/Name`) to the corresponding static JSON files.
+    - **Installation**: Integrated the Static JSON option into the `install.php` wizard.
+
+### [13:00] Static JSON API Consolidation & Frontend Filtering
+- **Task**: Optimize JSON API mode by consolidating files and moving filtering logic to the client.
+- **Implementation**:
+    - **Data Consolidation**: Modified `make_html.php` to generate a single `api/json/data.json` instead of multiple fragmented files, resolving encoding/404 issues with Chinese filenames.
+    - **Client-Side Filtering**: Updated `static/blog.js` to load the single data file and perform category/tag/date filtering in-memory, improving performance and deployment compatibility.
+    - **Cleanup**: Added auto-cleanup logic to remove legacy JSON files.
+
+### [13:30] Smart Build Cache (Config Hash)
+- **Task**: Optimize build performance by detecting specific configuration changes.
+- **Implementation**:
+    - **Hash-Based Detection**: Implemented logic in `make_html.php` to hash and compare configuration variables.
+    - **Granular Rebuilds**: Classification of variables into "Global" (Title, URL) and "Index-Only" (Description). Only changes to Global vars trigger full rebuilds; Index vars trigger only homepage rebuild.
+    - **Dependency Optimization**: Removed `config.php` from file-based `mtime` dependency checks to prevent unnecessary rebuilds on non-impacting config changes.

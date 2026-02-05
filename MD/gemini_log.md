@@ -181,3 +181,8 @@
   - 將原本分散的多個 JSON 檔案合併為單一 `api/json/data.json`，解決不同系統下中文字元編碼導致的檔名亂碼 (404) 問題。
   - 更新 `make_html.php`，改為生成單一 `data.json` 並自動清理舊有的分散檔案。
   - 更新 `static/blog.js`，實作前端過濾邏輯。在 JSON 模式下僅載入一次 `data.json`，並在瀏覽器端根據 URL 參數動態篩選文章，提升執行效率與部署便利性。
+- [2026-02-05 13:30:00] (UTC+8) 實作智慧建置快取 (Smart Build Cache)：
+  - 修改 `make_html.php`，引入基於 Config 變數雜湊 (Hash) 的快取機制。
+  - 將設定變數分為「全域影響」($blog_title, $site_url 等) 與「首頁影響」($blog_description) 兩類。
+  - 系統現在會比對 `contents/build_hash.json`，僅在相關設定變更時強制重建對應頁面，否則依賴檔案修改時間 (mtime) 判斷，大幅減少不必要的 I/O 操作。
+  - 移除 `make_html.php` 中對 `config.php` 的實體檔案依賴檢查，改由 Hash 邏輯接管。

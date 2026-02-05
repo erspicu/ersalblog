@@ -36,16 +36,53 @@ $langVars = [];
 foreach ($langData as $k => $v) {
     $langVars["lang_{$k}"] = $v;
 }
-// ------------------------------
 
-// 檢查是否強制重產
+// ==========================================
+// 智慧快取判斷 (Smart Cache Strategy)
+// ==========================================
+$cacheHashFile = __DIR__ . "/contents/build_hash.json";
+$storedHashes = file_exists($cacheHashFile) ? json_decode(file_get_contents($cacheHashFile), true) : [];
+
+// 1. 全域影響參數 (Global Impact): 變更時需重產所有頁面
+$globalConfigStr = $GLOBALS['blog_title'] . 
+                   $GLOBALS['blog_introduce'] . 
+                   $GLOBALS['site_url'] . 
+                   $GLOBALS['blog_lang'] . 
+                   $GLOBALS['blog_timezone']; // Timezone affects date formatting globally
+$currentGlobalHash = md5($globalConfigStr);
+
+// 2. 單頁影響參數 (Index-only Impact): 變更時僅需重產 blog.html
+$indexConfigStr  = $GLOBALS['blog_description'] . 
+                   $GLOBALS['blog_preview'];
+$currentIndexHash = md5($indexConfigStr);
+
+// 3. 判斷變更狀態
+$configChangedGlobal = ($currentGlobalHash !== ($storedHashes['global'] ?? ''));
+$configChangedIndex  = ($currentIndexHash !== ($storedHashes['index'] ?? ''));
+
+if ($configChangedGlobal) {
+    echo ">> [Config Change] Global settings changed. Rebuilding ALL pages.<br>\r\n";
+} elseif ($configChangedIndex) {
+    echo ">> [Config Change] Index settings changed. Rebuilding blog.html.<br>\r\n";
+}
+// ==========================================
+
+// 檢查是否強制重產 (Command line force overrides everything)
 $isForce = in_array('-f', $argv) || in_array('--force', $argv);
-$isJson = in_array('-json', $argv); // New Flag
+$isJson = in_array('-json', $argv); 
 
-// 執行建置
-build($isForce, $isJson);
+// 執行建置 (傳入 Config 狀態)
+build($isForce, $isJson, $configChangedGlobal, $configChangedIndex);
 
-function build($force = false, $jsonMode = false) {
+// 更新 Hash 紀錄
+file_put_contents($cacheHashFile, json_encode([
+    'global' => $currentGlobalHash,
+    'index'  => $currentIndexHash,
+    'last_build' => date('Y-m-d H:i:s')
+], JSON_PRETTY_PRINT));
+
+
+function build($force = false, $jsonMode = false, $forceGlobal = false, $forceIndex = false) {
     global $langVars; // Access global lang vars
     $indenter = new Indenter();
     $tpl = new TemplateManager();
@@ -76,8 +113,9 @@ function build($force = false, $jsonMode = false) {
     // A. 生成首頁 (blog.html)
     // ==========================================
     $targetBlog = "blog.html";
-    // 首頁依賴: 樣板檔 + 設定檔 (若標題變更需重產)
-    if ($force || !checkCache($targetBlog, array($templatePath, __DIR__ . '/config.php'))) {
+    // 首頁依賴: 樣板檔 (Config 依賴已移除，改由 $forceXXX 控制)
+    // 邏輯: 強制參數 OR 全域配置變更 OR 首頁配置變更 OR 檔案快取失效(樣板變更)
+    if ($force || $forceGlobal || $forceIndex || !checkCache($targetBlog, array($templatePath))) {
         $indexVars = array_merge($globalVars, array(
             'page_title'          => htmlspecialchars($GLOBALS['blog_title']),
             'page_canonical'      => $GLOBALS['site_url'] . 'blog.html',
@@ -108,12 +146,10 @@ function build($force = false, $jsonMode = false) {
 
     foreach ($posts as $post) {
         if (!$post['isValid']) {
-            // echo $post['filename'] . " skipped (draft/missing).<br>\r\n"; // 減少雜訊
             continue;
         }
 
         // 列表項目渲染 (列表頁總是需要這些資料，所以不能跳過這段字串生成)
-        // 注意：這裡只生成字串，不耗費太多效能
         $listItemsHtml .= $tpl->render($tpl->getSubTemplate('tmpl_blog_list_item'), array(
             'link'  => "post/" . $post['filename'],
             'time'  => $post['date'],
@@ -124,8 +160,9 @@ function build($force = false, $jsonMode = false) {
         $targetPost = "post/" . $post['filename'];
         $sourcePost = "contents/post_files/" . $post['filename'];
         
-        // 依賴: 原始文章 + 樣板 + 設定檔
-        if ($force || !checkCache($targetPost, array($sourcePost, $templatePath, __DIR__ . '/config.php'))) {
+        // 依賴: 原始文章 + 樣板 (Config 依賴已移除)
+        // 邏輯: 強制參數 OR 全域配置變更 OR 檔案快取失效(文章內容或樣板變更)
+        if ($force || $forceGlobal || !checkCache($targetPost, array($sourcePost, $templatePath))) {
             
             // 只有需要重產時才進行這些較重的運算
             $safeTags = array_map(function($t) { return array('name' => htmlspecialchars($t['name'])); }, prepareTags($post['tags']));
@@ -162,7 +199,7 @@ function build($force = false, $jsonMode = false) {
             $html = pipeline($html, $indenter, true, true, true);
             write($targetPost, $html);
         } else {
-            // echo "$targetPost cached.<br>\r\n"; // 減少雜訊，可視需求開啟
+            // echo "$targetPost cached.<br>\r\n"; // 減少雜訊
         }
     }
 
@@ -171,8 +208,10 @@ function build($force = false, $jsonMode = false) {
     // C. 生成文章總列表 (blog_list.html)
     // ==========================================
     $targetList = "blog_list.html";
-    // 依賴: 索引檔 + 樣板 + 設定檔
-    if ($force || !checkCache($targetList, array($indexFile, $templatePath, __DIR__ . '/config.php'))) {
+    // 依賴: 索引檔 + 樣板 (Config 依賴已移除)
+    // 邏輯: 強制參數 OR 全域配置變更 OR 首頁配置變更(假設列表頁跟首頁共享部分設定) OR 檔案快取失效
+    // 註: 列表頁通常也受 Global 影響
+    if ($force || $forceGlobal || !checkCache($targetList, array($indexFile, $templatePath))) {
         $listContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_blog_list_container'), array_merge($globalVars, array(
             'items' => $listItemsHtml
         )));
