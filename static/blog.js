@@ -151,196 +151,133 @@ if (pathName.endsWith("blog.html")) {
     var commentEl = document.getElementById("blog_comment");
     if (commentEl) commentEl.style.display = "none";
 
-    var apiUrl = "";
-    if (AppConfig["api_type"] === "json") {
-        // Static JSON Mode Routing
-        // 1. Default (Index): json/all.json
-        // 2. Category: ?/category/Name -> json/category_Name.json
-        // 3. Tag: ?/tag/Name -> json/tag_Name.json
-        // 4. Date: ?/date_range/202601 -> json/date_202601.json
-        
-        var targetFile = "all.json";
-        
-        // Simple router
-        if (queryString.indexOf("/category/") > -1) {
-            var catName = queryString.split("/category/")[1].split("&")[0];
-            targetFile = "category_" + encodeURIComponent(decodeURIComponent(catName)) + ".json";
-        } else if (queryString.indexOf("/tag/") > -1) {
-            var tagName = queryString.split("/tag/")[1].split("&")[0];
-            targetFile = "tag_" + encodeURIComponent(decodeURIComponent(tagName)) + ".json";
-        } else if (queryString.indexOf("/date_range/") > -1) {
-            var dateVal = queryString.split("/date_range/")[1].split("&")[0];
-            targetFile = "date_" + dateVal + ".json";
+    // --- JSON Mode Data Handler ---
+    var processResponse = function (res) {
+        renderTemplateGenerator(res.category, "template_category", "category_list_all", function (html, val) {
+            html = html.replace(/{{name}}/g, escapeHtml(val.name));
+            html = html.replace(/{{count}}/g, val.count);
+            return html;
+        });
+
+        if (res.dates_count) {
+            var myUL = document.getElementById("myUL");
+            var tmpStrYear = document.getElementById("tmpl_date_year").innerHTML;
+            var tmpStrMonth = document.getElementById("tmpl_date_month").innerHTML;
+
+            Object.keys(res.dates_count).forEach(function (key) {
+                var val = res.dates_count[key];
+                var render_tmp = "";
+                if (key.length == 4) {
+                    render_tmp = tmpStrYear;
+                    render_tmp = render_tmp.replace(/{{year}}/g, key);
+                    render_tmp = render_tmp.replace(/{{count}}/g, val);
+                    myUL.insertAdjacentHTML("beforeend", render_tmp);
+                }
+                if (key.length == 6) {
+                    var year = key.substring(0, 4);
+                    var mon = key.substring(4, 6);
+                    render_tmp = tmpStrMonth;
+                    render_tmp = render_tmp.replace(/{{mon}}/g, mon);
+                    render_tmp = render_tmp.replace(/{{key}}/g, key);
+                    render_tmp = render_tmp.replace(/{{count}}/g, val);
+                    var yearEl = document.getElementById("year_" + year);
+                    if (yearEl) yearEl.insertAdjacentHTML("beforeend", render_tmp);
+                }
+            });
         }
 
-        apiUrl = "api/json/" + targetFile;
+        if (res.date_post) {
+            Object.keys(res.date_post).forEach(function (key) {
+                var postsArray = res.date_post[key];
+                var containerId = "year_mon_" + key;
+                renderTemplateGenerator(postsArray, "template_date_post_item", containerId, function (html, post) {
+                    var day = post.post_index.substring(6, 8);
+                    html = html.replace(/{{day}}/g, day);
+                    html = html.replace(/{{link}}/g, "post/" + post.post_index);
+                    html = html.replace(/{{title}}/g, escapeHtml(post.title));
+                    return html;
+                });
+            });
+        }
+
+        renderTemplateGenerator(res.tags, "template_tag_item", "tag_list_all", function (html, val, key) {
+            html = html.replace(/{{name}}/g, escapeHtml(key));
+            html = html.replace(/{{count}}/g, val);
+            return html;
+        });
+
+        renderTemplateGenerator(res.posts, "tmpl_post_main", "post_body", function (mainHtml, post) {
+            var tagsInner = renderTemplateGenerator(post.post_tags, "tmpl_post_tag_item", null, function (tHtml, tVal) {
+                return tHtml.replace(/{{name}}/g, escapeHtml(tVal));
+            });
+            var tagsBlock = "";
+            if (tagsInner) {
+                var contTmpl = document.getElementById("tmpl_post_tag_container").innerHTML;
+                tagsBlock = contTmpl.replace(/{{items}}/g, tagsInner);
+            }
+            var catsInner = renderTemplateGenerator(post.post_category, "tmpl_post_cat_item", null, function (cHtml, cVal) {
+                return cHtml.replace(/{{name}}/g, escapeHtml(cVal));
+            });
+            var catsBlock = "";
+            if (catsInner) {
+                var contTmpl = document.getElementById("tmpl_post_cat_container").innerHTML;
+                catsBlock = contTmpl.replace(/{{items}}/g, catsInner);
+            }
+            mainHtml = mainHtml.replace(/{{link}}/g, "post/" + post.post_index);
+            mainHtml = mainHtml.replace(/{{time}}/g, post.post_time);
+            mainHtml = mainHtml.replace(/{{title}}/g, escapeHtml(post.post_title));
+            var optimizedContent = optimize_content_images(post.post_content);
+            mainHtml = mainHtml.replace(/{{content}}/g, optimizedContent);
+            mainHtml = mainHtml.replace(/{{tags_block}}/g, tagsBlock);
+            mainHtml = mainHtml.replace(/{{category_block}}/g, catsBlock);
+            return mainHtml;
+        });
+
+        if (typeof FB !== "undefined") FB.XFBML.parse(document.getElementById("post_body"));
+        var loadingEl = document.getElementById("loading");
+        if (loadingEl) loadingEl.style.display = "none";
+        ui_init();
+        init_fb_like();
+    };
+
+    if (AppConfig["api_type"] === "json") {
+        fetch("api/json/data.json")
+            .then(function (r) { return r.json(); })
+            .then(function (master) {
+                // Client-side Router & Filter
+                var filteredPosts = master.posts;
+                var decQuery = decodeURIComponent(queryString);
+
+                if (decQuery.indexOf("/category/") > -1) {
+                    var catName = decQuery.split("/category/")[1].split("&")[0];
+                    filteredPosts = master.posts.filter(function(p) { return p.post_category.indexOf(catName) > -1; });
+                } else if (decQuery.indexOf("/tag/") > -1) {
+                    var tagName = decQuery.split("/tag/")[1].split("&")[0];
+                    filteredPosts = master.posts.filter(function(p) { return p.post_tags.indexOf(tagName) > -1; });
+                } else if (decQuery.indexOf("/date_range/") > -1) {
+                    var dateVal = decQuery.split("/date_range/")[1].split("&")[0];
+                    var prefix = dateVal.length === 4 ? dateVal + "-" : dateVal.substring(0, 4) + "-" + dateVal.substring(4, 6);
+                    filteredPosts = master.posts.filter(function(p) { return p.post_time.indexOf(prefix) === 0; });
+                }
+
+                // Simulate API Response format
+                var simulatedRes = {
+                    category: master.sidebar.category,
+                    dates_count: master.sidebar.dates_count,
+                    date_post: master.sidebar.date_post,
+                    tags: master.sidebar.tags,
+                    posts: filteredPosts
+                };
+                processResponse(simulatedRes);
+            })
+            .catch(function (err) { alert("JSON Load Error: " + err); });
     } else {
         // Dynamic PHP API Mode
-        apiUrl = "api/" + AppConfig["api_type"] + ".php" + queryString;
+        fetch("api/" + AppConfig["api_type"] + ".php" + queryString)
+            .then(function (r) { return r.json(); })
+            .then(processResponse)
+            .catch(function (err) { alert(err); });
     }
-
-    // 使用 fetch 替代 $.ajax
-    fetch(apiUrl)
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("HTTP error " + response.status);
-            }
-            return response.json();
-        })
-        .then(function (res) {
-            renderTemplateGenerator(res.category, "template_category", "category_list_all", function (html, val) {
-                // html 是樣板原始碼, val 是陣列中的單一物件
-                html = html.replace(/{{name}}/g, escapeHtml(val.name));
-                html = html.replace(/{{count}}/g, val.count);
-                return html;
-            });
-
-            // ==============================================
-            // Part C: 日期歸檔處理 (修正版)
-            // ==============================================
-
-            // 1. 建立目錄結構 (年與月)
-            if (res.dates_count) {
-                var myUL = document.getElementById("myUL");
-
-                // 手動抓取樣板字串 (只抓一次，效能最佳化)
-                var tmpStrYear = document.getElementById("tmpl_date_year").innerHTML;
-                var tmpStrMonth = document.getElementById("tmpl_date_month").innerHTML;
-
-                Object.keys(res.dates_count).forEach(function (key) {
-                    var val = res.dates_count[key]; // 文章數量
-                    var render_tmp = "";
-
-                    // --- 情況 A: 年份 (key 長度為 4, e.g., "2026") ---
-                    if (key.length == 4) {
-                        render_tmp = tmpStrYear;
-                        render_tmp = render_tmp.replace(/{{year}}/g, key);
-                        render_tmp = render_tmp.replace(/{{count}}/g, val);
-
-                        myUL.insertAdjacentHTML("beforeend", render_tmp);
-                    }
-
-                    // --- 情況 B: 月份 (key 長度為 6, e.g., "202601") ---
-                    if (key.length == 6) {
-                        var year = key.substring(0, 4);
-                        var mon = key.substring(4, 6);
-
-                        render_tmp = tmpStrMonth;
-                        render_tmp = render_tmp.replace(/{{mon}}/g, mon);
-                        render_tmp = render_tmp.replace(/{{key}}/g, key);
-                        render_tmp = render_tmp.replace(/{{count}}/g, val);
-
-                        // 尋找對應的年份容器
-                        var yearEl = document.getElementById("year_" + year);
-                        if (yearEl) {
-                            yearEl.insertAdjacentHTML("beforeend", render_tmp);
-                        }
-                    }
-                });
-            }
-
-            // 2. 填入文章列表 (該月份下的文章) - 這裡就可以完美使用通用函式了！
-            if (res.date_post) {
-                // 這裡的 key 是 "YYYYMM" (例如 202601)
-                Object.keys(res.date_post).forEach(function (key) {
-                    var postsArray = res.date_post[key];
-                    var containerId = "year_mon_" + key; // 對應剛才建立的月份 ul ID
-
-                    // 使用通用函式生成該月份的文章列表
-                    renderTemplateGenerator(postsArray, "template_date_post_item", containerId, function (html, post) {
-                        // post 是單一文章物件
-                        // 假設 post_index 格式為 YYYYMMDDxx，取 6~8 位為日期
-                        var day = post.post_index.substring(6, 8);
-
-                        html = html.replace(/{{day}}/g, day);
-                        // 修正：連結需指向 post/ 目錄
-                        html = html.replace(/{{link}}/g, "post/" + post.post_index);
-                        html = html.replace(/{{title}}/g, escapeHtml(post.title)); // 注意：確認您的資料來源 title 欄位名稱
-
-                        return html;
-                    });
-                });
-            }
-
-            // 這裡 data 是物件，key 是標籤名，val 是數量
-            renderTemplateGenerator(res.tags, "template_tag_item", "tag_list_all", function (html, val, key) {
-                html = html.replace(/{{name}}/g, escapeHtml(key)); // key 是標籤名稱
-                html = html.replace(/{{count}}/g, val); // val 是數量
-                return html;
-            });
-
-            renderTemplateGenerator(res.posts, "tmpl_post_main", "post_body", function (mainHtml, post) {
-                // 1. 生成 [內部] 標籤 HTML (利用函式只回傳字串的特性)
-                // 這裡 data 直接給 post.post_tags，container 給 null
-                var tagsInner = renderTemplateGenerator(
-                    post.post_tags,
-                    "tmpl_post_tag_item",
-                    null,
-                    function (tHtml, tVal) {
-                        return tHtml.replace(/{{name}}/g, escapeHtml(tVal));
-                    },
-                );
-
-                // 套用 [外部] 標籤容器 (如果有標籤的話)
-                var tagsBlock = "";
-                if (tagsInner) {
-                    // 這裡我們也可以用 renderTemplateGenerator，但因為只有一筆，手動 replace 比較快
-                    var contTmpl = document.getElementById("tmpl_post_tag_container").innerHTML;
-                    tagsBlock = contTmpl.replace(/{{items}}/g, tagsInner);
-                }
-
-                // 2. 生成 [內部] 分類 HTML
-                var catsInner = renderTemplateGenerator(
-                    post.post_category,
-                    "tmpl_post_cat_item",
-                    null,
-                    function (cHtml, cVal) {
-                        return cHtml.replace(/{{name}}/g, escapeHtml(cVal));
-                    },
-                );
-
-                // 套用 [外部] 分類容器
-                var catsBlock = "";
-                if (catsInner) {
-                    var contTmpl = document.getElementById("tmpl_post_cat_container").innerHTML;
-                    catsBlock = contTmpl.replace(/{{items}}/g, catsInner);
-                }
-
-                // 3. 替換主文章欄位
-                // 修正：連結需指向 post/ 目錄
-                mainHtml = mainHtml.replace(/{{link}}/g, "post/" + post.post_index);
-                mainHtml = mainHtml.replace(/{{time}}/g, post.post_time);
-                mainHtml = mainHtml.replace(/{{title}}/g, escapeHtml(post.post_title));
-
-                // 5. 【關鍵應用】圖片優化
-                // 將 globalImgStatus 傳進去，函式會自動判斷並更新它
-                var optimizedContent = optimize_content_images(post.post_content);
-
-                // 替換優化後的內容
-                mainHtml = mainHtml.replace(/{{content}}/g, optimizedContent);
-
-                // 替換區塊
-                mainHtml = mainHtml.replace(/{{tags_block}}/g, tagsBlock);
-                mainHtml = mainHtml.replace(/{{category_block}}/g, catsBlock);
-
-                return mainHtml;
-            });
-
-            // FB 重繪 (保持原樣)
-            if (typeof FB !== "undefined") {
-                FB.XFBML.parse(document.getElementById("post_body"));
-            }
-
-            var loadingEl = document.getElementById("loading");
-            if (loadingEl) loadingEl.style.display = "none";
-
-            //set_image();
-            ui_init();
-            init_fb_like();
-        })
-        .catch(function (err) {
-            alert(err);
-        });
 } else {
     // 隱藏元素的純 JS 寫法
     var elsToHide = ["AllTagList", "AllDateList", "loading", "AllcategoryList"];

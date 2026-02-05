@@ -177,3 +177,7 @@
   - 更新 `make_html.php`，新增 `-json` 參數。啟用後會自動將所有文章索引、分類、標籤與日期歸檔預先生成為靜態 JSON 檔案 (存於 `api/json/`)。
   - 更新 `static/blog.js`，實作前端路由邏輯。當檢測到 `api_type: 'json'` 時，自動根據網址參數 (`?/category/`, `?/tag/` 等) 讀取對應的預生成 JSON 檔，達成無 PHP 後端的全靜態瀏覽體驗。
   - 更新 `install.php`，在安裝流程中加入 Static JSON 模式選項。
+- [2026-02-05 13:00:00] (UTC+8) 優化純靜態 JSON API 模式：
+  - 將原本分散的多個 JSON 檔案合併為單一 `api/json/data.json`，解決不同系統下中文字元編碼導致的檔名亂碼 (404) 問題。
+  - 更新 `make_html.php`，改為生成單一 `data.json` 並自動清理舊有的分散檔案。
+  - 更新 `static/blog.js`，實作前端過濾邏輯。在 JSON 模式下僅載入一次 `data.json`，並在瀏覽器端根據 URL 參數動態篩選文章，提升執行效率與部署便利性。
