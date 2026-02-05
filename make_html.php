@@ -8,19 +8,8 @@ require_once __DIR__ . '/PHP_LIB/TemplateManager.php';
 use Gajus\Dindent\Indenter;
 
 // --- Config & Language Init ---
-if (!isset($blog_lang)) $blog_lang = 'zh_TW'; // Default from config.php or fallback
-
-// Parse config.js for overrides (Timezone, Lang)
-$configJsPath = __DIR__ . '/config.js';
-if (file_exists($configJsPath)) {
-    $jsContent = file_get_contents($configJsPath);
-    if (preg_match("/blog_lang:\s*'([^']+)'/", $jsContent, $m)) {
-        $blog_lang = $m[1];
-    }
-    if (preg_match("/timezone:\s*'([^']+)'/", $jsContent, $m)) {
-        date_default_timezone_set($m[1]);
-    }
-}
+global $blog_lang; 
+if (!isset($blog_lang)) $blog_lang = 'zh_TW'; 
 
 // Load Language
 $langFile = __DIR__ . "/langs/template/template-{$blog_lang}.php";
@@ -117,10 +106,10 @@ function build($force = false) {
             
             // 只有需要重產時才進行這些較重的運算
             $tagsHtml = $tpl->renderList('tmpl_post_tag_item', prepareTags($post['tags']));
-            $tagsBlock = $tagsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_tag_container'), array('items' => $tagsHtml)) : '';
+            $tagsBlock = $tagsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_tag_container'), array_merge($globalVars, array('items' => $tagsHtml))) : '';
 
             $catsHtml = $tpl->renderList('tmpl_post_cat_item', matchCategories($post['filename'], $categories));
-            $catsBlock = $catsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_cat_container'), array('items' => $catsHtml)) : '';
+            $catsBlock = $catsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_cat_container'), array_merge($globalVars, array('items' => $catsHtml))) : '';
 
             $postContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_post_main'), array(
                 'time'           => $post['date'],
@@ -299,11 +288,21 @@ function scanCategories($dir) {
     return $cats;
 }
 
-function matchCategories($filenamePrefix, $categories) {
-    $prefix = substr($filenamePrefix, 0, 14);
+function matchCategories($filename, $categories) {
+    // Logic from api_filebase.php: check both full filename and filename without .html
+    $nameNoExt = str_replace(".html", "", $filename);
     $matched = array();
+    
     foreach ($categories as $cat) {
-        if (in_array($prefix, $cat['posts'])) $matched[] = array('name' => $cat['name']);
+        // api_filebase uses: in_array($nameNoExt, $category_post_index)
+        // But since we are static generating, we should check against what scanCategories returns.
+        // scanCategories returns filenames present in the category directory.
+        // The old logic in make_html.php used a 14-char prefix which was brittle.
+        // Now we check exact match for robustness.
+        
+        if (in_array($filename, $cat['posts']) || in_array($nameNoExt, $cat['posts'])) {
+             $matched[] = array('name' => $cat['name']);
+        }
     }
     return $matched;
 }

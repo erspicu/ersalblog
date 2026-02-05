@@ -156,3 +156,10 @@
   - 更新 admin/settings.php，新增「部落格語系」與「時區」設定欄位，並支援寫入 config.js。
   - 更新 install.php，在安裝流程中新增語系與時區選擇，並正確寫入 config.php/js。
   - 更新 langs/admin/admin-*.php 與 install_*.php，補齊新功能所需的翻譯鍵值。
+- [2026-02-05 10:45:00] (UTC+8) 修正配置邏輯：
+  - 將部落格語系 (`blog_lang`) 與時區 (`blog_timezone`) 設定由 `config.js` 移回 `config.php`，確保其符合靜態生成 (SSG) 邏輯。
+  - 更新 `make_html.php`，改回直接從 `config.php` 讀取全域變數。
+  - 更新 `admin/settings.php` 與 `install.php`，確保這些設定能正確寫入 `config.php` 且不影響 `config.js`。
+- [2026-02-05 11:15:00] (UTC+8) 修正靜態頁面生成問題：
+  - 修正 `make_html.php` 中 `tmpl_post_tag_container` 與 `tmpl_post_cat_container` 渲染時漏傳語系變數的問題，解決前台出現 `{{lang_post_tags_title}}` 的錯誤。
+  - 優化 `matchCategories` 函式，改為同時比對「完整檔名」與「無副檔名」的檔案，以相容舊有的分類標記方式，解決文章分類顯示不正確的問題。

@@ -14,8 +14,6 @@ function getConfigValues($content) {
     if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
     if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
     if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
-    if (preg_match("/blog_lang:\s*'([^']+)'/", $content, $m)) $values['blog_lang'] = $m[1];
-    if (preg_match("/timezone:\s*'([^']+)'/", $content, $m)) $values['timezone'] = $m[1];
     return $values;
 }
 
@@ -23,9 +21,9 @@ function getConfigValues($content) {
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
-// Defaults
-$currentConfig['blog_lang'] = $currentConfig['blog_lang'] ?? 'zh_TW';
-$currentConfig['timezone'] = $currentConfig['timezone'] ?? 'Asia/Taipei';
+// Defaults from config.php (already included via auth.php -> data_provider.php)
+$currentConfig['blog_lang'] = $GLOBALS['blog_lang'] ?? 'zh_TW';
+$currentConfig['timezone'] = $GLOBALS['blog_timezone'] ?? 'Asia/Taipei';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -40,18 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newLang = $_POST['blog_lang'] ?? 'zh_TW';
     $newTimezone = $_POST['timezone'] ?? 'Asia/Taipei';
 
-    // Reconstruct config.js content
-    $newContent = "var AppConfig = {\n";
-    $newContent .= "    api_type: '$newApi',\n";
-    $newContent .= "    theme_file: '$newTheme',\n";
-    $newContent .= "    cse_id: '$newCse',\n";
-    $newContent .= "    blog_lang: '$newLang',\n";
-    $newContent .= "    timezone: '$newTimezone'\n";
-    $newContent .= "};";
+    // 1. Update config.js (API, Theme, CSE)
+    $newJsContent = "var AppConfig = {\n";
+    $newJsContent .= "    api_type: '$newApi',\n";
+    $newJsContent .= "    theme_file: '$newTheme',\n";
+    $newJsContent .= "    cse_id: '$newCse'\n";
+    $newJsContent .= "};";
 
-    if (file_put_contents($configFile, $newContent)) {
+    // 2. Update config.php (Lang, Timezone) using regex to preserve other settings
+    $phpFile = __DIR__ . '/../config.php';
+    $phpContent = file_get_contents($phpFile);
+    $phpContent = preg_replace("/(\\\$blog_lang\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newLang$3", $phpContent);
+    $phpContent = preg_replace("/(\\\$blog_timezone\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newTimezone$3", $phpContent);
+
+    if (file_put_contents($configFile, $newJsContent) && file_put_contents($phpFile, $phpContent)) {
         $msg = __('msg_settings_saved');
-        $currentConfig = getConfigValues($newContent); // Refresh
+        $currentConfig = getConfigValues($newJsContent); // Refresh JS parts
+        $currentConfig['blog_lang'] = $newLang;
+        $currentConfig['timezone'] = $newTimezone;
     } else {
         $error = __('error_config_write');
     }

@@ -199,7 +199,8 @@ if (isset($_GET['action'])) {
         $config_php .= "\$blog_introduce = " . var_export($blog_introduce, true) . "; //描述一下你的blog用途或是特色\n";
         $config_php .= "\$blog_preview = " . var_export($blog_preview, true) . "; //預覽圖網址\n";
         $config_php .= "\$site_url = " . var_export($site_url, true) . "; // 網站網址\n";
-        $config_php .= "\$blog_lang = " . var_export($blog_lang_install, true) . "; // 部落格語系\n\n";
+        $config_php .= "\$blog_lang = " . var_export($blog_lang_install, true) . "; // 部落格語系\n";
+        $config_php .= "\$blog_timezone = " . var_export($timezone, true) . "; // 系統時區\n\n";
         $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n\n";
         $config_php .= "\$dbConfig = [\n";
         $config_php .= "    'host'     => " . var_export($db_host, true) . ",\n";
@@ -214,16 +215,14 @@ if (isset($_GET['action'])) {
         $config_php .= "    'password' => " . var_export($admin_pass, true) . ",\n";
         $config_php .= "    'session_secret' => " . var_export($session_secret, true) . "\n";
         $config_php .= "];\n\n";
-        $config_php .= "date_default_timezone_set(" . var_export($timezone, true) . ");\n";
+        $config_php .= "date_default_timezone_set(\$blog_timezone);\n";
         $config_php .= "?>";
 
         // Generate config.js
         $config_js = "var AppConfig = {\n";
         $config_js .= "    api_type: " . var_export($api_type, true) . ",\n";
         $config_js .= "    theme_file: " . var_export($theme_file, true) . ",\n";
-        $config_js .= "    cse_id: " . var_export($cse_id, true) . ",\n";
-        $config_js .= "    blog_lang: " . var_export($blog_lang_install, true) . ",\n";
-        $config_js .= "    timezone: " . var_export($timezone, true) . "\n";
+        $config_js .= "    cse_id: " . var_export($cse_id, true) . "\n";
         $config_js .= "};";
 
         if (@file_put_contents('config.php', $config_php) && @file_put_contents('config.js', $config_js)) {
