@@ -11,7 +11,7 @@ return [
     'post_category_title' => 'Categories :',
     'year_suffix' => ' (Year)',
     'month_suffix' => ' (Month)',
-    'day_suffix' => '',
+    'day_suffix' => ' (Day)',
     'list_page_title' => 'All Posts',
     'html_lang' => 'en',
 ];

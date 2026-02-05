@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- checked by https://validator.w3.org/-->
-<html lang="zh-Hant">
+<html lang="en">
     <head>
         <title>Baxermux的攝影Blog</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -63,7 +63,7 @@
             <div id="footer_body">
                 <div id="blog_search">
                     <div id="blog_search_google">
-                        <p class="RegionFunctionTitle">文章搜尋服務</p>
+                        <p class="RegionFunctionTitle">Search</p>
                         <div class="google-search-container">
                             <div class="gcse-search"></div>
                         </div>
@@ -71,19 +71,19 @@
                 </div>
                 <div id="AllPostList">
                     <a href="blog_list.html" class="all_a">
-                        <p class="all_p">文章總列表</p>
+                        <p class="all_p">All Posts</p>
                     </a>
                 </div>
                 <div id="AllTagList">
-                    <p class="RegionFunctionTitle">標籤總列出</p>
+                    <p class="RegionFunctionTitle">All Tags</p>
                     <div class="tag_list_region" id="tag_list_all"></div>
                 </div>
                 <div id="AllcategoryList">
-                    <p class="RegionFunctionTitle">文章分類</p>
+                    <p class="RegionFunctionTitle">Categories</p>
                     <div class="category_list_region" id="category_list_all"></div>
                 </div>
                 <div id="AllDateList">
-                    <p class="RegionFunctionTitle">文章日期列出</p>
+                    <p class="RegionFunctionTitle">Archives</p>
                     <div class="date_list_region">
                         <ul id="myUL"></ul>
                     </div>
@@ -116,11 +116,11 @@
                 <div class="post_content">{{content}}</div>
 
                 <a href="javascript:toTop()" class="top_a">
-                    <p class="back_top">(回到最上層 ↑)</p>
+                    <p class="back_top">(Back to Top ↑)</p>
                 </a>
 
                 <div class="more_div">
-                    <a class="more_a" href="{{link}}"><p class="more_p">(繼續閱讀...)</p></a>
+                    <a class="more_a" href="{{link}}"><p class="more_p">(Read More...)</p></a>
                 </div>
 
                 {{tags_block}} {{category_block}}
@@ -135,7 +135,7 @@
 
         <template id="template_date_post_item">
             <li>
-                <div>{{day}}日　<a href="{{link}}" class="date_link">{{title}}</a></div>
+                <div>{{day}} (Day)　<a href="{{link}}" class="date_link">{{title}}</a></div>
             </li>
         </template>
 
@@ -165,14 +165,14 @@
 
         <template id="tmpl_post_tag_container">
             <div class="tags">
-                <div><p class="tags_title">文章標籤 :</p></div>
+                <div><p class="tags_title">Tags :</p></div>
                 {{items}}
             </div>
         </template>
 
         <template id="tmpl_post_cat_container">
             <div class="categorys">
-                <div><p class="categorys_title">文章分類 :</p></div>
+                <div><p class="categorys_title">Categories :</p></div>
                 {{items}}
             </div>
         </template>
@@ -180,7 +180,7 @@
         <template id="tmpl_date_year">
             <li>
                 <span class="caret"
-                    >{{year}}年　<a href="blog.html?/date_range/{{year}}" class="date_link">({{count}})</a></span
+                    >{{year}} (Year)　<a href="blog.html?/date_range/{{year}}" class="date_link">({{count}})</a></span
                 >
                 <ul class="nested" id="year_{{year}}"></ul>
             </li>
@@ -189,7 +189,7 @@
         <template id="tmpl_date_month">
             <li>
                 <span class="caret"
-                    >{{mon}}月　<a href="blog.html?/date_range/{{key}}" class="date_link">({{count}})</a></span
+                    >{{mon}} (Month)　<a href="blog.html?/date_range/{{key}}" class="date_link">({{count}})</a></span
                 >
                 <ul class="nested" id="year_mon_{{key}}"></ul>
             </li>
@@ -198,7 +198,7 @@
         <template id="tmpl_blog_list_container">
             <article class="post_outermost">
                 <div class="post_title_outermost">
-                    <h1 class="post_title">文章總列表</h1>
+                    <h1 class="post_title">All Posts</h1>
                 </div>
                 <div class="post_list_border">{{items}}</div>
             </article>
