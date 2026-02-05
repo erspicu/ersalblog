@@ -14,12 +14,18 @@ function getConfigValues($content) {
     if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
     if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
     if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
+    if (preg_match("/blog_lang:\s*'([^']+)'/", $content, $m)) $values['blog_lang'] = $m[1];
+    if (preg_match("/timezone:\s*'([^']+)'/", $content, $m)) $values['timezone'] = $m[1];
     return $values;
 }
 
 // Read current config
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
+
+// Defaults
+$currentConfig['blog_lang'] = $currentConfig['blog_lang'] ?? 'zh_TW';
+$currentConfig['timezone'] = $currentConfig['timezone'] ?? 'Asia/Taipei';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,25 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newApi = $_POST['api_type'] ?? 'api_filebase';
     $newTheme = $_POST['theme_file'] ?? 'blog';
     $newCse = $_POST['cse_id'] ?? '';
+    $newLang = $_POST['blog_lang'] ?? 'zh_TW';
+    $newTimezone = $_POST['timezone'] ?? 'Asia/Taipei';
 
-    // Update Content using Regex to preserve formatting/comments
-    $newContent = $configContent;
-    
-    // API Type
-    $newContent = preg_replace("/(api_type:\s*')([^']+)(')/", "$1$newApi$3", $newContent);
-    // Theme
-    $newContent = preg_replace("/(theme_file:\s*')([^']+)(')/", "$1$newTheme$3", $newContent);
-    // CSE ID
-    $newContent = preg_replace("/(cse_id:\s*')([^']*)(')/", "$1$newCse$3", $newContent);
-
-    // Backup check: if regex failed (file structure changed), force rewrite
-    if ($newContent === null || $newContent === $configContent) {
-        // Fallback or just accept it might be same
-        // If content is empty/invalid, reconstruct
-        if (empty($newContent) || strlen($newContent) < 10) {
-             $newContent = "var AppConfig = {\n    api_type: '$newApi',\n    theme_file: '$newTheme',\n    cse_id: '$newCse'\n};";
-        }
-    }
+    // Reconstruct config.js content
+    $newContent = "var AppConfig = {\n";
+    $newContent .= "    api_type: '$newApi',\n";
+    $newContent .= "    theme_file: '$newTheme',\n";
+    $newContent .= "    cse_id: '$newCse',\n";
+    $newContent .= "    blog_lang: '$newLang',\n";
+    $newContent .= "    timezone: '$newTimezone'\n";
+    $newContent .= "};";
 
     if (file_put_contents($configFile, $newContent)) {
         $msg = __('msg_settings_saved');
@@ -161,6 +159,23 @@ if (empty($themes)) $themes = ['blog'];
                             <option value="api_sqlitebase" <?php echo ($currentConfig['api_type'] == 'api_sqlitebase') ? 'selected' : ''; ?>><?php echo __('opt_api_sqlite'); ?> (api_sqlitebase)</option>
                         </select>
                         <div class="form-text">控制前端網頁讀取資料的來源 API。</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_blog_lang'); ?></label>
+                        <select name="blog_lang" class="form-select">
+                            <option value="zh_TW" <?php echo ($currentConfig['blog_lang'] == 'zh_TW') ? 'selected' : ''; ?>><?php echo __('lang_zh_tw'); ?></option>
+                            <option value="en_US" <?php echo ($currentConfig['blog_lang'] == 'en_US') ? 'selected' : ''; ?>><?php echo __('lang_en_us'); ?></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_timezone'); ?></label>
+                        <select name="timezone" class="form-select">
+                            <option value="Asia/Taipei" <?php echo ($currentConfig['timezone'] == 'Asia/Taipei') ? 'selected' : ''; ?>>Asia/Taipei</option>
+                            <option value="UTC" <?php echo ($currentConfig['timezone'] == 'UTC') ? 'selected' : ''; ?>>UTC</option>
+                            <option value="America/New_York" <?php echo ($currentConfig['timezone'] == 'America/New_York') ? 'selected' : ''; ?>>America/New_York</option>
+                        </select>
                     </div>
 
                     <div class="mb-3">

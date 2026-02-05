@@ -148,3 +148,11 @@
 - [2026-02-04 15:20:00] (UTC+8) 樣板 CSS 分離：將 static/blog_template.html 中的行內樣式 (Inline Styles) 提取並獨立至 blog.css 與 blog-dark.css，優化代碼維護性與 CSP 相容性。
 - [2026-02-04 15:35:00] (UTC+8) 修復 HTML 排版工具導致的內容缺失：發現 `dindent` 在處理複雜 HTML5 結構時會導致內容截斷，已暫時禁用 `make_html.php` 中的排版功能以確保生成的 blog.html 完整性。
 - [2026-02-04 15:55:00] (UTC+8) 修復樣板內容缺失問題：還原被錯誤的取代操作破壞的 static/blog_template.html，補回遺失的列表區塊 (AllPostList, AllTagList 等)，確保 blog.html 能正常渲染並執行 JS。
+- [2026-02-05 10:15:00] (UTC+8) 實作前台多語系與動態配置 (i18n & Config)：
+  - 建立 langs/template 目錄，新增 template-zh_TW.php 與 template-en_US.php 語系檔。
+  - 更新 static/blog_template.html，將所有硬編碼中文改為 {{variable}} 佔位符。
+  - 更新 make_html.php，支援讀取 config.js 語系設定 (blog_lang) 與時區 (timezone)，並動態載入對應語系檔進行替換。
+  - 更新 config.example.php，新增 $blog_lang 設定範本。
+  - 更新 admin/settings.php，新增「部落格語系」與「時區」設定欄位，並支援寫入 config.js。
+  - 更新 install.php，在安裝流程中新增語系與時區選擇，並正確寫入 config.php/js。
+  - 更新 langs/admin/admin-*.php 與 install_*.php，補齊新功能所需的翻譯鍵值。

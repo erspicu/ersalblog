@@ -27,6 +27,7 @@ return [
     'blog_preview_placeholder' => '輸入預覽圖片的完整網址...',
     'site_url' => '網站網址',
     'site_url_help' => '請輸入網站的完整網址，包含最後的斜線。',
+    'blog_lang' => '部落格語系',
     'timezone' => '時區',
     'debug_mode' => '開啟除錯模式',
     'debug_mode_help' => '上線環境建議關閉此選項。',

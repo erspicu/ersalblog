@@ -232,6 +232,10 @@ return [
     // Settings
     'settings_title' => '網站設定 (config.js)',
     'label_api_type' => '資料來源模式 (API Type)',
+    'label_blog_lang' => '部落格語系 (Blog Language)',
+    'label_timezone' => '時區 (Timezone)',
+    'lang_zh_tw' => '繁體中文 (Traditional Chinese)',
+    'lang_en_us' => '英文 (English)',
     'label_theme' => '網站主題 (Theme)',
     'label_cse_id' => 'Google 搜尋引擎 ID (CSE ID)',
     'msg_settings_saved' => '設定已成功儲存！',

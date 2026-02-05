@@ -232,6 +232,10 @@ return [
     // Settings
     'settings_title' => 'Site Settings (config.js)',
     'label_api_type' => 'Data Source (API Type)',
+    'label_blog_lang' => 'Blog Language',
+    'label_timezone' => 'Timezone',
+    'lang_zh_tw' => 'Traditional Chinese',
+    'lang_en_us' => 'English',
     'label_theme' => 'Site Theme',
     'label_cse_id' => 'Google CSE ID',
     'msg_settings_saved' => 'Settings saved successfully!',

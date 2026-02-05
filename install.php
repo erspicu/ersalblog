@@ -173,6 +173,7 @@ if (isset($_GET['action'])) {
         $blog_introduce = $_POST['blog_introduce'] ?? '';
         $blog_preview = $_POST['blog_preview'] ?? '';
         $site_url = $_POST['site_url'] ?? '';
+        $blog_lang_install = $_POST['blog_lang'] ?? 'zh_TW';
         $timezone = $_POST['timezone'] ?? 'Asia/Taipei';
         $debug_mode = isset($_POST['debug_mode']) ? 'true' : 'false';
 
@@ -197,7 +198,8 @@ if (isset($_GET['action'])) {
         $config_php .= "\$blog_description = " . var_export($blog_description, true) . "; //Blog SEO描述屬性\n";
         $config_php .= "\$blog_introduce = " . var_export($blog_introduce, true) . "; //描述一下你的blog用途或是特色\n";
         $config_php .= "\$blog_preview = " . var_export($blog_preview, true) . "; //預覽圖網址\n";
-        $config_php .= "\$site_url = " . var_export($site_url, true) . "; // 網站網址\n\n";
+        $config_php .= "\$site_url = " . var_export($site_url, true) . "; // 網站網址\n";
+        $config_php .= "\$blog_lang = " . var_export($blog_lang_install, true) . "; // 部落格語系\n\n";
         $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n\n";
         $config_php .= "\$dbConfig = [\n";
         $config_php .= "    'host'     => " . var_export($db_host, true) . ",\n";
@@ -219,7 +221,9 @@ if (isset($_GET['action'])) {
         $config_js = "var AppConfig = {\n";
         $config_js .= "    api_type: " . var_export($api_type, true) . ",\n";
         $config_js .= "    theme_file: " . var_export($theme_file, true) . ",\n";
-        $config_js .= "    cse_id: " . var_export($cse_id, true) . "\n";
+        $config_js .= "    cse_id: " . var_export($cse_id, true) . ",\n";
+        $config_js .= "    blog_lang: " . var_export($blog_lang_install, true) . ",\n";
+        $config_js .= "    timezone: " . var_export($timezone, true) . "\n";
         $config_js .= "};";
 
         if (@file_put_contents('config.php', $config_php) && @file_put_contents('config.js', $config_js)) {
@@ -349,6 +353,12 @@ if (isset($_GET['action'])) {
                     <div class="col-md-12"><label for="blog_introduce" class="form-label"><?php echo _t('blog_intro'); ?></label><textarea class="form-control" id="blog_introduce" name="blog_introduce" rows="3" placeholder="<?php echo _t('blog_intro_placeholder'); ?>"></textarea></div>
                     <div class="col-md-12"><label for="blog_preview" class="form-label"><?php echo _t('blog_preview'); ?></label><input type="url" class="form-control" id="blog_preview" name="blog_preview" placeholder="<?php echo _t('blog_preview_placeholder'); ?>"></div>
                     <div class="col-md-6"><label for="site_url" class="form-label"><?php echo _t('site_url'); ?></label><input type="url" class="form-control" id="site_url" name="site_url" required><div class="form-text"><?php echo _t('site_url_help'); ?></div></div>
+                    <div class="col-md-6"><label for="blog_lang" class="form-label"><?php echo _t('blog_lang'); ?></label>
+                        <select class="form-select" id="blog_lang" name="blog_lang">
+                            <option value="zh_TW" <?php echo ($lang === 'zh_TW') ? 'selected' : ''; ?>>繁體中文</option>
+                            <option value="en_US" <?php echo ($lang === 'en_US') ? 'selected' : ''; ?>>English</option>
+                        </select>
+                    </div>
                     <div class="col-md-6"><label for="timezone" class="form-label"><?php echo _t('timezone'); ?></label>
                         <select class="form-select" id="timezone" name="timezone">
                             <option value="Asia/Taipei" selected>Asia/Taipei</option>

@@ -7,6 +7,33 @@ require_once __DIR__ . '/PHP_LIB/TemplateManager.php';
 
 use Gajus\Dindent\Indenter;
 
+// --- Config & Language Init ---
+if (!isset($blog_lang)) $blog_lang = 'zh_TW'; // Default from config.php or fallback
+
+// Parse config.js for overrides (Timezone, Lang)
+$configJsPath = __DIR__ . '/config.js';
+if (file_exists($configJsPath)) {
+    $jsContent = file_get_contents($configJsPath);
+    if (preg_match("/blog_lang:\s*'([^']+)'/", $jsContent, $m)) {
+        $blog_lang = $m[1];
+    }
+    if (preg_match("/timezone:\s*'([^']+)'/", $jsContent, $m)) {
+        date_default_timezone_set($m[1]);
+    }
+}
+
+// Load Language
+$langFile = __DIR__ . "/langs/template/template-{$blog_lang}.php";
+if (!file_exists($langFile)) $langFile = __DIR__ . "/langs/template/template-zh_TW.php";
+$langData = file_exists($langFile) ? require $langFile : [];
+
+// Prefix keys
+$langVars = [];
+foreach ($langData as $k => $v) {
+    $langVars["lang_{$k}"] = $v;
+}
+// ------------------------------
+
 // 檢查是否強制重產
 $isForce = in_array('-f', $argv) || in_array('--force', $argv);
 
@@ -14,18 +41,19 @@ $isForce = in_array('-f', $argv) || in_array('--force', $argv);
 build($isForce);
 
 function build($force = false) {
+    global $langVars; // Access global lang vars
     $indenter = new Indenter();
     $tpl = new TemplateManager();
     $templatePath = "static/blog_template.html";
     $tpl->load($templatePath);
 
     // 準備全域變數
-    $globalVars = array(
+    $globalVars = array_merge($langVars, array(
         'blog_title'       => $GLOBALS['blog_title'],
         'blog_description' => $GLOBALS['blog_description'],
         'blog_introduce'   => $GLOBALS['blog_introduce'],
         'site_url'         => $GLOBALS['site_url'],
-    );
+    ));
 
     // 準備資料來源
     $indexFile = "contents/index_post.txt";
@@ -312,7 +340,7 @@ function generateSitemap($force, $indexFile) {
         return;
     }
 
-    date_default_timezone_set('Asia/Taipei');
+    // date_default_timezone_set('Asia/Taipei'); // Removed: using global config
     $site_path = $GLOBALS['site_url'];
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     $pages = array_merge(array('blog.html', 'blog_list.html'), glob("post/*.html") ? glob("post/*.html") : array());

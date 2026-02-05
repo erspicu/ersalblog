@@ -27,6 +27,7 @@ return [
     'blog_preview_placeholder' => 'Enter the full URL of the preview image...',
     'site_url' => 'Site URL',
     'site_url_help' => 'Enter the full URL of the site, including the trailing slash.',
+    'blog_lang' => 'Blog Language',
     'timezone' => 'Timezone',
     'debug_mode' => 'Enable Debug Mode',
     'debug_mode_help' => 'Recommended to turn off in production.',

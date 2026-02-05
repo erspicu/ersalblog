@@ -4,6 +4,7 @@ $blog_description = ""; //Blog SEO描述屬性
 $blog_introduce = "";//描述一下你的blog用途或是特色
 $blog_preview = ""; //Blog 預覽圖網址
 $site_url = "https://example.com/blog/"; // 網站網址
+$blog_lang = "zh_TW"; // 部落格語系 (zh_TW, en_US)
 
 $sqlite_path = "blog.sqlite3"; // SQLite 資料庫檔案名稱 (若使用 SQLite 模式)
 

@@ -382,7 +382,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Clean up language files and enforce stricter loading rules.
 - **Implementation**:
     - Renamed language files to use `admin-` prefix (e.g., `admin-zh_TW.php`) to distinguish from installer files.
-    - Updated scanning logic in `admin/lang_init.php` to exclude `install_` prefixed files.
+    - Updated `admin/lang_init.php` scanning logic to exclude `install_` prefixed files.
     - Simplified language dropdown to show only core language codes.
 
 ### [23:00] Promotional Website Development (Vibe Coding Experiment)
@@ -433,6 +433,19 @@ Recorded the development journey and original Prompt commands of this project th
     - **Smart Dependency Tracking**: Added `checkCache()` logic to compare output timestamps against all source dependencies (Source HTML, Global Template, Config).
     - **Optimized Workflow**: The build script now only processes modified content, significantly speeding up the update process for large blogs.
     - **Forced Rebuild**: Added CLI support for `-f` / `--force` flags to bypass cache when necessary.
+
+---
+
+## 2026-02-05
+
+### [10:15] Frontend Internationalization & Config Dynamics
+- **Task**: Implement multi-language support for the frontend and make timezone/language configurations dynamic.
+- **Implementation**:
+    - **i18n Template Architecture**: Created `langs/template/` to house `zh_TW.php` and `en_US.php`. Replaced hardcoded text in `static/blog_template.html` with `{{variable}}` placeholders.
+    - **Dynamic Configuration**: Updated `make_html.php` to read `blog_lang` and `timezone` from `config.js` and load the corresponding language file.
+    - **Admin Settings**: Enhanced `admin/settings.php` to support GUI-based configuration of Blog Language and Timezone.
+    - **Installation Wizard**: Updated `install.php` to prompt for language and timezone during setup, ensuring `config.php` and `config.js` are initialized correctly.
+    - **Translation Coverage**: Updated `langs/admin/*.php` with all new UI strings.
 
 ---
 
@@ -854,3 +867,16 @@ Recorded the development journey and original Prompt commands of this project th
     - **智慧相依偵測**: 新增 `checkCache()`，比對目標檔案與所有來源檔案（原始文章、母樣板、設定檔）的修改時間。
     - **自動跳過**: 僅針對有變動的內容進行渲染，針對大規模部落格顯著提升效率。
     - **強制重產**: 支援 CLI 參數 `-f` / `--force` 繞過快取。
+
+---
+
+## 2026-02-05
+
+### [10:15] 前台國際化與動態配置 (i18n & Config)
+- **任務**: 實作前台多語系支援，並讓時區與語系設定動態化。
+- **實作**:
+    - **i18n 樣板架構**: 建立 `langs/template/` 目錄存放 `zh_TW.php` 與 `en_US.php`。將 `static/blog_template.html` 內的硬編碼文字替換為 `{{variable}}` 變數。
+    - **動態配置**: 更新 `make_html.php` 讀取 `config.js` 的語系 (`blog_lang`) 與時區 (`timezone`) 設定，並動態載入對應語系檔進行替換。
+    - **後台設定**: 強化 `admin/settings.php`，支援透過 GUI 設定部落格語系與時區。
+    - **安裝精靈**: 更新 `install.php`，在初始設定時詢問語系與時區，確保 `config.php` 與 `config.js` 初始化正確。
+    - **翻譯覆蓋**: 更新 `langs/admin/*.php` 補齊所有新 UI 字串的翻譯。
