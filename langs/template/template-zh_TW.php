@@ -11,6 +11,7 @@ return [
     'post_category_title' => '文章分類 :',
     'year_suffix' => '年',
     'month_suffix' => '月',
+    'day_suffix' => '日',
     'list_page_title' => '文章總列表',
     'html_lang' => 'zh-Hant',
 ];

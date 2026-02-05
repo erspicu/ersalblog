@@ -188,3 +188,6 @@
   - 移除 `make_html.php` 中對 `config.php` 的實體檔案依賴檢查，改由 Hash 邏輯接管。
 - [2026-02-05 13:45:00] (UTC+8) 優化 HTML 語系宣告：
   - 更新語系檔與 `static/blog_template.html`，使 `<html>` 標籤的 `lang` 屬性支援動態切換（如 `zh-Hant` 或 `en`），提升 SEO 與網頁相容性。
+- [2026-02-05 14:00:00] (UTC+8) 修正日期多語系單位顯示：
+  - 修正 `template_date_post_item` 樣板，將硬編碼的「日」改為 `{{lang_day_suffix}}`。
+  - 在語系檔中補齊 `day_suffix` 定義，解決年月單位可能未正確顯示的問題。

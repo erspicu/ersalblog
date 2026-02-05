@@ -497,6 +497,12 @@ Recorded the development journey and original Prompt commands of this project th
     - **Granular Rebuilds**: Classification of variables into "Global" (Title, URL) and "Index-Only" (Description). Only changes to Global vars trigger full rebuilds; Index vars trigger only homepage rebuild.
     - **Dependency Optimization**: Removed `config.php` from file-based `mtime` dependency checks to prevent unnecessary rebuilds on non-impacting config changes.
 
+### [14:00] HTML Lang Attribute & Date Suffix Localization
+- **Task**: Enhance HTML structure and date archiving with full multi-language support.
+- **Implementation**:
+    - **Dynamic HTML Lang**: Integrated `html_lang` key in language packs and updated `blog_template.html` to dynamically set the `lang` attribute.
+    - **Localized Date Suffixes**: Replaced hardcoded "日" with `{{lang_day_suffix}}` in `template_date_post_item` and updated language files to ensure correct year/month/day units in all archives.
+
 ---
 
 ## 2026-02-05 (繁體中文)
@@ -523,3 +529,7 @@ Recorded the development journey and original Prompt commands of this project th
 ### [13:45] HTML 語系宣告動態化
 - **任務**: 讓 `<html>` 標籤的 `lang` 屬性支援多語系切換。
 - **實作**: 在樣板語系檔新增 `html_lang` 鍵值，並將 `blog_template.html` 內的硬編碼屬性改為變數佔位符，提升 SEO 與瀏覽器相容性。
+
+### [14:00] 日期單位多語系修復
+- **任務**: 修正側邊欄與歸檔清單中的日期單位顯示。
+- **實作**: 將 `template_date_post_item` 內硬編碼的「日」替換為 `{{lang_day_suffix}}`，並在語系檔補齊相關定義，確保年月日顯示完整。
