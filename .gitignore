@@ -72,3 +72,6 @@ test/
 
 # Generated JSON API data
 /api/json/
+
+# Generated Build Cache Hash
+/contents/build_hash.json
