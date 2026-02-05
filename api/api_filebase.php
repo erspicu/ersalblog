@@ -55,7 +55,8 @@ function get_Category_index($category_ch, $index_page)
     $tags = explode(",", trim($line_arr[3]));
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
 
-    if (in_array(str_replace(".html", "", $line_arr[1]), $category_post_index)) {
+    $nameNoExt = str_replace(".html", "", $line_arr[1]);
+    if (in_array($line_arr[1], $category_post_index) || in_array($nameNoExt, $category_post_index)) {
       if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
@@ -286,8 +287,9 @@ function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
 function check_category($category, $line)
 {
   $in_category = array();
+  $nameNoExt = str_replace(".html", "", $line);
   foreach ($category as $c) {
-    if (in_array(substr($line, 0, 14),  $c['posts'])) {
+    if (in_array($line, $c['posts']) || in_array($nameNoExt, $c['posts'])) {
       array_push($in_category, $c['name']);
     }
   }
@@ -311,7 +313,7 @@ function category_deal()
     // Filter out drafts (check if actual content file exists)
     $valid_files = [];
     foreach($files as $f) {
-        if(file_exists("../contents/post_files/" . $f)) {
+        if(file_exists("../contents/post_files/" . $f) || file_exists("../contents/post_files/" . $f . ".html")) {
             $valid_files[] = $f;
         }
     }

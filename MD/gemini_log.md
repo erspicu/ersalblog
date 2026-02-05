@@ -163,3 +163,7 @@
 - [2026-02-05 11:15:00] (UTC+8) 修正靜態頁面生成問題：
   - 修正 `make_html.php` 中 `tmpl_post_tag_container` 與 `tmpl_post_cat_container` 渲染時漏傳語系變數的問題，解決前台出現 `{{lang_post_tags_title}}` 的錯誤。
   - 優化 `matchCategories` 函式，改為同時比對「完整檔名」與「無副檔名」的檔案，以相容舊有的分類標記方式，解決文章分類顯示不正確的問題。
+- [2026-02-05 11:30:00] (UTC+8) 修正樣板渲染與分類統計邏輯：
+  - 補齊 `make_html.php` 中所有子樣板（`tmpl_post_main`, `tmpl_blog_list_container`）渲染時缺失的全域語系變數，解決 `{{lang_back_to_top}}` 與 `{{lang_list_page_title}}` 佔位符未被替換的問題。
+  - 更新 `make_html.php` 的 `scanCategories` 與 `api/api_filebase.php` 的 `category_deal`，改為同時檢查「檔名」與「檔名.html」是否存在，確保舊式（無副檔名）分類標記能正確計數且不計入遺失的文章。
+  - 修正 `api/api_filebase.php` 的 `check_category` 與 `get_Category_index` 的比對邏輯，支援完整檔名與無副檔名的雙向相容。

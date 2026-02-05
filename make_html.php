@@ -111,14 +111,14 @@ function build($force = false) {
             $catsHtml = $tpl->renderList('tmpl_post_cat_item', matchCategories($post['filename'], $categories));
             $catsBlock = $catsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_cat_container'), array_merge($globalVars, array('items' => $catsHtml))) : '';
 
-            $postContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_post_main'), array(
+            $postContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_post_main'), array_merge($globalVars, array(
                 'time'           => $post['date'],
                 'title'          => $post['title'],
                 'link'           => $post['filename'],
                 'content'        => $post['content'],
                 'tags_block'     => $tagsBlock,
                 'category_block' => $catsBlock
-            ));
+            )));
 
             $pageVars = array_merge($globalVars, array(
                 'page_title'          => $GLOBALS['blog_title'] . "-" . $post['title'],
@@ -148,9 +148,9 @@ function build($force = false) {
     $targetList = "blog_list.html";
     // 依賴: 索引檔 + 樣板 + 設定檔
     if ($force || !checkCache($targetList, array($indexFile, $templatePath, __DIR__ . '/config.php'))) {
-        $listContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_blog_list_container'), array(
+        $listContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_blog_list_container'), array_merge($globalVars, array(
             'items' => $listItemsHtml
-        ));
+        )));
 
         $listVars = array_merge($globalVars, array(
             'page_title'          => $GLOBALS['blog_title'] . "-文章總列表",
@@ -279,7 +279,11 @@ function scanCategories($dir) {
                 $files = scandir("$dir/$d");
                 $validFiles = array();
                 foreach($files as $f) {
-                    if($f != '.' && $f != '..') $validFiles[] = $f;
+                    if($f == '.' || $f == '..') continue;
+                    // Compatibility: check for filename directly or with .html
+                    if (file_exists("contents/post_files/" . $f) || file_exists("contents/post_files/" . $f . ".html")) {
+                        $validFiles[] = $f;
+                    }
                 }
                 $cats[] = array('name' => $d, 'posts' => $validFiles);
             }
