@@ -121,7 +121,7 @@ Recorded the development journey and original Prompt commands of this project th
 ### [16:20] Database Schema Normalization
 - **Task**: Split category field into independent tables and relation tables.
 - **Prompt**: "Hope to fix the database version category architecture. Create two more tables: one for category names, one for which posts use which categories. Fix affected programs and screens; i.e., category management should have an add function."
-- **Implementation**: Created `blog_categories` and `blog_post_categories`資料表，更新 `DataManager` 與分類管理 UI。
+- **Implementation**: Created `blog_categories` and `blog_post_categories` 資料表，更新 `DataManager` 與分類管理 UI。
 
 ### [16:26] Redundant Field Cleanup and Logic Refactoring
 - **Task**: Remove `post_categories` from `blog_posts` and refactor queries.
@@ -130,7 +130,7 @@ Recorded the development journey and original Prompt commands of this project th
 
 ### [16:39] Documentation and Format Updates
 - Integrated `reme.txt` content into `README.md` and updated third-party package info.
-- `gemini_log.txt` transitioned to `gemini_log.md` with mandatory UTF-8 BOM encoding.
+- `gemini_log.txt` 轉換為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
 
 ---
 
@@ -186,7 +186,7 @@ Recorded the development journey and original Prompt commands of this project th
     - Fixed BOM (`ï»¿`) encoding issues in `gemini_log.md`.
 
 ### [21:30] System Time Calibration and Specification Strengthening
-- **Task**: Uniformly calibrate all站 time stamps to correct UTC+8 evening period.
+- **Task**: Uniformly calibrate all 站 time stamps to correct UTC+8 evening period.
 - **Implementation**:
     - Corrected time deviations in `HISTORY.md`, `admin/version_config.php`, and `gemini_log.md`.
     - Explicitly required all future records to use UTC+8 directly in `gemini.md`.
@@ -274,7 +274,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Establish a dedicated directory for backups.
 - **Implementation**:
     - Created `/backup` directory and added a bilingual `readme.md`.
-    - Updated `.gitignore` to exclude `/backup/*.zip` 檔案.
+    - Updated `.gitignore` 排除 `/backup/*.zip` 檔案。
 
 ### [15:15] Backup Restore & Upload
 - **Task**: Enhance backup tool with restore and upload capabilities.
@@ -408,106 +408,17 @@ Recorded the development journey and original Prompt commands of this project th
 ### [14:05] Core SSG Pipeline Refactoring (Regex Transition)
 - **Task**: Overhaul the static page generation logic for robustness and compatibility.
 - **Implementation**:
-    - **Single Source Architecture**: Rewrote `make_html.php` to generate all outputs directly from `blog_template.html`, eliminating chain-dependencies and structure degradation.
-    - **Regex-Based Parsing**: Replaced `DOMDocument` with high-performance Regex (`preg_match_all`, `preg_replace_callback`). This solved the "auto-corruption" of HTML5 `<template>` tags and fixed attribute URL-encoding issues (`%7B%7B`).
-    - **Placeholder Standardization**: Unified all template variables to the `{{variable}}` format to prevent syntax collisions with CSS/JS.
-    - **PHP 5.x Compatibility**: Maintained backward compatibility with PHP 5.x (using `array()` syntax and removing modern-only dependencies).
+    - **Single Source Architecture**: Rewrote `make_html.php` 靜態網頁生成邏輯，徹底解決結構劣化與轉碼問題。
+    - **Regex 解析**: 移除 `DOMDocument` 改用 Regex 處理樣板與圖片優化，大幅提升相容性與效能。
+    - **PHP 5.x 相容**: 維持向後相容性，確保在 AppServ 等舊版環境正常運作。
 
-### [14:40] Automated Asset Compression Optimization
-- **Task**: Refine the JS/CSS minification workflow.
-- **Implementation**:
-    - **Smart Directory Ignore**: Updated `mini.py` logic to correctly handle nested path matching (e.g., `admin/assets`), preventing accidental compression of third-party libraries.
-    - **Expanded Exclusion List**: Added `langs` and `PHP_LIB` to the global ignore list.
-    - **Auto-Cleanup Routine**: Implemented a cleanup function in `mini.py` to automatically detect and remove mistakenly generated `.min.js` / `.min.css` files.
+### [14:40] 自動化資產壓縮優化
+- **任務**: 精煉 JS/CSS 壓縮流程。
+- **實作**: 修正 `mini.py` 目錄排除邏輯，並新增自動清理機制，保持專案目錄整潔。
 
-### [15:15] Micro-Template Framework Development
-- **Task**: Decouple template logic from business logic in the build script.
-- **Implementation**:
-    - **TemplateManager Class**: Created `PHP_LIB/TemplateManager.php` as a lightweight, reusable template engine supporting nested templates and list rendering.
-    - **Script Simplification**: Refactored `make_html.php` to utilize the new manager, reducing boilerplate code and improving maintainability.
-    - **Processing Pipeline**: Centralized "template stripping," "path correction," and "image optimization" into a unified `pipeline()` function.
-
-### [15:45] File-MTIME Based Cache Mechanism
-- **Task**: Implement incremental builds to reduce redundant rendering time.
-- **Implementation**:
-    - **Smart Dependency Tracking**: Added `checkCache()` logic to compare output timestamps against all source dependencies (Source HTML, Global Template, Config).
-    - **Optimized Workflow**: The build script now only processes modified content, significantly speeding up the update process for large blogs.
-    - **Forced Rebuild**: Added CLI support for `-f` / `--force` flags to bypass cache when necessary.
-
----
-
-## 2026-02-05
-
-### [10:15] Frontend Internationalization & Config Dynamics
-- **Task**: Implement multi-language support for the frontend and make timezone/language configurations dynamic.
-- **Implementation**:
-    - **i18n Template Architecture**: Created `langs/template/` to house `zh_TW.php` and `en_US.php`. Replaced hardcoded text in `static/blog_template.html` with `{{variable}}` placeholders.
-    - **Dynamic Configuration**: Updated `make_html.php` to read `blog_lang` and `timezone` from `config.js` and load the corresponding language file.
-    - **Admin Settings**: Enhanced `admin/settings.php` to support GUI-based configuration of Blog Language and Timezone.
-    - **Installation Wizard**: Updated `install.php` to prompt for language and timezone during setup, ensuring `config.php` and `config.js` are initialized correctly.
-    - **Translation Coverage**: Updated `langs/admin/*.php` with all new UI strings.
-
-### [10:45] Config Logic Correction
-- **Task**: Correct the location of language and timezone settings to align with SSG logic.
-- **Implementation**:
-    - **Config Relocation**: Moved `blog_lang` and `blog_timezone` from `config.js` back to `config.php`.
-    - **SSG Purity**: Updated `make_html.php` to read global variables from `config.php` directly, removing `config.js` parsing.
-    - **Admin Update**: Updated `admin/settings.php` and `install.php` to correctly split writes between PHP and JS config files.
-
-### [11:15] Static Page & Category Fixes
-- **Task**: Fix missing i18n variables in sub-templates and ensure category backward compatibility.
-- **Implementation**:
-    - **Variable Propagation**: Updated `make_html.php` to pass `globalVars` to `tmpl_post_tag_container` and `tmpl_post_cat_container` render calls, fixing the `{{lang_post_tags_title}}` display issue.
-    - **Category Compatibility**: Enhanced `matchCategories` to match both full filenames (with extension) and filenames without extension (old style), resolving category display inconsistencies.
-
-### [11:30] Template Rendering & Category Statistics Optimization
-- **Task**: Fix missing i18n placeholders and correct category post counts.
-- **Implementation**:
-    - **Full i18n Propagation**: Ensured all sub-templates (`tmpl_post_main`, `tmpl_blog_list_container`) in `make_html.php` receive `globalVars`, resolving `{{lang_back_to_top}}` display errors.
-    - **Precise Category Counting**: Updated `scanCategories` and `api_filebase.php` to verify post existence using both exact filenames and `.html` extensions, ensuring accurate statistics for old-style category tags.
-    - **Robust Matching**: Refined `check_category` and `get_Category_index` to support bidirectional compatibility between full and extensionless filenames.
-
-### [12:00] Security Hardening
-- **Task**: Perform comprehensive security audit and vulnerability remediation.
-- **Implementation**:
-    - **Path Traversal Fix**: Corrected `get_Category_index` in `api/api_filebase.php` to enforce `basename()` filtering on category parameters, preventing `../` attacks.
-    - **SSG XSS Protection**: Updated `make_html.php` to use `htmlspecialchars` for escaping titles, descriptions, tags, and category names before template injection.
-    - **DOM XSS Protection**: Patched `static/blog.js` with a new `escapeHtml` helper, ensuring all API-sourced data (titles, tags) is escaped before rendering.
-    - **Admin Verification**: Confirmed that `admin/post_edit.php` and `admin/posts.php` already implement output escaping.
-
-### [12:30] Pure Static JSON API Mode
-- **Task**: Implement a zero-backend JSON API mode for purely static hosting.
-- **Implementation**:
-    - **Config Update**: Added `api_type: 'json'` option to `config.js` and `admin/settings.php`.
-    - **Generator**: Enhanced `make_html.php` with a `-json` flag to pre-generate `api/json/all.json`, `category_*.json`, `tag_*.json`, and `date_*.json`.
-    - **Frontend Routing**: Updated `static/blog.js` to detect JSON mode and map URL query parameters (e.g., `?/category/Name`) to the corresponding static JSON files.
-    - **Installation**: Integrated the Static JSON option into the `install.php` wizard.
-
-### [13:00] Static JSON API Consolidation & Frontend Filtering
-- **Task**: Optimize JSON API mode by consolidating files and moving filtering logic to the client.
-- **Implementation**:
-    - **Data Consolidation**: Modified `make_html.php` to generate a single `api/json/data.json` instead of multiple fragmented files, resolving encoding/404 issues with Chinese filenames.
-    - **Client-Side Filtering**: Updated `static/blog.js` to load the single data file and perform category/tag/date filtering in-memory, improving performance and deployment compatibility.
-    - **Cleanup**: Added auto-cleanup logic to remove legacy JSON files.
-
-### [13:30] Smart Build Cache (Config Hash)
-- **Task**: Optimize build performance by detecting specific configuration changes.
-- **Implementation**:
-    - **Hash-Based Detection**: Implemented logic in `make_html.php` to hash and compare configuration variables.
-    - **Granular Rebuilds**: Classification of variables into "Global" (Title, URL) and "Index-Only" (Description). Only changes to Global vars trigger full rebuilds; Index vars trigger only homepage rebuild.
-    - **Dependency Optimization**: Removed `config.php` from file-based `mtime` dependency checks to prevent unnecessary rebuilds on non-impacting config changes.
-
-### [14:00] HTML Lang Attribute & Date Suffix Localization
-- **Task**: Enhance HTML structure and date archiving with full multi-language support.
-- **Implementation**:
-    - **Dynamic HTML Lang**: Integrated `html_lang` key in language packs and updated `blog_template.html` to dynamically set the `lang` attribute.
-    - **Localized Date Suffixes**: Replaced hardcoded "日" with `{{lang_day_suffix}}` in `template_date_post_item` and updated language files to ensure correct year/month/day units in all archives.
-
-### [14:15] Build Cache Robustness & Unit Display Optimization
-- **Task**: Ensure build reliability during language switches and improve English archive clarity.
-- **Implementation**:
-    - **Dependency Tracking**: Updated `make_html.php` to include language file content in the global build hash and as a physical dependency in `checkCache`, ensuring template changes trigger rebuilds even when config remains static.
-    - **Clarity Optimization**: Provided descriptive suffixes for English (e.g., "Year", "Month") to prevent archives from appearing "empty" when unit strings are omitted.
+### [15:15] 微樣板管理器與增量建置
+- **任務**: 提升建置效率與維護性。
+- **實作**: 建立 `TemplateManager` 類別封裝解析邏輯，並實作基於檔案修改時間 (mtime) 的快取機制，大幅縮短生成時間。
 
 ---
 
@@ -540,6 +451,6 @@ Recorded the development journey and original Prompt commands of this project th
 - **任務**: 修正側邊欄與歸檔清單中的日期單位顯示。
 - **實作**: 將 `template_date_post_item` 內硬編碼的「日」替換為 `{{lang_day_suffix}}`，並在語系檔補齊相關定義，確保年月日顯示完整。
 
-### [14:15] 建置快取強化與單位顯示優化
-- **任務**: 確保語系變更時建置正常，並優化英文單位顯示。
-- **實作**: 更新 `make_html.php` 將語系檔內容納入雜湊計算與實體相依檢查，防止變更語系時因快取判定略過建置；同時優化英文語系預設值，避免單位消失感。
+### [14:30] 建置腳本穩定性與快取強化
+- **任務**: 修復 `make_html.php` 語法錯誤並強化快取檢查。
+- **實作**: 修正 `build` 函式語法錯誤，並將語系檔內容納入全域雜湊計算與實體相依檢查，確保語系變更時能正確觸發所有受影響頁面的重建。

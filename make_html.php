@@ -84,40 +84,162 @@ file_put_contents($cacheHashFile, json_encode([
 
 
 function build($force = false, $jsonMode = false, $forceGlobal = false, $forceIndex = false, $langFile = '') {
-    global $langVars; // Access global lang vars
+    global $langVars; 
+    
+    // Ensure langVars is not empty
+    if (empty($langVars)) {
+        echo "Warning: langVars is empty. Check language file loading.<br>\r\n";
+    }
+
     $indenter = new Indenter();
     $tpl = new TemplateManager();
     $templatePath = "static/blog_template.html";
     $tpl->load($templatePath);
 
-    // ... (rest of function)
-    $dependencies = array($templatePath);
-    if ($langFile) $dependencies[] = $langFile;
+    // 準備全域變數 (Explicitly merge to ensure lang_ keys are present)
+    $globalVars = array_merge($langVars, array(
+        'blog_title'       => $GLOBALS['blog_title'],
+        'blog_description' => $GLOBALS['blog_description'],
+        'blog_introduce'   => $GLOBALS['blog_introduce'],
+        'site_url'         => $GLOBALS['site_url'],
+    ));
+
+    // 準備資料來源
+    $indexFile = "contents/index_post.txt";
+    $posts = loadPosts($indexFile);
+    $categories = scanCategories("category");
+
+    // ==========================================
+    // JSON Pre-generation (If flag is set)
+    // ==========================================
+    if ($jsonMode) {
+        generateJsonApi($posts, $categories);
+    }
+
+    $commonDeps = array($templatePath);
+    if ($langFile) $commonDeps[] = $langFile;
 
     // ==========================================
     // A. 生成首頁 (blog.html)
     // ==========================================
     $targetBlog = "blog.html";
-    if ($force || $forceGlobal || $forceIndex || !checkCache($targetBlog, $dependencies)) {
-        // ...
+    if ($force || $forceGlobal || $forceIndex || !checkCache($targetBlog, $commonDeps)) {
+        $indexVars = array_merge($globalVars, array(
+            'page_title'          => htmlspecialchars($GLOBALS['blog_title']),
+            'page_canonical'      => $GLOBALS['site_url'] . 'blog.html',
+            'page_description'    => htmlspecialchars($GLOBALS['blog_description']),
+            'page_og_title'       => htmlspecialchars($GLOBALS['blog_title']),
+            'page_og_description' => htmlspecialchars($GLOBALS['blog_description']),
+            'page_og_image'       => $GLOBALS['blog_preview'],
+            'page_og_url'         => $GLOBALS['site_url'] . 'blog.html',
+            'page_twitter_card'   => 'summary_large_image',
+            'body_class'          => '',
+            'page_main_content'   => '', 
+        ));
+
+        $html = $tpl->render($tpl->getSource(), $indexVars);
+        $html = pipeline($html, $indenter, false, false, false);
+        write($targetBlog, $html);
+    } else {
+        echo "$targetBlog cached (skipped).<br>\r\n";
     }
-    // ...
+
+
+    // ==========================================
     // B. 生成單篇文章 (post/*.html)
-    // ...
-    $postDeps = array($sourcePost, $templatePath);
-    if ($langFile) $postDeps[] = $langFile;
-    if ($force || $forceGlobal || !checkCache($targetPost, $postDeps)) {
-        // ...
+    // ==========================================
+    if (!is_dir("post")) mkdir("post", 0755, true);
+    
+    $listItemsHtml = "";
+
+    foreach ($posts as $post) {
+        if (!$post['isValid']) {
+            continue;
+        }
+
+        // 列表項目渲染
+        $listItemsHtml .= $tpl->render($tpl->getSubTemplate('tmpl_blog_list_item'), array(
+            'link'  => "post/" . $post['filename'],
+            'time'  => $post['date'],
+            'title' => htmlspecialchars($post['title'])
+        ));
+
+        // 檢查單篇文章快取
+        $targetPost = "post/" . $post['filename'];
+        $sourcePost = "contents/post_files/" . $post['filename'];
+        
+        $postDeps = array_merge($commonDeps, array($sourcePost));
+
+        if ($force || $forceGlobal || !checkCache($targetPost, $postDeps)) {
+            
+            // 只有需要重產時才進行這些較重的運算
+            $safeTags = array_map(function($t) { return array('name' => htmlspecialchars($t['name'])); }, prepareTags($post['tags']));
+            $tagsHtml = $tpl->renderList('tmpl_post_tag_item', $safeTags);
+            $tagsBlock = $tagsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_tag_container'), array_merge($globalVars, array('items' => $tagsHtml))) : '';
+
+            $safeCats = array_map(function($c) { return array('name' => htmlspecialchars($c['name'])); }, matchCategories($post['filename'], $categories));
+            $catsHtml = $tpl->renderList('tmpl_post_cat_item', $safeCats);
+            $catsBlock = $catsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_cat_container'), array_merge($globalVars, array('items' => $catsHtml))) : '';
+
+            $postContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_post_main'), array_merge($globalVars, array(
+                'time'           => $post['date'],
+                'title'          => htmlspecialchars($post['title']),
+                'link'           => $post['filename'],
+                'content'        => $post['content'], 
+                'tags_block'     => $tagsBlock,
+                'category_block' => $catsBlock
+            )));
+
+            $pageVars = array_merge($globalVars, array(
+                'page_title'          => htmlspecialchars($GLOBALS['blog_title'] . "-" . $post['title']),
+                'page_canonical'      => $GLOBALS['site_url'] . 'post/' . $post['filename'],
+                'page_description'    => htmlspecialchars($post['description']),
+                'page_og_title'       => htmlspecialchars($post['title']),
+                'page_og_description' => htmlspecialchars($post['description']),
+                'page_og_image'       => $post['og_image'],
+                'page_og_url'         => $GLOBALS['site_url'] . 'post/' . $post['filename'],
+                'page_twitter_card'   => $post['has_icon'] ? 'summary_large_image' : '',
+                'body_class'          => 'is-single-page',
+                'page_main_content'   => $postContentHtml
+            ));
+
+            $html = $tpl->render($tpl->getSource(), $pageVars);
+            $html = pipeline($html, $indenter, true, true, true);
+            write($targetPost, $html);
+        }
     }
-    // ...
+
+
+    // ==========================================
     // C. 生成文章總列表 (blog_list.html)
-    // ...
-    $listDeps = array($indexFile, $templatePath);
-    if ($langFile) $listDeps[] = $langFile;
+    // ==========================================
+    $targetList = "blog_list.html";
+    $listDeps = array_merge($commonDeps, array($indexFile));
+
     if ($force || $forceGlobal || !checkCache($targetList, $listDeps)) {
-        // ...
+        $listContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_blog_list_container'), array_merge($globalVars, array(
+            'items' => $listItemsHtml
+        )));
+
+        $listVars = array_merge($globalVars, array(
+            'page_title'          => $GLOBALS['blog_title'] . "-文章總列表",
+            'page_canonical'      => $GLOBALS['site_url'] . 'blog_list.html',
+            'page_description'    => '',
+            'page_og_title'       => $GLOBALS['blog_title'] . "-文章總列表",
+            'page_og_description' => '',
+            'page_og_image'       => '',
+            'page_og_url'         => $GLOBALS['site_url'] . 'blog_list.html',
+            'page_twitter_card'   => '',
+            'body_class'          => '',
+            'page_main_content'   => $listContentHtml
+        ));
+
+        $html = $tpl->render($tpl->getSource(), $listVars);
+        $html = pipeline($html, $indenter, false, true, false); 
+        write($targetList, $html);
+    } else {
+        echo "$targetList cached (skipped).<br>\r\n";
     }
-}
 
     // ==========================================
     // D. 生成 Sitemap
