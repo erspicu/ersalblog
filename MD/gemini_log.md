@@ -167,3 +167,8 @@
   - 補齊 `make_html.php` 中所有子樣板（`tmpl_post_main`, `tmpl_blog_list_container`）渲染時缺失的全域語系變數，解決 `{{lang_back_to_top}}` 與 `{{lang_list_page_title}}` 佔位符未被替換的問題。
   - 更新 `make_html.php` 的 `scanCategories` 與 `api/api_filebase.php` 的 `category_deal`，改為同時檢查「檔名」與「檔名.html」是否存在，確保舊式（無副檔名）分類標記能正確計數且不計入遺失的文章。
   - 修正 `api/api_filebase.php` 的 `check_category` 與 `get_Category_index` 的比對邏輯，支援完整檔名與無副檔名的雙向相容。
+- [2026-02-05 12:00:00] (UTC+8) 執行安全性強化 (Security Hardening)：
+  - 修正 `api/api_filebase.php` 中的路徑遍歷漏洞 (Path Traversal)，對分類參數強制使用 `basename()` 過濾。
+  - 修正 `make_html.php` 中的靜態生成 XSS 風險，對標題、標籤與分類名稱執行 `htmlspecialchars` 轉義。
+  - 修正 `static/blog.js` 中的 DOM XSS 風險，新增 `escapeHtml` 函式並在渲染 API 資料時進行轉義。
+  - 確認後台 `post_edit.php` 與 `posts.php` 已具備正確的輸出轉義防護。

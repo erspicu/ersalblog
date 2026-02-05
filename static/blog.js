@@ -3,6 +3,19 @@ function toTop() {
     window.document.documentElement.scrollTop = 0;
 }
 
+/**
+ * HTML Escaping Helper to prevent XSS
+ */
+function escapeHtml(text) {
+    if (text === null || text === undefined) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function ui_init() {
     var toggler = document.getElementsByClassName("caret");
     var i;
@@ -149,7 +162,7 @@ if (pathName.endsWith("blog.html")) {
         .then(function (res) {
             renderTemplateGenerator(res.category, "template_category", "category_list_all", function (html, val) {
                 // html 是樣板原始碼, val 是陣列中的單一物件
-                html = html.replace(/{{name}}/g, val.name);
+                html = html.replace(/{{name}}/g, escapeHtml(val.name));
                 html = html.replace(/{{count}}/g, val.count);
                 return html;
             });
@@ -214,7 +227,7 @@ if (pathName.endsWith("blog.html")) {
                         html = html.replace(/{{day}}/g, day);
                         // 修正：連結需指向 post/ 目錄
                         html = html.replace(/{{link}}/g, "post/" + post.post_index);
-                        html = html.replace(/{{title}}/g, post.title); // 注意：確認您的資料來源 title 欄位名稱
+                        html = html.replace(/{{title}}/g, escapeHtml(post.title)); // 注意：確認您的資料來源 title 欄位名稱
 
                         return html;
                     });
@@ -223,7 +236,7 @@ if (pathName.endsWith("blog.html")) {
 
             // 這裡 data 是物件，key 是標籤名，val 是數量
             renderTemplateGenerator(res.tags, "template_tag_item", "tag_list_all", function (html, val, key) {
-                html = html.replace(/{{name}}/g, key); // key 是標籤名稱
+                html = html.replace(/{{name}}/g, escapeHtml(key)); // key 是標籤名稱
                 html = html.replace(/{{count}}/g, val); // val 是數量
                 return html;
             });
@@ -236,7 +249,7 @@ if (pathName.endsWith("blog.html")) {
                     "tmpl_post_tag_item",
                     null,
                     function (tHtml, tVal) {
-                        return tHtml.replace(/{{name}}/g, tVal);
+                        return tHtml.replace(/{{name}}/g, escapeHtml(tVal));
                     },
                 );
 
@@ -254,7 +267,7 @@ if (pathName.endsWith("blog.html")) {
                     "tmpl_post_cat_item",
                     null,
                     function (cHtml, cVal) {
-                        return cHtml.replace(/{{name}}/g, cVal);
+                        return cHtml.replace(/{{name}}/g, escapeHtml(cVal));
                     },
                 );
 
@@ -269,7 +282,7 @@ if (pathName.endsWith("blog.html")) {
                 // 修正：連結需指向 post/ 目錄
                 mainHtml = mainHtml.replace(/{{link}}/g, "post/" + post.post_index);
                 mainHtml = mainHtml.replace(/{{time}}/g, post.post_time);
-                mainHtml = mainHtml.replace(/{{title}}/g, post.post_title);
+                mainHtml = mainHtml.replace(/{{title}}/g, escapeHtml(post.post_title));
 
                 // 5. 【關鍵應用】圖片優化
                 // 將 globalImgStatus 傳進去，函式會自動判斷並更新它

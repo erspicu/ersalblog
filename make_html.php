@@ -7,6 +7,21 @@ require_once __DIR__ . '/PHP_LIB/TemplateManager.php';
 
 use Gajus\Dindent\Indenter;
 
+// --- Helper for XSS Prevention ---
+function escapeVars($data) {
+    if (is_array($data)) {
+        foreach ($data as $key => $value) {
+            $data[$key] = escapeVars($value);
+        }
+        return $data;
+    }
+    // Don't escape content if it's meant to be HTML (like post_content), 
+    // but here we are targeting metadata. 
+    // For this specific build script, we will apply escaping explicitly where needed.
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+}
+// ---------------------------------
+
 // --- Config & Language Init ---
 global $blog_lang; 
 if (!isset($blog_lang)) $blog_lang = 'zh_TW'; 
@@ -56,11 +71,11 @@ function build($force = false) {
     // 首頁依賴: 樣板檔 + 設定檔 (若標題變更需重產)
     if ($force || !checkCache($targetBlog, array($templatePath, __DIR__ . '/config.php'))) {
         $indexVars = array_merge($globalVars, array(
-            'page_title'          => $GLOBALS['blog_title'],
+            'page_title'          => htmlspecialchars($GLOBALS['blog_title']),
             'page_canonical'      => $GLOBALS['site_url'] . 'blog.html',
-            'page_description'    => $GLOBALS['blog_description'],
-            'page_og_title'       => $GLOBALS['blog_title'],
-            'page_og_description' => $GLOBALS['blog_description'],
+            'page_description'    => htmlspecialchars($GLOBALS['blog_description']),
+            'page_og_title'       => htmlspecialchars($GLOBALS['blog_title']),
+            'page_og_description' => htmlspecialchars($GLOBALS['blog_description']),
             'page_og_image'       => $GLOBALS['blog_preview'],
             'page_og_url'         => $GLOBALS['site_url'] . 'blog.html',
             'page_twitter_card'   => 'summary_large_image',
@@ -94,7 +109,7 @@ function build($force = false) {
         $listItemsHtml .= $tpl->render($tpl->getSubTemplate('tmpl_blog_list_item'), array(
             'link'  => "post/" . $post['filename'],
             'time'  => $post['date'],
-            'title' => $post['title']
+            'title' => htmlspecialchars($post['title'])
         ));
 
         // 檢查單篇文章快取
@@ -105,27 +120,29 @@ function build($force = false) {
         if ($force || !checkCache($targetPost, array($sourcePost, $templatePath, __DIR__ . '/config.php'))) {
             
             // 只有需要重產時才進行這些較重的運算
-            $tagsHtml = $tpl->renderList('tmpl_post_tag_item', prepareTags($post['tags']));
+            $safeTags = array_map(function($t) { return array('name' => htmlspecialchars($t['name'])); }, prepareTags($post['tags']));
+            $tagsHtml = $tpl->renderList('tmpl_post_tag_item', $safeTags);
             $tagsBlock = $tagsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_tag_container'), array_merge($globalVars, array('items' => $tagsHtml))) : '';
 
-            $catsHtml = $tpl->renderList('tmpl_post_cat_item', matchCategories($post['filename'], $categories));
+            $safeCats = array_map(function($c) { return array('name' => htmlspecialchars($c['name'])); }, matchCategories($post['filename'], $categories));
+            $catsHtml = $tpl->renderList('tmpl_post_cat_item', $safeCats);
             $catsBlock = $catsHtml ? $tpl->render($tpl->getSubTemplate('tmpl_post_cat_container'), array_merge($globalVars, array('items' => $catsHtml))) : '';
 
             $postContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_post_main'), array_merge($globalVars, array(
                 'time'           => $post['date'],
-                'title'          => $post['title'],
+                'title'          => htmlspecialchars($post['title']),
                 'link'           => $post['filename'],
-                'content'        => $post['content'],
+                'content'        => $post['content'], // Content is trusted HTML
                 'tags_block'     => $tagsBlock,
                 'category_block' => $catsBlock
             )));
 
             $pageVars = array_merge($globalVars, array(
-                'page_title'          => $GLOBALS['blog_title'] . "-" . $post['title'],
+                'page_title'          => htmlspecialchars($GLOBALS['blog_title'] . "-" . $post['title']),
                 'page_canonical'      => $GLOBALS['site_url'] . 'post/' . $post['filename'],
-                'page_description'    => $post['description'],
-                'page_og_title'       => $post['title'],
-                'page_og_description' => $post['description'],
+                'page_description'    => htmlspecialchars($post['description']),
+                'page_og_title'       => htmlspecialchars($post['title']),
+                'page_og_description' => htmlspecialchars($post['description']),
                 'page_og_image'       => $post['og_image'],
                 'page_og_url'         => $GLOBALS['site_url'] . 'post/' . $post['filename'],
                 'page_twitter_card'   => $post['has_icon'] ? 'summary_large_image' : '',

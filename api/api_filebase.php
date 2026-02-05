@@ -48,7 +48,21 @@ function get_Category_index($category_ch, $index_page)
   $ret_date = array();
   $ret_date_post = array();
 
-  $category_post_index = scandir("../category/" . $category_ch);
+  // Fix: Path Traversal
+  $safe_category = basename($category_ch);
+  if ($safe_category !== $category_ch || empty($safe_category) || $safe_category == '.' || $safe_category == '..') {
+      // Invalid path or traversal attempt
+      echo json_encode(['error' => 'Invalid category path']);
+      return;
+  }
+
+  $category_dir = "../category/" . $safe_category;
+  if (!is_dir($category_dir)) {
+      echo json_encode(['error' => 'Category not found']);
+      return;
+  }
+
+  $category_post_index = scandir($category_dir);
 
   foreach ($arr as $val) {
     $line_arr = explode("|", $val);
