@@ -69,3 +69,6 @@ test/
 # Backup artifacts
 /backup/*.zip
 /admin/attempts.log
+
+# Generated JSON API data
+/api/json/

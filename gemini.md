@@ -17,6 +17,7 @@
     - admin/assets 目錄底下第三方套件所有相關檔案
     - 壓縮後的資源檔 (`*.min.js`, `*.min.css`)。
     - `make_html.php` 輸出的靜態網頁檔案。
+    - `api/json/` 目錄下的預生成 JSON 檔案。
     - `sitemap.xml`。
     - Google Search Console 驗證用的 HTML 檔。
 
