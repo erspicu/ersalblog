@@ -46,6 +46,19 @@ This document organizes the discussions and evaluations regarding future feature
     *   **Visibility**: Frontend APIs and Static Generator automatically filter out drafts.
     *   **UI**: Dashboard badges, distinct "Save Draft" buttons, and stats breakdown.
 
+### 1.7 Pure Static Mode (Status: COMPLETED ✅)
+*   **Reasoning**: Hosting on static servers (like GitHub Pages or AWS S3) often fails with non-ASCII filenames (CJK characters) causing 404 errors.
+*   **Implementation**: 
+    *   **Single Source**: Consolidated all post data into a single `api/json/data.json` file.
+    *   **Client-Side Logic**: Refactored `blog.js` to handle routing, filtering, and pagination on the client side without needing physical subdirectories.
+    *   **Build Support**: Updated `make_html.php` with a `-json` flag to export the complete data package.
+
+### 1.8 Smart Build System (Status: COMPLETED ✅)
+*   **Reasoning**: Rebuilding thousands of pages for every minor configuration change is inefficient and slow.
+*   **Implementation**: 
+    *   **Granular Caching**: Implemented `TemplateManager` with modification time (mtime) checks.
+    *   **Hash Detection**: Added content hash comparison to distinguish between 'Global' updates (header/footer changes requiring full rebuild) and 'Local' updates (requiring only index updates).
+
 ---
 
 ## 2. Content Creation & Management
@@ -129,9 +142,16 @@ This document organizes the discussions and evaluations regarding future feature
     *   **Sharing Buttons**: High impact, low effort.
     *   **Comments**: Use 3rd-party systems like Disqus or Giscus to avoid the complexity of building a secure in-house comment engine.
 
+### 5.3 Front-end Internationalization (Status: COMPLETED ✅)
+*   **Reasoning**: The blog needs to serve a global audience, matching the admin panel's capabilities.
+*   **Implementation**: 
+    *   **Template Logic**: Decoupled hardcoded text in `blog_template.html` using `{{variables}}`.
+    *   **System**: Created `langs/template/` architecture for easy language expansion.
+    *   **Dynamic Attributes**: Implemented dynamic `<html>` lang attributes and localized date formatting.
+
 ---
 
-# 部落格專案開發藍圖與功能提案 (v2026.02.04)
+# 部落格專案開發藍圖與功能提案 (v2026.02.06)
 
 此文件整理了關於 BaxerMux 攝影部落格未來功能擴充的討論與評估，作為長期開發的戰略參考。
 
@@ -159,6 +179,7 @@ This document organizes the discussions and evaluations regarding future feature
     *   **CSRF 防護**：所有資料變更操作均已加入 Token 驗證。
     *   **登入限制**：實作基於 IP 的 `attempts.log` 鎖定機制（5 次失敗鎖 15 分鐘）。
     *   **Session 強化**：強制 HttpOnly、SameSite=Strict 以及登入後 ID 重生。
+    *   **漏洞修復**：實作了嚴格的 API 路徑遍歷防護 (`basename`) 與樣板 XSS 轉義機制。
 
 ### 1.5 架構重構 (狀態：已完成 ✅)
 *   **實作**：
@@ -176,6 +197,19 @@ This document organizes the discussions and evaluations regarding future feature
     *   **儲存**：檔案模式使用 `.html.tmp` 副檔名；資料庫模式新增 `status` 欄位。
     *   **隱蔽性**：前台 API 與靜態生成器會自動過濾草稿，確保不外流。
     *   **UI**：後台提供「暫存草稿」按鈕、狀態標籤 (Badge) 與詳細統計數據。
+
+### 1.7 純靜態模式 (狀態：已完成 ✅)
+*   **理由**：靜態主機 (如 GitHub Pages) 常因中文檔名導致 404 錯誤。
+*   **實作**：
+    *   **單一資料源**：將所有文章數據整合為單一 `api/json/data.json` 檔案。
+    *   **客戶端邏輯**：重構 `blog.js`，在前端處理路由與篩選，無需依賴實體子目錄。
+    *   **建置支援**：`make_html.php` 新增 `-json` 參數以匯出完整資料包。
+
+### 1.8 智慧建置系統 (狀態：已完成 ✅)
+*   **理由**：每次修改設定都需重建上千個頁面，效率極低。
+*   **實作**：
+    *   **增量快取**：實作基於檔案修改時間 (mtime) 的 `TemplateManager` 快取。
+    *   **雜湊偵測**：加入內容 Hash 比對，區分「全域更新」(需重建全站) 與「局部更新」(僅更新首頁)。
 
 ---
 
@@ -260,7 +294,14 @@ This document organizes the discussions and evaluations regarding future feature
     *   **分享按鈕**：高回報、低成本的功能。
     *   **評論系統**：建議整合 Disqus 或 Giscus 等第三方系統以維持安全性。
 
+### 5.3 前端國際化 (狀態：已完成 ✅)
+*   **理由**：部落格需服務全球讀者，前台應具備與後台同等的多語系能力。
+*   **實作**：
+    *   **樣板邏輯**：使用 `{{variables}}` 解耦 `blog_template.html` 內的硬編碼文字。
+    *   **系統架構**：建立 `langs/template/` 架構，易於擴充新語系。
+    *   **動態屬性**：實作動態 `<html>` lang 屬性與在地化日期格式。
+
 ---
 **Document Created**: 2026-02-01
-**Last Updated**: 2026-02-04
+**Last Updated**: 2026-02-06
 **Source**: Discussion between User & Gemini CLI

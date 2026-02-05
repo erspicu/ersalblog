@@ -57,6 +57,10 @@
 *   [x] **Advanced Editor**：整合 TinyMCE 6 (Local Host) 並支援 `<!--more-->`。
 *   [x] **Translation**：完整的中英文語系支援 (含 TinyMCE)。
 *   [x] **Error Handling**：修正後台登入錯誤訊息顯示 (補全語系檔)。
+*   [x] **Front-end i18n**：前台樣板多語系支援與動態配置。
+*   [x] **Static JSON Mode**：實作單一資料源 (`data.json`) 支援純靜態主機。
+*   [x] **Smart Build Cache**：實作增量建置與內容雜湊比對。
+*   [x] **Security Hardening**：API 路徑遍歷防護與樣板 XSS 轉義。
 
 ## 6. 其它建議項目
 
@@ -64,5 +68,5 @@
 *   [ ] **Automatic WebP Conversion**：上傳圖片時自動轉換並生成縮圖。
 
 ---
-**Last Updated**: 2026-02-04
+**Last Updated**: 2026-02-06
 **Recorded by**: Gemini CLI Discussion
