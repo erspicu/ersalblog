@@ -156,6 +156,17 @@ if ($source === 'db') {
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
+        <?php 
+        require_once 'health_check.php';
+        $installCheck = SystemHealth::checkInstaller();
+        if ($installCheck['exists']): 
+        ?>
+            <div class="alert alert-danger shadow-sm mb-4">
+                <h5 class="alert-heading fw-bold"><?php echo $installCheck['message']; ?></h5>
+                <p class="mb-0"><?php echo __('warn_install_file_exists_desc'); ?></p>
+            </div>
+        <?php endif; ?>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="mb-0"><?php echo __('welcome_msg'); ?>，<?php echo htmlspecialchars($_SESSION['admin_user']); ?>！</h2>

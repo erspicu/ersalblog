@@ -165,6 +165,15 @@ if ($hasSQLite && !$sqliteStatus['status']) {
 
     <h3 class="brand"><?php echo __('login_title'); ?></h3>
     
+    <?php 
+    $installCheck = SystemHealth::checkInstaller();
+    if ($installCheck['exists']): 
+    ?>
+        <div class="alert alert-danger small py-2 mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i> <?php echo $installCheck['message']; ?>
+        </div>
+    <?php endif; ?>
+
     <?php if ($error): ?>
         <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>

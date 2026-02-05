@@ -282,4 +282,8 @@ return [
     'upload_limit_hint' => '注意：系統上傳上限約為 %s。若備份檔超過此大小，上傳將會失敗，請改用 FTP 或其他方式將檔案放入 backup 目錄。',
     'op_success' => '操作成功',
     'op_error' => '操作失敗',
+
+    // Security Warning
+    'warn_install_file_exists' => '⚠️ 安全警告：安裝檔案 (install.php) 仍然存在。',
+    'warn_install_file_exists_desc' => '為了確保系統安全，請在完成安裝後手動將根目錄下的 <code>install.php</code> 刪除。',
 ];

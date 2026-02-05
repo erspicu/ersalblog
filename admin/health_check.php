@@ -129,5 +129,16 @@ class SystemHealth {
 
         return $result;
     }
+
+    public static function checkInstaller() {
+        $installerPath = __DIR__ . '/../install.php';
+        if (file_exists($installerPath)) {
+            return [
+                'exists' => true,
+                'message' => __('warn_install_file_exists')
+            ];
+        }
+        return ['exists' => false];
+    }
 }
 ?>

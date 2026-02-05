@@ -282,4 +282,8 @@ return [
     'upload_limit_hint' => 'Note: System upload limit is approx %s. If the file exceeds this, upload will fail. Please use FTP or other methods to place the file in the "backup" directory.',
     'op_success' => 'Operation Successful',
     'op_error' => 'Operation Failed',
+
+    // Security Warning
+    'warn_install_file_exists' => '⚠️ Security Warning: Installer file (install.php) still exists.',
+    'warn_install_file_exists_desc' => 'For security reasons, please manually delete <code>install.php</code> from your root directory after installation.',
 ];
