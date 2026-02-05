@@ -385,14 +385,14 @@ Recorded the development journey and original Prompt commands of this project th
     - Updated `admin/lang_init.php` scanning logic to exclude `install_` prefixed files.
     - Simplified language dropdown to show only core language codes.
 
-### [23:00] 專案宣傳網站開發 (Vibe Coding 實驗)
-- **任務**: 建立一個現代化、攝影導向的宣傳網站來展示 ErsalBlog。
-- **實作**:
-    - **技術棧**: React + Vite + Bootstrap 5 + Framer Motion。
-    - **內容**: 詳細規劃了開發動機 (匠人初心)、演進歷程 (Vibe 飛躍)、技術架構與未來藍圖。
-    - **4K 優化**: 為超寬螢幕實作了自定義容器邏輯與響應式字體，確保版面完美置中且視覺平衡。
-    - **部署**: 設定 Vite 編譯路徑，確保與現有 Apache 環境無縫整合。
-    - **驗證**: 成功驗證宣傳網站作為 Vibe Coding 開發效率的強力證明。
+### [23:00] Promotional Website Development (Vibe Coding Experiment)
+- **Task**: Create a modern, photography-focused promotional website to showcase ErsalBlog.
+- **Implementation**:
+    - **Technology**: React + Vite + Bootstrap 5 + Framer Motion.
+    - **Content**: Detailed sections for Motivation (Hand-crafted origins), Evolution (The Vibe Leap), Technical Architecture, and Roadmap.
+    - **4K Optimization**: Implemented custom container logic and responsive typography for ultra-wide screens, ensuring a centered and balanced layout.
+    - **Deployment**: Configured Vite build with relative base paths for seamless integration with the existing Apache environment.
+    - **Success Verification**: Successfully verified the promo site as a robust demonstration of Vibe Coding efficiency.
 
 ### [23:33] Model Switch & Global Update
 - **Task**: Switch development model back to Gemini 3 Pro and sync all project documents.
@@ -496,3 +496,30 @@ Recorded the development journey and original Prompt commands of this project th
     - **Hash-Based Detection**: Implemented logic in `make_html.php` to hash and compare configuration variables.
     - **Granular Rebuilds**: Classification of variables into "Global" (Title, URL) and "Index-Only" (Description). Only changes to Global vars trigger full rebuilds; Index vars trigger only homepage rebuild.
     - **Dependency Optimization**: Removed `config.php` from file-based `mtime` dependency checks to prevent unnecessary rebuilds on non-impacting config changes.
+
+---
+
+## 2026-02-05 (繁體中文)
+
+### [10:15] 前台多語系與動態配置
+- **任務**: 實作前台多語系支援與動態時區/語系配置。
+- **實作**: 建立 `langs/template/` 架構，將樣板硬編碼文字替換為 `{{variable}}`，並更新建置腳本與後台設定。
+
+### [12:00] 安全性強化 (Security Hardening)
+- **任務**: 修復路徑遍歷與 XSS 漏洞。
+- **實作**: 在 API 引入 `basename()` 過濾，並在樣板生成與前端渲染流程中全面實作 HTML 轉義防護。
+
+### [13:00] 純靜態 JSON API 模式與優化
+- **任務**: 實作無後端 JSON 模式並解決亂碼 404 問題。
+- **實作**: 
+    - **單一資料源**: 將原本分散的 JSON 合併為 `api/json/data.json`，避免中文字元檔名導致的存取錯誤。
+    - **前端過濾**: 在 `blog.js` 實作客戶端路由與篩選邏輯，達成全靜態瀏覽體驗。
+    - **建置支援**: `make_html.php` 新增 `-json` 參數，一鍵導出完整資料包。
+
+### [13:30] 智慧建置快取 (Smart Build Cache)
+- **任務**: 優化建置效能，精確偵測配置變更。
+- **實作**: 實作雜湊雜湊 (Hash) 比對機制，將變數分為「全域」與「僅首頁」影響兩類，達成更細粒度的增量建置，減少不必要的檔案重產。
+
+### [13:45] HTML 語系宣告動態化
+- **任務**: 讓 `<html>` 標籤的 `lang` 屬性支援多語系切換。
+- **實作**: 在樣板語系檔新增 `html_lang` 鍵值，並將 `blog_template.html` 內的硬編碼屬性改為變數佔位符，提升 SEO 與瀏覽器相容性。

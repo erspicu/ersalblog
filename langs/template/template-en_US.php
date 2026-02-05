@@ -12,4 +12,5 @@ return [
     'year_suffix' => '',
     'month_suffix' => '',
     'list_page_title' => 'All Posts',
+    'html_lang' => 'en',
 ];

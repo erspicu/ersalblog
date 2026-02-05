@@ -12,4 +12,5 @@ return [
     'year_suffix' => '年',
     'month_suffix' => '月',
     'list_page_title' => '文章總列表',
+    'html_lang' => 'zh-Hant',
 ];

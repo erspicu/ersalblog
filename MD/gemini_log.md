@@ -186,3 +186,5 @@
   - 將設定變數分為「全域影響」($blog_title, $site_url 等) 與「首頁影響」($blog_description) 兩類。
   - 系統現在會比對 `contents/build_hash.json`，僅在相關設定變更時強制重建對應頁面，否則依賴檔案修改時間 (mtime) 判斷，大幅減少不必要的 I/O 操作。
   - 移除 `make_html.php` 中對 `config.php` 的實體檔案依賴檢查，改由 Hash 邏輯接管。
+- [2026-02-05 13:45:00] (UTC+8) 優化 HTML 語系宣告：
+  - 更新語系檔與 `static/blog_template.html`，使 `<html>` 標籤的 `lang` 屬性支援動態切換（如 `zh-Hant` 或 `en`），提升 SEO 與網頁相容性。
