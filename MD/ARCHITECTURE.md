@@ -41,8 +41,15 @@ The system supports two operating modes:
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity.
 *   **Backup & Recovery System**:
     *   **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives for File, MySQL, or SQLite modes.
+*   **Internationalization (i18n)**:
+    *   **Template i18n**: Supports multi-language frontend via `langs/template/` (e.g., `zh_TW.php`, `en_US.php`).
+    *   **Admin i18n**: Admin panel supports dynamic language switching.
+*   **Pure Static JSON API Mode**:
+    *   Supports `api_type: 'json'` in `config.js`.
+    *   `make_html.php -json` exports all data into a single consolidated `api/json/data.json`.
+    *   `static/blog.js` implements client-side routing and filtering for a 100% backend-less experience.
 *   **Admin Settings GUI**:
-    *   **Settings Page**: `admin/settings.php` allows graphical editing of `config.js` settings.
+    *   **Settings Page**: `admin/settings.php` allows graphical editing of `config.js` and `config.php` (Lang/Timezone) settings.
 
 ---
 
@@ -58,6 +65,10 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **`/api`**:
     *   Contains backend API endpoints (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`).
+    *   `json/`: (Ignored) Contains pre-generated `data.json` for static mode.
+
+*   **`/langs`**:
+    *   Contains language packs for Admin (`admin/`) and Frontend templates (`template/`).
 
 *   **`/PHP_LIB`**:
     *   Contains shared libraries and the `TemplateManager.php` micro-framework.
@@ -132,7 +143,15 @@ Listed below are key directories and file rules in the Git repository:
     *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。
 *   **備份與還原系統**: 支援 File/MySQL/SQLite 多模式備份集製作與還原。
-*   **網站設定管理 (GUI)**: `admin/settings.php` 提供圖形介面修改網站配置。
+*   **國際化支援 (i18n)**:
+    *   **前台多語系**: 透過 `langs/template/` 提供多語系樣板渲染支援。
+    *   **後台多語系**: 管理介面支援動態切換語言。
+*   **純靜態 JSON API 模式**:
+    *   支援 `config.js` 中的 `api_type: 'json'` 設定。
+    *   `make_html.php -json` 可將所有索引與統計導出至單一 `api/json/data.json`。
+    *   `static/blog.js` 實作客戶端路由與過濾，達成 100% 無後端運作。
+*   **網站設定管理 (GUI)**:
+    *   `admin/settings.php` 提供圖形介面修改網站配置 (包含語系與時區)。
 
 ---
 
@@ -148,6 +167,10 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **`/api`**:
     *   存放後端 API 程式 (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`)。
+    *   `json/`: (已忽略) 存放預生成的 `data.json` 靜態資料包。
+
+*   **`/langs`**:
+    *   存放後台 (`admin/`) 與前台樣板 (`template/`) 的語系包。
 
 *   **`/PHP_LIB`**:
     *   存放共用函式庫與 `TemplateManager.php` 微框架。
