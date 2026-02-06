@@ -261,12 +261,19 @@ class StaticGenerator {
             $iconName = "icon-" . str_replace(".html", ".jpg", $filename);
             $hasIcon = file_exists($this->baseDir . "/preview/" . $iconName);
 
+            $rawTags = explode(",", trim($parts[3]));
+            $cleanTags = array();
+            foreach ($rawTags as $t) {
+                $t = trim($t);
+                if ($t !== "") $cleanTags[] = $t;
+            }
+
             $posts[] = array(
                 'isValid'     => true,
                 'date'        => $parts[0],
                 'filename'    => $filename,
                 'title'       => $parts[2],
-                'tags'        => explode(",", trim($parts[3])),
+                'tags'        => $cleanTags,
                 'description' => isset($parts[4]) ? $parts[4] : '',
                 'content'     => file_get_contents($sourcePath),
                 'has_icon'    => $hasIcon,
@@ -416,9 +423,15 @@ class StaticGenerator {
             }
             $catNames = $matched;
 
+            $finalTags = array();
+            foreach ($p['tags'] as $t) {
+                $t = trim($t);
+                if ($t !== "") $finalTags[] = $t;
+            }
+
             return array(
                 'post_category' => $catNames,
-                'post_tags'     => $p['tags'],
+                'post_tags'     => $finalTags,
                 'post_time'     => $p['date'],
                 'post_title'    => $p['title'],
                 'post_content'  => $summary,
