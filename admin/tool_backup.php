@@ -489,31 +489,7 @@ function cleanupTempDir($dir) {
 
 <div class="d-flex">
     <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
-        <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
-        </a>
-        <hr>
-        <div class="text-center mb-3">
-            <span class="badge <?php echo ($currentSource === 'db') ? 'bg-success' : (($currentSource === 'sqlite') ? 'bg-info text-dark' : 'bg-warning text-dark'); ?>">
-                <?php echo __('mode_label'); ?>: <?php echo ($currentSource === 'db') ? __('mode_db_short') : (($currentSource === 'sqlite') ? 'SQLite' : __('mode_file_short')); ?>
-            </span>
-        </div>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item"><a href="index.php"><?php echo __('nav_dashboard'); ?></a></li>
-            <li class="nav-item"><a href="posts.php"><?php echo __('nav_posts'); ?></a></li>
-            <li class="nav-item"><a href="categories.php"><?php echo __('nav_categories'); ?></a></li>
-            <li class="nav-item"><a href="tool_migrate.php"><?php echo __('nav_import'); ?></a></li>
-            <!-- Backup Link (Active) -->
-            <li class="nav-item"><a href="tool_backup.php" class="active"><?php echo __('nav_backup'); ?></a></li>
-            <li class="nav-item"><a href="settings.php"><?php echo __('nav_settings'); ?></a></li>
-        </ul>
-        <hr>
-        <div class="dropdown">
-            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
-            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
-        </div>
-    </div>
+    <?php require 'sidebar_inc.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">

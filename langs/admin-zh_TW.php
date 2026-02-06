@@ -283,6 +283,23 @@ return [
     'op_success' => '操作成功',
     'op_error' => '操作失敗',
 
+    // Build Tool (SSG)
+    'nav_build' => '🔨 網站建置',
+    'build_title' => '靜態網頁建置 (SSG)',
+    'build_desc' => '此工具會根據目前的文章資料，手動觸發靜態 HTML 網頁與 JSON API 的生成。',
+    'label_build_options' => '建置選項',
+    'opt_force_all' => '強制全部重生 (忽略快取)',
+    'opt_update_json' => '更新 JSON API (data.json)',
+    'opt_force_global' => '強制重生全域頁面 (首頁/列表頁)',
+    'label_select_posts' => '選擇特定文章 (若不勾選則掃描全部變更)',
+    'btn_start_build' => '🚀 開始執行建置',
+    'build_log_title' => '建置日誌 (Build Log)',
+    'build_running' => '建置執行中，請稍候...',
+    'build_complete' => '建置執行完成！',
+    'col_select' => '選取',
+    'filter_all' => '全部',
+    'filter_published' => '僅發布',
+
     // Security Warning
     'warn_install_file_exists' => '⚠️ 安全警告：安裝檔案 (install.php) 仍然存在。',
     'warn_install_file_exists_desc' => '為了確保系統安全，請在完成安裝後手動將根目錄下的 <code>install.php</code> 刪除。',

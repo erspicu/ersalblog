@@ -283,6 +283,23 @@ return [
     'op_success' => 'Operation Successful',
     'op_error' => 'Operation Failed',
 
+    // Build Tool (SSG)
+    'nav_build' => '🔨 Build Site',
+    'build_title' => 'Static Site Generation (SSG)',
+    'build_desc' => 'This tool manually triggers the generation of static HTML pages and the JSON API based on current post data.',
+    'label_build_options' => 'Build Options',
+    'opt_force_all' => 'Force Rebuild All (Ignore cache)',
+    'opt_update_json' => 'Update JSON API (data.json)',
+    'opt_force_global' => 'Force Rebuild Global Pages (Home/List)',
+    'label_select_posts' => 'Select Specific Posts (Scan all changes if none selected)',
+    'btn_start_build' => '🚀 Start Build Process',
+    'build_log_title' => 'Build Log',
+    'build_running' => 'Building, please wait...',
+    'build_complete' => 'Build completed!',
+    'col_select' => 'Select',
+    'filter_all' => 'All',
+    'filter_published' => 'Published Only',
+
     // Security Warning
     'warn_install_file_exists' => '⚠️ Security Warning: Installer file (install.php) still exists.',
     'warn_install_file_exists_desc' => 'For security reasons, please manually delete <code>install.php</code> from your root directory after installation.',
