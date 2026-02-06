@@ -51,10 +51,6 @@ $exportTarget = isset($_POST['export_target']) ? $_POST['export_target'] : 'file
     <title><?php echo __('migrate_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
-        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
-        .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
-        .main-content { padding: 20px; }
         .log-container { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; height: 400px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; border: 1px solid #444; }
         .log-item { padding: 5px 10px; margin-bottom: 5px; background: #2d2d2d; border-radius: 3px; display: flex; align-items: center; }
         .log-item .icon { margin-right: 12px; min-width: 25px; text-align: center; }

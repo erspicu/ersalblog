@@ -35,10 +35,6 @@ function truncate($text, $limit = 60) {
     <title><?php echo __('posts_list_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
-        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
-        .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
-        .main-content { padding: 20px; }
         .table td { vertical-align: middle; }
         /* 描述文字樣式：自然換行，字體稍小 */
         .desc-text { 

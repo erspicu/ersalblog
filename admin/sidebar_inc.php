@@ -18,7 +18,30 @@ function is_active($page, $current) {
     return ($page === $current) ? 'active' : '';
 }
 ?>
-<div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
+<style>
+    .sidebar { 
+        min-height: 100vh; 
+        background-color: #343a40; 
+        color: white; 
+        position: fixed; /* 固定側邊欄 */
+        top: 0;
+        left: 0;
+        width: 250px;
+        z-index: 1000;
+        overflow-y: auto; /* 若選單太長可自行捲動 */
+    }
+    .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
+    .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
+    
+    /* 修正內容區位移 */
+    .main-content { 
+        margin-left: 250px; 
+        width: calc(100% - 250px);
+        min-height: 100vh;
+        padding: 20px; 
+    }
+</style>
+<div class="sidebar d-flex flex-column flex-shrink-0 p-3">
     <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span class="fs-4"><?php echo __('nav_brand'); ?></span>
     </a>

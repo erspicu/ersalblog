@@ -80,10 +80,6 @@ if (empty($themes)) $themes = array('blog');
     <title><?php echo __('settings_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
-        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
-        .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
-        .main-content { padding: 20px; }
     </style>
 </head>
 <body>
