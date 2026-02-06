@@ -66,8 +66,14 @@ function get_Category_index($category_ch, $index_page)
   $category_post_index = scandir($category_dir);
 
   foreach ($arr as $val) {
+    if (trim($val) === "") continue;
     $line_arr = explode("|", $val);
-    $tags = explode(",", trim($line_arr[3]));
+    $raw_tags = explode(",", trim($line_arr[3]));
+    $tags = array();
+    foreach ($raw_tags as $t) {
+        $t = trim($t);
+        if ($t !== "") $tags[] = $t;
+    }
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
     if (!file_exists("../post/" . $line_arr[1])) continue;
 
@@ -104,8 +110,14 @@ function get_daterange_index($date_param, $index_page)
   $ret_date_post = array();
 
   foreach ($arr as $val) {
+    if (trim($val) === "") continue;
     $line_arr = explode("|", $val);
-    $tags = explode(",", trim($line_arr[3]));
+    $raw_tags = explode(",", trim($line_arr[3]));
+    $tags = array();
+    foreach ($raw_tags as $t) {
+        $t = trim($t);
+        if ($t !== "") $tags[] = $t;
+    }
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
     if (!file_exists("../post/" . $line_arr[1])) continue;
 
@@ -155,8 +167,14 @@ function get_tag_index($tag, $index_page)
   $ret_date_post = array();
 
   foreach ($arr as $val) {
+    if (trim($val) === "") continue;
     $line_arr = explode("|", $val);
-    $tags = explode(",", trim($line_arr[3]));
+    $raw_tags = explode(",", trim($line_arr[3]));
+    $tags = array();
+    foreach ($raw_tags as $t) {
+        $t = trim($t);
+        if ($t !== "") $tags[] = $t;
+    }
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
     if (!file_exists("../post/" . $line_arr[1])) continue;
 
@@ -190,8 +208,14 @@ function get_index($index_page)
   $ret_date_post = array();
 
   foreach ($arr as $val) {
+    if (trim($val) === "") continue;
     $line_arr = explode("|", $val);
-    $tags = explode(",", trim($line_arr[3]));
+    $raw_tags = explode(",", trim($line_arr[3]));
+    $tags = array();
+    foreach ($raw_tags as $t) {
+        $t = trim($t);
+        if ($t !== "") $tags[] = $t;
+    }
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
     if (!file_exists("../post/" . $line_arr[1])) continue;
     $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
@@ -254,6 +278,8 @@ function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
 function tag_deal(&$tags, &$ret_tag_count)
 {
     foreach ($tags as $tag_val) {
+        $tag_val = trim($tag_val);
+        if ($tag_val === "") continue;
         $ret_tag_count[$tag_val] = (isset($ret_tag_count[$tag_val]) ? $ret_tag_count[$tag_val] : 0) + 1;
     }
 }
