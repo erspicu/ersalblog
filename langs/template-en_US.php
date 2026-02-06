@@ -1,5 +1,5 @@
 <?php
-return [
+return array(
     'search_title' => 'Search',
     'all_posts_link' => 'All Posts',
     'all_tags_title' => 'All Tags',
@@ -14,4 +14,4 @@ return [
     'day_suffix' => ' (Day)',
     'list_page_title' => 'All Posts',
     'html_lang' => 'en',
-];
+);

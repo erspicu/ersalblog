@@ -503,6 +503,13 @@ Recorded the development journey and original Prompt commands of this project th
     - **CLI 更新**: 重寫 `make_html.php` 為輕量級介面。
     - **後台整合**: 在 `admin/post_edit.php` 新增「立即重建」選項，並在 `post_save.php` 中實作自動建置觸發器。
 
+### [15:45] SSG 穩定性修復與 PHP 5.x 相容性強化
+- **任務**: 解決重構後出現的 500 錯誤並提升舊版 PHP 支援。
+- **實作**: 
+    - **語法修復**: 修正 `StaticGenerator.php` 內的引號轉義與 Regex 錯誤。
+    - **相容性修復**: 針對 PHP 5.3 移除 Closure 中的 `$this` 使用，並將語系檔全面降級為 `array()` 語法。
+    - **強健度提升**: 在 `post_save.php` 引入更全面的錯誤捕捉邏輯。
+
 ---
 
 ## 2026-02-07 (繁體中文)

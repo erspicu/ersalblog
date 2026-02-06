@@ -234,6 +234,11 @@
   - 重寫 `make_html.php`，改為調用 `StaticGenerator` 執行建置。
   - 更新 `admin/post_edit.php`，新增「儲存後立即重建靜態網頁」選項。
   - 更新 `admin/post_save.php`，實作勾選後自動觸發 `StaticGenerator` 的邏輯，達成發布與建置的解耦與可選整合。
+- [2026-02-07 15:45:00] 修正 SSG 重構後的 500 錯誤與相容性優化：
+  - 修復 `StaticGenerator.php` 中的引號轉義錯誤與 Regex 語法錯誤。
+  - 修正 `StaticGenerator.php` 在 PHP 5.3 下不支援在 Closure 中使用 `$this` 的問題（改為邏輯內聯）。
+  - 將語系檔 (`langs/template-*.php`) 的短陣列 `[]` 降級為 `array()` 以相容舊版 PHP。
+  - 強化 `post_save.php` 的錯誤捕捉機制。
 - [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。

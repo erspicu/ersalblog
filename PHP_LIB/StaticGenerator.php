@@ -226,17 +226,13 @@ class StaticGenerator {
 
     private function write($path, $content) {
         file_put_contents($path, $content);
-        $this->log(basename($path) . " render ok!<br>
-");
+        $this->log(basename($path) . " render ok!<br>\r\n");
     }
 
     private function loadPosts($indexFile) {
         $content = file_get_contents($indexFile);
-        $content = str_replace("
-", "
-", $content);
-        $lines = explode("
-", $content);
+        $content = str_replace("\r\n", "\n", $content);
+        $lines = explode("\n", $content);
         $posts = array();
 
         foreach ($lines as $line) {
@@ -318,7 +314,7 @@ class StaticGenerator {
             $html = str_replace('src="' . $file, 'src="../' . $file, $html);
         }
         $html = str_replace('content="preview/', 'content="../preview/', $html);
-        $html = str_replace("href="' + themeFile", "href="../' + themeFile", $html);
+        $html = str_replace("href=\"' + themeFile", "href=\"../' + themeFile", $html);
         return $html;
     }
 
@@ -326,7 +322,7 @@ class StaticGenerator {
         if (trim($html) === "") return "";
         $GLOBALS['g_img_counter'] = 0; // Use simple global counter or property
         return preg_replace_callback('/<img\s+([^>]+)>/i', function($matches) {
-            $attrs = preg_replace("/\s+(loading|fetchpriority)\s*=\s*("[^"]*"|'[^']*')/i", '', $matches[1]);
+            $attrs = preg_replace("/\s+(loading|fetchpriority)\s*=\s*(\"[^\"]*\"|'[^']*')/i", '', $matches[1]);
             $new_attrs = ($GLOBALS['g_img_counter'] === 0) ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"';
             $GLOBALS['g_img_counter']++;
             return '<img ' . trim($attrs) . $new_attrs . '>';
@@ -342,25 +338,18 @@ class StaticGenerator {
         }
 
         $site_path = $this->config['site_url'];
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "
-" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
         $pages = array_merge(array('blog.html', 'blog_list.html'), glob($this->baseDir . "/post/*.html") ? glob($this->baseDir . "/post/*.html") : array());
         foreach ($pages as $p) {
             if (file_exists($p)) {
                 $relPath = substr($p, strlen($this->baseDir) + 1);
                 $relPath = str_replace('', '/', $relPath);
-                $xml .= "
-    <url>
-        <loc>" . $site_path . $relPath . "</loc>
-        <lastmod>" . date("c", filemtime($p)) . "</lastmod>
-    </url>";
+                $xml .= "\n    <url>\n        <loc>" . $site_path . $relPath . "</loc>\n        <lastmod>" . date("c", filemtime($p)) . "</lastmod>\n    </url>";
             }
         }
-        $xml .= "
-</urlset>";
+        $xml .= "\n</urlset>";
         file_put_contents($targetSitemap, $xml);
-        $this->log("sitemap.xml render ok!<br>
-");
+        $this->log("sitemap.xml render ok!<br>\r\n");
     }
 
     private function generateJsonApi($posts, $categories) {
@@ -401,12 +390,26 @@ class StaticGenerator {
             }
         }
 
-        // Helper
-        $formatPost = function($p) use ($categories) {
+        // Helper (Avoid using $this in closure for PHP 5.3 compatibility)
+        $self = $this;
+        $formatPost = function($p) use ($categories, $self) {
             $content_parts = explode('<!--more-->', $p['content']);
             $summary = protect_script_tags($content_parts[0]);
-            $myCats = $this->matchCategories($p['filename'], $categories);
-            $catNames = array_map(function($c){ return $c['name']; }, $myCats);
+            // Use $self instead of $this (PHP 5.3 requires this, and even then private access might fail in some versions, but we'll try)
+            // Wait, in PHP 5.3, closures cannot access private methods of $self.
+            // Better to just inline the matchCategories logic or make it public.
+            // Let's just pass the matched categories directly or use a workaround.
+            
+            // To be safest for PHP 5.x, I will just inline the matching logic here or call a static helper.
+            $filename = $p['filename'];
+            $nameNoExt = str_replace(".html", "", $filename);
+            $matched = array();
+            foreach ($categories as $cat) {
+                if (in_array($filename, $cat['posts']) || in_array($nameNoExt, $cat['posts'])) {
+                     $matched[] = $cat['name'];
+                }
+            }
+            $catNames = $matched;
 
             return array(
                 'post_category' => $catNames,

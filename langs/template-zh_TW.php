@@ -1,5 +1,5 @@
 <?php
-return [
+return array(
     'search_title' => '文章搜尋服務',
     'all_posts_link' => '文章總列表',
     'all_tags_title' => '標籤總列出',
@@ -14,4 +14,4 @@ return [
     'day_suffix' => '日',
     'list_page_title' => '文章總列表',
     'html_lang' => 'zh-Hant',
-];
+);

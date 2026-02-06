@@ -122,5 +122,7 @@ try {
 
 } catch (Exception $e) {
     die("儲存失敗: " . $e->getMessage());
+} catch (\Throwable $e) {
+    die("儲存失敗 (Error): " . $e->getMessage());
 }
 ?>
