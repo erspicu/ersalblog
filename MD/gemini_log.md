@@ -216,6 +216,9 @@
   - 將短陣列初始化語法 (`[]`) 替換為傳統的 `array()` 語法，確保相容 PHP 5.4 以下版本。
   - 在 `admin/system_helper.php` 中實作 `random_bytes()` 回退函式，解決舊版 PHP 缺少原生安全隨機數生成的問題。
   - 全面校閱 `admin/` 與 `api/` 目錄下的核心邏輯，修復因自動化替換產生的語法錯誤，確保程式在 PHP 5.x 環境下的穩定性。
+- [2026-02-07 14:35:00] 修正後台登入 500 錯誤：
+  - 修復 `admin/lang_init.php` 在語系目錄扁平化後指向錯誤路徑 (`langs/admin`) 的問題。
+  - 確保後台能正確讀取 `langs/` 根目錄下的語系檔案。
 - [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。

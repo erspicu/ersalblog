@@ -3,7 +3,7 @@
 // 負責載入語系設定與定義翻譯函式
 
 // 取得語系檔根目錄
-$langBaseDir = dirname(__DIR__) . '/langs/admin';
+$langBaseDir = dirname(__DIR__) . '/langs';
 $availableLangs = array();
 $defaultLang = 'zh_TW';
 

@@ -473,8 +473,12 @@ Recorded the development journey and original Prompt commands of this project th
 - **任務**: 確保專案能在舊版 PHP 5.x 環境 (如 AppServ) 穩定執行。
 - **實作**: 
     - **語法降級**: 將 `??` 替換為 `isset() ? :`，將 `[]` 替換為 `array()`。
-    - **隨機數回退**: 在 `system_helper.php` 實作 `random_bytes` 回退方案。
+    - **隨記數回退**: 在 `system_helper.php` 實作 `random_bytes` 回退方案。
     - **核心校閱**: 修正所有 `admin/` 與 `api/` 核心邏輯，確保相容性。
+
+### [14:35] 後台登入 500 錯誤修正
+- **任務**: 修復因語系目錄結構變動導致的後台失效。
+- **實作**: 修正 `admin/lang_init.php` 中的 `$langBaseDir` 路徑，使其正確指向扁平化後的 `langs/` 根目錄。
 
 ---
 
