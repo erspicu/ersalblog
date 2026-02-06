@@ -45,7 +45,7 @@ function clearAttempts($ip) {
     if (!file_exists($attempts_log)) return;
     $lines = @file($attempts_log);
     if (!$lines) return;
-    $newLines = [];
+    $newLines = array();
     foreach ($lines as $line) {
         $parts = explode('|', trim($line));
         if (count($parts) < 2) continue;
@@ -70,10 +70,10 @@ if (isAdminLoggedIn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $dataSource = $_POST['data_source'] ?? 'db'; 
-    $csrf_token = $_POST['csrf_token'] ?? '';
+    $username = isset($_POST['username']) ? $_POST['username'] : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+    $dataSource = isset($_POST['data_source']) ? $_POST['data_source'] : 'db'; 
+    $csrf_token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
 
     if (!verifyCSRFToken($csrf_token)) {
         $error = "Security Error: Invalid CSRF Token.";

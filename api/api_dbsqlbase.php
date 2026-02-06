@@ -6,14 +6,15 @@
 
 error_reporting(E_ALL & ~E_NOTICE);
 require_once '../config.php';
+require_once '../admin/system_helper.php';
 
 // Initialize Database Connection
 try {
     $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-    $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+    $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
+    ));
 } catch (PDOException $e) {
     // In a real API, return JSON error, but to match filebase behavior we might output text or die.
     header('HTTP/1.1 500 Internal Server Error');
@@ -102,14 +103,14 @@ function get_data($filter_type, $filter_value)
     $rows = $stmt->fetchAll();
 
     // 2. Initialize Return Structures
-    $ret_post = [];
-    $ret_tag_count = [];
-    $ret_date = [];      // Year/Month counts
-    $ret_date_post = []; // Posts grouped by Month
+    $ret_post = array();
+    $ret_tag_count = array();
+    $ret_date = array();      // Year/Month counts
+    $ret_date_post = array(); // Posts grouped by Month
     
     // We need to build the category list dynamically.
     // Structure: Name => { name, count, posts: [filenames...] }
-    $cat_stats_map = []; 
+    $cat_stats_map = array(); 
 
     // 3. Iterate and Process
     foreach ($rows as $row) {
@@ -121,12 +122,12 @@ function get_data($filter_type, $filter_value)
         
         // Tags
         $tags_str = $row['post_tags'];
-        $tags = ($tags_str !== '') ? explode(',', $tags_str) : [];
+        $tags = ($tags_str !== '') ? explode(',', $tags_str) : array();
         $tags = array_map('trim', $tags);
         
         // Categories (Now from GROUP_CONCAT)
-        $cats_str = $row['post_categories_str'] ?? '';
-        $cats = ($cats_str !== '') ? explode(',', $cats_str) : [];
+        $cats_str = isset($row['post_categories_str']) ? $row['post_categories_str'] : '';
+        $cats = ($cats_str !== '') ? explode(',', $cats_str) : array();
         $cats = array_map('trim', $cats);
 
         // --- B. Build Global Stats (Sidebars) ---
@@ -134,18 +135,18 @@ function get_data($filter_type, $filter_value)
         // 1. Tags Stats
         foreach ($tags as $t) {
             if ($t === '') continue;
-            $ret_tag_count[$t] = ($ret_tag_count[$t] ?? 0) + 1;
+            $ret_tag_count[$t] = (isset($ret_tag_count[$t]) ? $ret_tag_count[$t] : 0) + 1;
         }
 
         // 2. Category Stats
         foreach ($cats as $c) {
             if ($c === '') continue;
             if (!isset($cat_stats_map[$c])) {
-                $cat_stats_map[$c] = [
+                $cat_stats_map[$c] = array(
                     'name' => $c,
                     'count' => 0,
-                    'posts' => []
-                ];
+                    'posts' => array()
+                );
             }
             $cat_stats_map[$c]['count']++;
             $cat_stats_map[$c]['posts'][] = str_replace('.html', '', $filename); 
@@ -161,18 +162,18 @@ function get_data($filter_type, $filter_value)
             $ymKey = $year . $mon; // 202601
 
             // Count for Year
-            $ret_date[$year] = ($ret_date[$year] ?? 0) + 1;
+            $ret_date[$year] = (isset($ret_date[$year]) ? $ret_date[$year] : 0) + 1;
             // Count for Month
-            $ret_date[$ymKey] = ($ret_date[$ymKey] ?? 0) + 1;
+            $ret_date[$ymKey] = (isset($ret_date[$ymKey]) ? $ret_date[$ymKey] : 0) + 1;
 
             // Group posts by Month
             if (!isset($ret_date_post[$ymKey])) {
-                $ret_date_post[$ymKey] = [];
+                $ret_date_post[$ymKey] = array();
             }
-            $ret_date_post[$ymKey][] = [
+            $ret_date_post[$ymKey][] = array(
                 'title' => $title,
                 'post_index' => $filename
-            ];
+            );
         }
 
         // --- C. Filter Logic (Main Content) ---
@@ -207,14 +208,14 @@ function get_data($filter_type, $filter_value)
             $content_parts = explode('<!--more-->', $content);
             $summary = $content_parts[0];
 
-            $ret_post[] = [
+            $ret_post[] = array(
                 'post_category' => $cats,
                 'post_tags'     => $tags,
                 'post_time'     => $date_str, // api_filebase returns raw string from file
                 'post_title'    => $title,
-                'post_content'  => $summary,
+                'post_content'  => protect_script_tags($summary),
                 'post_index'    => $filename
-            ];
+            );
         }
     }
 
@@ -222,13 +223,13 @@ function get_data($filter_type, $filter_value)
     // Format category map to list
     $category_list = array_values($cat_stats_map);
 
-    $ret_all = [
+    $ret_all = array(
         'category'    => $category_list,
         'dates_count' => $ret_date,
         'date_post'   => $ret_date_post,
         'tags'        => $ret_tag_count,
         'posts'       => $ret_post
-    ];
+    );
 
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($ret_all);

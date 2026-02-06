@@ -62,4 +62,42 @@ function get_detailed_os_info() {
     
     return $os;
 }
+
+/**
+ * 針對 PHP 5.x 的 random_bytes 回退方案
+ */
+if (!function_exists('random_bytes')) {
+    function random_bytes($length) {
+        if (function_exists('openssl_random_pseudo_bytes')) {
+            $bytes = openssl_random_pseudo_bytes($length, $strong);
+            if ($bytes !== false && $strong === true) {
+                return $bytes;
+            }
+        }
+        if (function_exists('mcrypt_create_iv')) {
+            $bytes = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+            if ($bytes !== false) {
+                return $bytes;
+            }
+        }
+        // 最差的回退方案 (安全性較低)
+        $bytes = '';
+        for ($i = 0; $i < $length; $i++) {
+            $bytes .= chr(mt_rand(0, 255));
+        }
+        return $bytes;
+    }
+}
+
+/**
+ * 保護 Script 標籤，防止在網頁中執行文章內的腳本
+ * 改為轉義形式，使 <script> 標籤能以文字形式在技術文章中顯示但不執行
+ */
+function protect_script_tags($html) {
+    if (empty($html)) return "";
+    // 尋找所有的 <script ...> 與 </script> 標籤並將其轉義為 HTML 實體
+    return preg_replace_callback('/<\/?script\b[^>]*>/i', function($m) {
+        return htmlspecialchars($m[0], ENT_QUOTES, 'UTF-8');
+    }, $html);
+}
 ?>

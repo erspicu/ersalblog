@@ -7,9 +7,9 @@
 define('APP_VERSION', 'v2026.02.06.00.40');
 define('GEMINI_CLI_VERSION', '0.27.0');
 
-return [
+return array(
     'version' => 'v2026.02.06.00.40',
     'cli_version' => '0.27.0',
     'model_name' => 'gemini-3-pro-preview',
     'last_update' => '2026-02-06 00:40:00'
-];
+);

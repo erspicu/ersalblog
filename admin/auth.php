@@ -56,7 +56,7 @@ function verifyCSRFToken($token) {
  * 快速驗證 POST 請求中的 CSRF
  */
 function validateCSRFRequest() {
-    $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    $token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : (isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '');
     if (!verifyCSRFToken($token)) {
         header('HTTP/1.1 403 Forbidden');
         die("Invalid CSRF Token. Request denied.");
@@ -81,19 +81,19 @@ function connectAdminDB() {
         if ($source === 'sqlite') {
             if (isset($sqlite_path) && !empty($sqlite_path)) {
                 $target = __DIR__ . '/../' . $sqlite_path;
-                $pdo = new PDO("sqlite:" . $target, null, null, [
+                $pdo = new PDO("sqlite:" . $target, null, null, array(
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                ]);
+                ));
             } else {
                 throw new Exception("SQLite path not configured.");
             }
         } elseif ($source === 'db') {
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]);
+            ));
         }
     } catch (Exception $e) {
         $dbConnectionError = $e->getMessage();
@@ -146,7 +146,7 @@ function login($username, $password, $dataSource = 'db') {
  * 取得目前管理模式
  */
 function getAdminSource() {
-    return $_SESSION['admin_source'] ?? 'db';
+    return isset($_SESSION['admin_source']) ? $_SESSION['admin_source'] : 'db';
 }
 
 /**

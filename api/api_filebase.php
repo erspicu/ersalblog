@@ -1,6 +1,7 @@
 <?php
 
 error_reporting(E_ALL & ~E_NOTICE);
+require_once "../admin/system_helper.php";
 
 restful_rounter($_SERVER['QUERY_STRING']);
 
@@ -78,7 +79,7 @@ function get_Category_index($category_ch, $index_page)
       //檢查有沒有在特定分類內start
       $in_category = check_category($category, $line_arr[1]);
 
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => $html_split[0], 'post_index' => $line_arr[1]);
+      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
       array_push($ret_post, $tmp);
     }
     date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
@@ -114,7 +115,7 @@ function get_daterange_index($date_param, $index_page)
       //檢查有沒有在特定分類內start
       $in_category = check_category($category, $line_arr[1]);
 
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => $html_split[0], 'post_index' => $line_arr[1]);
+      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
       array_push($ret_post, $tmp);
     }
 
@@ -162,7 +163,7 @@ function get_tag_index($tag, $index_page)
       //檢查有沒有在特定分類內
       $in_category = check_category($category, $line_arr[1]);
 
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => $html_split[0], 'post_index' => $line_arr[1]);
+      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
       array_push($ret_post, $tmp);
     }
 
@@ -192,7 +193,7 @@ function get_index($index_page)
     //檢查有沒有在特定分類內start
     $in_category = check_category($category, $line_arr[1]);
 
-    $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => $html_split[0], 'post_index' => $line_arr[1]);
+    $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
     array_push($ret_post, $tmp);
 
     date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
@@ -243,22 +244,10 @@ function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
   array_push($ret_date_post[$date_arr[0] . $date_arr[1]], $tmp2);
 }*/
 
-// 統計標籤
 function tag_deal(&$tags, &$ret_tag_count)
 {
     foreach ($tags as $tag_val) {
-        // 修改重點：如果 key 不存在，預設給 0，然後再 +1
-        // 舊寫法: $ret_tag_count[$tag_val]++;
-        
-        // 新寫法 (PHP 7.0+):
-        $ret_tag_count[$tag_val] = ($ret_tag_count[$tag_val] ?? 0) + 1;
-        
-        /* 如果您用的是很舊的 PHP 5，則要寫成:
-           if (!isset($ret_tag_count[$tag_val])) {
-               $ret_tag_count[$tag_val] = 0;
-           }
-           $ret_tag_count[$tag_val]++;
-        */
+        $ret_tag_count[$tag_val] = (isset($ret_tag_count[$tag_val]) ? $ret_tag_count[$tag_val] : 0) + 1;
     }
 }
 
@@ -276,13 +265,13 @@ function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
     $ymKey   = $date_arr[0] . $date_arr[1];
 
     // 修改重點 1：計算年份數量 (修正 Undefined key)
-    $ret_date[$yearKey] = ($ret_date[$yearKey] ?? 0) + 1;
+    $ret_date[$yearKey] = (isset($ret_date[$yearKey]) ? $ret_date[$yearKey] : 0) + 1;
 
     // 修改重點 2：計算年月數量 (修正 Undefined key)
-    $ret_date[$ymKey] = ($ret_date[$ymKey] ?? 0) + 1;
+    $ret_date[$ymKey] = (isset($ret_date[$ymKey]) ? $ret_date[$ymKey] : 0) + 1;
 
     // 準備要塞入的資料
-    $tmp2 = array('title' => $line_arr[2] ?? '', 'post_index' => $line_arr[1] ?? '');
+    $tmp2 = array('title' => isset($line_arr[2]) ? $line_arr[2] : '', 'post_index' => isset($line_arr[1]) ? $line_arr[1] : '');
 
     // 修改重點 3：初始化二維陣列
     // 舊寫法: if ($ret_date_post[$ymKey] == null) <- 這裡存取時就會報錯
@@ -325,7 +314,7 @@ function category_deal()
     $files = del_by_value($files, "..");
 
     // Filter out drafts (check if actual content file exists)
-    $valid_files = [];
+    $valid_files = array();
     foreach($files as $f) {
         if(file_exists("../contents/post_files/" . $f) || file_exists("../contents/post_files/" . $f . ".html")) {
             $valid_files[] = $f;

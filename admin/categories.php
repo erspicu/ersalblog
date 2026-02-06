@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 驗證 CSRF Token
     validateCSRFRequest();
     
-    $action = $_POST['action'] ?? '';
+    $action = isset($_POST['action']) ? $_POST['action'] : '';
     
     // [改名功能]
     if ($action === 'rename') {
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $catStats = $dataManager->getAllCategories();
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -13,10 +13,10 @@ class SystemHealth {
     
     public static function checkDB() {
         global $dbConfig;
-        $result = [
+        $result = array(
             'status' => false,
             'message' => ''
-        ];
+        );
 
         if (!extension_loaded('pdo')) {
             $result['message'] = __('health_php_pdo_missing');
@@ -29,10 +29,10 @@ class SystemHealth {
 
         try {
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]);
+            ));
             
             // Check table existence
             $stmt = $pdo->query("SHOW TABLES LIKE 'blog_posts'");
@@ -55,10 +55,10 @@ class SystemHealth {
 
     public static function checkSQLite() {
         global $sqlite_path;
-        $result = [
+        $result = array(
             'status' => false,
             'message' => ''
-        ];
+        );
 
         if (!isset($sqlite_path) || empty($sqlite_path)) {
             $result['message'] = __('health_sqlite_config_missing');
@@ -82,10 +82,10 @@ class SystemHealth {
         }
 
         try {
-            $pdo = new PDO("sqlite:" . $target, null, null, [
+            $pdo = new PDO("sqlite:" . $target, null, null, array(
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]);
+            ));
 
             // Check table
             $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='blog_posts'");
@@ -106,11 +106,11 @@ class SystemHealth {
 
     public static function checkFile() {
         $baseDir = dirname(__DIR__);
-        $result = [
+        $result = array(
             'status' => true,
             'message' => __('health_file_ok')
-        ];
-        $errors = [];
+        );
+        $errors = array();
 
         if (!file_exists($baseDir . '/contents/index_post.txt')) {
             $errors[] = __('health_file_missing_index');
@@ -133,12 +133,12 @@ class SystemHealth {
     public static function checkInstaller() {
         $installerPath = __DIR__ . '/../install.php';
         if (file_exists($installerPath)) {
-            return [
+            return array(
                 'exists' => true,
                 'message' => __('warn_install_file_exists')
-            ];
+            );
         }
-        return ['exists' => false];
+        return array('exists' => false);
     }
 }
 ?>

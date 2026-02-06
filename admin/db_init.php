@@ -13,10 +13,10 @@ function checkDBConnection() {
     global $dbConfig;
     try {
         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]);
+        ));
     } catch (Exception $e) {
         return false;
     }
@@ -32,7 +32,7 @@ function initDatabase($pdo, $importFiles = false) {
     
     // 1. Create Tables (DDL)
     // Execute separately to ensure driver compatibility and avoid implicit commit issues mixed with transactions
-    $queries = [
+    $queries = array(
         "CREATE TABLE IF NOT EXISTS `blog_posts` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `post_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -65,7 +65,7 @@ function initDatabase($pdo, $importFiles = false) {
           CONSTRAINT `fk_post` FOREIGN KEY (`post_id`) REFERENCES `blog_posts` (`id`) ON DELETE CASCADE,
           CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `blog_categories` (`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-    ];
+    );
 
     foreach ($queries as $sql) {
         $pdo->exec($sql);
@@ -100,13 +100,13 @@ function initDatabase($pdo, $importFiles = false) {
 
                 // Insert Post
                 $stmt = $pdo->prepare("INSERT IGNORE INTO blog_posts (post_title, post_filename, post_date, post_content, post_tags, post_description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())");
-                $stmt->execute([$title, $filename, $date, $content, $tags, $desc]);
+                $stmt->execute(array($title, $filename, $date, $content, $tags, $desc));
                 
                 if ($stmt->rowCount() > 0) {
                      $postId = $pdo->lastInsertId();
                 } else {
                      $stmtGetId = $pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-                     $stmtGetId->execute([$filename]);
+                     $stmtGetId->execute(array($filename));
                      $postId = $stmtGetId->fetchColumn();
                 }
 
@@ -121,16 +121,16 @@ function initDatabase($pdo, $importFiles = false) {
                         if (file_exists($catDir . '/' . $cat . '/' . $filename)) {
                             // Category
                             $stmtCat = $pdo->prepare("INSERT IGNORE INTO blog_categories (category_name) VALUES (?)");
-                            $stmtCat->execute([$cat]);
+                            $stmtCat->execute(array($cat));
                             
                             $stmtGetCat = $pdo->prepare("SELECT id FROM blog_categories WHERE category_name = ?");
-                            $stmtGetCat->execute([$cat]);
+                            $stmtGetCat->execute(array($cat));
                             $catId = $stmtGetCat->fetchColumn();
 
                             if ($catId) {
                                 // Pivot
                                 $stmtPivot = $pdo->prepare("INSERT IGNORE INTO blog_post_categories (post_id, category_id) VALUES (?, ?)");
-                                $stmtPivot->execute([$postId, $catId]);
+                                $stmtPivot->execute(array($postId, $catId));
                             }
                         }
                     }
@@ -147,7 +147,7 @@ function initDatabase($pdo, $importFiles = false) {
             $sampleContent = "<p>這是您的第一篇文章。您可以開始編輯或刪除它。</p><!--more--><p>這是更多內容。</p>";
             
             $stmt = $pdo->prepare("INSERT INTO blog_posts (post_title, post_filename, post_date, post_content, post_tags, post_description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())");
-            $stmt->execute([$sampleTitle, $sampleFile, $sampleDate, $sampleContent, "Hello,World", "這是範例文章"]);
+            $stmt->execute(array($sampleTitle, $sampleFile, $sampleDate, $sampleContent, "Hello,World", "這是範例文章"));
             $postId = $pdo->lastInsertId();
 
             $pdo->exec("INSERT INTO blog_post_categories (post_id, category_id) VALUES ($postId, $catId)");
@@ -169,8 +169,8 @@ function initDatabase($pdo, $importFiles = false) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['login_check'])) {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $username = isset($_POST['username']) ? $_POST['username'] : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
         
         if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
             $_SESSION['db_init_authorized'] = true;

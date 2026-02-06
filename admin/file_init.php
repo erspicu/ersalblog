@@ -13,10 +13,10 @@ function getDBConnection() {
     global $dbConfig;
     try {
         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]);
+        ));
     } catch (Exception $e) {
         return false;
     }
@@ -37,14 +37,14 @@ function hasDBData($pdo) {
 
 function initFileSystem($pdo = null, $importDB = false) {
     $baseDir = dirname(__DIR__);
-    $dirs = [
+    $dirs = array(
         $baseDir . '/contents',
         $baseDir . '/contents/post_files',
         $baseDir . '/category',
         $baseDir . '/preview',
         $baseDir . '/static',
         $baseDir . '/post'
-    ];
+    );
 
     // 1. Create Directories
     foreach ($dirs as $dir) {
@@ -69,7 +69,7 @@ function initFileSystem($pdo = null, $importDB = false) {
         $stmt = $pdo->query($sql);
         $posts = $stmt->fetchAll();
 
-        $indexLines = [];
+        $indexLines = array();
 
         foreach ($posts as $post) {
             $filename = $post['post_filename'];
@@ -79,17 +79,17 @@ function initFileSystem($pdo = null, $importDB = false) {
             
             // Prepare Index Line
             // Format: Date|Filename|Title|Tags|Description
-            $line = implode('|', [
+            $line = implode('|', array(
                 $post['post_date'],
                 $filename,
                 $post['post_title'],
                 $post['post_tags'],
                 $post['post_description']
-            ]);
+            ));
             $indexLines[] = $line;
 
             // Handle Categories
-            $cats = explode(',', $post['cats'] ?? '');
+            $cats = explode(',', isset($post['cats']) ? $post['cats'] : '');
             foreach ($cats as $catName) {
                 $catName = trim($catName);
                 if ($catName === '') continue;
@@ -134,8 +134,8 @@ function initFileSystem($pdo = null, $importDB = false) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['login_check'])) {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $username = isset($_POST['username']) ? $_POST['username'] : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
         
         if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
             $_SESSION['file_init_authorized'] = true;

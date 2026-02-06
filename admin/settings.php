@@ -10,7 +10,7 @@ $error = '';
 
 // Helper to read config values
 function getConfigValues($content) {
-    $values = [];
+    $values = array();
     if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
     if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
     if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
@@ -22,8 +22,8 @@ $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
 // Defaults from config.php (already included via auth.php -> data_provider.php)
-$currentConfig['blog_lang'] = $GLOBALS['blog_lang'] ?? 'zh_TW';
-$currentConfig['timezone'] = $GLOBALS['blog_timezone'] ?? 'Asia/Taipei';
+$currentConfig['blog_lang'] = isset($GLOBALS['blog_lang']) ? $GLOBALS['blog_lang'] : 'zh_TW';
+$currentConfig['timezone'] = isset($GLOBALS['blog_timezone']) ? $GLOBALS['blog_timezone'] : 'Asia/Taipei';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("CSRF Validation Failed");
     }
 
-    $newApi = $_POST['api_type'] ?? 'api_filebase';
-    $newTheme = $_POST['theme_file'] ?? 'blog';
-    $newCse = $_POST['cse_id'] ?? '';
-    $newLang = $_POST['blog_lang'] ?? 'zh_TW';
-    $newTimezone = $_POST['timezone'] ?? 'Asia/Taipei';
+    $newApi = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_filebase';
+    $newTheme = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
+    $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
+    $newLang = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
+    $newTimezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
 
     // 1. Update config.js (API, Theme, CSE)
     $newJsContent = "var AppConfig = {\n";
@@ -63,17 +63,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Scan Themes
 $themeFiles = glob(__DIR__ . '/../blog*.css');
-$themes = [];
+$themes = array();
 foreach ($themeFiles as $f) {
     if (strpos($f, '.min.css') !== false) continue; // Skip minified
     $name = basename($f, '.css');
     $themes[] = $name;
 }
-if (empty($themes)) $themes = ['blog'];
+if (empty($themes)) $themes = array('blog');
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -194,7 +194,7 @@ if (empty($themes)) $themes = ['blog'];
 
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_cse_id'); ?></label>
-                        <input type="text" name="cse_id" class="form-control" value="<?php echo htmlspecialchars($currentConfig['cse_id'] ?? ''); ?>">
+                        <input type="text" name="cse_id" class="form-control" value="<?php echo htmlspecialchars(isset($currentConfig['cse_id']) ? $currentConfig['cse_id'] : ''); ?>">
                     </div>
 
                     <hr>

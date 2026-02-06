@@ -458,3 +458,31 @@ Recorded the development journey and original Prompt commands of this project th
 ### [14:45] 英文語系單位遺漏修復
 - **任務**: 解決英文模式下「日」單位不顯示的問題。
 - **實作**: 補齊 `template-en_US.php` 中的 `day_suffix` 定義，優化英文歸檔標籤的可見性與一致性。
+
+---
+
+## 2026-02-06 (繁體中文)
+
+### [23:30] 語系檔案結構重構 (i18n Refactoring)
+- **任務**: 簡化語系檔案目錄結構，提升讀取效率。
+- **實作**: 
+    - 將 `langs/admin/` 與 `langs/template/` 下的檔案移至 `langs/` 根目錄。
+    - 同步更新 `make_html.php`, `install.php`, `admin/lang_init.php` 等所有相關路徑。
+
+### [23:45] PHP 5.x 全域相容性強化
+- **任務**: 確保專案能在舊版 PHP 5.x 環境 (如 AppServ) 穩定執行。
+- **實作**: 
+    - **語法降級**: 將 `??` 替換為 `isset() ? :`，將 `[]` 替換為 `array()`。
+    - **隨機數回退**: 在 `system_helper.php` 實作 `random_bytes` 回退方案。
+    - **核心校閱**: 修正所有 `admin/` 與 `api/` 核心邏輯，確保相容性。
+
+---
+
+## 2026-02-07 (繁體中文)
+
+### [14:15] 文章內容 Script 標籤保護 (Script Tag Protection)
+- **任務**: 防止文章內的 `<script>` 內容在網頁中執行，同時確保其在技術文章中的可見性。
+- **實作**: 
+    - **核心邏輯**: 在 `admin/system_helper.php` 實作 `protect_script_tags` 函式，將 `<script>` 標籤轉義為 `&lt;script&gt;`。
+    - **優點**: 腳本標籤現在能以文字形式在技術文章中顯示，但不會被瀏覽器當作腳本執行，安全性與可讀性兼具。
+    - **全域套用**: 整合至 `make_html.php` 與所有 `api/*.php` 檔案。

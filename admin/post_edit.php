@@ -4,9 +4,9 @@ require_once 'data_provider.php';
 requireLogin();
 
 $dataManager = new DataManager();
-$id = $_GET['id'] ?? null;
+$id = isset($_GET['id']) ? $_GET['id'] : null;
 
-$post = [
+$post = array(
     'post_title' => '',
     'post_filename' => '', 
     'post_date' => date('Y-m-d H:i:s'),
@@ -14,7 +14,7 @@ $post = [
     'post_tags' => '',
     'post_categories' => '',
     'post_description' => ''
-];
+);
 
 $pageTitle = __('edit_title_new');
 
@@ -35,12 +35,12 @@ $allCats = array_keys($allCatsData);
 // Current post categories (Handle both string and array just in case)
 $currentCats = $post['post_categories'];
 if (!is_array($currentCats)) {
-    $currentCats = explode(',', $currentCats ?? '');
+    $currentCats = explode(',', isset($currentCats) ? $currentCats : '');
 }
 $currentCats = array_map('trim', $currentCats);
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,7 +125,7 @@ $currentCats = array_map('trim', $currentCats);
             <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             
             <input type="hidden" name="old_filename" value="<?php echo htmlspecialchars($filename); ?>">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars(isset($id) ? $id : ''); ?>">
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_post_title'); ?></label>
@@ -181,11 +181,11 @@ $currentCats = array_map('trim', $currentCats);
                         <a href="posts.php" class="btn btn-outline-secondary me-md-2"><?php echo __('btn_cancel'); ?></a>
                         
                         <button type="submit" name="is_draft" value="1" class="btn btn-warning text-dark px-4">
-                            <i class="bi bi-journal-text"></i> <?php echo __('btn_save_draft') ?? '暫存草稿'; ?>
+                            <i class="bi bi-journal-text"></i> <?php echo isset($lang['btn_save_draft']) ? $lang['btn_save_draft'] : '暫存草稿'; ?>
                         </button>
                         
                         <button type="submit" name="is_draft" value="0" class="btn btn-success px-5">
-                            <i class="bi bi-send"></i> <?php echo __('btn_save_publish') ?? '正式發布'; ?>
+                            <i class="bi bi-send"></i> <?php echo isset($lang['btn_save_publish']) ? $lang['btn_save_publish'] : '正式發布'; ?>
                         </button>
                     </div>
                 </form>

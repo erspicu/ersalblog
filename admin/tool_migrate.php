@@ -39,12 +39,12 @@ if ($currentSource === 'db') {
 $startMigration = isset($_POST['start_migration']); // Action: Import (Pull)
 $startExport = isset($_POST['start_export']);       // Action: Export (Push)
 
-$importSource = $_POST['import_source'] ?? 'file';  // file | mysql | sqlite
-$exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
+$importSource = isset($_POST['import_source']) ? $_POST['import_source'] : 'file';  // file | mysql | sqlite
+$exportTarget = isset($_POST['export_target']) ? $_POST['export_target'] : 'file';  // file | mysql | sqlite
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -317,10 +317,10 @@ $exportTarget = $_POST['export_target'] ?? 'file';  // file | mysql | sqlite
 // Utilities
 // ==========================================
 function output_log($msg, $type = 'info') {
-    $colors = ['success'=>'#2ecc71', 'error'=>'#e74c3c', 'warning'=>'#f39c12', 'system'=>'#3498db', 'default'=>'#bdc3c7'];
-    $color = $colors[$type] ?? $colors['default'];
-    $icons = ['success'=>'✅', 'error'=>'❌', 'warning'=>'⚠️', 'system'=>'⚙️', 'default'=>'📝'];
-    $icon = $icons[$type] ?? $icons['default'];
+    $colors = array('success'=>'#2ecc71', 'error'=>'#e74c3c', 'warning'=>'#f39c12', 'system'=>'#3498db', 'default'=>'#bdc3c7');
+    $color = isset($colors[$type]) ? $colors[$type] : $colors['default'];
+    $icons = array('success'=>'✅', 'error'=>'❌', 'warning'=>'⚠️', 'system'=>'⚙️', 'default'=>'📝');
+    $icon = isset($icons[$type]) ? $icons[$type] : $icons['default'];
     echo "<div class='log-item' style='border-left: 4px solid $color;'><span class='icon'>$icon</span><span class='msg'>$msg</span></div>";
     echo "<script>var c=document.querySelector('.log-container');if(c)c.scrollTop=c.scrollHeight;</script>";
     flush(); if (ob_get_level() > 0) ob_flush();
@@ -337,9 +337,9 @@ function connectTo($target) {
     try {
         if ($target === 'mysql') {
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-            return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+            return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
         } elseif ($target === 'sqlite') {
-            return new PDO("sqlite:" . dirname(__DIR__) . '/' . $sqlite_path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+            return new PDO("sqlite:" . dirname(__DIR__) . '/' . $sqlite_path, null, null, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
         }
     } catch (Exception $e) { return null; }
     return null;
@@ -372,14 +372,14 @@ function runImport($targetDB) {
     foreach ($lines as $index => $line) {
         $parts = explode('|', $line);
         if (count($parts) < 3) continue;
-        list($date, $fname, $title) = [$parts[0], $parts[1], $parts[2]];
-        $tags = $parts[3]??''; $desc = $parts[4]??'';
+        $date = $parts[0]; $fname = $parts[1]; $title = $parts[2];
+        $tags = isset($parts[3]) ? $parts[3] : ''; $desc = isset($parts[4]) ? $parts[4] : '';
         
         $content = '';
         if (file_exists($baseDir."/contents/post_files/$fname")) $content = file_get_contents($baseDir."/contents/post_files/$fname");
 
         // Categories
-        $cats = [];
+        $cats = array();
         foreach (glob($baseDir.'/category/*', GLOB_ONLYDIR) as $dir) {
             if (file_exists("$dir/$fname") || file_exists("$dir/".pathinfo($fname, PATHINFO_FILENAME))) $cats[] = basename($dir);
         }
@@ -414,14 +414,14 @@ function runExport($pdo = null) {
         $total = count($posts);
         output_log(sprintf(__('log_found_posts'), $total), 'system');
 
-        $lines = [];
+        $lines = array();
         $i = 0;
         foreach ($posts as $p) {
             $fname = $p['post_filename'];
             file_put_contents($baseDir."/contents/post_files/$fname", $p['post_content']);
-            $lines[] = implode('|', [$p['post_date'], $fname, $p['post_title'], $p['post_tags'], $p['post_description']]);
+            $lines[] = implode('|', array($p['post_date'], $fname, $p['post_title'], $p['post_tags'], $p['post_description']));
             
-            $cats = explode(',', $p['cats']??'');
+            $cats = explode(',', isset($p['cats']) ? $p['cats'] : '');
             foreach ($cats as $c) {
                 $c = trim($c); if(!$c) continue;
                 if(!is_dir($baseDir."/category/$c")) mkdir($baseDir."/category/$c", 0755, true);
@@ -474,7 +474,7 @@ function runDBMigration($sourceType, $targetType) {
 
         foreach ($rows as $index => $row) {
             $fname = $row['post_filename'];
-            $cats = explode(',', $row['cats']??'');
+            $cats = explode(',', isset($row['cats']) ? $row['cats'] : '');
             
             if (processPostImport($tgtPdo, $stmt, $targetType, $fname, $row['post_title'], $row['post_date'], $row['post_tags'], $row['post_description'], $row['post_content'], $cats)) {
                 output_log(sprintf(__('log_migration_success'), $row['post_title']), 'success');
@@ -518,31 +518,31 @@ function processPostImport($pdo, $stmt, $type, $fname, $title, $date, $tags, $de
     try {
         $pdo->beginTransaction();
         try {
-            $stmt->execute([$fname, $title, $date, $tags, $desc, $content]);
+            $stmt->execute(array($fname, $title, $date, $tags, $desc, $content));
         } catch(Exception $e) {
             // Fallback for old SQLite
             if ($type === 'sqlite' && strpos($e->getMessage(), 'syntax error') !== false) {
                  $check = $pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-                 $check->execute([$fname]); $pid = $check->fetchColumn();
-                 if ($pid) $pdo->prepare("UPDATE blog_posts SET post_title=?, post_date=?, post_tags=?, post_description=?, post_content=?, updated_at=datetime('now') WHERE id=?")->execute([$title, $date, $tags, $desc, $content, $pid]);
-                 else $pdo->prepare("INSERT INTO blog_posts (post_filename, post_title, post_date, post_tags, post_description, post_content, updated_at) VALUES (?,?,?,?,?,?,datetime('now'))")->execute([$fname, $title, $date, $tags, $desc, $content]);
+                 $check->execute(array($fname)); $pid = $check->fetchColumn();
+                 if ($pid) $pdo->prepare("UPDATE blog_posts SET post_title=?, post_date=?, post_tags=?, post_description=?, post_content=?, updated_at=datetime('now') WHERE id=?")->execute(array($title, $date, $tags, $desc, $content, $pid));
+                 else $pdo->prepare("INSERT INTO blog_posts (post_filename, post_title, post_date, post_tags, post_description, post_content, updated_at) VALUES (?,?,?,?,?,?,datetime('now'))")->execute(array($fname, $title, $date, $tags, $desc, $content));
             } else { throw $e; }
         }
         
         $checkId = $pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-        $checkId->execute([$fname]); $postId = $checkId->fetchColumn();
+        $checkId->execute(array($fname)); $postId = $checkId->fetchColumn();
         
-        $pdo->prepare("DELETE FROM blog_post_categories WHERE post_id = ?")->execute([$postId]);
+        $pdo->prepare("DELETE FROM blog_post_categories WHERE post_id = ?")->execute(array($postId));
         
         foreach ($cats as $cat) {
             $cat = trim($cat); if(!$cat) continue;
             $checkCat = $pdo->prepare("SELECT id FROM blog_categories WHERE category_name = ?");
-            $checkCat->execute([$cat]); $catId = $checkCat->fetchColumn();
+            $checkCat->execute(array($cat)); $catId = $checkCat->fetchColumn();
             if (!$catId) {
-                try { $pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)")->execute([$cat]); $catId = $pdo->lastInsertId(); } 
-                catch(Exception $e) { $checkCat->execute([$cat]); $catId = $checkCat->fetchColumn(); }
+                try { $pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)")->execute(array($cat)); $catId = $pdo->lastInsertId(); } 
+                catch(Exception $e) { $checkCat->execute(array($cat)); $catId = $checkCat->fetchColumn(); }
             }
-            if($catId) $pdo->prepare("INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)")->execute([$postId, $catId]);
+            if($catId) $pdo->prepare("INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)")->execute(array($postId, $catId));
         }
         $pdo->commit();
         return true;

@@ -4,7 +4,7 @@
 
 // 取得語系檔根目錄
 $langBaseDir = dirname(__DIR__) . '/langs/admin';
-$availableLangs = [];
+$availableLangs = array();
 $defaultLang = 'zh_TW';
 
 // 掃描可用語系 (僅掃描 admin- 開頭的檔案)
@@ -24,7 +24,7 @@ if (is_dir($langBaseDir)) {
 
 // 偵測與設定語系 (同時支援 GET 切換與 Cookie 讀取)
 // 如果在登入頁面已經設定 Cookie，這裡會直接讀取
-$currentLang = $_COOKIE['admin_lang'] ?? $defaultLang;
+$currentLang = isset($_COOKIE['admin_lang']) ? $_COOKIE['admin_lang'] : $defaultLang;
 
 // 如果網址帶有 ?lang=xxx 且該語系有效，則更新 Cookie (支援登入後切換)
 if (isset($_GET['lang']) && in_array($_GET['lang'], $availableLangs)) {
@@ -49,5 +49,5 @@ if (file_exists($langFile)) {
  */
 function __($key) {
     global $lang;
-    return $lang[$key] ?? $key;
+    return isset($lang[$key]) ? $lang[$key] : $key;
 }

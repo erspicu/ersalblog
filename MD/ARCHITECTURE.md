@@ -50,6 +50,8 @@ The system supports two operating modes:
     *   `static/blog.js` implements client-side routing and filtering for a 100% backend-less experience.
 *   **Admin Settings GUI**:
     *   **Settings Page**: `admin/settings.php` allows graphical editing of `config.js` and `config.php` (Lang/Timezone) settings.
+*   **Security Features**:
+    *   **Script Tag Protection**: Implements `protect_script_tags` to neutralize `<script>` tags in article content by replacing them with `<nop-script>`, preventing execution in both static and dynamic views.
 
 ---
 
@@ -152,6 +154,8 @@ Listed below are key directories and file rules in the Git repository:
     *   `static/blog.js` 實作客戶端路由與過濾，達成 100% 無後端運作。
 *   **網站設定管理 (GUI)**:
     *   `admin/settings.php` 提供圖形介面修改網站配置 (包含語系與時區)。
+*   **安全性特性 (Security)**:
+    *   **文章腳本保護**: 實作 `protect_script_tags` 機制，自動將文章內容中的 `<script>` 標籤替換為 `<nop-script>`，防止腳本在靜態或動態載入時被意外執行。
 
 ---
 

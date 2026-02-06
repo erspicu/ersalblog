@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/admin/system_helper.php';
 require_once __DIR__ . '/PHP_LIB/dindent/Indenter.php';
 require_once __DIR__ . '/PHP_LIB/dindent/Exception/DindentException.php';
 require_once __DIR__ . '/PHP_LIB/TemplateManager.php';
@@ -18,7 +19,7 @@ function escapeVars($data) {
     // Don't escape content if it's meant to be HTML (like post_content), 
     // but here we are targeting metadata. 
     // For this specific build script, we will apply escaping explicitly where needed.
-    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars(isset($data) ? $data : '', ENT_QUOTES, 'UTF-8');
 }
 // ---------------------------------
 
@@ -27,12 +28,12 @@ global $blog_lang;
 if (!isset($blog_lang)) $blog_lang = 'zh_TW'; 
 
 // Load Language
-$langFile = __DIR__ . "/langs/template/template-{$blog_lang}.php";
-if (!file_exists($langFile)) $langFile = __DIR__ . "/langs/template/template-zh_TW.php";
-$langData = file_exists($langFile) ? require $langFile : [];
+$langFile = __DIR__ . "/langs/template-{$blog_lang}.php";
+if (!file_exists($langFile)) $langFile = __DIR__ . "/langs/template-zh_TW.php";
+$langData = file_exists($langFile) ? require $langFile : array();
 
 // Prefix keys
-$langVars = [];
+$langVars = array();
 foreach ($langData as $k => $v) {
     $langVars["lang_{$k}"] = $v;
 }
@@ -41,7 +42,7 @@ foreach ($langData as $k => $v) {
 // 智慧快取判斷 (Smart Cache Strategy)
 // ==========================================
 $cacheHashFile = __DIR__ . "/contents/build_hash.json";
-$storedHashes = file_exists($cacheHashFile) ? json_decode(file_get_contents($cacheHashFile), true) : [];
+$storedHashes = file_exists($cacheHashFile) ? json_decode(file_get_contents($cacheHashFile), true) : array();
 
 // 1. 全域影響參數 (Global Impact): 變更時需重產所有頁面
 $globalConfigStr = $GLOBALS['blog_title'] . 
@@ -58,8 +59,8 @@ $indexConfigStr  = $GLOBALS['blog_description'] .
 $currentIndexHash = md5($indexConfigStr);
 
 // 3. 判斷變更狀態
-$configChangedGlobal = ($currentGlobalHash !== ($storedHashes['global'] ?? ''));
-$configChangedIndex  = ($currentIndexHash !== ($storedHashes['index'] ?? ''));
+$configChangedGlobal = ($currentGlobalHash !== (isset($storedHashes['global']) ? $storedHashes['global'] : ''));
+$configChangedIndex  = ($currentIndexHash !== (isset($storedHashes['index']) ? $storedHashes['index'] : ''));
 
 if ($configChangedGlobal) {
     echo ">> [Config Change] Global settings changed. Rebuilding ALL pages.<br>\r\n";
@@ -185,7 +186,7 @@ function build($force = false, $jsonMode = false, $forceGlobal = false, $forceIn
                 'time'           => $post['date'],
                 'title'          => htmlspecialchars($post['title']),
                 'link'           => $post['filename'],
-                'content'        => $post['content'], 
+                'content'        => protect_script_tags($post['content']), 
                 'tags_block'     => $tagsBlock,
                 'category_block' => $catsBlock
             )));
@@ -294,6 +295,10 @@ function write($path, $content) {
     file_put_contents($path, $content);
     echo "$path render ok!<br>\r\n";
 }
+
+/**
+ * 輔助函式區 (Helpers)
+ */
 
 function loadPosts($indexFile) {
     $content = file_get_contents($indexFile);
@@ -435,10 +440,10 @@ function generateJsonApi($posts, $categories) {
     echo "Generating Consolidated JSON API file...<br>\r\n";
 
     // 1. Calculate Sidebar/Global Stats
-    $ret_tag_count = [];
-    $ret_date = [];
-    $ret_date_post = [];
-    $cat_stats = [];
+    $ret_tag_count = array();
+    $ret_date = array();
+    $ret_date_post = array();
+    $cat_stats = array();
 
     foreach ($categories as $cat) {
         $cat_stats[] = array(
@@ -453,15 +458,15 @@ function generateJsonApi($posts, $categories) {
         foreach ($post['tags'] as $t) {
             $t = trim($t);
             if ($t === '') continue;
-            $ret_tag_count[$t] = ($ret_tag_count[$t] ?? 0) + 1;
+            $ret_tag_count[$t] = (isset($ret_tag_count[$t]) ? $ret_tag_count[$t] : 0) + 1;
         }
         $dt_parts = explode(' ', $post['date']);
         $ymd = explode('-', $dt_parts[0]);
         if (count($ymd) >= 2) {
             $year = $ymd[0]; $mon = $ymd[1]; $ymKey = $year . $mon;
-            $ret_date[$year] = ($ret_date[$year] ?? 0) + 1;
-            $ret_date[$ymKey] = ($ret_date[$ymKey] ?? 0) + 1;
-            if (!isset($ret_date_post[$ymKey])) $ret_date_post[$ymKey] = [];
+            $ret_date[$year] = (isset($ret_date[$year]) ? $ret_date[$year] : 0) + 1;
+            $ret_date[$ymKey] = (isset($ret_date[$ymKey]) ? $ret_date[$ymKey] : 0) + 1;
+            if (!isset($ret_date_post[$ymKey])) $ret_date_post[$ymKey] = array();
             $ret_date_post[$ymKey][] = array('title' => $post['title'], 'post_index' => $post['filename']);
         }
     }
@@ -469,37 +474,37 @@ function generateJsonApi($posts, $categories) {
     // Helper to format post
     $formatPost = function($p) use ($categories) {
         $content_parts = explode('<!--more-->', $p['content']);
-        $summary = $content_parts[0];
+        $summary = protect_script_tags($content_parts[0]);
         
         // Find categories for this post
         $myCats = matchCategories($p['filename'], $categories);
         $catNames = array_map(function($c){ return $c['name']; }, $myCats);
 
-        return [
+        return array(
             'post_category' => $catNames,
             'post_tags'     => $p['tags'],
             'post_time'     => $p['date'],
             'post_title'    => $p['title'],
             'post_content'  => $summary,
             'post_index'    => $p['filename']
-        ];
+        );
     };
 
     // 2. Build the big data object
-    $allPosts = [];
+    $allPosts = array();
     foreach ($posts as $p) {
         if ($p['isValid']) $allPosts[] = $formatPost($p);
     }
 
-    $masterData = [
+    $masterData = array(
         'posts' => $allPosts,
-        'sidebar' => [
+        'sidebar' => array(
             'category'    => $cat_stats,
             'dates_count' => $ret_date,
             'date_post'   => $ret_date_post,
             'tags'        => $ret_tag_count
-        ]
-    ];
+        )
+    );
 
     // 3. Write to single file
     file_put_contents("$jsonDir/data.json", json_encode($masterData));

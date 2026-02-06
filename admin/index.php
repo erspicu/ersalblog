@@ -30,7 +30,7 @@ if ($source === 'db') {
         $stmt = $pdo->prepare("SELECT round(SUM(data_length + index_length) / 1024 / 1024, 2) 
                                FROM information_schema.TABLES 
                                WHERE table_schema = ?");
-        $stmt->execute([$dbName]);
+        $stmt->execute(array($dbName));
         $dbSize = $stmt->fetchColumn();
         if($dbSize === false) $dbSize = 0;
     } catch (Exception $e) {
@@ -86,7 +86,7 @@ if ($source === 'db') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

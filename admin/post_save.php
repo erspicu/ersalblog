@@ -8,17 +8,17 @@ validateCSRFRequest();
 
 $dataManager = new DataManager();
 
-$id = $_POST['id'] ?? '';
-$title = $_POST['post_title'] ?? '未命名文章';
-$filename = trim($_POST['post_filename'] ?? '');
-$date = $_POST['post_date'] ?? date('Y-m-d H:i:s');
-$content = $_POST['post_content'] ?? '';
-$tags = $_POST['post_tags'] ?? '';
-$desc = $_POST['post_description'] ?? '';
+$id = isset($_POST['id']) ? $_POST['id'] : '';
+$title = isset($_POST['post_title']) ? $_POST['post_title'] : '未命名文章';
+$filename = trim(isset($_POST['post_filename']) ? $_POST['post_filename'] : '');
+$date = isset($_POST['post_date']) ? $_POST['post_date'] : date('Y-m-d H:i:s');
+$content = isset($_POST['post_content']) ? $_POST['post_content'] : '';
+$tags = isset($_POST['post_tags']) ? $_POST['post_tags'] : '';
+$desc = isset($_POST['post_description']) ? $_POST['post_description'] : '';
 
 // --- 處理分類 ---
-$cats = $_POST['cats_check'] ?? []; // 陣列
-$newCat = trim($_POST['new_category'] ?? '');
+$cats = isset($_POST['cats_check']) ? $_POST['cats_check'] : array(); // 陣列
+$newCat = trim(isset($_POST['new_category']) ? $_POST['new_category'] : '');
 if ($newCat) {
     $cats[] = $newCat;
 }
@@ -63,7 +63,7 @@ $filename .= '.html';
 $isDraft = isset($_POST['is_draft']) && $_POST['is_draft'] == '1';
 
 try {
-    $saveData = [
+    $saveData = array(
         'id' => $id,
         'title' => $title,
         'filename' => $filename,
@@ -73,7 +73,7 @@ try {
         'categories' => $categoriesStr,
         'desc' => $desc,
         'is_draft' => $isDraft
-    ];
+    );
 
     $dataManager->savePost($saveData);
     

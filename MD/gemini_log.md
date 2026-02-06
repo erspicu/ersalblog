@@ -53,7 +53,7 @@
 - [2026-02-01 15:00:00] 優化後台備份列表顯示：根據當前模式 (File System 或 Database) 自動過濾備份檔，避免混淆 (filebase-* vs dbsqlbase-*)。
 - [2026-02-01 15:15:00] 實作後台 SQLite 備份還原功能 (admin/tool_backup.php)。支援打包 SQLite 資料庫檔與靜態資源 (sqlitebase-*.zip)，並實作相應的還原與列表過濾邏輯。
 - [2026-02-01 15:30:00] 修正後台備份工具 (admin/tool_backup.php) 錯誤：補充缺失的 Helper Functions (addStaticFilesToZip, restoreStaticFiles, cleanupTempDir) 以解決 500 錯誤；修正備份列表過濾邏輯，確保 SQLite 模式下正確顯示 sqlitebase-* 檔案。
-- [2026-02-01 15:50:00] 修正 HISTORY.md 文件，重新整理並補全 2026-02-01 的開發紀錄，確保所有新功能 (Backup/Restore, SQLite Support, Filtering) 的中英文內容完整對應且格式一致。
+- [2026-02-01 15:50:00] 修正 HISTORY.md 文件，重新整理並補全 2026-02-01 的開發紀錄，確保所有新功能 (Backup/Restore, SQLite Support, Filtering) 的 中英文內容完整對應且格式一致。
 - [2026-02-01 16:00:00] 補全 HISTORY.md 中 2026-01-30 與 2026-01-31 的繁體中文翻譯，確保全站歷史紀錄皆符合中英文同步規範。
 - [2026-02-01 19:15:00] 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.19.15，並完成 Git 發佈。
 - [2026-02-01 19:30:00] 實作全方位安裝引導精靈 (install.php)：
@@ -203,3 +203,20 @@
   - 修復因錯誤取代導致的 `build` 函式語法錯誤 (Brace mismatch)。
   - 強化 `build` 函式內部全域變數合併邏輯，增加 `langVars` 狀態檢查，確保語系佔位符能被正確替換。
   - 修正單篇文章與列表頁的實體相依檢查，納入 `commonDeps` 以確保樣板或語系變更時能正確觸發重建。
+- [2026-02-06 23:21:10] 我現在跑的是哪款ai模型?
+    回答內容摘要：目前運行的是 Gemini 3 Pro (gemini-3-pro-preview)，CLI 版本為 0.27.2。
+- [2026-02-06 23:30:02] 重構語系檔案結構 (i18n Refactoring)：
+  - 將 `langs/admin/` 與 `langs/template/` 下的所有語系檔移至 `langs/` 根目錄，並移除子目錄。
+  - 更新 `make_html.php`，修正樣板語系檔讀取路徑。
+  - 更新 `install.php`，修正安裝程式語系檔讀取路徑。
+  - 更新 `admin/lang_init.php`，修正後台語系檔掃描目錄。
+  - 更新 `admin/common_js_inc.php`，修正後台 JS 語系檔載入路徑。
+- [2026-02-06 23:45:00] PHP 5.x 相容性強化 (Compatibility Reinforcement)：
+  - 將全站 PHP 檔案中的 Null Coalescing 運算子 (`??`) 替換為 `isset() ? :` 語法。
+  - 將短陣列初始化語法 (`[]`) 替換為傳統的 `array()` 語法，確保相容 PHP 5.4 以下版本。
+  - 在 `admin/system_helper.php` 中實作 `random_bytes()` 回退函式，解決舊版 PHP 缺少原生安全隨機數生成的問題。
+  - 全面校閱 `admin/` 與 `api/` 目錄下的核心邏輯，修復因自動化替換產生的語法錯誤，確保程式在 PHP 5.x 環境下的穩定性。
+- [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
+  - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
+  - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。
+  - 確保腳本保護僅作用於使用者產生的文章內容，不影響樣板本身的合法腳本執行。

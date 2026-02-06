@@ -64,11 +64,11 @@ class DataManager {
                 $counts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // Returns ['published' => 10, 'draft' => 2]
             } catch (Exception $e) {
                 // Fallback if status column missing (shouldn't happen due to ensureSchema)
-                $counts = [];
+                $counts = array();
             }
             
-            $published = $counts['published'] ?? 0;
-            $draft = $counts['draft'] ?? 0;
+            $published = isset($counts['published']) ? $counts['published'] : 0;
+            $draft = isset($counts['draft']) ? $counts['draft'] : 0;
             
             // Recalculate total from parts or DB count (total might include other statuses if any)
             // Or just sum them.
@@ -81,7 +81,7 @@ class DataManager {
             ];
         } else {
             $file = $this->baseDir . '/contents/index_post.txt';
-            if (!file_exists($file)) return ['total'=>0, 'published'=>0, 'draft'=>0];
+            if (!file_exists($file)) return array('total'=>0, 'published'=>0, 'draft'=>0);
             
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $total = 0;
@@ -132,7 +132,7 @@ class DataManager {
                 return [
                     'post_title' => $p['post_title'],
                     'post_date' => $p['post_date'],
-                    'status' => $p['status'] ?? 'published'
+                    'status' => isset($p['status']) ? $p['status'] : 'published'
                 ];
             }, $recent);
         }
@@ -154,10 +154,10 @@ class DataManager {
             return $posts;
         } else {
             $file = $this->baseDir . '/contents/index_post.txt';
-            if (!file_exists($file)) return [];
+            if (!file_exists($file)) return array();
             
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            $posts = [];
+            $posts = array();
             foreach ($lines as $line) {
                 // Format: time|filename|title|tags|desc
                 $parts = explode('|', $line);
@@ -175,7 +175,7 @@ class DataManager {
                     $status = 'draft';
                 }
 
-                $posts[] = [
+                $posts[] = array(
                     'id' => $filename, // Use filename as ID for file system
                     'post_date' => trim($parts[0]),
                     'post_filename' => $filename,
@@ -184,7 +184,7 @@ class DataManager {
                     'post_description' => isset($parts[4]) ? trim($parts[4]) : '',
                     'post_categories' => $cats,
                     'status' => $status
-                ];
+                );
             }
             // Sort by date DESC
             usort($posts, function($a, $b) {
@@ -203,7 +203,7 @@ class DataManager {
                     WHERE p.id = ?
                     GROUP BY p.id";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$id]);
+            $stmt->execute(array($id));
             return $stmt->fetch();
         } else {
             // For file system, $id IS the filename
@@ -233,7 +233,7 @@ class DataManager {
                         $status = 'missing';
                     }
                     
-                    return [
+                    return array(
                         'id' => $filename,
                         'post_date' => trim($parts[0]),
                         'post_filename' => $filename,
@@ -243,7 +243,7 @@ class DataManager {
                         'post_categories' => $this->getFilePostCategories($filename),
                         'post_content' => $content,
                         'status' => $status
-                    ];
+                    );
                 }
             }
             return false;
@@ -251,7 +251,7 @@ class DataManager {
     }
 
     public function savePost($data) {
-        $id = $data['id'] ?? null;
+        $id = isset($data['id']) ? $data['id'] : null;
         
         if ($this->source === 'db' || $this->source === 'sqlite') {
             try {
@@ -266,16 +266,16 @@ class DataManager {
                             post_tags = ?, post_description = ?, status = ?, updated_at = ?
                             WHERE id = ?";
                     $stmt = $this->pdo->prepare($sql);
-                    $stmt->execute([
+                    $stmt->execute(array(
                         $data['title'], $data['filename'], $data['date'], $data['content'],
                         $data['tags'], $data['desc'], $status, $now, $id
-                    ]);
+                    ));
                     $postId = $id;
                 } else {
                     // Insert
                     // Check dup filename
                     $check = $this->pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-                    $check->execute([$data['filename']]);
+                    $check->execute(array($data['filename']));
                     if ($check->rowCount() > 0) {
                          $data['filename'] = str_replace('.html', '-' . rand(100,999) . '.html', $data['filename']);
                     }
@@ -284,17 +284,17 @@ class DataManager {
                             (post_title, post_filename, post_date, post_content, post_tags, post_description, status, created_at, updated_at) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $this->pdo->prepare($sql);
-                    $stmt->execute([
+                    $stmt->execute(array(
                         $data['title'], $data['filename'], $data['date'], $data['content'],
                         $data['tags'], $data['desc'], $status, $now, $now
-                    ]);
+                    ));
                     $postId = $this->pdo->lastInsertId();
                 }
 
                 // --- Sync Categories (New Schema) ---
                 // 1. Clear old pivot records
                 $delPivot = $this->pdo->prepare("DELETE FROM blog_post_categories WHERE post_id = ?");
-                $delPivot->execute([$postId]);
+                $delPivot->execute(array($postId));
 
                 // 2. Process Categories
                 $cats = explode(',', $data['categories']);
@@ -304,17 +304,17 @@ class DataManager {
 
                     // Get or Create Category ID
                     $checkCat = $this->pdo->prepare("SELECT id FROM blog_categories WHERE category_name = ?");
-                    $checkCat->execute([$catName]);
+                    $checkCat->execute(array($catName));
                     $catId = $checkCat->fetchColumn();
 
                     if (!$catId) {
                         try {
                             $insCat = $this->pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)");
-                            $insCat->execute([$catName]);
+                            $insCat->execute(array($catName));
                             $catId = $this->pdo->lastInsertId();
                         } catch (Exception $e) {
                             // Race condition or constraint violation, try select again
-                            $checkCat->execute([$catName]);
+                            $checkCat->execute(array($catName));
                             $catId = $checkCat->fetchColumn();
                         }
                     }
@@ -322,7 +322,7 @@ class DataManager {
                     // Insert Pivot
                     if ($catId) {
                         $insPivot = $this->pdo->prepare("INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)");
-                        $insPivot->execute([$postId, $catId]);
+                        $insPivot->execute(array($postId, $catId));
                     }
                 }
 
@@ -355,15 +355,15 @@ class DataManager {
             // 2. Update Index File
             // Note: Index file always records the "base" filename (xxxx.html), regardless of draft status.
             $indexFile = $this->baseDir . '/contents/index_post.txt';
-            $lines = file_exists($indexFile) ? file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
+            $lines = file_exists($indexFile) ? file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : array();
             
-            $newLine = implode('|', [
+            $newLine = implode('|', array(
                 $data['date'],
                 $baseFilename,
                 $data['title'],
                 $data['tags'],
                 $data['desc']
-            ]);
+            ));
 
             $found = false;
             // If ID exists (filename), we might be updating or renaming. 
@@ -411,14 +411,14 @@ class DataManager {
     public function deletePost($id) {
         if ($this->source === 'db' || $this->source === 'sqlite') {
             $stmt = $this->pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
-            $stmt->execute([$id]);
+            $stmt->execute(array($id));
         } else {
             $filename = $id;
             
             // 1. Remove from Index
             $indexFile = $this->baseDir . '/contents/index_post.txt';
             $lines = file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            $newLines = [];
+            $newLines = array();
             foreach ($lines as $line) {
                 if (strpos($line, $filename) === false) { // Simple check, better explode
                     $parts = explode('|', $line);
@@ -449,7 +449,7 @@ class DataManager {
                 // Compatible "INSERT IGNORE" logic
                 // Try insert, catch exception if unique constraint fails
                 $stmt = $this->pdo->prepare("INSERT INTO blog_categories (category_name) VALUES (?)");
-                $stmt->execute([$name]);
+                $stmt->execute(array($name));
                 return $stmt->rowCount() > 0;
             } catch (Exception $e) {
                 // If using MySQL, maybe error 1062. SQLite error 19.
@@ -470,7 +470,7 @@ class DataManager {
 
     public function getAllCategories() {
         if ($this->source === 'db' || $this->source === 'sqlite') {
-            $catStats = [];
+            $catStats = array();
             // Use LEFT JOIN to get all categories even with 0 posts
             $sql = "SELECT c.category_name, COUNT(pc.post_id) as cnt 
                     FROM blog_categories c
@@ -485,13 +485,13 @@ class DataManager {
                 }
             } catch (Exception $e) {
                 // Fallback or Empty
-                $catStats = [];
+                $catStats = array();
             }
             return $catStats;
         } else {
             $catDir = $this->baseDir . '/category';
-            $cats = [];
-            if (!is_dir($catDir)) return [];
+            $cats = array();
+            if (!is_dir($catDir)) return array();
             
             $dirs = scandir($catDir);
             foreach ($dirs as $dir) {
@@ -515,7 +515,7 @@ class DataManager {
          if ($this->source === 'db' || $this->source === 'sqlite') {
             // 1. Update Category Table
             $stmt = $this->pdo->prepare("UPDATE blog_categories SET category_name = ? WHERE category_name = ?");
-            $stmt->execute([$newName, $oldName]);
+            $stmt->execute(array($newName, $oldName));
             return $stmt->rowCount() > 0;
          } else {
              // File System: Rename Directory
@@ -532,7 +532,7 @@ class DataManager {
         if ($this->source === 'db' || $this->source === 'sqlite') {
             // 1. Get ID
             $stmt = $this->pdo->prepare("SELECT id FROM blog_categories WHERE category_name = ?");
-            $stmt->execute([$name]);
+            $stmt->execute(array($name));
             $catId = $stmt->fetchColumn();
 
             if ($catId) {
@@ -548,7 +548,7 @@ class DataManager {
                 }
                 
                 $del = $this->pdo->prepare("DELETE FROM blog_categories WHERE id = ?");
-                $del->execute([$catId]);
+                $del->execute(array($catId));
                 return true;
             }
             return false;
@@ -570,7 +570,7 @@ class DataManager {
     // --- Helpers for File System ---
 
     private function getFilePostCategories($filename) {
-        $cats = [];
+        $cats = array();
         $catBase = $this->baseDir . '/category';
         if (!is_dir($catBase)) return '';
         

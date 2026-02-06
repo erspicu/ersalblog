@@ -20,7 +20,7 @@ $posts = $dataManager->getAllPosts();
 
 // 輔助函式
 function truncate($text, $limit = 60) {
-    $text = $text ?? ''; 
+    $text = isset($text) ? $text : ''; 
     if (mb_strlen($text) > $limit) {
         return mb_substr($text, 0, $limit) . '...';
     }
@@ -28,7 +28,7 @@ function truncate($text, $limit = 60) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,7 +140,7 @@ function truncate($text, $limit = 60) {
                             <td>
                                 <!-- 標題 -->
                                 <a href="post_edit.php?id=<?php echo urlencode($post['id']); ?>" class="text-decoration-none fw-bold text-dark fs-5">
-                                    <?php echo htmlspecialchars($post['post_title'] ?? __('no_title')); ?>
+                                    <?php echo htmlspecialchars(isset($post['post_title']) ? $post['post_title'] : __('no_title')); ?>
                                 </a>
                                 
                                 <!-- 狀態標籤 -->
@@ -155,7 +155,7 @@ function truncate($text, $limit = 60) {
                                 <br>
                                 <!-- 檔名 -->
                                 <span class="meta-text text-monospace">
-                                    <i class="bi bi-file-earmark-code"></i> <?php echo htmlspecialchars($post['post_filename'] ?? ''); ?>
+                                    <i class="bi bi-file-earmark-code"></i> <?php echo htmlspecialchars(isset($post['post_filename']) ? $post['post_filename'] : ''); ?>
                                 </span>
                                 <!-- 描述 (整合至此) -->
                                 <?php if (!empty($post['post_description'])): ?>
@@ -166,7 +166,7 @@ function truncate($text, $limit = 60) {
                             </td>
                             <td class="align-top pt-3">
                                 <?php 
-                                $cats = is_array($post['post_categories']) ? $post['post_categories'] : explode(',', $post['post_categories'] ?? '');
+                                $cats = is_array($post['post_categories']) ? $post['post_categories'] : explode(',', isset($post['post_categories']) ? $post['post_categories'] : '');
                                 foreach($cats as $c) {
                                     $c = trim($c);
                                     if($c) echo "<span class='badge bg-info text-dark me-1 mb-1 d-inline-block'>".htmlspecialchars($c)."</span>";
@@ -175,7 +175,7 @@ function truncate($text, $limit = 60) {
                             </td>
                             <td class="align-top pt-3">
                                 <?php 
-                                $tags = explode(',', $post['post_tags'] ?? '');
+                                $tags = explode(',', isset($post['post_tags']) ? $post['post_tags'] : '');
                                 foreach($tags as $t) {
                                     $t = trim($t);
                                     if($t) echo "<span class='badge bg-secondary me-1 mb-1 d-inline-block'>".htmlspecialchars($t)."</span>";

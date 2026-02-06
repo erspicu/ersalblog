@@ -5,21 +5,21 @@
  */
 
 // --- 語言設定 ---
-$available_langs = [
+$available_langs = array(
     'en_US' => 'English',
     'zh_TW' => '繁體中文'
-];
+);
 
 // 決定當前語言
-$lang = $_GET['lang'] ?? $_COOKIE['lang'] ?? 'en_US';
+$lang = isset($_GET['lang']) ? $_GET['lang'] : (isset($_COOKIE['lang']) ? $_COOKIE['lang'] : 'en_US');
 if (!isset($available_langs[$lang])) $lang = 'en_US';
 
 // 存入 Cookie 以持久化
 setcookie('lang', $lang, time() + (86400 * 30), "/");
 
 // 載入語言檔
-$lang_file = __DIR__ . "/langs/admin/install_{$lang}.php";
-$translations = file_exists($lang_file) ? include $lang_file : [];
+$lang_file = __DIR__ . "/langs/install_{$lang}.php";
+$translations = file_exists($lang_file) ? include $lang_file : array();
 
 // 引入共用系統輔助函式
 require_once __DIR__ . '/admin/system_helper.php';
@@ -27,7 +27,7 @@ require_once __DIR__ . '/admin/system_helper.php';
 // 輔助函式：取得翻譯文字
 function _t($key) {
     global $translations;
-    return $translations[$key] ?? $key;
+    return isset($translations[$key]) ? $translations[$key] : $key;
 }
 
 /**
@@ -47,13 +47,13 @@ function is_wsl_ntfs() {
 // --- 處理 AJAX 請求 ---
 if (isset($_GET['action'])) {
     header('Content-Type: application/json');
-    $response = ['success' => false, 'message' => ''];
+    $response = array('success' => false, 'message' => '');
 
     if ($_GET['action'] === 'check_db_connection') {
-        $host = $_POST['db_host'] ?? '';
-        $user = $_POST['db_user'] ?? '';
-        $pass = $_POST['db_pass'] ?? '';
-        $dbname = $_POST['db_name'] ?? '';
+        $host = isset($_POST['db_host']) ? $_POST['db_host'] : '';
+        $user = isset($_POST['db_user']) ? $_POST['db_user'] : '';
+        $pass = isset($_POST['db_pass']) ? $_POST['db_pass'] : '';
+        $dbname = isset($_POST['db_name']) ? $_POST['db_name'] : '';
 
         if (!extension_loaded('pdo_mysql')) {
             $response['message'] = _t('no_pdo_mysql');
@@ -62,7 +62,7 @@ if (isset($_GET['action'])) {
 
         try {
             $dsn = "mysql:host=$host;charset=utf8mb4";
-            $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]);
+            $pdo = new PDO($dsn, $user, $pass, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5));
             if (!empty($dbname)) {
                 $stmt = $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = " . $pdo->quote($dbname));
                 if ((bool) $stmt->fetchColumn()) {
@@ -83,7 +83,7 @@ if (isset($_GET['action'])) {
         echo json_encode($response); exit;
 
     } elseif ($_GET['action'] === 'check_sqlite_connection') {
-        $sqlitePath = $_POST['sqlite_path'] ?? 'blog.sqlite3';
+        $sqlitePath = isset($_POST['sqlite_path']) ? $_POST['sqlite_path'] : 'blog.sqlite3';
         if (!extension_loaded('pdo_sqlite')) {
             $response['message'] = _t('no_pdo_sqlite');
             echo json_encode($response); exit;
@@ -111,8 +111,8 @@ if (isset($_GET['action'])) {
         echo json_encode($response); exit;
 
     } elseif ($_GET['action'] === 'check_file_connection') {
-        $requiredDirs = ['.' => 'Root', 'contents' => 'contents', 'contents/post_files' => 'post_files', 'backup' => 'backup'];
-        $errors = [];
+        $requiredDirs = array('.' => 'Root', 'contents' => 'contents', 'contents/post_files' => 'post_files', 'backup' => 'backup');
+        $errors = array();
         foreach ($requiredDirs as $path => $label) {
             $fullPath = __DIR__ . '/' . $path;
             if (!file_exists($fullPath) && $path !== '.') { @mkdir($fullPath, 0777, true); }
@@ -139,7 +139,7 @@ if (isset($_GET['action'])) {
             if (strpos($path, '/.git') !== false || strpos($path, '/node_modules') !== false) continue;
             $perms = substr(sprintf('%o', fileperms($path)), -4);
             if ($item->isDir()) { if ($perms !== '0755') $invalidCount++; } 
-            else { if (in_array(pathinfo($path, PATHINFO_EXTENSION), ['php', 'html', 'js', 'css'])) { if ($perms !== '0644') $invalidCount++; } } 
+            else { if (in_array(pathinfo($path, PATHINFO_EXTENSION), array('php', 'html', 'js', 'css'))) { if ($perms !== '0644') $invalidCount++; } } 
         }
         if ($invalidCount === 0) { $response['success'] = true; $response['message'] = _t('fix_success'); } 
         else { $response['success'] = false; $response['message'] = "Found $invalidCount items with incorrect permissions."; $response['invalid_count'] = $invalidCount; }
@@ -156,7 +156,7 @@ if (isset($_GET['action'])) {
             $path = $item->getPathname();
             if (strpos($path, '/.git') !== false || strpos($path, '/node_modules') !== false) continue;
             if ($item->isDir()) { if (!@chmod($path, 0755)) $failed++; else $fixed++; } 
-            else { if (in_array(pathinfo($path, PATHINFO_EXTENSION), ['php', 'html', 'js', 'css'])) { if (!@chmod($path, 0644)) $failed++; else $fixed++; } } 
+            else { if (in_array(pathinfo($path, PATHINFO_EXTENSION), array('php', 'html', 'js', 'css'))) { if (!@chmod($path, 0644)) $failed++; else $fixed++; } } 
         }
         if ($failed > 0) { $response['success'] = false; $response['message'] = sprintf(_t('fix_finished_errors'), $failed); } 
         else { $response['success'] = true; $response['message'] = _t('fix_success'); }
@@ -168,29 +168,29 @@ if (isset($_GET['action'])) {
             echo json_encode($response); exit;
         }
 
-        $blog_title = $_POST['blog_title'] ?? '';
-        $blog_description = $_POST['blog_description'] ?? '';
-        $blog_introduce = $_POST['blog_introduce'] ?? '';
-        $blog_preview = $_POST['blog_preview'] ?? '';
-        $site_url = $_POST['site_url'] ?? '';
-        $blog_lang_install = $_POST['blog_lang'] ?? 'zh_TW';
-        $timezone = $_POST['timezone'] ?? 'Asia/Taipei';
+        $blog_title = isset($_POST['blog_title']) ? $_POST['blog_title'] : '';
+        $blog_description = isset($_POST['blog_description']) ? $_POST['blog_description'] : '';
+        $blog_introduce = isset($_POST['blog_introduce']) ? $_POST['blog_introduce'] : '';
+        $blog_preview = isset($_POST['blog_preview']) ? $_POST['blog_preview'] : '';
+        $site_url = isset($_POST['site_url']) ? $_POST['site_url'] : '';
+        $blog_lang_install = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
+        $timezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
         $debug_mode = isset($_POST['debug_mode']) ? 'true' : 'false';
 
-        $api_type = $_POST['api_type'] ?? 'api_dbsqlbase';
-        $sqlite_path = $_POST['sqlite_path'] ?? 'blog.sqlite3';
+        $api_type = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_dbsqlbase';
+        $sqlite_path = isset($_POST['sqlite_path']) ? $_POST['sqlite_path'] : 'blog.sqlite3';
 
-        $db_host = $_POST['db_host'] ?? 'localhost';
-        $db_name = $_POST['db_name'] ?? '';
-        $db_user = $_POST['db_user'] ?? '';
-        $db_pass = $_POST['db_pass'] ?? '';
+        $db_host = isset($_POST['db_host']) ? $_POST['db_host'] : 'localhost';
+        $db_name = isset($_POST['db_name']) ? $_POST['db_name'] : '';
+        $db_user = isset($_POST['db_user']) ? $_POST['db_user'] : '';
+        $db_pass = isset($_POST['db_pass']) ? $_POST['db_pass'] : '';
 
-        $admin_user = $_POST['admin_user'] ?? 'admin';
-        $admin_pass = $_POST['admin_pass'] ?? '';
-        $session_secret = $_POST['session_secret'] ?? '';
+        $admin_user = isset($_POST['admin_user']) ? $_POST['admin_user'] : 'admin';
+        $admin_pass = isset($_POST['admin_pass']) ? $_POST['admin_pass'] : '';
+        $session_secret = isset($_POST['session_secret']) ? $_POST['session_secret'] : '';
 
-        $cse_id = $_POST['cse_id'] ?? '';
-        $theme_file = $_POST['theme_file'] ?? 'blog';
+        $cse_id = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
+        $theme_file = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
 
         // Generate config.php
         $config_php = "<?php\n\n";
@@ -202,19 +202,19 @@ if (isset($_GET['action'])) {
         $config_php .= "\$blog_lang = " . var_export($blog_lang_install, true) . "; // 部落格語系\n";
         $config_php .= "\$blog_timezone = " . var_export($timezone, true) . "; // 系統時區\n\n";
         $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n\n";
-        $config_php .= "\$dbConfig = [\n";
+        $config_php .= "\$dbConfig = array(\n";
         $config_php .= "    'host'     => " . var_export($db_host, true) . ",\n";
         $config_php .= "    'dbname'   => " . var_export($db_name, true) . ",\n";
         $config_php .= "    'username' => " . var_export($db_user, true) . ",\n";
         $config_php .= "    'password' => " . var_export($db_pass, true) . ",\n";
         $config_php .= "    'charset'  => 'utf8mb4',\n";
         $config_php .= "    'debug_mode' => $debug_mode\n";
-        $config_php .= "];\n\n";
-        $config_php .= "\$adminConfig = [\n";
+        $config_php .= ");\n\n";
+        $config_php .= "\$adminConfig = array(\n";
         $config_php .= "    'username' => " . var_export($admin_user, true) . ",\n";
         $config_php .= "    'password' => " . var_export($admin_pass, true) . ",\n";
         $config_php .= "    'session_secret' => " . var_export($session_secret, true) . "\n";
-        $config_php .= "];\n\n";
+        $config_php .= ");\n\n";
         $config_php .= "date_default_timezone_set(\$blog_timezone);\n";
         $config_php .= "?>";
 

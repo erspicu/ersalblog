@@ -59,6 +59,13 @@ This document organizes the discussions and evaluations regarding future feature
     *   **Granular Caching**: Implemented `TemplateManager` with modification time (mtime) checks.
     *   **Hash Detection**: Added content hash comparison to distinguish between 'Global' updates (header/footer changes requiring full rebuild) and 'Local' updates (requiring only index updates).
 
+### 1.9 PHP 5.x Compatibility (Status: COMPLETED ✅)
+*   **Reasoning**: Ensures the blog can run on legacy hosting environments frequently encountered in photography communities.
+*   **Implementation**: 
+    *   **Syntax Downgrade**: Replaced Null Coalescing operators (`??`) with `isset() ? :` and short array syntax (`[]`) with `array()`.
+    *   **Fallbacks**: Added `random_bytes()` fallback for PHP versions older than 7.0.
+    *   **Stability**: Systematic manual verification of core logic across all admin and API files.
+
 ---
 
 ## 2. Content Creation & Management
@@ -210,6 +217,13 @@ This document organizes the discussions and evaluations regarding future feature
 *   **實作**：
     *   **增量快取**：實作基於檔案修改時間 (mtime) 的 `TemplateManager` 快取。
     *   **雜湊偵測**：加入內容 Hash 比對，區分「全域更新」(需重建全站) 與「局部更新」(僅更新首頁)。
+
+### 1.9 PHP 5.x 相容性強化 (狀態：已完成 ✅)
+*   **理由**：確保部落格能在攝影社群常見的舊型主機環境中穩定運作。
+*   **實作**：
+    *   **語法降級**：將 Null Coalescing (`??`) 替換為 `isset() ? :`，並將短陣列語法 (`[]`) 替換為 `array()`。
+    *   **回退方案**：針對 PHP 7.0 以下版本新增了 `random_bytes()` 的相容回退函式。
+    *   **穩定性**：全面手動校閱後台與 API 核心邏輯，確保舊版 PHP 環境下的語法正確性。
 
 ---
 

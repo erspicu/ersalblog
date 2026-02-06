@@ -26,7 +26,7 @@ function createMysqlDump($pdo) {
     $out = "-- MySQL Dump\n-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
     $out .= "SET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n\n";
 
-    $tables = [];
+    $tables = array();
     $stmt = $pdo->query("SHOW TABLES");
     while ($row = $stmt->fetch(PDO::FETCH_NUM)) $tables[] = $row[0];
 
@@ -45,9 +45,9 @@ function createMysqlDump($pdo) {
         
         if (count($rows) > 0) {
             $out .= "INSERT INTO `$table` VALUES \n";
-            $valuesArr = [];
+            $valuesArr = array();
             foreach ($rows as $row) {
-                $vals = [];
+                $vals = array();
                 foreach ($row as $val) {
                     if ($val === null) $vals[] = "NULL";
                     else $vals[] = $pdo->quote($val);
@@ -152,7 +152,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'restore_backup' && isset($_
                     if (!empty($sqlFiles)) {
                         global $dbConfig;
                         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-                        $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                        $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
                         
                         restoreMysqlDump($pdo, $sqlFiles[0]);
                         restoreStaticFiles($tempExtractDir, $baseDir);
@@ -183,11 +183,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'restore_backup' && isset($_
                     $zip->close();
 
                     try {
-                        $sqliteFiles = [];
+                        $sqliteFiles = array();
                         foreach (scandir($tempExtractDir) as $f) {
                             if ($f === '.' || $f === '..') continue;
                             $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
-                            if (in_array($ext, ['sqlite', 'db', 'sqlite3', 'db3'])) {
+                            if (in_array($ext, array('sqlite', 'db', 'sqlite3', 'db3'))) {
                                 $sqliteFiles[] = $f;
                             }
                         }
@@ -248,7 +248,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'create_backup') {
         try {
             global $dbConfig;
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $pdo = new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
             
             // 1. Generate SQL
             $sqlContent = createMysqlDump($pdo);
@@ -303,7 +303,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'create_backup') {
         
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-            $dirs = ['category', 'contents', 'preview', 'post'];
+            $dirs = array('category', 'contents', 'preview', 'post');
             foreach ($dirs as $dir) {
                 $fullPath = $baseDir . '/' . $dir;
                 if (is_dir($fullPath)) {
@@ -345,7 +345,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['fi
 
 // --- List Backups ---
 $allBackups = glob($backupDir . '/*.zip');
-$backups = [];
+$backups = array();
 foreach ($allBackups as $file) {
     $bn = basename($file);
     if ($currentSource === 'db') {
@@ -385,7 +385,7 @@ $uploadLimitStr = getUploadLimit();
 // --- Shared Helpers ---
 
 function addStaticFilesToZip($zip, $baseDir) {
-    $dirs = ['preview', 'post'];
+    $dirs = array('preview', 'post');
     foreach ($dirs as $dir) {
         $fullPath = $baseDir . '/' . $dir;
         if (is_dir($fullPath)) {
@@ -413,7 +413,7 @@ function addStaticFilesToZip($zip, $baseDir) {
 }
 
 function restoreStaticFiles($srcDir, $destDir) {
-     foreach(['preview', 'static', 'post'] as $d) {
+     foreach(array('preview', 'static', 'post') as $d) {
          if (is_dir($srcDir . '/' . $d)) {
              $src = $srcDir . '/' . $d;
              $dst = $destDir . '/' . $d;
@@ -450,7 +450,7 @@ function cleanupTempDir($dir) {
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -23,10 +23,10 @@ function checkSQLiteConnection() {
     
     // Attempt to create/open
     try {
-        return new PDO("sqlite:" . $target, null, null, [
+        return new PDO("sqlite:" . $target, null, null, array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]);
+        ));
     } catch (Exception $e) {
         return false;
     }
@@ -36,10 +36,10 @@ function checkMySQLConnection() {
     global $dbConfig;
     try {
         $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], [
+        return new PDO($dsn, $dbConfig['username'], $dbConfig['password'], array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]);
+        ));
     } catch (Exception $e) {
         return false;
     }
@@ -64,7 +64,7 @@ function hasMySQLData() {
 
 function initSQLiteDatabase($pdo, $mode) {
     // 1. Create Tables
-    $queries = [
+    $queries = array(
         "CREATE TABLE IF NOT EXISTS blog_posts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           post_title TEXT NOT NULL,
@@ -88,7 +88,7 @@ function initSQLiteDatabase($pdo, $mode) {
           FOREIGN KEY(post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
           FOREIGN KEY(category_id) REFERENCES blog_categories(id) ON DELETE CASCADE
         )"
-    ];
+    );
 
     foreach ($queries as $sql) {
         $pdo->exec($sql);
@@ -118,11 +118,11 @@ function initSQLiteDatabase($pdo, $mode) {
 
                 // Insert Post
                 $stmt = $pdo->prepare("INSERT OR IGNORE INTO blog_posts (post_title, post_filename, post_date, post_content, post_tags, post_description) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$title, $filename, $date, $content, $tags, $desc]);
+                $stmt->execute(array($title, $filename, $date, $content, $tags, $desc));
                 
                 // Get ID
                 $stmtGetId = $pdo->prepare("SELECT id FROM blog_posts WHERE post_filename = ?");
-                $stmtGetId->execute([$filename]);
+                $stmtGetId->execute(array($filename));
                 $postId = $stmtGetId->fetchColumn();
 
                 if (!$postId) continue;
@@ -157,25 +157,25 @@ function initSQLiteDatabase($pdo, $mode) {
             $posts = $mysqlPdo->query("SELECT * FROM blog_posts")->fetchAll(PDO::FETCH_ASSOC);
             foreach ($posts as $post) {
                 $stmt = $pdo->prepare("INSERT OR IGNORE INTO blog_posts (id, post_title, post_filename, post_date, post_content, post_tags, post_description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([
+                $stmt->execute(array(
                     $post['id'], $post['post_title'], $post['post_filename'], $post['post_date'], 
                     $post['post_content'], $post['post_tags'], $post['post_description'], 
                     $post['created_at'], $post['updated_at']
-                ]);
+                ));
             }
 
             // Categories
             $cats = $mysqlPdo->query("SELECT * FROM blog_categories")->fetchAll(PDO::FETCH_ASSOC);
             foreach ($cats as $cat) {
                 $stmt = $pdo->prepare("INSERT OR IGNORE INTO blog_categories (id, category_name) VALUES (?, ?)");
-                $stmt->execute([$cat['id'], $cat['category_name']]);
+                $stmt->execute(array($cat['id'], $cat['category_name']));
             }
 
             // Pivot
             $pivots = $mysqlPdo->query("SELECT * FROM blog_post_categories")->fetchAll(PDO::FETCH_ASSOC);
             foreach ($pivots as $pivot) {
                 $stmt = $pdo->prepare("INSERT OR IGNORE INTO blog_post_categories (id, post_id, category_id) VALUES (?, ?, ?)");
-                $stmt->execute([$pivot['id'], $pivot['post_id'], $pivot['category_id']]);
+                $stmt->execute(array($pivot['id'], $pivot['post_id'], $pivot['category_id']));
             }
             
             // Reset AutoIncrement sequence for SQLite
@@ -192,7 +192,7 @@ function initSQLiteDatabase($pdo, $mode) {
             $sampleContent = __('sqlite_sample_content');
             
             $stmt = $pdo->prepare("INSERT INTO blog_posts (post_title, post_filename, post_date, post_content, post_tags, post_description) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$sampleTitle, $sampleFile, $sampleDate, $sampleContent, "SQLite", "Test"]);
+            $stmt->execute(array($sampleTitle, $sampleFile, $sampleDate, $sampleContent, "SQLite", "Test"));
             $postId = $pdo->lastInsertId();
 
             $pdo->exec("INSERT INTO blog_post_categories (post_id, category_id) VALUES ($postId, $catId)");
@@ -210,8 +210,8 @@ function initSQLiteDatabase($pdo, $mode) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['login_check'])) {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $username = isset($_POST['username']) ? $_POST['username'] : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
         
         if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
             $_SESSION['sqlite_init_authorized'] = true;
@@ -248,7 +248,7 @@ $canImportMySQL = hasMySQLData();
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($currentLang ?? 'zh_TW'); ?>">
+<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

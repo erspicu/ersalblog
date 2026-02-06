@@ -12,7 +12,7 @@ if ($dataManager->getSource() !== 'db') {
 
 global $pdo;
 
-$log = [];
+$log = array();
 
 function addLog($msg) {
     global $log;
