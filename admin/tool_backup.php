@@ -602,6 +602,7 @@ max_input_time = 300</pre>
                                 
                                 <!-- Restore -->
                                 <form method="POST" class="d-inline-block" id="restore_<?php echo md5($filename); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                     <input type="hidden" name="action" value="restore_backup">
                                     <input type="hidden" name="filename" value="<?php echo $filename; ?>">
                                     <button type="button" class="btn btn-sm btn-outline-warning me-1" onclick="confirmAction('restore', '<?php echo md5($filename); ?>')">
@@ -611,6 +612,7 @@ max_input_time = 300</pre>
 
                                 <!-- Delete -->
                                 <form method="POST" class="d-inline-block" id="delete_<?php echo md5($filename); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="filename" value="<?php echo $filename; ?>">
                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmAction('delete', '<?php echo md5($filename); ?>')">

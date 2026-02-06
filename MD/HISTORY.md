@@ -487,6 +487,10 @@ Recorded the development journey and original Prompt commands of this project th
     - 修正前端 JS 呼叫時的表單 ID 不匹配問題。
     - 優化變數定義流程以提升程式碼強健度。
 
+### [14:50] 備份工具 CSRF 安全性修正
+- **任務**: 解決刪除或還原備份時出現 "Invalid CSRF Token" 的錯誤。
+- **實作**: 為備份清單中的所有操作表單補上 `csrf_token` 隱藏欄位，確保符合安全性檢查規範。
+
 ---
 
 ## 2026-02-07 (繁體中文)

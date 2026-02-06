@@ -223,6 +223,8 @@
   - 修復 `admin/tool_backup.php` 缺少 `data_provider.php` 引用導致找不到 `DataManager` 類別的問題。
   - 修正備份建立表單的 ID 不一致問題 (backupForm -> createBackupForm)。
   - 優化變數宣告順序，避免 `uploadLimitStr` 產生的未定義變數警告。
+- [2026-02-07 14:50:00] 修正備份工具 CSRF 驗證錯誤：
+  - 補齊備份清單中「還原」與「刪除」表單缺失的 CSRF Token 欄位。
 - [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。
