@@ -77,6 +77,42 @@ try {
 
     $dataManager->savePost($saveData);
     
+    // --- Auto Build Static Pages ---
+    if (isset($_POST['auto_build']) && $_POST['auto_build'] == '1') {
+        // Load Global Config & Lang for Generator
+        // Note: auth.php already includes config.php
+        global $blog_lang;
+        if (!isset($blog_lang)) $blog_lang = 'zh_TW'; 
+        
+        $baseDir = dirname(__DIR__);
+        $langFile = $baseDir . "/langs/template-{$blog_lang}.php";
+        if (!file_exists($langFile)) $langFile = $baseDir . "/langs/template-zh_TW.php";
+        $langData = file_exists($langFile) ? require $langFile : array();
+        
+        $langVars = array();
+        foreach ($langData as $k => $v) {
+            $langVars["lang_{$k}"] = $v;
+        }
+
+        $genConfig = array(
+            'blog_title' => $GLOBALS['blog_title'],
+            'blog_description' => $GLOBALS['blog_description'],
+            'blog_introduce' => $GLOBALS['blog_introduce'],
+            'site_url' => $GLOBALS['site_url'],
+            'blog_preview' => $GLOBALS['blog_preview']
+        );
+
+        require_once $baseDir . '/PHP_LIB/StaticGenerator.php';
+        $generator = new \PHPLib\StaticGenerator($baseDir, $langVars, $genConfig, false); // False = Silent mode
+        
+        // Check if JSON API is enabled in config.js
+        $configJs = file_get_contents($baseDir . '/config.js');
+        $isJsonMode = (strpos($configJs, "api_type: 'json'") !== false);
+
+        // Run Build (Force Global to ensure list pages update)
+        $generator->build(false, $isJsonMode, true); 
+    }
+
     // 判斷是新增還是修改
     $msg = $id ? 'updated' : 'created';
 

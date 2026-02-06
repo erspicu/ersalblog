@@ -177,7 +177,14 @@ $currentCats = array_map('trim', $currentCats);
                         <input type="text" name="post_description" class="form-control" value="<?php echo htmlspecialchars($post['post_description']); ?>" placeholder="<?php echo __('ph_desc_seo'); ?>">
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end align-items-center">
+                        <div class="form-check me-3">
+                            <input class="form-check-input" type="checkbox" name="auto_build" value="1" id="autoBuildCheck">
+                            <label class="form-check-label" for="autoBuildCheck">
+                                <?php echo isset($lang['label_auto_build']) ? $lang['label_auto_build'] : '儲存後立即重建靜態網頁'; ?>
+                            </label>
+                        </div>
+
                         <a href="posts.php" class="btn btn-outline-secondary me-md-2"><?php echo __('btn_cancel'); ?></a>
                         
                         <button type="submit" name="is_draft" value="1" class="btn btn-warning text-dark px-4">

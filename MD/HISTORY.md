@@ -496,6 +496,13 @@ Recorded the development journey and original Prompt commands of this project th
 - **實作**: 在所有 API 接口 (File/MySQL/SQLite) 與靜態 JSON 生成邏輯中，加入對 `post/` 目錄下實體檔案的檢查。
 - **優點**: 防止「已發布但尚未建置」的文章出現在前台列表中，確保網站顯示內容與實體檔案完全同步。
 
+### [15:30] 靜態生成架構重構 (SSG Refactoring)
+- **任務**: 解耦「資料發布」與「靜態網頁生成」，但提供可選的自動化整合。
+- **實作**:
+    - **邏輯封裝**: 建立 `PHP_LIB/StaticGenerator.php` 類別，統一管理建置邏輯。
+    - **CLI 更新**: 重寫 `make_html.php` 為輕量級介面。
+    - **後台整合**: 在 `admin/post_edit.php` 新增「立即重建」選項，並在 `post_save.php` 中實作自動建置觸發器。
+
 ---
 
 ## 2026-02-07 (繁體中文)

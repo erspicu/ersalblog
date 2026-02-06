@@ -229,6 +229,11 @@
   - 更新 `api/api_filebase.php`, `api/api_sqlitebase.php`, `api/api_dbsqlbase.php`。
   - 增加「靜態檔檢查」過濾條件：API 僅回傳在 `post/` 目錄下已存在實體 `.html` 檔案的文章。
   - 同步更新 `make_html.php` 的 JSON 生成邏輯，確保 `data.json` 與實體檔案一致。
+- [2026-02-07 15:30:00] 靜態生成邏輯重構與後台整合：
+  - 建立 `PHP_LIB/StaticGenerator.php` 類別，封裝所有 SSG 核心邏輯。
+  - 重寫 `make_html.php`，改為調用 `StaticGenerator` 執行建置。
+  - 更新 `admin/post_edit.php`，新增「儲存後立即重建靜態網頁」選項。
+  - 更新 `admin/post_save.php`，實作勾選後自動觸發 `StaticGenerator` 的邏輯，達成發布與建置的解耦與可選整合。
 - [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。
