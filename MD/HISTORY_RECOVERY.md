@@ -365,7 +365,7 @@ Recorded the development journey and original Prompt commands of this project th
     - **UI 更新**: 新增「暫存草稿」與「正式發布」按鈕，並在後台列表與儀表板加入狀態標籤。
 
 ### [19:40] 網站設定圖形化介面 (config.js 管理)
-- **任務**: 提供友善的介面來管理前端配置.
+- **任務**: 提供友善的介面來管理前端配置。
 - **實作**:
     - 建立 `admin/settings.php` 用於管理 `config.js`。
     - 支援透過 UI 切換資料來源 (File/DB/SQLite)、選擇主題以及設定 Google CSE ID。
@@ -377,6 +377,29 @@ Recorded the development journey and original Prompt commands of this project th
     - **TinyMCE 6**: 在本地端完整部署 TinyMCE 6.8.2，不依賴外部 CDN。
     - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現台邏輯。
     - **語系與體驗**: 整合動態語系切換 (繁中/英文)，並移除升級提示與品牌標記以簡化介面。
+
+### [20:00] 後台語系架構重構
+- **任務**: 清理語系檔案並實施更嚴格的載入規則。
+- **實作**:
+    - 將語系檔更名為 `admin-` 前綴 (如 `admin-zh_TW.php`)，以區別安裝程式檔案。
+    - 更新 `admin/lang_init.php` 掃描邏輯，自動排除 `install_` 開頭的檔案。
+    - 精簡語言下拉選單，僅顯示核心語系代碼。
+
+### [23:00] 專案宣傳網站開發 (Vibe Coding 實驗)
+- **任務**: 建立一個現代化、攝影導向的宣傳網站來展示 ErsalBlog。
+- **實作**:
+    - **技術棧**: React + Vite + Bootstrap 5 + Framer Motion。
+    - **內容**: 詳細規劃了開發動機 (匠人初心)、演進歷程 (Vibe 飛躍)、技術架構與未來藍圖。
+    - **4K 優化**: 為超寬螢幕實作了自定義容器邏輯與響應式字體，確保版面完美置中且視覺平衡。
+    - **部署**: 設定 Vite 編譯路徑，確保與現有 Apache 環境無縫整合。
+    - **驗證**: 成功驗證宣傳網站作為 Vibe Coding 開發效率的強力證明。
+
+### [23:33] 模型切換與全域更新
+- **任務**: 將開發模型切換回 Gemini 3 Pro 並同步所有專案文件。
+- **實作**:
+    - 更新 `admin/version_config.php` 以反映切換至 `gemini-3-pro-preview`。
+    - 執行「更新」巨集同步 HISTORY.md、ARCHITECTURE.md 與 README.md。
+    - 執行本地 Git Commit，將宣傳網站資產與技術優化內容入庫。
 
 ---
 
@@ -414,94 +437,24 @@ Recorded the development journey and original Prompt commands of this project th
 - **實作**: 
     - **單一資料源**: 將原本分散的 JSON 合併為 `api/json/data.json`，避免中文字元檔名導致的存取錯誤。
     - **前端過濾**: 在 `blog.js` 實作客戶端路由與篩選邏輯，達成全靜態瀏覽體驗。
-    - **建置支援**: `make_html.php -json` 可將所有索引與統計導出至單一 `api/json/data.json`。
+    - **建置支援**: `make_html.php` 新增 `-json` 參數，一鍵導出完整資料包。
 
 ### [13:30] 智慧建置快取 (Smart Build Cache)
 - **任務**: 優化建置效能，精確偵測配置變更。
 - **實作**: 實作雜湊雜湊 (Hash) 比對機制，將變數分為「全域」與「僅首頁」影響兩類，達成更細粒度的增量建置，減少不必要的檔案重產。
 
----
+### [13:45] HTML 語系宣告動態化
+- **任務**: 讓 `<html>` 標籤的 `lang` 屬性支援多語系切換。
+- **實作**: 在樣板語系檔新增 `html_lang` 鍵值，並將 `blog_template.html` 內的硬編碼屬性改為變數佔位符，提升 SEO 與瀏覽器相容性。
 
-## 2026-02-06 (繁體中文)
+### [14:00] 日期單位多語系修復
+- **任務**: 修正側邊欄與歸檔清單中的日期單位顯示。
+- **實作**: 將 `template_date_post_item` 內硬編碼的「日」替換為 `{{lang_day_suffix}}`，並在語系檔補齊相關定義，確保年月日顯示完整。
 
-### [23:30] 語系檔案結構重構 (i18n Refactoring)
-- **任務**: 簡化語系檔案目錄結構，提升讀取效率。
-- **實作**: 
-    - 將 `langs/admin/` 與 `langs/template/` 下的檔案移至 `langs/` 根目錄。
-    - 同步更新 `make_html.php`, `install.php`, `admin/lang_init.php` 等所有相關路徑。
+### [14:30] 建置腳本穩定性與快取強化
+- **任務**: 修復 `make_html.php` 語法錯誤並強化快取檢查。
+- **實作**: 修正 `build` 函式語法錯誤，並將語系檔內容納入全域雜湊計算與實體相依檢查，確保語系檔變更時能正確觸發所有受影響頁面的重建。
 
-### [23:45] PHP 5.x 全域相容性強化
-- **任務**: 確保專案能在舊版 PHP 5.x 環境 (如 AppServ) 穩定執行。
-- **實作**: 
-    - **語法降級**: 將 `??` 替換為 `isset() ? :`，將 `[]` 替換為 `array()`。
-    - **隨記數回退**: 在 `system_helper.php` 實作 `random_bytes` 回退方案。
-    - **核心校閱**: 修正所有 `admin/` 與 `api/` 核心邏輯，確保相容性。
-
----
-
-## 2026-02-07 (English)
-
-### [14:15] Script Tag Protection
-- **Task**: Prevent `<script>` tags in posts from executing while keeping them visible for technical articles.
-- **Implementation**: Used `protect_script_tags` to escape script tags to `&lt;script&gt;`.
-
-### [15:30] SSG Refactoring & Class Integration
-- **Task**: Decouple post saving from static generation and unify build logic.
-- **Implementation**: 
-    - Created `PHPLib\StaticGenerator` class to encapsulate all build pipelines.
-    - Updated `admin/post_save.php` to optionally trigger a targeted build.
-    - Simplified `make_html.php` as a CLI wrapper for the Generator.
-
-### [15:45] Stability & PHP 5.x Compatibility
-- **Task**: Resolve 500 errors and ensure legacy environment support.
-- **Implementation**: 
-    - Fixed quoting and regex syntax in `StaticGenerator.php`.
-    - Removed `$this` from closures for PHP 5.3 compatibility.
-    - Downgraded language files from `[]` to `array()` syntax.
-
-### [17:15] Build Management GUI & Layout Refactoring
-- **Task**: Provide a manual build interface and improve navigation UX.
-- **Implementation**:
-    - Created `admin/build.php` with options for full/partial rebuilds and JSON API updates.
-    - Unified navigation with `admin/sidebar_inc.php`. 
-    - Implemented a **Fixed Sidebar** layout to keep menus accessible while scrolling.
-    - Added "Static Page Missing" indicators across Dashboard and Post lists.
-
-### [18:00] Server-side Pagination
-- **Task**: Improve performance for post management with large datasets.
-- **Implementation**: Implemented `getPostsPaged` in `DataManager` and added a pagination UI (15 posts per page) in `admin/posts.php`.
-
----
-
-## 2026-02-07 (繁體中文)
-
-### [14:15] 文章內容 Script 標籤保護 (Script Tag Protection)
-- **任務**: 防止文章內的 `<script>` 內容在網頁中執行，同時確保其在技術文章中的可見性。
-- **實作**: 
-    - **核心邏輯**: 在 `admin/system_helper.php` 實作 `protect_script_tags` 函式，將 `<script>` 標籤轉義為 `&lt;script&gt;`。
-    - **全域套用**: 整合至 `make_html.php` 與所有 `api/*.php` 檔案。
-
-### [15:30] 靜態生成架構重構 (SSG Refactoring)
-- **任務**: 解耦「資料發布」與「靜態網頁生成」，提供更靈活的建置管線。
-- **實作**:
-    - **邏輯封裝**: 建立 `PHP_LIB/StaticGenerator.php` 類別，統一管理 SSG 核心邏輯。
-    - **後台整合**: 在 `admin/post_edit.php` 新增「儲存後立即重建」選項。
-    - **相容性修復**: 修正 PHP 5.3 不支援 Closure 使用 `$this` 的限制，確保在舊版環境穩定執行。
-
-### [15:45] SSG 穩定性修復與 PHP 5.x 相容性強化
-- **任務**: 解決重構後出現的 500 錯誤並提升舊版 PHP 支援。
-- **實作**: 
-    - **語法修復**: 修正 `StaticGenerator.php` 內的引號轉義與 Regex 錯誤。
-    - **相容性修復**: 針對 PHP 5.3 移除 Closure 中的 `$this` 使用，並將語系檔全面降級為 `array()` 語法。
-    - **強健度提升**: 在 `post_save.php` 引入更全面的錯誤捕捉邏輯。
-
-### [17:15] 後台建置管理頁面與導覽重構
-- **任務**: 建立專用的建置管理介面並優化後台使用者體驗.
-- **實作**:
-    - **網站建置頁面**: 新增 `admin/build.php`，支援「強制重生」、「更新 JSON API」以及「選取特定文章建置」。
-    - **導覽列組件化**: 建立 `admin/sidebar_inc.php` 並將後台選單統一化，實作 **Fixed Sidebar** 佈局，讓選單不隨頁面捲動消失。
-    - **狀態偵測**: 在儀表板與文章列表中，加入「靜態網頁未建立」的即時偵測與紅色警告標籤。
-
-### [18:00] 文章管理分頁功能
-- **任務**: 解決文章量大時載入緩慢的問題。
-- **實作**: 在 `DataManager` 實作 `getPostsPaged` 方法，並在 `admin/posts.php` 建立分頁導覽列（每頁 15 篇），顯著提升管理效率。
+### [14:45] 英文語系單位遺漏修復
+- **任務**: 解決英文模式下「日」單位不顯示的問題。
+- **實作**: 補齊 `template-en_US.php` 中的 `day_suffix` 定義，優化英文歸檔標籤的可見性與一致性。
