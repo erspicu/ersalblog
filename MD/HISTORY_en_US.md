@@ -4,7 +4,7 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
-## 2026-01-30
+## 2026-01-30 (English)
 
 ### [12:05] Initial Project Scan and Analysis
 - **Task**: Understand project architecture (Hybrid SSG + SPA).
@@ -81,7 +81,7 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
-## 2026-01-31
+## 2026-01-31 (English)
 
 ### [12:05] PHP 7.x Compatibility Check and Fixes
 - **Task**: Ensure code runs in PHP 7.x environment.
@@ -121,7 +121,7 @@ Recorded the development journey and original Prompt commands of this project th
 ### [16:20] Database Schema Normalization
 - **Task**: Split category field into independent tables and relation tables.
 - **Prompt**: "Hope to fix the database version category architecture. Create two more tables: one for category names, one for which posts use which categories. Fix affected programs and screens; i.e., category management should have an add function."
-- **Implementation**: Created `blog_categories` and `blog_post_categories` 資料表，更新 `DataManager` 與分類管理 UI。
+- **Implementation**: Created `blog_categories` and `blog_post_categories` tables, updated `DataManager` and Category Management UI.
 
 ### [16:26] Redundant Field Cleanup and Logic Refactoring
 - **Task**: Remove `post_categories` from `blog_posts` and refactor queries.
@@ -130,11 +130,11 @@ Recorded the development journey and original Prompt commands of this project th
 
 ### [16:39] Documentation and Format Updates
 - Integrated `reme.txt` content into `README.md` and updated third-party package info.
-- `gemini_log.txt` 轉換為 `gemini_log.md` 並強制使用 UTF-8 BOM 編碼。
+- Converted `gemini_log.txt` to `gemini_log.md` with forced UTF-8 BOM encoding.
 
 ---
 
-## 2026-02-01
+## 2026-02-01 (English)
 
 ### [19:05] Automated Initialization System (Database Initialization)
 - **Task**: Build automated DB table creation and data migration.
@@ -186,7 +186,7 @@ Recorded the development journey and original Prompt commands of this project th
     - Fixed BOM (`ï»¿`) encoding issues in `gemini_log.md`.
 
 ### [21:30] System Time Calibration and Specification Strengthening
-- **Task**: Uniformly calibrate all 站 time stamps to correct UTC+8 evening period.
+- **Task**: Uniformly calibrate all time stamps to correct UTC+8 evening period.
 - **Implementation**:
     - Corrected time deviations in `HISTORY.md`, `admin/version_config.php`, and `gemini_log.md`.
     - Explicitly required all future records to use UTC+8 directly in `gemini.md`.
@@ -215,7 +215,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Fix README content discrepancy and refine Gemini CLI instructions.
 - **Implementation**:
     - Synchronized missing sections in `README.md` (Chinese version) to match English content.
-    - Added "Reload" (重讀) macro command to `gemini.md` for syncing external edits via `git diff`.
+    - Added "Reload" macro command to `gemini.md` for syncing external edits via `git diff`.
     - Cleaned up excessive blank lines in `gemini.md` for better readability.
 
 ### [00:50] Development Evaluation and Final Polishing
@@ -242,7 +242,7 @@ Recorded the development journey and original Prompt commands of this project th
 
 ---
 
-## 2026-02-01
+## 2026-02-01 (English)
 
 ### [12:30] SQLite 3 Database Support and Interface Optimization
 - **Task**: Implement SQLite 3 support as an alternative to MySQL and the file system, and fix UI inconsistencies.
@@ -274,7 +274,7 @@ Recorded the development journey and original Prompt commands of this project th
 - **Task**: Establish a dedicated directory for backups.
 - **Implementation**:
     - Created `/backup` directory and added a bilingual `readme.md`.
-    - Updated `.gitignore` 排除 `/backup/*.zip` 檔案。
+    - Updated `.gitignore` to exclude `/backup/*.zip` files.
 
 ### [15:15] Backup Restore & Upload
 - **Task**: Enhance backup tool with restore and upload capabilities.
@@ -297,145 +297,161 @@ Recorded the development journey and original Prompt commands of this project th
 - **Implementation**:
     - Implemented `createMysqlDump` to generate SQL structure and data dumps.
     - Implemented `restoreMysqlDump` to parse and execute SQL dumps from ZIP.
-    - Updated `create_backup` 將 SQL 檔 + 靜態資源 (`preview`, `pic`, `static/icon-192.png`) 打包為 `dbsqlbase-*.zip`。
-    - 更新 `restore_backup` 支援 `dbsqlbase` 檔案，先還原資料庫再還原靜態檔案。
+    - Updated `create_backup` to package SQL file + static assets (`preview`, `pic`, `static/icon-192.png`) as `dbsqlbase-*.zip`.
+    - Updated `restore_backup` to support `dbsqlbase` files, restoring database first then static files.
 
 ### [16:15] SQLite Database Backup & Restore
 - **Task**: Extend backup tool to support SQLite database mode.
 - **Implementation**:
-    - 新增邏輯將使用中的 SQLite 資料庫檔 + 靜態資源打包為 `sqlitebase-*.zip`。
-    - 新增邏輯從 ZIP 中還原 SQLite DB 檔案至設定路徑。
-    - 新增 Helper 函數 (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) 修復 500 錯誤並重用程式碼。
+    - Added logic to package active SQLite database file + static assets as `sqlitebase-*.zip`.
+    - Added logic to restore SQLite DB file from ZIP to configured path.
+    - Added Helper functions (`addStaticFilesToZip`, `restoreStaticFiles`, `cleanupTempDir`) to fix 500 errors and reuse code.
 
 ### [16:30] Backup List Filtering
 - **Task**: Avoid confusion by showing only relevant backup files.
 - **Implementation**:
-    - 更新 `admin/tool_backup.php` 根據當前模式過濾列表：
-        - 資料庫模式: 僅顯示 `dbsqlbase-*.zip`
-        - SQLite 模式: 僅顯示 `sqlitebase-*.zip`
-        - 檔案模式: 僅顯示 `filebase-*.zip`
+    - Updated `admin/tool_backup.php` to filter list based on current mode:
+        - DB Mode: Show only `dbsqlbase-*.zip`
+        - SQLite Mode: Show only `sqlitebase-*.zip`
+        - File Mode: Show only `filebase-*.zip`
 
-### [19:30] 全方位安裝引導精靈
-- **任務**: 設計並實作友善的系統初始化系統。
-- **實作**:
-    - 在根目錄建立 `install.php`。
-    - 特性：環境檢測 (PHP 版本與 Unix 權限修復)、多模式資料庫測試 (MySQL/SQLite/File)、管理員設定與前端配置生成。
-    - 多語系支援：建立 `langs/admin/install_zh_TW.php` 與 `install_en_US.php` 並將語系獨立管理。
-    - 整合 `admin/version_config.php` 顯示系統版本資訊。
+### [19:30] All-in-One Installation Wizard
+- **Task**: Design and implement a user-friendly system initialization wizard.
+- **Implementation**:
+    - Created `install.php` in root directory.
+    - Features: Environment detection (PHP version & Unix permission fix), multi-mode database testing (MySQL/SQLite/File), admin setup, and frontend config generation.
+    - i18n Support: Created `langs/admin/install_zh_TW.php` and `install_en_US.php` for isolated language management.
+    - Integrated `admin/version_config.php` to display system version info.
 
-### [22:15] WSL2 開發環境建置與 OS 偵測強化
-- **任務**: 自動化 WSL2 中的 LAMP 環境配置並提供詳細 OS 資訊。
-- **實作**:
-    - **環境配置**: 自動在 WSL2 Ubuntu 24.04 安裝 Apache2, MySQL 8.0, PHP 8.3。
-    - **網頁整合**: 設定 Apache 監聽 8086 埠並透過軟連結掛載 Windows 專案目錄。
-    - **資料庫初始化**: 建立符合專案設定的 MySQL 使用者與資料庫。
-    - **phpMyAdmin**: 自動安裝並整合至自訂埠號。
-    - **權限處理**: 修正 `install.php` 偵測 WSL2 NTFS 掛載點並自動跳過無效的權限修正步驟。
-    - **OS 偵測**: 建立 `admin/system_helper.php` 提供詳細 OS 資訊 (如 Ubuntu 發行版或 Windows Build 號)。
-    - **介面整合**: 在儀表板與安裝精靈中同步顯示詳細作業系統環境。
+### [22:15] WSL2 Development Environment & OS Detection
+- **Task**: Automate LAMP setup in WSL2 and provide detailed OS info.
+- **Implementation**:
+    - **Env Setup**: Automated install of Apache2, MySQL 8.0, PHP 8.3 in WSL2 Ubuntu 24.04.
+    - **Web Integration**: Configured Apache on port 8086 with symlink to Windows project directory.
+    - **DB Init**: Created MySQL user and database matching project config.
+    - **phpMyAdmin**: Automated install and integration on custom port.
+    - **Permissions**: Fixed `install.php` to detect WSL2 NTFS mounts and skip invalid permission fixes.
+    - **OS Detection**: Created `admin/system_helper.php` to provide detailed OS info (e.g., Ubuntu distro or Windows Build).
+    - **UI Integration**: Displayed detailed OS environment in Dashboard and Installation Wizard.
 
-### [23:20] 強化 Windows OS 偵測與 UI 佈局優化
-- **任務**: 提升 Windows 版本偵測可靠性並精煉安裝介面佈局。
-- **實作**:
-    - **進階 OS 偵測**: 在 `admin/system_helper.php` 中加入 COM/WMI 支援，作為原生 Windows PHP 環境的第一優先偵測方式，提供精確的產品名稱（如 Windows 11 專業版）。
-    - **編碼校正**: 針對 PowerShell 輸出實作了強制的 CP950 轉 UTF-8 轉換，防止在繁體中文環境下出現亂碼。
-    - **UI 優化**: 將 `install.php` 系統資訊重構為 2x2 網格顯示，將顯示寬度提升一倍，以利閱讀長的作業系統版本字串。
-    - **Git 策略**: 更新 `gemini.md` 加入 WSL2 專屬回退規則，自動調用 `git.exe` 處理需要憑證驗證的推送操作。
+### [23:20] Enhanced Windows OS Detection & UI Layout
+- **Task**: Improve Windows version detection reliability and refine install UI.
+- **Implementation**:
+    - **Advanced OS Detection**: Added COM/WMI support in `admin/system_helper.php` as primary detection for native Windows PHP, providing exact product names (e.g., Windows 11 Pro).
+    - **Encoding Fix**: Implemented forced CP950 to UTF-8 conversion for PowerShell output to prevent garbled text in T. Chinese environments.
+    - **UI Optimization**: Refactored `install.php` system info into a 2x2 grid with double width for better readability of long OS strings.
+    - **Git Strategy**: Updated `gemini.md` with WSL2-specific fallback rules, automatically invoking `git.exe` for push operations requiring credentials.
 
-### [23:30] WSL2 Git 策略精煉
-- **任務**: 規範 WSL2 下的遠端儲存庫同步流程。
-- **實作**:
-    - **規範更新**: 更新 `gemini.md` 明確規定 WSL2 僅負責完成 Commit，最終的 `git push` 由使用者於具備憑證的環境 (如 Windows 終端機) 手動執行。
-    - **巨集同步**: 調整「更新」關鍵字指令的流程，自動化執行至本地 Commit 為止，並加入手動推送提醒。
-
----
-
-## 2026-02-03 (繁體中文)
-
-### [19:30] 混合式草稿系統與檔名標準化
-- **任務**: 實作文章草稿機制並確保檔案命名的一致性。
-- **實作**:
-    - **草稿機制**: 
-        - 檔案模式：草稿存為 `.html.tmp`，正式文章為 `.html`。
-        - 資料庫模式：動態補齊 `status` 欄位 ('draft'/'published')。
-        - 前台過濾：更新所有 API 與 `make_html.php` 自動跳過草稿檔案。
-    - **檔名標準化**: 
-        - 根據發文日期自動補上 `YYYYMMDD-` 前綴。
-        - 智慧偵測使用者輸入，支援手動輸入前綴並避免重複處理。
-    - **UI 更新**: 新增「暫存草稿」與「正式發布」按鈕，並在後台列表與儀表板加入狀態標籤。
-
-### [19:40] 網站設定圖形化介面 (config.js 管理)
-- **任務**: 提供友善的介面來管理前端配置.
-- **實作**:
-    - 建立 `admin/settings.php` 用於管理 `config.js`。
-    - 支援透過 UI 切換資料來源 (File/DB/SQLite)、選擇主題以及設定 Google CSE ID。
-    - 採用正規表達式寫入配置，保留檔案原始格式。
-
-### [19:50] 進階視覺化編輯器整合
-- **任務**: 將文章編輯器從純文字框升級為視覺化編輯器。
-- **實作**:
-    - **TinyMCE 6**: 在本地端完整部署 TinyMCE 6.8.2，不依賴外部 CDN。
-    - **客製化分頁**: 修改 PageBreak 外掛使用 `<!--more-->` 作為分隔符號，完美相容現台邏輯。
-    - **語系與體驗**: 整合動態語系切換 (繁中/英文)，並移除升級提示與品牌標記以簡化介面。
+### [23:30] WSL2 Git Strategy Refinement
+- **Task**: Standardize remote repo synchronization in WSL2.
+- **Implementation**:
+    - **Spec Update**: Updated `gemini.md` to explicitly state WSL2 handles local commits only; `git push` must be done manually in a credentialed environment (e.g., Windows Terminal).
+    - **Macro Sync**: Adjusted "Update" keyword flow to automate up to local commit, adding a manual push reminder.
 
 ---
 
-## 2026-02-04 (繁體中文)
+## 2026-02-03 (English)
 
-### [14:05] 核心 SSG 建置管線重構 (Regex 轉型)
-- **任務**: 全面翻新靜態頁面生成邏輯，提升穩定性與相容性。
-- **實作**:
-    - **單一真理來源**: 重寫 `make_html.php` 靜態網頁生成邏輯，徹底解決結構劣化與轉碼問題。
-    - **Regex 解析**: 移除 `DOMDocument` 改用 Regex 處理樣板與圖片優化，大幅提升相容性與效能。
-    - **PHP 5.x 相容**: 維持向後相容性，確保在 AppServ 等舊版環境正常運作。
+### [19:30] Hybrid Draft System & Filename Standardization
+- **Task**: Implement post drafts and consistent file naming.
+- **Implementation**:
+    - **Drafts**: 
+        - File Mode: Drafts saved as `.html.tmp`.
+        - DB Mode: `status` column ('draft'/'published').
+        - Frontend: Updated APIs and `make_html.php` to skip drafts.
+    - **Naming**: 
+        - Auto-prefix `YYYYMMDD-` based on post date.
+        - Smart detection to avoid duplicate prefixes.
+    - **UI**: Added "Save Draft" & "Publish" buttons, and status badges.
 
-### [14:40] 自動化資產壓縮優化
-- **任務**: 精煉 JS/CSS 壓縮流程。
-- **實作**: 修正 `mini.py` 目錄排除邏輯，並新增自動清理機制，保持專案目錄整潔。
+### [19:40] GUI for Site Settings
+- **Task**: Provide a friendly interface for managing `config.js`.
+- **Implementation**:
+    - Created `admin/settings.php` for `config.js` management.
+    - Supports toggling Data Source (File/DB/SQLite), Theme, and Google CSE ID via UI.
+    - Uses Regex to preserve original config file formatting.
 
-### [15:15] 微樣板管理器與增量建置
-- **任務**: 提升建置效率與維護性。
-- **實作**: 建立 `TemplateManager` 類別封裝解析邏輯，並實作基於檔案修改時間 (mtime) 的快取機制，大幅縮短生成時間。
-
----
-
-## 2026-02-05 (繁體中文)
-
-### [10:15] 前台多語系與動態配置
-- **任務**: 實作前台多語系支援與動態時區/語系配置。
-- **實作**: 建立 `langs/template/` 架構，將樣板硬編碼文字替換為 `{{variable}}`，並更新建置腳本與後台設定。
-
-### [12:00] 安全性強化 (Security Hardening)
-- **任務**: 修復路徑遍歷與 XSS 漏洞。
-- **實作**: 在 API 引入 `basename()` 過濾，並在樣板生成與前端渲染流程中全面實作 HTML 轉義防護。
-
-### [13:00] 純靜態 JSON API 模式與優化
-- **任務**: 實作無後端 JSON 模式並解決亂碼 404 問題。
-- **實作**: 
-    - **單一資料源**: 將原本分散的 JSON 合併為 `api/json/data.json`，避免中文字元檔名導致的存取錯誤。
-    - **前端過濾**: 在 `blog.js` 實作客戶端路由與篩選邏輯，達成全靜態瀏覽體驗。
-    - **建置支援**: `make_html.php -json` 可將所有索引與統計導出至單一 `api/json/data.json`。
-
-### [13:30] 智慧建置快取 (Smart Build Cache)
-- **任務**: 優化建置效能，精確偵測配置變更。
-- **實作**: 實作雜湊雜湊 (Hash) 比對機制，將變數分為「全域」與「僅首頁」影響兩類，達成更細粒度的增量建置，減少不必要的檔案重產。
+### [19:50] Visual Editor Integration
+- **Task**: Upgrade post editor from textarea to a visual WYSIWYG editor.
+- **Implementation**:
+    - **TinyMCE 6**: Locally hosted deployment (no CDN).
+    - **Custom Page Break**: Modified PageBreak plugin to use `<!--more-->` separator.
+    - **UX**: Dynamic language switching (T. Chinese/English) and simplified toolbar.
 
 ---
 
-## 2026-02-06 (繁體中文)
+## 2026-02-04 (English)
 
-### [23:30] 語系檔案結構重構 (i18n Refactoring)
-- **任務**: 簡化語系檔案目錄結構，提升讀取效率。
-- **實作**: 
-    - 將 `langs/admin/` 與 `langs/template/` 下的檔案移至 `langs/` 根目錄。
-    - 同步更新 `make_html.php`, `install.php`, `admin/lang_init.php` 等所有相關路徑。
+### [14:05] SSG Pipeline Refactoring (Regex Transition)
+- **Task**: Revamp static page generation for stability and compatibility.
+- **Implementation**:
+    - **Single Source of Truth**: Rewrote `make_html.php` logic.
+    - **Regex Parsing**: Replaced `DOMDocument` with Regex for template and image processing, improving HTML5 compatibility.
+    - **PHP 5.x Compat**: Maintained backward compatibility.
 
-### [23:45] PHP 5.x 全域相容性強化
-- **任務**: 確保專案能在舊版 PHP 5.x 環境 (如 AppServ) 穩定執行。
-- **實作**: 
-    - **語法降級**: 將 `??` 替換為 `isset() ? :`，將 `[]` 替換為 `array()`。
-    - **隨記數回退**: 在 `system_helper.php` 實作 `random_bytes` 回退方案。
-    - **核心校閱**: 修正所有 `admin/` 與 `api/` 核心邏輯，確保相容性。
+### [14:40] Automated Asset Minification
+- **Task**: Refine JS/CSS compression workflow.
+- **Implementation**: Fixed `mini.py` exclusion logic and added auto-cleanup.
+
+### [15:15] Micro-Template Manager & Incremental Builds
+- **Task**: Improve build efficiency and maintainability.
+- **Implementation**: Created `TemplateManager` class for logic encapsulation and implemented `mtime`-based caching to speed up generation.
+
+---
+
+## 2026-02-05 (English)
+
+### [10:15] Frontend i18n & Dynamic Config
+- **Task**: Implement frontend multi-language support and dynamic timezone/lang config.
+- **Implementation**: Created `langs/template/` structure, replaced hardcoded template text with `{{variable}}`, and updated build scripts.
+
+### [12:00] Security Hardening
+- **Task**: Fix Path Traversal and XSS vulnerabilities.
+- **Implementation**: Introduced `basename()` filtering in APIs and comprehensive HTML escaping in template generation.
+
+### [13:00] Pure Static JSON API Mode
+- **Task**: Implement backend-less JSON mode and fix encoding 404s.
+- **Implementation**: 
+    - **Single Data Source**: Consolidated JSONs into `api/json/data.json`.
+    - **Frontend Filtering**: Implemented client-side routing in `blog.js`.
+    - **Build Support**: Added `-json` flag to `make_html.php`.
+
+### [13:30] Smart Build Cache
+- **Task**: Optimize build performance with precise change detection.
+- **Implementation**: Implemented Hash comparison for global vs. home-only changes to minimize unnecessary rebuilds.
+
+### [13:45] Dynamic HTML Lang Attribute
+- **Task**: Support dynamic `lang` attribute in `<html>`.
+- **Implementation**: Added `html_lang` to template i18n files and updated `blog_template.html`.
+
+### [14:00] Date Unit i18n Fix
+- **Task**: Fix date unit display in sidebar and archives.
+- **Implementation**: Replaced hardcoded "日" with `{{lang_day_suffix}}` in templates and updated language files.
+
+### [14:30] Build Script Stability
+- **Task**: Fix syntax errors and strengthen caching in `make_html.php`.
+- **Implementation**: Fixed `build` function syntax and included language file content in global hash calculation.
+
+### [14:45] English Unit Fix
+- **Task**: Fix missing "Day" unit in English mode.
+- **Implementation**: Updated `template-en_US.php` with `day_suffix` definition.
+
+---
+
+## 2026-02-06 (English)
+
+### [23:30] i18n Refactoring
+- **Task**: Simplify language file structure.
+- **Implementation**: 
+    - Moved files from `langs/admin/` & `langs/template/` to `langs/` root.
+    - Updated paths in `make_html.php`, `install.php`, `admin/lang_init.php`.
+
+### [23:45] PHP 5.x Global Compatibility
+- **Task**: Ensure stability on legacy PHP 5.x environments (e.g., AppServ).
+- **Implementation**: 
+    - **Syntax Downgrade**: Replaced `??` with `isset()`, `[]` with `array()`.
+    - **Polyfills**: Implemented `random_bytes` fallback in `system_helper.php`.
+    - **Core Review**: Audited `admin/` and `api/` logic for compatibility.
 
 ---
 
@@ -470,38 +486,3 @@ Recorded the development journey and original Prompt commands of this project th
 ### [18:00] Server-side Pagination
 - **Task**: Improve performance for post management with large datasets.
 - **Implementation**: Implemented `getPostsPaged` in `DataManager` and added a pagination UI (15 posts per page) in `admin/posts.php`.
-
----
-
-## 2026-02-07 (繁體中文)
-
-### [14:15] 文章內容 Script 標籤保護 (Script Tag Protection)
-- **任務**: 防止文章內的 `<script>` 內容在網頁中執行，同時確保其在技術文章中的可見性。
-- **實作**: 
-    - **核心邏輯**: 在 `admin/system_helper.php` 實作 `protect_script_tags` 函式，將 `<script>` 標籤轉義為 `&lt;script&gt;`。
-    - **全域套用**: 整合至 `make_html.php` 與所有 `api/*.php` 檔案。
-
-### [15:30] 靜態生成架構重構 (SSG Refactoring)
-- **任務**: 解耦「資料發布」與「靜態網頁生成」，提供更靈活的建置管線。
-- **實作**:
-    - **邏輯封裝**: 建立 `PHP_LIB/StaticGenerator.php` 類別，統一管理 SSG 核心邏輯。
-    - **後台整合**: 在 `admin/post_edit.php` 新增「儲存後立即重建」選項。
-    - **相容性修復**: 修正 PHP 5.3 不支援 Closure 使用 `$this` 的限制，確保在舊版環境穩定執行。
-
-### [15:45] SSG 穩定性修復與 PHP 5.x 相容性強化
-- **任務**: 解決重構後出現的 500 錯誤並提升舊版 PHP 支援。
-- **實作**: 
-    - **語法修復**: 修正 `StaticGenerator.php` 內的引號轉義與 Regex 錯誤。
-    - **相容性修復**: 針對 PHP 5.3 移除 Closure 中的 `$this` 使用，並將語系檔全面降級為 `array()` 語法。
-    - **強健度提升**: 在 `post_save.php` 引入更全面的錯誤捕捉邏輯。
-
-### [17:15] 後台建置管理頁面與導覽重構
-- **任務**: 建立專用的建置管理介面並優化後台使用者體驗.
-- **實作**:
-    - **網站建置頁面**: 新增 `admin/build.php`，支援「強制重生」、「更新 JSON API」以及「選取特定文章建置」。
-    - **導覽列組件化**: 建立 `admin/sidebar_inc.php` 並將後台選單統一化，實作 **Fixed Sidebar** 佈局，讓選單不隨頁面捲動消失。
-    - **狀態偵測**: 在儀表板與文章列表中，加入「靜態網頁未建立」的即時偵測與紅色警告標籤。
-
-### [18:00] 文章管理分頁功能
-- **任務**: 解決文章量大時載入緩慢的問題。
-- **實作**: 在 `DataManager` 實作 `getPostsPaged` 方法，並在 `admin/posts.php` 建立分頁導覽列（每頁 15 篇），顯著提升管理效率。

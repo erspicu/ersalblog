@@ -45,7 +45,7 @@
 
 ## "更新" (Update)
 當使用者輸入關鍵字 **"更新"** 時，請依序執行以下流程：
-1. **文件更新**: 掃描現況，更新 `MD/ARCHITECTURE.md`、`MD/HISTORY.md` 與 `README.md`。**所有文件必須維持中英文內容同步。**
+1. **文件更新**: 掃描現況，更新 `MD/ARCHITECTURE.md`、`README.md`，以及歷史紀錄檔 `MD/HISTORY_zh_TW.md` (繁中) 與 `MD/HISTORY_en_US.md` (英文)。**所有文件必須維持中英文內容同步。**
 2. **版本控管**:
     - 呼叫 `cli_help` 查詢當前的 **Gemini CLI 版本** 與 **AI 模型名稱**。
     - 獲取當前 **UTC+8** 日期時間作為版本號 (格式：`vYYYY.MM.DD.HH.MM`)。
