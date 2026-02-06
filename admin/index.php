@@ -246,6 +246,14 @@ if ($source === 'db') {
                                 <?php echo htmlspecialchars($post['post_title']); ?>
                                 <?php if (isset($post['status']) && $post['status'] === 'draft'): ?>
                                     <span class="badge bg-warning text-dark ms-1" style="font-size: 0.75em;"><?php echo __('stat_drafts'); ?></span>
+                                <?php else: ?>
+                                    <?php 
+                                    // 檢查實體檔是否存在 (僅限非草稿)
+                                    $staticPath = __DIR__ . '/../post/' . $post['post_filename'];
+                                    if (!file_exists($staticPath)) {
+                                        echo '<span class="badge bg-danger ms-1" style="font-size: 0.75em;">' . __('badge_no_static') . '</span>';
+                                    }
+                                    ?>
                                 <?php endif; ?>
                             </td>
                         </tr>
