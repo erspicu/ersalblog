@@ -299,6 +299,7 @@ return [
     'col_select' => '選取',
     'filter_all' => '全部',
     'filter_published' => '僅發布',
+    'badge_no_static' => '靜態網頁未建立',
 
     // Security Warning
     'warn_install_file_exists' => '⚠️ 安全警告：安裝檔案 (install.php) 仍然存在。',

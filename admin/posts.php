@@ -97,6 +97,16 @@ function truncate($text, $limit = 60) {
                                 </a>
                                 
                                 <!-- 狀態標籤 -->
+                                <?php 
+                                // 靜態網頁存在檢查 (排除草稿)
+                                $isDraft = (isset($post['status']) && $post['status'] === 'draft');
+                                if (!$isDraft) {
+                                    $staticPath = '../post/' . $post['post_filename'];
+                                    if (!file_exists($staticPath)) {
+                                        echo '<span class="badge bg-danger ms-2" title="Static page file not found">'.__('badge_no_static').'</span>';
+                                    }
+                                }
+                                ?>
                                 <?php if (isset($post['status'])): ?>
                                     <?php if ($post['status'] === 'draft'): ?>
                                         <span class="badge bg-warning text-dark ms-2">草稿</span>

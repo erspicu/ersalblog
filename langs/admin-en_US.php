@@ -299,6 +299,7 @@ return [
     'col_select' => 'Select',
     'filter_all' => 'All',
     'filter_published' => 'Published Only',
+    'badge_no_static' => 'Static Page Missing',
 
     // Security Warning
     'warn_install_file_exists' => '⚠️ Security Warning: Installer file (install.php) still exists.',
