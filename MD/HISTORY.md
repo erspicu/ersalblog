@@ -480,6 +480,13 @@ Recorded the development journey and original Prompt commands of this project th
 - **任務**: 修復因語系目錄結構變動導致的後台失效。
 - **實作**: 修正 `admin/lang_init.php` 中的 `$langBaseDir` 路徑，使其正確指向扁平化後的 `langs/` 根目錄。
 
+### [14:45] 備份工具 500 錯誤修正
+- **任務**: 修復 `admin/tool_backup.php` 的運行錯誤。
+- **實作**: 
+    - 補齊缺失的 `data_provider.php` 引用。
+    - 修正前端 JS 呼叫時的表單 ID 不匹配問題。
+    - 優化變數定義流程以提升程式碼強健度。
+
 ---
 
 ## 2026-02-07 (繁體中文)

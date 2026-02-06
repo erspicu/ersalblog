@@ -1,6 +1,7 @@
 <?php
 // admin/tool_backup.php
 require_once 'auth.php';
+require_once 'data_provider.php';
 requireLogin();
 
 // 驗證 CSRF Token
@@ -8,9 +9,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateCSRFRequest();
 }
 
-$dataManager = new DataManager();$currentSource = getAdminSource();
+$dataManager = new DataManager();
+$currentSource = getAdminSource();
 $backupDir = dirname(__DIR__) . '/backup';
 if (!is_dir($backupDir)) mkdir($backupDir, 0755, true);
+
+// --- Helper: Get PHP Upload Limit ---
+function getUploadLimit() {
+    $parse = function($val) {
+        $val = trim($val);
+        $last = strtolower($val[strlen($val)-1]);
+        $val = (int)$val;
+        switch($last) {
+            case 'g': $val *= 1024;
+            case 'm': $val *= 1024;
+            case 'k': $val *= 1024;
+        }
+        return $val;
+    };
+    $upload_max = $parse(ini_get('upload_max_filesize'));
+    $post_max = $parse(ini_get('post_max_size'));
+    $limit = min($upload_max, $post_max);
+    
+    if ($limit >= 1024 * 1024 * 1024) return round($limit / 1024 / 1024 / 1024, 2) . ' GB';
+    else return round($limit / 1024 / 1024, 2) . ' MB';
+}
+$uploadLimitStr = getUploadLimit();
 
 $msg = '';
 $msgType = '';
@@ -360,28 +384,6 @@ usort($backups, function($a, $b) {
     return filemtime($b) - filemtime($a); 
 });
 
-// --- Helper: Get PHP Upload Limit ---
-function getUploadLimit() {
-    $parse = function($val) {
-        $val = trim($val);
-        $last = strtolower($val[strlen($val)-1]);
-        $val = (int)$val;
-        switch($last) {
-            case 'g': $val *= 1024;
-            case 'm': $val *= 1024;
-            case 'k': $val *= 1024;
-        }
-        return $val;
-    };
-    $upload_max = $parse(ini_get('upload_max_filesize'));
-    $post_max = $parse(ini_get('post_max_size'));
-    $limit = min($upload_max, $post_max);
-    
-    if ($limit >= 1024 * 1024 * 1024) return round($limit / 1024 / 1024 / 1024, 2) . ' GB';
-    else return round($limit / 1024 / 1024, 2) . ' MB';
-}
-$uploadLimitStr = getUploadLimit();
-
 // --- Shared Helpers ---
 
 function addStaticFilesToZip($zip, $baseDir) {
@@ -524,7 +526,7 @@ function cleanupTempDir($dir) {
                 <h5 class="card-title"><?php echo __('backup_create_title'); ?></h5>
                 <p class="text-muted"><?php echo __('backup_desc'); ?></p>
                 
-                <form method="POST" id="backupForm">
+                <form method="POST" id="createBackupForm">
                     <!-- CSRF Token -->
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     <input type="hidden" name="action" value="create_backup">
