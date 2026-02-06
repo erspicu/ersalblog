@@ -1,88 +1,126 @@
-﻿# BaxerMux Photography Blog
+# BaxerMux Photography Blog
 
-A lightweight, high-performance blog system designed specifically for photographers. It features a unique hybrid architecture combining Static Site Generation (SSG) and Single Page Application (SPA) capabilities without requiring a traditional SQL database for its core operation.
-
-## Key Features
-- **Photography Focused**: Automatically extracts and displays EXIF metadata (Camera, Aperture, Shutter, ISO, GPS) from your photos using `exif.js`.
-- **Hybrid Data Management**:
-  - **Flat-file Mode**: Uses simple text files (`index_post.txt`) and directory structures for content management.
-  - **Database Mode**: Supports MySQL/MariaDB and **SQLite 3** with a normalized schema (`blog_posts`, `blog_categories`) for robust data handling.
-- **Dual-Mode Admin Panel**: A unified administration interface that allows you to switch between managing local files or the database seamlessly.
-    - **Full Internationalization**: Both the admin panel and frontend templates support dynamic language switching (Traditional Chinese / English).
-    - **Backup & Restore**: Integrated tool to pack data and static resources into ZIP archives, supporting file system, MySQL, and SQLite modes.
-    - **Vibe Coding**: Developed with Gemini CLI & Gemini AI Models, featuring automated version tracking.
-- **Hybrid Rendering & Static JSON**: Serve content as a SPA, pre-render static HTML, or export all data into a **consolidated Static JSON** (`api/json/data.json`) for a 100% backend-less hosting experience.
-- **Performance Optimized**: Built-in lazy loading for images and automatic JS/CSS minification via Python scripts.
-
-## Tech Stack
-- **Backend**: PHP 7.4+ (Compatible with PHP 8.x)
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Tools**: Python 3 (for asset minification)
-
-## Quick Start
-1. Clone the repository.
-2. Run `install.php` in your browser. This wizard will help you check the environment and generate `config.php` and `config.js`.
-3. Alternatively, manually copy `config.example.php` to `config.php` and configure your settings.
-4. Access `/admin`, select **Database Mode**. If the database is not initialized, follow the on-screen link to the **Initialization Wizard** to create tables and import data.
-5. Alternatively, add posts in `contents/index_post.txt` for File mode.
-6. Run `make_html.php` to generate static pages.
-
-## Acknowledgements & Third-Party Libraries
-This project utilizes the following open-source libraries:
-
-### Core & Frontend
-- **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas): Used in `make_html.php` for HTML beautification.
-- **[exif-js](https://github.com/exif-js/exif-js)**: Used in the frontend (`static/exif.js`) to read and display EXIF data.
-
-### Admin Panel
-- **[Bootstrap 5](https://getbootstrap.com/)**: Modern responsive UI framework.
-- **[SweetAlert2](https://sweetalert2.github.io/)**: Beautiful and customizable alert dialogs.
-- **[TinyMCE 6](https://www.tiny.cloud/)**: Advanced WYSIWYG editor with custom `<!--more-->` support.
+A lightweight, hybrid photography blog system designed for speed, flexibility, and privacy.
 
 ---
 
-# BaxerMux 攝影部落格 (Photography Blog)
+### 🌟 Core Features
 
-一個輕量、高效能，專為攝影師設計的部落格系統。採用獨特的混合架構，結合了靜態網站生成 (SSG) 與單頁應用程式 (SPA) 的優點，且核心運作不需要傳統的 SQL 資料庫。
+*   **Hybrid Engine**: High-performance Static Site Generation (SSG) combined with a flexible Single Page Application (SPA).
+*   **Zero-Database Option**: Runs entirely on plain text files, while also supporting MySQL and SQLite 3 for scalability.
+*   **Admin Power-ups**:
+    *   **Selective SSG Build**: Trigger static page generation directly from the post editor or a dedicated build management interface.
+    *   **Visual Editor**: Locally-hosted TinyMCE 6 for a seamless "What You See Is What You Get" writing experience.
+    *   **Advanced Dashboard**: Real-time system health checks, database statistics, and static file status monitoring.
+    *   **Smart Navigation**: Fixed sidebar layout with unified navigation for efficient management.
+    *   **Post Pagination**: Server-side pagination (15 posts/page) for fast browsing of large archives.
+*   **Security First**:
+    *   **Script Protection**: Built-in HTML escaping for `<script>` tags to prevent execution in posts while keeping content readable.
+    *   **Rate Limiting & CSRF**: Secure login with IP-based lockout and full CSRF protection for all admin actions.
+*   **Deployment Ready**: Optimized Python minification script for JS/CSS assets and incremental build support.
+*   **Multi-language**: Fully localized admin and frontend (T. Chinese/English).
 
-## 核心特性 (Key Features)
-- **攝影導向**：整合 `exif.js`，自動從您的照片中提取並顯示 EXIF 元數據（相機、光圈、快門、ISO、GPS）。
-- **混合數據管理**：
-  - **檔案模式 (Flat-file)**：使用簡單的文字檔 (`index_post.txt`) 與目錄結構進行內容管理。
-  - **資料庫模式 (Database)**：支援 MySQL/MariaDB 與 **SQLite 3**，並採用正規化架構 (`blog_posts`, `blog_categories`) 處理更強大的數據需求。
-- **雙模式管理後台**：統一的管理介面，讓您能在管理本地檔案或資料庫之間無縫切換。
-    - **全面國際化**：後台管理介面與前台樣板皆支援動態語言切換（繁體中文 / 英文）。
-    - **備份與還原**：內建備份工具，支援將資料與靜態資源打包為 ZIP 檔，涵蓋檔案模式、MySQL 與 SQLite 模式。
-    - **Vibe Coding**：由 Gemini CLI 與 Gemini AI 模型開發，具備自動化版本追蹤。
-- **混合渲染與靜態 JSON**：內容可透過 SPA 呈現，或預先渲染為靜態 HTML。支援將所有資料導出為**單一靜態 JSON 資料包** (`api/json/data.json`)，達成 100% 無後端部署。
-- **效能優化**：內建圖片延遲載入 (Lazy Loading) 機制，並透過 Python 腳本自動壓縮 JS/CSS。
+---
 
-## 技術棧 (Tech Stack)
-- **後端 (Backend)**: PHP 7.4+ (相容 PHP 8.x)
-- **前端 (Frontend)**: 原生 JavaScript (Vanilla JS), HTML5, CSS3
-- **工具 (Tools)**: Python 3 (用於資產壓縮)
+### 🚀 Key Features Highlights
 
-## 快速開始
-1. 複製儲存庫。
-2. 在瀏覽器中執行 `install.php`。此安裝精靈將協助您檢測環境並自動生成 `config.php` 與 `config.js`。
-3. 您也可以手動將 `config.example.php` 重新命名為 `config.php` 並設定資料庫資訊。
-4. 進入 `/admin` 並選擇 **資料庫模式**。若尚未初始化，請點擊畫面提示進入 **初始化精靈** 以建立資料表並匯入資料。
-5. 若選擇 **檔案模式** 且目錄結構缺失，系統亦會引導進入 **檔案建構精靈**，可選擇從資料庫還原內容。
-6. 執行 `make_html.php` 以生成靜態頁面。
+#### 1. SSG Pipeline Refactoring
+The core build logic is now encapsulated in `PHPLib\StaticGenerator`, enabling consistent rendering across CLI and Web interfaces. It supports incremental builds based on file modification times.
 
-## 致謝與第三方函式庫
-本專案使用了以下開源函式庫，感謝原作者的貢獻：
+#### 2. Advanced Post Management
+Manage your content with ease through a paginated list and a visual editor. The system automatically detects missing static files and alerts you on the dashboard.
 
-### 核心與前台
-- **[Dindent](https://github.com/gajus/dindent)** (Gajus Kuizinas):
-  用於 `make_html.php` 中，將生成的 HTML 原始碼進行排版美化。
-- **[exif-js](https://github.com/exif-js/exif-js)**:
-  用於前端 (`static/exif.js`)，從圖片中讀取並顯示 EXIF 資訊。
+#### 3. Secure & Private
+No external CDNs required for core functionality. TinyMCE, SweetAlert2, and Bootstrap are all bundled for maximum privacy and performance.
 
-### 後台管理系統
-- **[Bootstrap 5](https://getbootstrap.com/)**:
-  後台介面採用 Bootstrap 5 框架構建，提供響應式且現代化的 UI。
-- **[SweetAlert2](https://sweetalert2.github.io/)**:
-  用於替代 JavaScript 原生彈出視窗，提供美觀且高度可客製化的提示訊息。
-- **[TinyMCE 6](https://www.tiny.cloud/)**:
-  進階視覺化 (WYSIWYG) 文章編輯器，具備自定義 `<!--more-->` 繼續閱讀支援。
+---
+
+### 📂 Directory Structure Overview
+
+*   `admin/`: Backend management system.
+*   `api/`: Dynamic API endpoints (File/MySQL/SQLite).
+*   `langs/`: Centralized i18n files for Admin and Templates.
+*   `PHP_LIB/`: Core libraries including `StaticGenerator` and `TemplateManager`.
+*   `contents/`: Your raw blog content (HTML fragments and index).
+*   `post/`: Statically generated pages ready for production.
+*   `static/`: Core frontend assets (JavaScript and Templates).
+
+---
+
+### 📚 Acknowledgments & Third-party Libraries
+
+We respect open-source contributors. This project utilizes:
+- **PHP Libraries**:
+  - `Gajus\Dindent`: HTML indentation for beautiful static output.
+  - `Html2Text`: Content conversion utility.
+- **Frontend Assets**:
+  - `TinyMCE 6`: Visual content editor.
+  - `SweetAlert2`: Modern popup notifications.
+  - `Bootstrap 5`: Responsive layout framework.
+  - `Exif.js`: Photography metadata extraction.
+
+---
+
+### 🎨 Theming
+Configurable in `config.js` via `theme_file`. Supports `blog.css` (Standard) and `blog-dark.css` (Dark Mode).
+
+---
+
+### 🛠 Automated Version Control
+Version: `v2026.02.07.10.08` (UTC+8)
+CLI Version: `0.27.2`
+Model: `gemini-3-flash-preview`
+
+---
+
+## BaxerMux Photography Blog (繁體中文說明)
+
+本專案是一個兼具 **靜態網頁生成 (SSG)** 與 **動態單頁應用 (SPA)** 優點的攝影部落格系統。
+
+### 🌟 核心特色
+
+*   **混合引擎**: 高效能靜態網頁生成與靈活的前端渲染 (SPA) 雙模式。
+*   **無資料庫支援**: 可完全運行於純文字檔案，亦支援 MySQL 與 SQLite 3 提供擴充性。
+*   **強大後台**:
+    *   **選擇性建置**: 可直接從文章編輯器或專用的建置管理介面觸發靜態網頁生成。
+    *   **視覺化編輯器**: 內建 TinyMCE 6，提供所見即所得的流暢寫作體驗。
+    *   **進階儀表板**: 即時系統健康檢查、資料庫統計及靜態檔案狀態監測。
+    *   **智慧導覽**: 固定式側邊欄佈局與統一的導覽組件，提升管理效率。
+    *   **文章分頁**: 後台支援伺服器端分頁（每頁 15 篇），輕鬆應對大量文章。
+*   **安全性強化**:
+    *   **腳本防護**: 內建 `<script>` 標籤轉義機制，防止文章內的腳本執行，同時保留技術內容的可讀性。
+    *   **安全防禦**: IP 登入鎖定機制與全站 CSRF 防護。
+*   **部署優化**: 內建 Python 壓縮腳本與增量建置支援，顯著縮短部屬時間。
+*   **多語系**: 完整的後台與前台語系支援（繁中/英文）。
+
+---
+
+### 🚀 重點功能摘要
+
+#### 1. SSG 建置管線重構
+核心建置邏輯封裝於 `PHPLib\StaticGenerator`，確保 CLI 與 Web 介面渲染結果一致，並支援基於檔案修改時間的增量建置。
+
+#### 2. 進階文章管理
+透過分頁列表與視覺化編輯器輕鬆管理內容。系統會自動偵測缺失的靜態檔案，並在儀表板即時提醒。
+
+#### 3. 安全與隱私
+核心功能不依賴外部 CDN。TinyMCE、SweetAlert2 與 Bootstrap 全數內建，確保極致的隱私與連線效能。
+
+---
+
+### 📂 目錄結構簡述
+
+*   `admin/`: 後台管理系統。
+*   `api/`: 各種模式的資料接口。
+*   `langs/`: 集中管理的語系檔案。
+*   `PHP_LIB/`: 核心邏輯類別庫 (StaticGenerator, TemplateManager)。
+*   `contents/`: 文章原始內容與索引。
+*   `post/`: 產出的靜態網頁。
+*   `static/`: 前端核心邏輯與樣板原始碼。
+
+---
+
+### 🛠 自動化版本資訊
+版本號: `v2026.02.07.10.08` (UTC+8)
+CLI 版本: `0.27.2`
+模型名稱: `gemini-3-flash-preview`

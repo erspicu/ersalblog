@@ -22,10 +22,12 @@ The system supports two operating modes:
     *   The frontend uses the `<template>` tag for client-side rendering.
 2.  **Static Generation Mode (`make_html.php`)**:
     *   Executes a PHP script to read the database.
+    *   **Core Generator**: Powered by `PHPLib\StaticGenerator` class, encapsulating all build logic for reuse in both CLI and Admin.
     *   Uses `static/blog_template.html` as the base template.
     *   **Micro-Template Engine**: Utilizes `PHP_LIB/TemplateManager.php` for high-performance placeholder replacement and list rendering.
     *   **Regex Pipeline**: Employs Regex-based parsing instead of DOMDocument to ensure HTML5 compatibility and stability across different PHP versions (5.x+).
     *   **Incremental Builds**: Implements an `mtime`-based cache mechanism that skips rendering for unmodified articles or templates.
+    *   **Selective Generation**: Supports building specific posts via filename filtering to optimize automated workflows.
     *   Pre-renders all article pages into the `post/` directory (e.g., `post/2025xxxx.html`).
     *   Generates list pages (`blog_list.html`) in the root directory.
     *   **Note**: These generated `.html` files (and the `post/` directory) are excluded by `.gitignore`.
@@ -42,7 +44,7 @@ The system supports two operating modes:
 *   **Backup & Recovery System**:
     *   **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives for File, MySQL, or SQLite modes.
 *   **Internationalization (i18n)**:
-    *   **Template i18n**: Supports multi-language frontend via `langs/template/` (e.g., `zh_TW.php`, `en_US.php`).
+    *   **Template i18n**: Supports multi-language frontend via `langs/` (e.g., `template-zh_TW.php`).
     *   **Admin i18n**: Admin panel supports dynamic language switching.
 *   **Pure Static JSON API Mode**:
     *   Supports `api_type: 'json'` in `config.js`.
@@ -50,8 +52,11 @@ The system supports two operating modes:
     *   `static/blog.js` implements client-side routing and filtering for a 100% backend-less experience.
 *   **Admin Settings GUI**:
     *   **Settings Page**: `admin/settings.php` allows graphical editing of `config.js` and `config.php` (Lang/Timezone) settings.
+*   **Navigation & Layout**:
+    *   **Unified Sidebar**: Components via `admin/sidebar_inc.php` for consistency.
+    *   **Fixed Layout**: Sidebar remains fixed while content area is scrollable.
 *   **Security Features**:
-    *   **Script Tag Protection**: Implements `protect_script_tags` to neutralize `<script>` tags in article content by replacing them with `<nop-script>`, preventing execution in both static and dynamic views.
+    *   **Script Tag Protection**: Implements `protect_script_tags` to neutralize `<script>` tags in article content by escaping them to `&lt;script&gt;`, preventing execution while maintaining visibility for technical posts.
 
 ---
 
@@ -70,10 +75,10 @@ Listed below are key directories and file rules in the Git repository:
     *   `json/`: (Ignored) Contains pre-generated `data.json` for static mode.
 
 *   **`/langs`**:
-    *   Contains language packs for Admin (`admin/`) and Frontend templates (`template/`).
+    *   Contains language packs for Admin, Templates, and Installer.
 
 *   **`/PHP_LIB`**:
-    *   Contains shared libraries and the `TemplateManager.php` micro-framework.
+    *   Contains shared libraries, `StaticGenerator.php` core, and the `TemplateManager.php` micro-framework.
 
 *   **`/post`**:
     *   (Ignored) Destination for statically generated article HTML files.
@@ -100,6 +105,7 @@ Listed below are key directories and file rules in the Git repository:
     *   `mini.py` automatically compresses JS/CSS while protecting vendor assets.
     *   Image loading strategy: LCP (first image) Eager Loading, others Lazy Loading.
     *   Static generation optimizes resource paths (`../`) for subdirectories.
+    *   **Server-side Pagination**: Admin interface supports paginated list retrieval for large datasets.
 *   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`.
 
 ---
@@ -130,10 +136,12 @@ Listed below are key directories and file rules in the Git repository:
     *   前端利用 `<template>` 標籤進行客戶端渲染。
 2.  **靜態生成模式 (`make_html.php`)**:
     *   執行 PHP 腳本讀取資料庫。
+    *   **核心建置器**：由 `PHPLib\StaticGenerator` 類別驅動，封裝所有建置邏輯，供 CLI 與後台管理介面共同調用。
     *   利用 `static/blog_template.html` 作為基底樣板。
     *   **微樣板引擎**：使用 `PHP_LIB/TemplateManager.php` 進行高效能變數替換與列表渲染。
     *   **Regex 建置管線**：全面改用正規表達式取代 DOMDocument，解決 HTML5 相容性問題並支援 PHP 5.x+ 環境。
     *   **增量建置快取**：實作基於 `mtime` 的快取機制，自動比對來源檔與目標檔時間，僅重新渲染有變動的內容。
+    *   **選擇性生成**：支援指定特定檔名進行建置，優化自動化流程效能。
     *   預先渲染所有文章頁面至 `post/` 目錄 (如 `post/2025xxxx.html`)。
     *   在根目錄生成列表頁 (`blog_list.html`)。
     *   **注意**: 這些生成的 `.html` 檔案與 `post/` 目錄已被 `.gitignore` 排除。
@@ -146,7 +154,7 @@ Listed below are key directories and file rules in the Git repository:
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。
 *   **備份與還原系統**: 支援 File/MySQL/SQLite 多模式備份集製作與還原。
 *   **國際化支援 (i18n)**:
-    *   **前台多語系**: 透過 `langs/template/` 提供多語系樣板渲染支援。
+    *   **前台多語系**: 透過 `langs/` 提供多語系樣板渲染支援 (如 `template-zh_TW.php`)。
     *   **後台多語系**: 管理介面支援動態切換語言。
 *   **純靜態 JSON API 模式**:
     *   支援 `config.js` 中的 `api_type: 'json'` 設定。
@@ -154,8 +162,11 @@ Listed below are key directories and file rules in the Git repository:
     *   `static/blog.js` 實作客戶端路由與過濾，達成 100% 無後端運作。
 *   **網站設定管理 (GUI)**:
     *   `admin/settings.php` 提供圖形介面修改網站配置 (包含語系與時區)。
+*   **導覽與佈局**:
+    *   **統一側邊欄**: 透過 `admin/sidebar_inc.php` 達成所有頁面導覽的一致性。
+    *   **固定佈局**: 實作固定選單 (Fixed Sidebar)，確保操作項始終可見。
 *   **安全性特性 (Security)**:
-    *   **文章腳本保護**: 實作 `protect_script_tags` 機制，自動將文章內容中的 `<script>` 標籤替換為 `<nop-script>`，防止腳本在靜態或動態載入時被意外執行。
+    *   **文章腳本保護**: 實作 `protect_script_tags` 機制，自動將文章內容中的 `<script>` 標籤轉義為 `&lt;script&gt;`，防止腳本被意外執行，同時確保在技術文章中能正確顯示文字內容。
 
 ---
 
@@ -174,10 +185,10 @@ Listed below are key directories and file rules in the Git repository:
     *   `json/`: (已忽略) 存放預生成的 `data.json` 靜態資料包。
 
 *   **`/langs`**:
-    *   存放後台 (`admin/`) 與前台樣板 (`template/`) 的語系包。
+    *   存放後台、前台樣板與安裝程式的語系包。
 
 *   **`/PHP_LIB`**:
-    *   存放共用函式庫與 `TemplateManager.php` 微框架。
+    *   存放共用函式庫、`StaticGenerator.php` 核心與 `TemplateManager.php` 微框架。
 
 *   **`/post`**:
     *   (已忽略) 靜態生成文章的輸出目錄。
@@ -204,6 +215,7 @@ Listed below are key directories and file rules in the Git repository:
     *   `mini.py` 自動壓縮 JS/CSS 並保護第三方套件。
     *   圖片載入策略：LCP (首張圖) Eager Loading，其餘 Lazy Loading。
     *   靜態生成支援自動修正子目錄資源路徑 (`../`)。
+    *   **伺服器端分頁**：後台文章列表支援分頁讀取，顯著提升大數據量下的效能。
 *   **版本控制**: 透過 `.gitignore` 嚴格區分「程式碼」與「內容/生成物」。
 
 ---
