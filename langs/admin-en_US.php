@@ -300,6 +300,7 @@ return [
     'filter_all' => 'All',
     'filter_published' => 'Published Only',
     'badge_no_static' => 'Static Page Missing',
+    'stat_no_static' => 'Unbuilt',
 
     // Security Warning
     'warn_install_file_exists' => '⚠️ Security Warning: Installer file (install.php) still exists.',

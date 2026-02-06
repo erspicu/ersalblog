@@ -300,6 +300,7 @@ return [
     'filter_all' => '全部',
     'filter_published' => '僅發布',
     'badge_no_static' => '靜態網頁未建立',
+    'stat_no_static' => '未建置',
 
     // Security Warning
     'warn_install_file_exists' => '⚠️ 安全警告：安裝檔案 (install.php) 仍然存在。',

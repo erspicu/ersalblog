@@ -13,6 +13,17 @@ $phpVersion = phpversion();
 $postCounts = $dataManager->getPostCounts();
 $postCount = $postCounts['total'];
 
+// 1.1 統計未建置靜態網頁的文章 (僅限已發布文章)
+$allPosts = $dataManager->getAllPosts();
+$missingStaticCount = 0;
+foreach ($allPosts as $p) {
+    if (isset($p['status']) && $p['status'] === 'draft') continue;
+    $staticPath = __DIR__ . '/../post/' . $p['post_filename'];
+    if (!file_exists($staticPath)) {
+        $missingStaticCount++;
+    }
+}
+
 // 2. DB 大小 & 連線資訊 (For DB / SQLite)
 $dbSize = 'N/A';
 $dbHost = 'N/A';
@@ -138,6 +149,13 @@ if ($source === 'db') {
                                     <?php echo __('stat_published'); ?>: <b><?php echo $postCounts['published']; ?></b> | 
                                     <?php echo __('stat_drafts'); ?>: <b><?php echo $postCounts['draft']; ?></b>
                                 </small>
+                                <?php if ($missingStaticCount > 0): ?>
+                                <div class="mt-1">
+                                    <span class="badge bg-danger">
+                                        <?php echo __('stat_no_static'); ?>: <?php echo $missingStaticCount; ?>
+                                    </span>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             <span class="fs-1">📝</span>
                         </div>
