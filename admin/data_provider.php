@@ -119,7 +119,7 @@ class DataManager {
 
     public function getRecentPosts($limit = 5) {
         if ($this->source === 'db' || $this->source === 'sqlite') {
-            $stmt = $this->pdo->prepare("SELECT post_title, post_date, status FROM blog_posts ORDER BY post_date DESC LIMIT ?");
+            $stmt = $this->pdo->prepare("SELECT post_title, post_date, status, post_filename FROM blog_posts ORDER BY post_date DESC LIMIT ?");
             // PDO::PARAM_INT is important for LIMIT
             $stmt->bindValue(1, $limit, PDO::PARAM_INT); 
             $stmt->execute();
@@ -132,7 +132,8 @@ class DataManager {
                 return [
                     'post_title' => $p['post_title'],
                     'post_date' => $p['post_date'],
-                    'status' => isset($p['status']) ? $p['status'] : 'published'
+                    'status' => isset($p['status']) ? $p['status'] : 'published',
+                    'post_filename' => $p['post_filename']
                 ];
             }, $recent);
         }
