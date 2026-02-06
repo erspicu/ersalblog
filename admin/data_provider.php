@@ -195,6 +195,28 @@ class DataManager {
         }
     }
 
+    public function getPostsPaged($page = 1, $limit = 15) {
+        $offset = ($page - 1) * $limit;
+        if ($this->source === 'db' || $this->source === 'sqlite') {
+            $sql = "SELECT p.id, p.post_date, p.post_title, p.post_filename, p.post_tags, p.post_description, p.status, 
+                           GROUP_CONCAT(c.category_name) as post_categories
+                    FROM blog_posts p
+                    LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
+                    LEFT JOIN blog_categories c ON pc.category_id = c.id
+                    GROUP BY p.id
+                    ORDER BY p.post_date DESC
+                    LIMIT ? OFFSET ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+            $stmt->bindValue(2, (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } else {
+            $all = $this->getAllPosts();
+            return array_slice($all, $offset, $limit);
+        }
+    }
+
     public function getPost($id) {
         if ($this->source === 'db' || $this->source === 'sqlite') {
             $sql = "SELECT p.*, GROUP_CONCAT(c.category_name) as post_categories

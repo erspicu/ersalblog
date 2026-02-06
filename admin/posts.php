@@ -15,8 +15,14 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['id
     exit;
 }
 
-// 讀取文章列表 (依日期降序)
-$posts = $dataManager->getAllPosts();
+// 讀取文章列表 (分頁)
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$limit = 15;
+
+$posts = $dataManager->getPostsPaged($page, $limit);
+$totalPosts = $dataManager->getPostCount();
+$totalPages = ceil($totalPosts / $limit);
 
 // 輔助函式
 function truncate($text, $limit = 60) {
@@ -160,6 +166,43 @@ function truncate($text, $limit = 60) {
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination UI -->
+            <?php if ($totalPages > 1): ?>
+            <div class="card-footer bg-white border-top-0 py-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        <!-- Previous -->
+                        <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page - 1; ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers (Limited) -->
+                        <?php 
+                        $start = max(1, $page - 2);
+                        $end = min($totalPages, $page + 2);
+                        for ($i = $start; $i <= $end; $i++): 
+                        ?>
+                            <li class="page-item <?php echo ($i === $page) ? 'active' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <!-- Next -->
+                        <li class="page-item <?php echo ($page >= $totalPages) ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page + 1; ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center mt-2 small text-muted">
+                    Page <?php echo $page; ?> of <?php echo $totalPages; ?> (Total: <?php echo $totalPosts; ?> posts)
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
