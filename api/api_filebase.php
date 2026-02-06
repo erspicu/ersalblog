@@ -69,10 +69,12 @@ function get_Category_index($category_ch, $index_page)
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
 
     $nameNoExt = str_replace(".html", "", $line_arr[1]);
     if (in_array($line_arr[1], $category_post_index) || in_array($nameNoExt, $category_post_index)) {
       if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -105,10 +107,12 @@ function get_daterange_index($date_param, $index_page)
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
 
     //改成檢查年跟月是否合乎範圍
     if (startsWith($line_arr[0], $year . "-" . $mon)) {
       if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -154,9 +158,11 @@ function get_tag_index($tag, $index_page)
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
 
     if (in_array($tag, $tags)) {
       if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
       $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
       $html_split = explode("<!--more-->", $html);
 
@@ -187,6 +193,7 @@ function get_index($index_page)
     $line_arr = explode("|", $val);
     $tags = explode(",", trim($line_arr[3]));
     if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
+    if (!file_exists("../post/" . $line_arr[1])) continue;
     $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
     $html_split = explode("<!--more-->", $html);
 

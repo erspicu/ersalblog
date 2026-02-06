@@ -219,6 +219,11 @@ function get_data($filter_type, $filter_value)
 
         // --- D. Add to Result if Match ---
         if ($is_match) {
+            // 檢查是否已建置靜態網頁檔
+            if (!file_exists("../post/" . $filename)) {
+                continue;
+            }
+
             // Prepare content (summary only)
             $content_parts = explode('<!--more-->', $content);
             $summary = $content_parts[0];

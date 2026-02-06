@@ -225,6 +225,10 @@
   - 優化變數宣告順序，避免 `uploadLimitStr` 產生的未定義變數警告。
 - [2026-02-07 14:50:00] 修正備份工具 CSRF 驗證錯誤：
   - 補齊備份清單中「還原」與「刪除」表單缺失的 CSRF Token 欄位。
+- [2026-02-07 15:05:00] 強化 API 回傳邏輯：
+  - 更新 `api/api_filebase.php`, `api/api_sqlitebase.php`, `api/api_dbsqlbase.php`。
+  - 增加「靜態檔檢查」過濾條件：API 僅回傳在 `post/` 目錄下已存在實體 `.html` 檔案的文章。
+  - 同步更新 `make_html.php` 的 JSON 生成邏輯，確保 `data.json` 與實體檔案一致。
 - [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。

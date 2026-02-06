@@ -491,6 +491,11 @@ Recorded the development journey and original Prompt commands of this project th
 - **任務**: 解決刪除或還原備份時出現 "Invalid CSRF Token" 的錯誤。
 - **實作**: 為備份清單中的所有操作表單補上 `csrf_token` 隱藏欄位，確保符合安全性檢查規範。
 
+### [15:05] API 文章同步過濾強化
+- **任務**: 確保動態列表僅顯示已成功生成靜態 HTML 的文章。
+- **實作**: 在所有 API 接口 (File/MySQL/SQLite) 與靜態 JSON 生成邏輯中，加入對 `post/` 目錄下實體檔案的檢查。
+- **優點**: 防止「已發布但尚未建置」的文章出現在前台列表中，確保網站顯示內容與實體檔案完全同步。
+
 ---
 
 ## 2026-02-07 (繁體中文)

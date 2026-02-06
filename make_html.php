@@ -493,7 +493,12 @@ function generateJsonApi($posts, $categories) {
     // 2. Build the big data object
     $allPosts = array();
     foreach ($posts as $p) {
-        if ($p['isValid']) $allPosts[] = $formatPost($p);
+        if ($p['isValid']) {
+            // 只有已經建置過靜態檔的文章才加入 JSON API
+            if (file_exists("post/" . $p['filename'])) {
+                $allPosts[] = $formatPost($p);
+            }
+        }
     }
 
     $masterData = array(
