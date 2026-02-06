@@ -109,8 +109,9 @@ try {
         $configJs = file_get_contents($baseDir . '/config.js');
         $isJsonMode = (strpos($configJs, "api_type: 'json'") !== false);
 
-        // Run Build (Force Global to ensure list pages update)
-        $generator->build(false, $isJsonMode, true); 
+        // Run Build (Pass targetFilename to build only this post)
+        // build($force, $jsonMode, $forceGlobal, $forceIndex, $langFile, $targetFilename)
+        $generator->build(false, $isJsonMode, false, false, '', $filename); 
     }
 
     // 判斷是新增還是修改

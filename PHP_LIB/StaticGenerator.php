@@ -41,10 +41,18 @@ class StaticGenerator {
         }
     }
 
-    public function build($force = false, $jsonMode = false, $forceGlobal = false, $forceIndex = false, $langFile = '') {
+    /**
+     * Core build pipeline
+     * @param bool $force Force rebuild all
+     * @param bool $jsonMode Whether to update JSON API
+     * @param bool $forceGlobal Whether to force rebuild global list pages
+     * @param bool $forceIndex Unused but kept for signature compatibility if needed
+     * @param string $langFile Unused but kept for signature compatibility
+     * @param string|null $targetFilename Optional: only build this specific post file
+     */
+    public function build($force = false, $jsonMode = false, $forceGlobal = false, $forceIndex = false, $langFile = '', $targetFilename = null) {
         if (empty($this->langVars)) {
-            $this->log("Warning: langVars is empty. Check language file loading.<br>
-");
+            $this->log("Warning: langVars is empty. Check language file loading.<br>\r\n");
         }
 
         $indenter = new Indenter();
@@ -71,11 +79,11 @@ class StaticGenerator {
         }
 
         $commonDeps = array($templatePath);
-        if ($langFile) $commonDeps[] = $langFile;
 
         // A. Generate Home (blog.html)
         $targetBlog = $this->baseDir . "/blog.html";
-        if ($force || $forceGlobal || $forceIndex || !$this->checkCache($targetBlog, $commonDeps)) {
+        // Always rebuild home if we are doing a single build to ensure latest list
+        if ($force || $forceGlobal || $forceIndex || $targetFilename !== null || !$this->checkCache($targetBlog, $commonDeps)) {
             $indexVars = array_merge($globalVars, array(
                 'page_title'          => htmlspecialchars($this->config['blog_title']),
                 'page_canonical'      => $this->config['site_url'] . 'blog.html',
@@ -93,8 +101,7 @@ class StaticGenerator {
             $html = $this->pipeline($html, $indenter, false, false, false);
             $this->write($targetBlog, $html);
         } else {
-            $this->log("blog.html cached (skipped).<br>
-");
+            $this->log("blog.html cached (skipped).<br>\r\n");
         }
 
         // B. Generate Posts (post/*.html)
@@ -108,12 +115,18 @@ class StaticGenerator {
                 continue;
             }
 
-            // List Item Render
+            // List Item Render (Always accumulate for blog_list.html)
             $listItemsHtml .= $tpl->render($tpl->getSubTemplate('tmpl_blog_list_item'), array(
                 'link'  => "post/" . $post['filename'],
                 'time'  => $post['date'],
                 'title' => htmlspecialchars($post['title'])
             ));
+
+            // If targetFilename is specified, only process that one. Others use cache or skip.
+            $isTarget = ($targetFilename !== null && $post['filename'] === $targetFilename);
+            if ($targetFilename !== null && !$isTarget) {
+                continue; 
+            }
 
             // Check Cache
             $targetPost = $postDir . "/" . $post['filename'];
@@ -121,7 +134,8 @@ class StaticGenerator {
             
             $postDeps = array_merge($commonDeps, array($sourcePost));
 
-            if ($force || $forceGlobal || !$this->checkCache($targetPost, $postDeps)) {
+            // If it's the target, we force it.
+            if ($force || $forceGlobal || $isTarget || !$this->checkCache($targetPost, $postDeps)) {
                 
                 $safeTags = array_map(function($t) { return array('name' => htmlspecialchars($t['name'])); }, $this->prepareTags($post['tags']));
                 $tagsHtml = $tpl->renderList('tmpl_post_tag_item', $safeTags);
@@ -135,7 +149,6 @@ class StaticGenerator {
                     'time'           => $post['date'],
                     'title'          => htmlspecialchars($post['title']),
                     'link'           => $post['filename'],
-                    // Use protect_script_tags (available globally via constructor require)
                     'content'        => protect_script_tags($post['content']), 
                     'tags_block'     => $tagsBlock,
                     'category_block' => $catsBlock
@@ -164,7 +177,7 @@ class StaticGenerator {
         $targetList = $this->baseDir . "/blog_list.html";
         $listDeps = array_merge($commonDeps, array($indexFile));
 
-        if ($force || $forceGlobal || !$this->checkCache($targetList, $listDeps)) {
+        if ($force || $forceGlobal || $targetFilename !== null || !$this->checkCache($targetList, $listDeps)) {
             $listContentHtml = $tpl->render($tpl->getSubTemplate('tmpl_blog_list_container'), array_merge($globalVars, array(
                 'items' => $listItemsHtml
             )));
@@ -186,12 +199,11 @@ class StaticGenerator {
             $html = $this->pipeline($html, $indenter, false, true, false); 
             $this->write($targetList, $html);
         } else {
-            $this->log("blog_list.html cached (skipped).<br>
-");
+            $this->log("blog_list.html cached (skipped).<br>\r\n");
         }
 
         // D. Generate Sitemap
-        $this->generateSitemap($force, $indexFile);
+        $this->generateSitemap($force || ($targetFilename !== null), $indexFile);
     }
 
     private function checkCache($targetFile, $dependencies) {
@@ -332,18 +344,17 @@ class StaticGenerator {
     private function generateSitemap($force, $indexFile) {
         $targetSitemap = $this->baseDir . "/sitemap.xml";
         if (!$force && $this->checkCache($targetSitemap, array($indexFile))) {
-            $this->log("sitemap.xml cached (skipped).<br>
-");
+            $this->log("sitemap.xml cached (skipped).<br>\r\n");
             return;
         }
 
         $site_path = $this->config['site_url'];
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-        $pages = array_merge(array('blog.html', 'blog_list.html'), glob($this->baseDir . "/post/*.html") ? glob($this->baseDir . "/post/*.html") : array());
+        $pages = array_merge(array('blog.html', 'blog_list.html'), (glob($this->baseDir . "/post/*.html") ? glob($this->baseDir . "/post/*.html") : array()));
         foreach ($pages as $p) {
             if (file_exists($p)) {
                 $relPath = substr($p, strlen($this->baseDir) + 1);
-                $relPath = str_replace('', '/', $relPath);
+                $relPath = str_replace('\\', '/', $relPath);
                 $xml .= "\n    <url>\n        <loc>" . $site_path . $relPath . "</loc>\n        <lastmod>" . date("c", filemtime($p)) . "</lastmod>\n    </url>";
             }
         }
@@ -356,8 +367,7 @@ class StaticGenerator {
         $jsonDir = $this->baseDir . "/api/json";
         if (!is_dir($jsonDir)) mkdir($jsonDir, 0755, true);
 
-        $this->log("Generating Consolidated JSON API file...<br>
-");
+        $this->log("Generating Consolidated JSON API file...<br>\r\n");
 
         $ret_tag_count = array();
         $ret_date = array();
@@ -395,12 +405,7 @@ class StaticGenerator {
         $formatPost = function($p) use ($categories, $self) {
             $content_parts = explode('<!--more-->', $p['content']);
             $summary = protect_script_tags($content_parts[0]);
-            // Use $self instead of $this (PHP 5.3 requires this, and even then private access might fail in some versions, but we'll try)
-            // Wait, in PHP 5.3, closures cannot access private methods of $self.
-            // Better to just inline the matchCategories logic or make it public.
-            // Let's just pass the matched categories directly or use a workaround.
             
-            // To be safest for PHP 5.x, I will just inline the matching logic here or call a static helper.
             $filename = $p['filename'];
             $nameNoExt = str_replace(".html", "", $filename);
             $matched = array();
@@ -447,8 +452,7 @@ class StaticGenerator {
             if (basename($f) !== 'data.json') @unlink($f);
         }
 
-        $this->log("  - api/json/data.json created successfully.<br>
-");
+        $this->log("  - api/json/data.json created successfully.<br>\r\n");
     }
 }
 ?>
