@@ -26,8 +26,8 @@ if ($source === 'db') {
     <title><?php echo __('build_title'); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .log-container { background: #000; color: #00ff00; padding: 15px; height: calc(100vh - 420px); min-height: 200px; overflow-y: auto; font-family: monospace; border-radius: 5px; }
-        .post-list-scroll { height: calc(100vh - 180px); min-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; background: white; }
+        .log-container { background: #000; color: #00ff00; padding: 15px; height: calc(100vh - 460px); min-height: 200px; overflow-y: auto; font-family: monospace; border-radius: 5px; }
+        .post-list-scroll { height: calc(100vh - 220px); min-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; background: white; }
     </style>
 </head>
 <body>
