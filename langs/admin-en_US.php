@@ -234,6 +234,8 @@ return [
     'label_api_type' => 'Data Source (API Type)',
     'label_blog_lang' => 'Blog Language',
     'label_timezone' => 'Timezone',
+    'label_posts_per_page' => 'Posts Per Page',
+    'hint_posts_per_page' => 'Set the number of posts displayed per page in the frontend SPA mode.',
     'lang_zh_tw' => 'Traditional Chinese',
     'lang_en_us' => 'English',
     'label_theme' => 'Site Theme',

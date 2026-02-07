@@ -24,6 +24,7 @@ $currentConfig = getConfigValues($configContent);
 // Defaults from config.php (already included via auth.php -> data_provider.php)
 $currentConfig['blog_lang'] = isset($GLOBALS['blog_lang']) ? $GLOBALS['blog_lang'] : 'zh_TW';
 $currentConfig['timezone'] = isset($GLOBALS['blog_timezone']) ? $GLOBALS['blog_timezone'] : 'Asia/Taipei';
+$currentConfig['posts_per_page'] = isset($GLOBALS['posts_per_page']) ? $GLOBALS['posts_per_page'] : 10;
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,25 +38,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
     $newLang = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
     $newTimezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
+    $newPerPage = isset($_POST['posts_per_page']) ? (int)$_POST['posts_per_page'] : 10;
 
-    // 1. Update config.js (API, Theme, CSE)
+    // 1. Update config.js (API, Theme, CSE, PerPage)
     $newJsContent = "var AppConfig = {\n";
     $newJsContent .= "    api_type: '$newApi',\n";
     $newJsContent .= "    theme_file: '$newTheme',\n";
+    $newJsContent .= "    posts_per_page: $newPerPage,\n";
     $newJsContent .= "    cse_id: '$newCse'\n";
     $newJsContent .= "};";
 
-    // 2. Update config.php (Lang, Timezone) using regex to preserve other settings
+    // 2. Update config.php (Lang, Timezone, PerPage) using regex to preserve other settings
     $phpFile = __DIR__ . '/../config.php';
     $phpContent = file_get_contents($phpFile);
     $phpContent = preg_replace("/(\\\$blog_lang\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newLang$3", $phpContent);
     $phpContent = preg_replace("/(\\\$blog_timezone\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newTimezone$3", $phpContent);
+    $phpContent = preg_replace("/(\\\$posts_per_page\s*=\s*)([^;]*)(;)/", "$1$newPerPage$3", $phpContent);
 
     if (file_put_contents($configFile, $newJsContent) && file_put_contents($phpFile, $phpContent)) {
         $msg = __('msg_settings_saved');
         $currentConfig = getConfigValues($newJsContent); // Refresh JS parts
         $currentConfig['blog_lang'] = $newLang;
         $currentConfig['timezone'] = $newTimezone;
+        $currentConfig['posts_per_page'] = $newPerPage;
     } else {
         $error = __('error_config_write');
     }
@@ -130,6 +135,12 @@ if (empty($themes)) $themes = array('blog');
                             <option value="UTC" <?php echo ($currentConfig['timezone'] == 'UTC') ? 'selected' : ''; ?>>UTC</option>
                             <option value="America/New_York" <?php echo ($currentConfig['timezone'] == 'America/New_York') ? 'selected' : ''; ?>>America/New_York</option>
                         </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_posts_per_page'); ?></label>
+                        <input type="number" name="posts_per_page" class="form-control" value="<?php echo htmlspecialchars($currentConfig['posts_per_page']); ?>" min="1" max="100">
+                        <div class="form-text"><?php echo __('hint_posts_per_page'); ?></div>
                     </div>
 
                     <div class="mb-3">

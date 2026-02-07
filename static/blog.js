@@ -147,6 +147,13 @@ if (pathName.endsWith("blog_list.html")) {
     if (commentEl) commentEl.style.display = "none";
 }
 
+/**
+ * Helper to get URL Query parameters
+ */
+function getURLParameter(name) {
+    return decodeURIComponent((new RegExp("[?|&]" + name + "=([^&;]+?)(&|#|;|$)").exec(location.search) || [null, ""])[1].replace(/\+/g, "%20")) || null;
+}
+
 if (pathName.endsWith("blog.html")) {
     var commentEl = document.getElementById("blog_comment");
     if (commentEl) commentEl.style.display = "none";
@@ -206,7 +213,38 @@ if (pathName.endsWith("blog.html")) {
             return html;
         });
 
-        renderTemplateGenerator(res.posts, "tmpl_post_main", "post_body", function (mainHtml, post) {
+        // --- Pagination Logic ---
+        var postsPerPage = AppConfig["posts_per_page"] || 10;
+        var currentPage = parseInt(getURLParameter("page") || 1);
+        var totalPosts = res.posts.length;
+        var totalPages = Math.ceil(totalPosts / postsPerPage);
+        
+        var startIndex = (currentPage - 1) * postsPerPage;
+        var pagedPosts = res.posts.slice(startIndex, startIndex + postsPerPage);
+
+        var pagEl = document.getElementById("PaginationList");
+        if (totalPages > 1) {
+            pagEl.style.display = "block";
+            pagEl.innerHTML = ""; // Clear
+            
+            // Build Base URL
+            var baseSearch = window.location.search.split("&page=")[0].split("?page=")[0];
+            if (baseSearch === "") baseSearch = "?";
+            else if (baseSearch.indexOf("?") === -1) baseSearch = "?" + baseSearch;
+            
+            for (var i = 1; i <= totalPages; i++) {
+                var btn = document.createElement("a");
+                var separator = (baseSearch === "?") ? "" : "&";
+                btn.href = window.location.pathname + baseSearch + separator + "page=" + i;
+                btn.innerText = i;
+                btn.className = "pagination_btn" + (i === currentPage ? " active" : "");
+                pagEl.appendChild(btn);
+            }
+        } else {
+            pagEl.style.display = "none";
+        }
+
+        renderTemplateGenerator(pagedPosts, "tmpl_post_main", "post_body", function (mainHtml, post) {
             var tagsInner = renderTemplateGenerator(post.post_tags, "tmpl_post_tag_item", null, function (tHtml, tVal) {
                 return tHtml.replace(/{{name}}/g, escapeHtml(tVal));
             });

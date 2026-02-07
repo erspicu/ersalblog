@@ -1,4 +1,4 @@
-﻿# Gemini CLI Development Log
+# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -131,7 +131,7 @@
 - [2026-02-03 00:52:15] (UTC+8) 修正 api/api_filebase.php：修復 get_index 函式中 file_get_contents 的路徑錯誤，解決 post_content 回傳空值的問題。
 - [2026-02-03 00:58:10] (UTC+8) 修正樣板連結樣式：移除 blog_template.html 中標題連結的行內樣式，並更新 CSS (blog.css/blog-dark.css) 確保各主題下連結顏色顯示正確。
 - [2026-02-03 01:05:30] (UTC+8) 同步配置與安裝：更新 config.example.js 並強化 install.php，在安裝過程中新增佈景主題 (Theme) 選擇功能，確保新舊配置與安裝流程一致。
-- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建議。
+- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構進建議。
 - [2026-02-03 23:33:51] Executed Update macro: Switched to Gemini 3 Pro, synced documentation, and baselined promo site development.
 - [2026-02-04 12:00:00] (UTC+8) 優化靜態生成流程 (make_html.php)：改用 blog_template.html 為單一來源，移除 blog.html 中繼解析與 header 行比對注入邏輯，統一改用變數佔位符 ({page_title}, {page_content} 等) 進行內容替換，大幅簡化邏輯並提升維護性。
 - [2026-02-04 12:15:00] (UTC+8) 統一樣板變數格式：將 static/blog_template.html 與 make_html.php 中所有的 {xxx} 單大括號變數統一為 {{xxx}} 雙大括號格式，與內層 template 區塊的語法保持一致，避免混淆並提升可讀性。
@@ -252,3 +252,8 @@
 - [2026-02-07 14:50:00] 修正 StaticGenerator.php 語系支援：
   - 修正 `StaticGenerator.php` 中硬編碼的中文標題 ("-文章總列表")。
   - 改用 `langVars['list_page_title']` 動態變數，確保前台標題能隨語系設定正確切換。
+- [2026-02-07 15:10:00] 實作前台 SPA 分頁功能：
+  - 在 `admin/settings.php` 加入「每頁文章數量」設定，並同步寫入 `config.php` 與 `config.js`。
+  - 更新 `blog.css` 與 `blog-dark.css`，將 `#PaginationList` 預設設為隱藏。
+  - 更新 `static/blog.js`，實作客戶端分頁邏輯與分頁按鈕動態生成。
+  - 分頁功能僅在 `blog.html` 且總頁數大於 1 時顯示，並支援保留篩選參數。

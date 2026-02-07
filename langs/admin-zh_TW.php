@@ -234,6 +234,8 @@ return [
     'label_api_type' => '資料來源模式 (API Type)',
     'label_blog_lang' => '部落格語系 (Blog Language)',
     'label_timezone' => '時區 (Timezone)',
+    'label_posts_per_page' => '每頁文章數量',
+    'hint_posts_per_page' => '設定前台 SPA 模式下，每頁顯示的文章篇數。',
     'lang_zh_tw' => '繁體中文 (Traditional Chinese)',
     'lang_en_us' => '英文 (English)',
     'label_theme' => '網站主題 (Theme)',
