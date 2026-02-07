@@ -106,6 +106,7 @@ body {
     text-align: center;
     border-style: solid;
     display: block;
+    clear: both;
     margin-bottom: 20px;
     margin-top: 20px;
     padding-bottom: 10px;
@@ -474,6 +475,7 @@ body.is-single-page .post_title a {
     width: 96%;
     text-align: center;
     padding: 10px;
+    clear: both;
 }
 .pagination_btn {
     display: inline-block;

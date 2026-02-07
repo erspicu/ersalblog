@@ -16,7 +16,7 @@ body {
     padding: 0;
     width: auto;
     font-size: 16px;
-    color: #5d4037; /* 深棕色文字，比純黑更溫柔 */
+    color: #5d4037; /* 深棕色文字 */
 }
 
 /* 通用容器 */
@@ -36,7 +36,7 @@ body {
     margin: auto;
     background-color: #ffffff;
     border: 1px solid #f8bbd0;
-    border-radius: 15px; /* 圓角化 */
+    border-radius: 15px;
     margin-bottom: 20px;
     padding: 15px;
     display: block;
@@ -95,6 +95,7 @@ body {
     width: 96%;
     text-align: center;
     display: block;
+    clear: both;
     padding: 15px;
     box-shadow: 0 2px 5px rgba(214, 51, 132, 0.03);
 }
@@ -116,7 +117,7 @@ body {
     margin-bottom: 15px;
     display: block;
     border: none;
-    border-left: 5px solid #d63384; /* 粉紅側邊條 */
+    border-left: 5px solid #d63384;
     border-radius: 4px;
     padding: 10px 15px;
 }
@@ -138,11 +139,6 @@ body {
 .post_outermost .post_title a {
     color: #880e4f;
     text-decoration: none;
-    transition: color 0.2s;
-}
-
-.post_outermost .post_title a:hover {
-    color: #d63384;
 }
 
 .more_div {
@@ -174,25 +170,51 @@ body {
 .read_title {
     color: #5d4037;
     padding: 8px;
-    border-bottom: 1px dashed #f8bbd0;
 }
 
 /* Loading 動畫 */
 .loader {
     color: #d63384;
+    margin: auto;
 }
 
-/* 標籤設計 */
+/* 分類與標籤容器 */
+.tag_list_region,
+.date_list_region,
+.category_list_region {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center; /* 置中 */
+    border: 1px dashed #f8bbd0;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fff9fa;
+    width: 98%;
+    margin: 10px auto;
+}
+
+.RegionFunctionTitle {
+    color: #d63384;
+    font-weight: bold;
+    border-bottom: 2px solid #f8bbd0;
+    display: inline-block;
+    padding-bottom: 3px;
+    margin: 8px auto 15px auto;
+}
+
+/* 標籤方塊 */
 .tag_p {
     display: inline-block;
     background-color: #fce4ec;
     color: #ad1457;
     border: 1px solid #f8bbd0;
     border-radius: 15px;
-    padding: 3px 12px;
-    margin: 0 5px 5px 0;
+    padding: 4px 12px;
+    margin: 5px;
     font-size: 0.85rem;
     transition: all 0.2s;
+    text-decoration: none;
 }
 .tag_link:hover .tag_p {
     background-color: #d63384;
@@ -202,32 +224,39 @@ body {
 .category_p {
     color: #c2185b;
     font-weight: bold;
+    margin: 5px 10px;
 }
 
-.tag_list_region,
-.date_list_region,
-.category_list_region {
-    border: 1px dashed #f8bbd0;
-    border-radius: 8px;
-    padding: 10px;
-    background-color: #fff9fa;
+/* 日期選單樣式 */
+ul, #myUL {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    text-align: left;
 }
-
-.RegionFunctionTitle {
-    color: #d63384;
-    font-weight: bold;
-    border-bottom: 2px solid #f8bbd0;
-    display: inline-block;
-    padding-bottom: 3px;
-    margin-bottom: 15px;
-}
-
-/* 日期選單 */
 .caret {
+    cursor: pointer;
+    user-select: none;
     color: #ad1457;
+    font-weight: bold;
+    display: block;
+    padding: 5px 0;
 }
 .caret::before {
+    content: "\25B6";
     color: #f06292;
+    display: inline-block;
+    margin-right: 8px;
+}
+.caret-down::before {
+    transform: rotate(90deg);
+}
+.nested {
+    display: none;
+    padding-left: 25px;
+}
+.active {
+    display: block;
 }
 
 /* 分頁美化 */
@@ -236,17 +265,19 @@ body {
     margin: 30px auto;
     width: 96%;
     text-align: center;
+    clear: both;
 }
 .pagination_btn {
     display: inline-block;
     padding: 8px 16px;
     margin: 0 5px;
     border: 1px solid #f8bbd0;
-    border-radius: 20px; /* 圓角翻頁鈕 */
+    border-radius: 20px;
     background-color: #fff;
     color: #d63384;
     text-decoration: none;
     transition: all 0.3s;
+    font-weight: bold;
 }
 .pagination_btn:hover {
     background-color: #fce4ec;
@@ -260,20 +291,33 @@ body {
     color: #f8bbd0;
     border-color: #fce4ec;
     opacity: 0.5;
+    pointer-events: none;
 }
 
-/* 響應式圖片 */
+/* 圖片與影片響應式 */
 #post_body img {
     border-radius: 12px;
     max-width: 95%;
+    height: auto;
+}
+#post_body iframe {
+    border-radius: 12px;
+    border: 3px solid #fce4ec;
 }
 
-/* EXIF 資訊區塊美化 */
+/* EXIF 資訊 */
 div[style*="font-weight: bold"] {
     background-color: #fff0f3;
     border-radius: 8px;
-    padding: 10px;
-    margin-top: 10px;
+    padding: 12px;
+    margin: 10px auto;
     color: #ad1457 !important;
     font-size: 0.85rem !important;
+    border: 1px solid #f8bbd0;
+}
+
+/* 修正搜尋框容器 */
+.google-search-container {
+    width: 98%;
+    margin: 10px auto;
 }
