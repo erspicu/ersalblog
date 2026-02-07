@@ -1,0 +1,279 @@
+/* blog-pink.css - Soft Pink & Elegant Theme for ErsalBlog */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background-color: #fce4ec; /* 淺粉色底色 */
+    font-family: "PingFang TC", "Heiti TC", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+body {
+    background-color: #fce4ec;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    font-size: 16px;
+    color: #5d4037; /* 深棕色文字，比純黑更溫柔 */
+}
+
+/* 通用容器 */
+.outermost {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    background-color: #fff9fa; /* 極淺粉色內容區 */
+    padding-bottom: 20px;
+    padding-top: 30px;
+    margin: auto;
+    display: block;
+}
+
+.head {
+    width: 96%;
+    margin: auto;
+    background-color: #ffffff;
+    border: 1px solid #f8bbd0;
+    border-radius: 15px; /* 圓角化 */
+    margin-bottom: 20px;
+    padding: 15px;
+    display: block;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(214, 51, 132, 0.05);
+}
+
+.blog_name {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #d63384; /* 玫瑰粉 */
+    margin: 5px;
+}
+
+.blog_comment {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #ad1457;
+    margin: 5px;
+    opacity: 0.8;
+}
+
+.blog_name_link {
+    text-decoration: none;
+}
+
+.post_content img {
+    margin: 15px auto;
+    display: block;
+    max-width: 90%;
+    border: 5px solid #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    height: auto;
+}
+
+.post_content hr {
+    width: 80%;
+    height: 1px;
+    background-color: #f8bbd0;
+    border: none;
+    margin: 30px auto;
+}
+
+/* 側邊欄區域 */
+#AllPostList,
+#AllTagList,
+#AllcategoryList,
+#blog_search,
+#AllCommentList,
+#AllDateList {
+    background-color: #ffffff;
+    border: 1px solid #fce4ec;
+    border-radius: 12px;
+    margin: 20px auto;
+    width: 96%;
+    text-align: center;
+    display: block;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(214, 51, 132, 0.03);
+}
+
+.post_outermost {
+    width: 96%;
+    background-color: #ffffff;
+    margin: 0 auto 20px auto;
+    border: 1px solid #f8bbd0;
+    border-radius: 15px;
+    padding: 20px;
+    display: block;
+    box-shadow: 0 2px 10px rgba(214, 51, 132, 0.05);
+}
+
+.post_title_outermost {
+    width: 100%;
+    background-color: #fff0f3;
+    margin-bottom: 15px;
+    display: block;
+    border: none;
+    border-left: 5px solid #d63384; /* 粉紅側邊條 */
+    border-radius: 4px;
+    padding: 10px 15px;
+}
+
+.post_time {
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+    color: #ec407a;
+    font-weight: bold;
+}
+
+.post_outermost .post_title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #880e4f;
+}
+
+.post_outermost .post_title a {
+    color: #880e4f;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.post_outermost .post_title a:hover {
+    color: #d63384;
+}
+
+.more_div {
+    margin: 20px 0;
+    text-align: center;
+}
+.more_p {
+    color: #d63384;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: 1px solid #d63384;
+    display: inline-block;
+    padding: 5px 20px;
+    border-radius: 20px;
+    transition: all 0.3s;
+}
+.more_a:hover .more_p {
+    background-color: #d63384;
+    color: #ffffff;
+}
+
+.back_top {
+    text-align: center;
+    color: #ec407a;
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+
+.read_title {
+    color: #5d4037;
+    padding: 8px;
+    border-bottom: 1px dashed #f8bbd0;
+}
+
+/* Loading 動畫 */
+.loader {
+    color: #d63384;
+}
+
+/* 標籤設計 */
+.tag_p {
+    display: inline-block;
+    background-color: #fce4ec;
+    color: #ad1457;
+    border: 1px solid #f8bbd0;
+    border-radius: 15px;
+    padding: 3px 12px;
+    margin: 0 5px 5px 0;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.tag_link:hover .tag_p {
+    background-color: #d63384;
+    color: #ffffff;
+}
+
+.category_p {
+    color: #c2185b;
+    font-weight: bold;
+}
+
+.tag_list_region,
+.date_list_region,
+.category_list_region {
+    border: 1px dashed #f8bbd0;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff9fa;
+}
+
+.RegionFunctionTitle {
+    color: #d63384;
+    font-weight: bold;
+    border-bottom: 2px solid #f8bbd0;
+    display: inline-block;
+    padding-bottom: 3px;
+    margin-bottom: 15px;
+}
+
+/* 日期選單 */
+.caret {
+    color: #ad1457;
+}
+.caret::before {
+    color: #f06292;
+}
+
+/* 分頁美化 */
+#PaginationList {
+    display: none;
+    margin: 30px auto;
+    width: 96%;
+    text-align: center;
+}
+.pagination_btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 5px;
+    border: 1px solid #f8bbd0;
+    border-radius: 20px; /* 圓角翻頁鈕 */
+    background-color: #fff;
+    color: #d63384;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+.pagination_btn:hover {
+    background-color: #fce4ec;
+}
+.pagination_btn.active {
+    background-color: #d63384;
+    border-color: #d63384;
+    color: #fff;
+}
+.pagination_btn.disabled {
+    color: #f8bbd0;
+    border-color: #fce4ec;
+    opacity: 0.5;
+}
+
+/* 響應式圖片 */
+#post_body img {
+    border-radius: 12px;
+    max-width: 95%;
+}
+
+/* EXIF 資訊區塊美化 */
+div[style*="font-weight: bold"] {
+    background-color: #fff0f3;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    color: #ad1457 !important;
+    font-size: 0.85rem !important;
+}

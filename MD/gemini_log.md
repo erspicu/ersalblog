@@ -1,4 +1,4 @@
-# Gemini CLI Development Log
+﻿# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -268,3 +268,6 @@
   - 同步更新 `blog.js` 的 JSON 模式篩選器，確保全站日期導覽功能正常運作。
 - [2026-02-07 16:10:00] 修正 StaticGenerator.php 語系變數引用錯誤：
   - 修正 `list_page_title` 鍵值缺少 `lang_` 前綴的問題，解決執行 make_html.php 時出現的 Undefined index 錯誤。
+- [2026-02-07 16:20:00] 新增粉柔主題 (Soft Pink Theme)：
+  - 建立 `blog-pink.css`，採用櫻花粉與玫瑰色系設計，提供圓潤的 UI 元素與溫柔的視覺體驗。
+  - 確保主題能被後台設定自動偵測並切換。
