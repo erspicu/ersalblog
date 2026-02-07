@@ -465,4 +465,42 @@ body.is-single-page .post_title a {
 .fb-like-container {
     max-width: 100vw;
     padding: 5px;
-}#PaginationList { display: none; margin: 20px 0; text-align: center; }
+}
+
+/* Pagination Styling */
+#PaginationList {
+    display: none;
+    margin: 40px auto;
+    width: 96%;
+    text-align: center;
+    padding: 10px;
+}
+.pagination_btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: bold;
+}
+.pagination_btn:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
+.pagination_btn.active {
+    background-color: #333;
+    border-color: #333;
+    color: #fff;
+    cursor: default;
+}
+.pagination_btn.disabled {
+    color: #aaa;
+    border-color: #eee;
+    background-color: #fafafa;
+    pointer-events: none;
+}

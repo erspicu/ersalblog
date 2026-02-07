@@ -225,14 +225,31 @@ if (pathName.endsWith("blog.html")) {
             if (baseSearch === "") baseSearch = "?";
             else if (baseSearch.indexOf("?") === -1) baseSearch = "?" + baseSearch;
             
+            var separator = (baseSearch === "?") ? "" : "&";
+            var baseUrl = window.location.pathname + baseSearch + separator;
+
+            // Prev Button
+            var prevBtn = document.createElement("a");
+            prevBtn.href = baseUrl + "page=" + (currentPage - 1);
+            prevBtn.innerHTML = "&laquo;";
+            prevBtn.className = "pagination_btn" + (currentPage === 1 ? " disabled" : "");
+            pagEl.appendChild(prevBtn);
+
+            // Page Numbers
             for (var i = 1; i <= totalPages; i++) {
                 var btn = document.createElement("a");
-                var separator = (baseSearch === "?") ? "" : "&";
-                btn.href = window.location.pathname + baseSearch + separator + "page=" + i;
+                btn.href = baseUrl + "page=" + i;
                 btn.innerText = i;
                 btn.className = "pagination_btn" + (i === currentPage ? " active" : "");
                 pagEl.appendChild(btn);
             }
+
+            // Next Button
+            var nextBtn = document.createElement("a");
+            nextBtn.href = baseUrl + "page=" + (currentPage + 1);
+            nextBtn.innerHTML = "&raquo;";
+            nextBtn.className = "pagination_btn" + (currentPage === totalPages ? " disabled" : "");
+            pagEl.appendChild(nextBtn);
         } else {
             pagEl.style.display = "none";
         }
