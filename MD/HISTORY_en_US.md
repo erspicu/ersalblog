@@ -45,3 +45,9 @@
     - **Matrix Theme**: Added `blog-matrix.css`, simulating terminal aesthetics with black/green palette and scanline effects.
     - **Layout Hardening**: Enforced `clear: both` on all sidebar and pagination containers to prevent layout breakage.
     - **Tweaks**: Removed image filters in Matrix theme to preserve original colors and optimized pagination responsiveness.
+
+### [16:50] Stability Fixes & Process Reinforcement
+- **Task**: Fix build-time errors and strengthen development guidelines.
+- **Implementation**:
+    - **Bugfix**: Corrected language key references in `StaticGenerator.php` (added `lang_` prefix) to resolve `Undefined index` warnings during SSG execution.
+    - **Rule Update**: Updated `gemini.md` to specify the use of Linux `date` command for timestamping, ensuring accurate logs and versioning.
