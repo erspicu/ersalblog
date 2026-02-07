@@ -1,4 +1,4 @@
-# Gemini CLI Development Log
+﻿# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -256,4 +256,7 @@
   - 在 `admin/settings.php` 加入「每頁文章數量」設定，並同步寫入 `config.php` 與 `config.js`。
   - 更新 `blog.css` 與 `blog-dark.css`，將 `#PaginationList` 預設設為隱藏。
   - 更新 `static/blog.js`，實作客戶端分頁邏輯與分頁按鈕動態生成。
-  - 分頁功能僅在 `blog.html` 且總頁數大於 1 時顯示，並支援保留篩選參數。
+- [2026-02-07 15:20:00] 升級混合式分頁系統 (Hybrid Pagination)：
+  - 實作伺服器端分頁 (PHP API)：優化 `api_*.php` 核心邏輯，支援 `page` 參數與 `pagination` 數據回傳，提升動態模式下的效能與 IO 效率。
+  - 實作客戶端分頁 (JSON Mode)：在 `blog.js` 中對全量 JSON 資料執行本地切割，模擬 API 回傳格式。
+  - 統一數據結構：無論動態或靜態模式，前端均使用一致的 `pagination` 元數據進行 UI 渲染。

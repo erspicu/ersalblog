@@ -213,21 +213,14 @@ if (pathName.endsWith("blog.html")) {
             return html;
         });
 
-        // --- Pagination Logic ---
-        var postsPerPage = AppConfig["posts_per_page"] || 10;
-        var currentPage = parseInt(getURLParameter("page") || 1);
-        var totalPosts = res.posts.length;
-        var totalPages = Math.ceil(totalPosts / postsPerPage);
-        
-        var startIndex = (currentPage - 1) * postsPerPage;
-        var pagedPosts = res.posts.slice(startIndex, startIndex + postsPerPage);
-
+        // --- Pagination UI Rendering ---
         var pagEl = document.getElementById("PaginationList");
-        if (totalPages > 1) {
+        if (res.pagination && res.pagination.total_pages > 1) {
             pagEl.style.display = "block";
-            pagEl.innerHTML = ""; // Clear
+            pagEl.innerHTML = "";
+            var currentPage = res.pagination.current_page;
+            var totalPages = res.pagination.total_pages;
             
-            // Build Base URL
             var baseSearch = window.location.search.split("&page=")[0].split("?page=")[0];
             if (baseSearch === "") baseSearch = "?";
             else if (baseSearch.indexOf("?") === -1) baseSearch = "?" + baseSearch;
@@ -244,7 +237,7 @@ if (pathName.endsWith("blog.html")) {
             pagEl.style.display = "none";
         }
 
-        renderTemplateGenerator(pagedPosts, "tmpl_post_main", "post_body", function (mainHtml, post) {
+        renderTemplateGenerator(res.posts, "tmpl_post_main", "post_body", function (mainHtml, post) {
             var tagsInner = renderTemplateGenerator(post.post_tags, "tmpl_post_tag_item", null, function (tHtml, tVal) {
                 return tHtml.replace(/{{name}}/g, escapeHtml(tVal));
             });
@@ -298,13 +291,27 @@ if (pathName.endsWith("blog.html")) {
                     filteredPosts = master.posts.filter(function(p) { return p.post_time.indexOf(prefix) === 0; });
                 }
 
+                // --- Client-side Pagination for JSON Mode ---
+                var postsPerPage = AppConfig["posts_per_page"] || 10;
+                var currentPage = parseInt(getURLParameter("page") || 1);
+                var totalPosts = filteredPosts.length;
+                var totalPages = Math.ceil(totalPosts / postsPerPage);
+                var startIndex = (currentPage - 1) * postsPerPage;
+                var pagedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+
                 // Simulate API Response format
                 var simulatedRes = {
                     category: master.sidebar.category,
                     dates_count: master.sidebar.dates_count,
                     date_post: master.sidebar.date_post,
                     tags: master.sidebar.tags,
-                    posts: filteredPosts
+                    posts: pagedPosts,
+                    pagination: {
+                        total_posts: totalPosts,
+                        total_pages: totalPages,
+                        current_page: currentPage,
+                        per_page: postsPerPage
+                    }
                 };
                 processResponse(simulatedRes);
             })

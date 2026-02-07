@@ -35,8 +35,6 @@ function restful_rounter($path)
     $action[1]($action);
 }
 
-// --- Routes ---
-
 function category($url_param)
 {
     $category = urldecode(explode("&", $url_param[2])[0]);
@@ -56,13 +54,21 @@ function tag($url_param)
     get_data('tag', $tag);
 }
 
-// --- Core Logic ---
-
 function get_data($filter_type, $filter_value)
 {
-    global $pdo;
+    global $pdo, $posts_per_page;
+    $per_page = isset($posts_per_page) ? (int)$posts_per_page : 10;
 
-    // 1. Fetch All Published Posts
+    $current_page = 1;
+    if (isset($_GET['page'])) {
+        $current_page = (int)$_GET['page'];
+    } elseif (isset($_SERVER['QUERY_STRING']) && strpos($_SERVER['QUERY_STRING'], 'page=') !== false) {
+        preg_match('/page=(\d+)/', $_SERVER['QUERY_STRING'], $matches);
+        if (isset($matches[1])) $current_page = (int)$matches[1];
+    }
+    if ($current_page < 1) $current_page = 1;
+
+    // 1. Fetch All Published Posts (For Sidebars and filtering)
     $sql = "SELECT p.*, GROUP_CONCAT(c.category_name SEPARATOR ',') as post_categories_str 
             FROM blog_posts p
             LEFT JOIN blog_post_categories pc ON p.id = pc.post_id
@@ -74,14 +80,12 @@ function get_data($filter_type, $filter_value)
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll();
 
-    // 2. Initialize Return Structures
-    $ret_post = array();
+    $matched_posts = array();
     $ret_tag_count = array();
     $ret_date = array();      
     $ret_date_post = array(); 
     $cat_stats_map = array(); 
 
-    // 3. Iterate and Process
     foreach ($rows as $row) {
         $filename = $row['post_filename'];
         $title    = $row['post_title'];
@@ -96,7 +100,7 @@ function get_data($filter_type, $filter_value)
         $cats = ($cats_str !== '') ? explode(',', $cats_str) : array();
         $cats = array_map('trim', $cats);
 
-        // --- Stats (Sidebars) ---
+        // Sidebar Stats
         foreach ($tags as $t) {
             if ($t === '') continue;
             $ret_tag_count[$t] = (isset($ret_tag_count[$t]) ? $ret_tag_count[$t] : 0) + 1;
@@ -121,7 +125,7 @@ function get_data($filter_type, $filter_value)
             $ret_date_post[$ymKey][] = array('title' => $title, 'post_index' => $filename);
         }
 
-        // --- Filter Logic ---
+        // Filtering
         $is_match = false;
         if ($filter_type === 'all') {
             $is_match = true;
@@ -134,19 +138,29 @@ function get_data($filter_type, $filter_value)
         }
 
         if ($is_match) {
-            // 僅回傳已有靜態網頁的文章
             if (!file_exists("../post/" . $filename)) continue;
-
-            $content_parts = explode('<!--more-->', $content);
-            $ret_post[] = array(
+            
+            $matched_posts[] = array(
                 'post_category' => $cats,
                 'post_tags'     => $tags,
                 'post_time'     => $date_str,
                 'post_title'    => $title,
-                'post_content'  => protect_script_tags($content_parts[0]),
-                'post_index'    => $filename
+                'post_index'    => $filename,
+                'raw_content'   => $content // Temporary
             );
         }
+    }
+
+    // --- Pagination ---
+    $total_posts = count($matched_posts);
+    $total_pages = ceil($total_posts / $per_page);
+    $start_index = ($current_page - 1) * $per_page;
+    $paged_posts = array_slice($matched_posts, $start_index, $per_page);
+
+    foreach ($paged_posts as &$p) {
+        $content_parts = explode('<!--more-->', $p['raw_content']);
+        $p['post_content'] = protect_script_tags($content_parts[0]);
+        unset($p['raw_content']);
     }
 
     $ret_all = array(
@@ -154,7 +168,13 @@ function get_data($filter_type, $filter_value)
         'dates_count' => $ret_date,
         'date_post'   => $ret_date_post,
         'tags'        => $ret_tag_count,
-        'posts'       => $ret_post
+        'posts'       => $paged_posts,
+        'pagination'  => array(
+            'total_posts' => $total_posts,
+            'total_pages' => $total_pages,
+            'current_page' => $current_page,
+            'per_page'    => $per_page
+        )
     );
 
     header('Content-Type: application/json; charset=utf-8');
