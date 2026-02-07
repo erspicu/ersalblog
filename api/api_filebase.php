@@ -7,364 +7,160 @@ restful_rounter($_SERVER['QUERY_STRING']);
 
 function restful_rounter($path)
 {
-  $action = explode("/", $path);
-  $param_count = count($action);
-  if ($param_count == 1) {
-    get_index(1);
-    return;
-  }
+    $action = explode("/", $path);
+    $param_count = count($action);
 
-  if (function_exists($action[1])) {
+    // 預設路由或無效動作
+    if ($param_count == 1 || !function_exists($action[1]) || $action[1] == 'page') {
+        get_data('all', null);
+        return;
+    }
+
     $action[1]($action);
-  } else {
-    echo urldecode($path) . " url param error!";
-  }
 }
+
+// --- API 進入點 (與前端路徑相容) ---
 
 function category($url_param)
 {
-  $category = urldecode(explode("&", $url_param[2])[0]);
-  get_Category_index($category, 1);
+    $category = urldecode(explode("&", $url_param[2])[0]);
+    get_data('category', $category);
 }
 
 function date_range($url_param)
 {
-  $date_param = explode("&", $url_param[2])[0];
-  get_daterange_index($date_param, 1);
+    $date_param = explode("&", $url_param[2])[0];
+    get_data('date', $date_param);
 }
 
 function tag($url_param)
 {
-  $dec_param =  urldecode($url_param[2]);
-  $tag = explode("&", $dec_param)[0];
-  get_tag_index($tag, 1);
+    $dec_param =  urldecode($url_param[2]);
+    $tag = explode("&", $dec_param)[0];
+    get_data('tag', $tag);
 }
 
-function get_Category_index($category_ch, $index_page)
+// --- 核心資料處理邏輯 ---
+
+function get_data($filter_type, $filter_value)
 {
-  $arr = get_contents(); //取得索引資料
-  $category =  category_deal(); //文章分類功能
-  $ret_post = array();
-  $ret_tag_count = array();
-  $ret_date = array();
-  $ret_date_post = array();
+    // 1. 取得基礎資料
+    $index_file = "../contents/index_post.txt";
+    $index_content = file_get_contents($index_file);
+    $index_content = str_replace("\r\n", "\n", $index_content);
+    $lines = explode("\n", $index_content);
 
-  // Fix: Path Traversal
-  $safe_category = basename($category_ch);
-  if ($safe_category !== $category_ch || empty($safe_category) || $safe_category == '.' || $safe_category == '..') {
-      // Invalid path or traversal attempt
-      echo json_encode(['error' => 'Invalid category path']);
-      return;
-  }
-
-  $category_dir = "../category/" . $safe_category;
-  if (!is_dir($category_dir)) {
-      echo json_encode(['error' => 'Category not found']);
-      return;
-  }
-
-  $category_post_index = scandir($category_dir);
-
-  foreach ($arr as $val) {
-    if (trim($val) === "") continue;
-    $line_arr = explode("|", $val);
-    $raw_tags = explode(",", trim($line_arr[3]));
-    $tags = array();
-    foreach ($raw_tags as $t) {
-        $t = trim($t);
-        if ($t !== "") $tags[] = $t;
-    }
-    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-
-    $nameNoExt = str_replace(".html", "", $line_arr[1]);
-    if (in_array($line_arr[1], $category_post_index) || in_array($nameNoExt, $category_post_index)) {
-      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
-      $html_split = explode("<!--more-->", $html);
-
-      //檢查有沒有在特定分類內start
-      $in_category = check_category($category, $line_arr[1]);
-
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
-      array_push($ret_post, $tmp);
-    }
-    date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
-    tag_deal($tags, $ret_tag_count);   //統計標籤
-  }
-  $ret_all = array('category' => $category, 'dates_count' => $ret_date, "date_post" => $ret_date_post, 'tags' => $ret_tag_count,  'posts' => $ret_post);
-  echo json_encode($ret_all);
-}
-
-function get_daterange_index($date_param, $index_page)
-{
-  $year =  substr($date_param, 0, 4);
-  $mon = substr($date_param, 4, 2);
-
-  $arr = get_contents(); //取得索引資料
-  $category =  category_deal(); //文章分類功能
-  $ret_post = array();
-  $ret_tag_count = array();
-  $ret_date = array();
-  $ret_date_post = array();
-
-  foreach ($arr as $val) {
-    if (trim($val) === "") continue;
-    $line_arr = explode("|", $val);
-    $raw_tags = explode(",", trim($line_arr[3]));
-    $tags = array();
-    foreach ($raw_tags as $t) {
-        $t = trim($t);
-        if ($t !== "") $tags[] = $t;
-    }
-    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-
-    //改成檢查年跟月是否合乎範圍
-    if (startsWith($line_arr[0], $year . "-" . $mon)) {
-      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
-      $html_split = explode("<!--more-->", $html);
-
-      //檢查有沒有在特定分類內start
-      $in_category = check_category($category, $line_arr[1]);
-
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
-      array_push($ret_post, $tmp);
+    // 2. 預掃描分類資訊 (用於計算 Sidebar 與 check_category)
+    $all_categories = array();
+    $cat_dirs = scandir("../category");
+    foreach ($cat_dirs as $dir) {
+        if ($dir == '.' || $dir == '..' || !is_dir("../category/" . $dir)) continue;
+        
+        $files = scandir("../category/" . $dir);
+        $valid_files = array();
+        foreach ($files as $f) {
+            if ($f == '.' || $f == '..') continue;
+            if (file_exists("../contents/post_files/" . $f) || file_exists("../contents/post_files/" . $f . ".html")) {
+                $valid_files[] = $f;
+            }
+        }
+        $all_categories[] = array('name' => $dir, 'count' => count($valid_files), 'posts' => $valid_files);
     }
 
-    date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
-    tag_deal($tags, $ret_tag_count);   //統計標籤
-  }
-  $ret_all = array('category' => $category, 'dates_count' => $ret_date, "date_post" => $ret_date_post, 'tags' => $ret_tag_count,  'posts' => $ret_post);
-  echo json_encode($ret_all);
-}
+    // 3. 初始化回傳結構
+    $ret_post = array();
+    $ret_tag_count = array();
+    $ret_date = array();
+    $ret_date_post = array();
 
-function page($url_param)
-{
-  $count = count($url_param);
+    // 4. 迭代處理文章
+    foreach ($lines as $line) {
+        if (trim($line) === "") continue;
+        $parts = explode("|", $line);
+        $date_str = $parts[0];  // YYYY-MM-DD HH:MM:SS
+        $filename = $parts[1];  // 檔名
+        $title    = $parts[2];  // 標題
+        $tags_str = trim($parts[3]);
+        
+        $raw_tags = ($tags_str !== "") ? explode(",", $tags_str) : array();
+        $tags = array();
+        foreach ($raw_tags as $t) {
+            $t = trim($t);
+            if ($t !== "") {
+                $tags[] = $t;
+                $ret_tag_count[$t] = (isset($ret_tag_count[$t]) ? $ret_tag_count[$t] : 0) + 1;
+            }
+        }
 
-  if ($count == 2 || $url_param[2] == "") {
-    get_index(1);
-    return;
-  }
-  if (ctype_digit($url_param[2])) {
-    get_index($url_param[2]);
-  } else {
-    echo "分頁參數錯誤!";
-  }
-}
+        // 檢查實體檔案是否存在 (跳過草稿或損壞索引)
+        if (!file_exists("../contents/post_files/" . $filename)) continue;
 
-function get_tag_index($tag, $index_page)
-{
-  $arr = get_contents(); //取得索引資料
-  $category =  category_deal(); //文章分類功能
-  $ret_post = array();
-  $ret_tag_count = array();
-  $ret_date = array();
-  $ret_date_post = array();
+        // --- 統計側邊欄資訊 (日期歸檔) ---
+        $date_only = explode(" ", $date_str)[0];
+        $ymd = explode("-", $date_only);
+        if (count($ymd) >= 2) {
+            $year = $ymd[0]; $mon = $ymd[1]; $ymKey = $year . $mon;
+            $ret_date[$year] = (isset($ret_date[$year]) ? $ret_date[$year] : 0) + 1;
+            $ret_date[$ymKey] = (isset($ret_date[$ymKey]) ? $ret_date[$ymKey] : 0) + 1;
+            if (!isset($ret_date_post[$ymKey])) $ret_date_post[$ymKey] = array();
+            $ret_date_post[$ymKey][] = array('title' => $title, 'post_index' => $filename);
+        }
 
-  foreach ($arr as $val) {
-    if (trim($val) === "") continue;
-    $line_arr = explode("|", $val);
-    $raw_tags = explode(",", trim($line_arr[3]));
-    $tags = array();
-    foreach ($raw_tags as $t) {
-        $t = trim($t);
-        if ($t !== "") $tags[] = $t;
-    }
-    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
+        // --- 篩選與內容處理 ---
+        $is_match = false;
+        if ($filter_type === 'all') {
+            $is_match = true;
+        } elseif ($filter_type === 'tag') {
+            if (in_array($filter_value, $tags)) $is_match = true;
+        } elseif ($filter_type === 'category') {
+            $nameNoExt = str_replace(".html", "", $filename);
+            foreach ($all_categories as $c) {
+                if ($c['name'] === $filter_value) {
+                    if (in_array($filename, $c['posts']) || in_array($nameNoExt, $c['posts'])) $is_match = true;
+                    break;
+                }
+            }
+        } elseif ($filter_type === 'date') {
+            $f_year = substr($filter_value, 0, 4);
+            $f_mon  = substr($filter_value, 4, 2);
+            if (substr($date_str, 0, 7) === ($f_year . "-" . $f_mon)) $is_match = true;
+        }
 
-    if (in_array($tag, $tags)) {
-      if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-      $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
-      $html_split = explode("<!--more-->", $html);
+        if ($is_match) {
+            // 僅回傳已有靜態網頁的文章
+            if (!file_exists("../post/" . $filename)) continue;
 
-      //檢查有沒有在特定分類內
-      $in_category = check_category($category, $line_arr[1]);
+            $html = file_get_contents("../contents/post_files/" . $filename);
+            $html_split = explode("<!--more-->", $html);
 
-      $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
-      array_push($ret_post, $tmp);
-    }
+            // 獲取該文章所屬分類
+            $post_cats = array();
+            $nameNoExt = str_replace(".html", "", $filename);
+            foreach ($all_categories as $c) {
+                if (in_array($filename, $c['posts']) || in_array($nameNoExt, $c['posts'])) {
+                    $post_cats[] = $c['name'];
+                }
+            }
 
-    date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
-    tag_deal($tags, $ret_tag_count);   //統計標籤
-  }
-  $ret_all = array('category' => $category, 'dates_count' => $ret_date, "date_post" => $ret_date_post, 'tags' => $ret_tag_count,  'posts' => $ret_post);
-  echo json_encode($ret_all);
-}
-
-function get_index($index_page)
-{
-  $arr = get_contents(); //取得索引資料
-  $category =  category_deal(); //文章分類功能
-  $ret_post = array();
-  $ret_tag_count = array();
-  $ret_date = array();
-  $ret_date_post = array();
-
-  foreach ($arr as $val) {
-    if (trim($val) === "") continue;
-    $line_arr = explode("|", $val);
-    $raw_tags = explode(",", trim($line_arr[3]));
-    $tags = array();
-    foreach ($raw_tags as $t) {
-        $t = trim($t);
-        if ($t !== "") $tags[] = $t;
-    }
-    if (!file_exists("../contents/post_files/" . $line_arr[1])) continue;
-    if (!file_exists("../post/" . $line_arr[1])) continue;
-    $html = file_get_contents("../contents/post_files/" . $line_arr[1]);
-    $html_split = explode("<!--more-->", $html);
-
-    //檢查有沒有在特定分類內start
-    $in_category = check_category($category, $line_arr[1]);
-
-    $tmp = array('post_category' => $in_category, 'post_tags' => $tags, 'post_time' => $line_arr[0], 'post_title' => $line_arr[2], 'post_content' => protect_script_tags($html_split[0]), 'post_index' => $line_arr[1]);
-    array_push($ret_post, $tmp);
-
-    date_deal($ret_date, $ret_date_post, $line_arr); //日期處理
-    tag_deal($tags, $ret_tag_count);   //統計標籤
-  }
-
-  $ret_all = array('category' => $category, 'dates_count' => $ret_date, "date_post" => $ret_date_post, 'tags' => $ret_tag_count,  'posts' => $ret_post);
-
-  echo json_encode($ret_all);
-}
-
-function startsWith($string, $startString)
-{
-  $len = strlen($startString);
-  return (substr($string, 0, $len) === $startString);
-}
-
-function del_by_value($array, $del_val)
-{
-  if (($key = array_search($del_val, $array)) !== false) {
-    unset($array[$key]);
-  }
-  return $array;
-}
-
-
-
-/*
-//統計標籤
-function tag_deal(&$tags, &$ret_tag_count)
-{
-  foreach ($tags as $tag_val) {
-    $ret_tag_count[$tag_val]++;
-  }
-}
-
-//處理日期
-function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
-{
-  $date =  explode(" ", $line_arr[0])[0];
-  $date_arr = explode("-", $date);
-  $ret_date[$date_arr[0]]++;
-  $ret_date[$date_arr[0] . $date_arr[1]]++;
-  $tmp2 = array('title' => $line_arr[2], 'post_index' => $line_arr[1]);
-  if ($ret_date_post[$date_arr[0] . $date_arr[1]]  == null) {
-    $ret_date_post[$date_arr[0] . $date_arr[1]] = array();
-  }
-  array_push($ret_date_post[$date_arr[0] . $date_arr[1]], $tmp2);
-}*/
-
-function tag_deal(&$tags, &$ret_tag_count)
-{
-    foreach ($tags as $tag_val) {
-        $tag_val = trim($tag_val);
-        if ($tag_val === "") continue;
-        $ret_tag_count[$tag_val] = (isset($ret_tag_count[$tag_val]) ? $ret_tag_count[$tag_val] : 0) + 1;
-    }
-}
-
-// 處理日期
-function date_deal(&$ret_date, &$ret_date_post, &$line_arr)
-{
-    // 防呆：確保 line_arr 資料足夠，避免 index 0 不存在的錯誤
-    if (!isset($line_arr[0])) return; 
-
-    $date = explode(" ", $line_arr[0])[0];
-    $date_arr = explode("-", $date);
-    
-    // 取得年份與月份 Key
-    $yearKey = $date_arr[0];
-    $ymKey   = $date_arr[0] . $date_arr[1];
-
-    // 修改重點 1：計算年份數量 (修正 Undefined key)
-    $ret_date[$yearKey] = (isset($ret_date[$yearKey]) ? $ret_date[$yearKey] : 0) + 1;
-
-    // 修改重點 2：計算年月數量 (修正 Undefined key)
-    $ret_date[$ymKey] = (isset($ret_date[$ymKey]) ? $ret_date[$ymKey] : 0) + 1;
-
-    // 準備要塞入的資料
-    $tmp2 = array('title' => isset($line_arr[2]) ? $line_arr[2] : '', 'post_index' => isset($line_arr[1]) ? $line_arr[1] : '');
-
-    // 修改重點 3：初始化二維陣列
-    // 舊寫法: if ($ret_date_post[$ymKey] == null) <- 這裡存取時就會報錯
-    
-    // 新寫法: 使用 isset 檢查
-    if (!isset($ret_date_post[$ymKey])) {
-        $ret_date_post[$ymKey] = array();
-    }
-    
-    // 塞入資料
-    array_push($ret_date_post[$ymKey], $tmp2);
-}
-
-
-//檢查有沒有在特定分類內
-function check_category($category, $line)
-{
-  $in_category = array();
-  $nameNoExt = str_replace(".html", "", $line);
-  foreach ($category as $c) {
-    if (in_array($line, $c['posts']) || in_array($nameNoExt, $c['posts'])) {
-      array_push($in_category, $c['name']);
-    }
-  }
-  return $in_category;
-}
-
-//文章分類
-function category_deal()
-{
-  $category = array();
-  $dirs = scandir("../category");
-  $dirs = del_by_value($dirs, ".");
-  $dirs = del_by_value($dirs, "..");
-  foreach ($dirs as $dir) {
-    if (!is_dir("../category/" . $dir)) continue; // 跳過非目錄的檔案 (例如 readme.md)
-    
-    $files = scandir("../category/" . $dir);
-    $files = del_by_value($files, ".");
-    $files = del_by_value($files, "..");
-
-    // Filter out drafts (check if actual content file exists)
-    $valid_files = array();
-    foreach($files as $f) {
-        if(file_exists("../contents/post_files/" . $f) || file_exists("../contents/post_files/" . $f . ".html")) {
-            $valid_files[] = $f;
+            $ret_post[] = array(
+                'post_category' => $post_cats,
+                'post_tags'     => $tags,
+                'post_time'     => $date_str,
+                'post_title'    => $title,
+                'post_content'  => protect_script_tags($html_split[0]),
+                'post_index'    => $filename
+            );
         }
     }
 
-    array_push($category, array('name' => $dir, 'count' => count($valid_files), 'posts' => $valid_files));
-  }
-  return $category;
-}
+    $ret_all = array(
+        'category'    => $all_categories,
+        'dates_count' => $ret_date,
+        'date_post'   => $ret_date_post,
+        'tags'        => $ret_tag_count,
+        'posts'       => $ret_post
+    );
 
-//取得索引資料
-function get_contents()
-{
-  $index_file = "../contents/index_post.txt";
-  $index = file_get_contents($index_file);
-  $index  = str_replace("\r\n", "\n", $index);
-  $arr = explode("\n", $index);
-  return $arr;
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($ret_all);
 }

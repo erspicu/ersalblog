@@ -17,12 +17,13 @@ The project does not rely on a traditional database but utilizes the file system
 The system supports two operating modes:
 1.  **Dynamic SPA Mode (`blog.html`)**: 
     *   User accesses `blog.html`.
-    *   `static/blog.js` calls `api/api_filebase.php` via AJAX (path configurable in `config.js`).
-    *   The PHP backend reads the text file database and returns JSON.
+    *   `static/blog.js` calls `api/api_filebase.php` (or SQLite/MySQL variants) via AJAX.
+    *   **Unified API Logic**: All API endpoints (`api_*.php`) share a unified core logic (`get_data`) to ensure consistency across File, SQLite, and MySQL modes.
+    *   The PHP backend reads the data and returns JSON.
     *   The frontend uses the `<template>` tag for client-side rendering.
 2.  **Static Generation Mode (`make_html.php`)**:
     *   Executes a PHP script to read the database.
-    *   **Core Generator**: Powered by `PHPLib\StaticGenerator` class, encapsulating all build logic for reuse in both CLI and Admin.
+    *   **Core Generator**: Powered by `PHPLib\StaticGenerator` class, encapsulating all build logic for reuse in CLI (`make_html.php`) and Admin (`admin/build.php`, `admin/post_save.php`).
     *   Uses `static/blog_template.html` as the base template.
     *   **Micro-Template Engine**: Utilizes `PHP_LIB/TemplateManager.php` for high-performance placeholder replacement and list rendering.
     *   **Regex Pipeline**: Employs Regex-based parsing instead of DOMDocument to ensure HTML5 compatibility and stability across different PHP versions (5.x+).
@@ -66,12 +67,12 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **Root Directory**:
     *   `blog.html`: Core SPA entry point.
-    *   `make_html.php`: Optimized static site generator.
+    *   `make_html.php`: Optimized static site generator (CLI wrapper).
     *   `mini.py`: Python automation script for minification (with smart ignore logic).
     *   `install.php`: System installation wizard.
 
 *   **`/api`**:
-    *   Contains backend API endpoints (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`).
+    *   Contains backend API endpoints (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`) sharing a unified architecture.
     *   `json/`: (Ignored) Contains pre-generated `data.json` for static mode.
 
 *   **`/langs`**:
@@ -94,6 +95,7 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **`/admin`**:
     *   Backend management system.
+    *   `build.php`: Dedicated interface for manual site rebuilding.
 
 ---
 
@@ -132,11 +134,13 @@ Listed below are key directories and file rules in the Git repository:
 本系統支援兩種運作模式：
 1.  **動態 SPA 模式 (`blog.html`)**: 
     *   使用者存取 `blog.html`。
-    *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php`。
+    *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php` (或 SQLite/MySQL 版本)。
+    *   **統一 API 邏輯**: 所有 API 端點 (`api_*.php`) 共享統一的 `get_data` 核心邏輯，確保 File、SQLite 與 MySQL 模式間的行為一致性。
+    *   後端讀取資料並回傳 JSON。
     *   前端利用 `<template>` 標籤進行客戶端渲染。
 2.  **靜態生成模式 (`make_html.php`)**:
-    *   執行 PHP 腳本讀取資料庫。
-    *   **核心建置器**：由 `PHPLib\StaticGenerator` 類別驅動，封裝所有建置邏輯，供 CLI 與後台管理介面共同調用。
+    *   執行 PHP 腳本讀取資料。
+    *   **核心建置器**：由 `PHPLib\StaticGenerator` 類別驅動，封裝所有建置邏輯，供 CLI (`make_html.php`) 與後台管理介面 (`admin/build.php`, `admin/post_save.php`) 共同調用。
     *   利用 `static/blog_template.html` 作為基底樣板。
     *   **微樣板引擎**：使用 `PHP_LIB/TemplateManager.php` 進行高效能變數替換與列表渲染。
     *   **Regex 建置管線**：全面改用正規表達式取代 DOMDocument，解決 HTML5 相容性問題並支援 PHP 5.x+ 環境。
@@ -176,12 +180,12 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **根目錄**:
     *   `blog.html`: 核心 SPA 入口。
-    *   `make_html.php`: 優化後的靜態網站生成器。
+    *   `make_html.php`: 優化後的靜態網站生成器 (CLI 包裝器)。
     *   `mini.py`: Python 自動化壓縮腳本 (具備智慧排除邏輯)。
     *   `install.php`: 系統安裝精靈。
 
 *   **`/api`**:
-    *   存放後端 API 程式 (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`)。
+    *   存放後端 API 程式 (`api_filebase.php`, `api_dbsqlbase.php`, `api_sqlitebase.php`)，共享統一架構。
     *   `json/`: (已忽略) 存放預生成的 `data.json` 靜態資料包。
 
 *   **`/langs`**:
@@ -204,6 +208,7 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **`/admin`**:
     *   後台管理系統核心程式。
+    *   `build.php`: 專用的手動網站建置介面。
 
 ---
 

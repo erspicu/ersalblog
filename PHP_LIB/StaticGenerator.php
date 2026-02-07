@@ -183,10 +183,10 @@ class StaticGenerator {
             )));
 
             $listVars = array_merge($globalVars, array(
-                'page_title'          => $this->config['blog_title'] . "-文章總列表",
+                'page_title'          => $this->config['blog_title'] . "-" . $this->langVars['list_page_title'],
                 'page_canonical'      => $this->config['site_url'] . 'blog_list.html',
                 'page_description'    => '',
-                'page_og_title'       => $this->config['blog_title'] . "-文章總列表",
+                'page_og_title'       => $this->config['blog_title'] . "-" . $this->langVars['list_page_title'],
                 'page_og_description' => '',
                 'page_og_image'       => '',
                 'page_og_url'         => $this->config['site_url'] . 'blog_list.html',

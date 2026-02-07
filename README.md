@@ -8,6 +8,7 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
 
 *   **Hybrid Engine**: High-performance Static Site Generation (SSG) combined with a flexible Single Page Application (SPA).
 *   **Zero-Database Option**: Runs entirely on plain text files, while also supporting MySQL and SQLite 3 for scalability.
+*   **Unified API Architecture**: A single, robust logic core powers API endpoints across all storage modes, ensuring consistency and ease of maintenance.
 *   **Admin Power-ups**:
     *   **Selective SSG Build**: Trigger static page generation directly from the post editor or a dedicated build management interface.
     *   **Visual Editor**: Locally-hosted TinyMCE 6 for a seamless "What You See Is What You Get" writing experience.
@@ -67,9 +68,9 @@ Configurable in `config.js` via `theme_file`. Supports `blog.css` (Standard) and
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.07.10.08` (UTC+8)
-CLI Version: `0.27.2`
-Model: `gemini-3-flash-preview`
+Version: `v2026.02.07.15.00` (UTC+8)
+CLI Version: `0.27.3`
+Model: `gemini-3-pro-preview`
 
 ---
 
@@ -81,6 +82,7 @@ Model: `gemini-3-flash-preview`
 
 *   **混合引擎**: 高效能靜態網頁生成與靈活的前端渲染 (SPA) 雙模式。
 *   **無資料庫支援**: 可完全運行於純文字檔案，亦支援 MySQL 與 SQLite 3 提供擴充性。
+*   **統一 API 架構**: 所有儲存模式的資料接口皆由單一核心邏輯驅動，大幅提升系統一致性與維護便利性。
 *   **強大後台**:
     *   **選擇性建置**: 可直接從文章編輯器或專用的建置管理介面觸發靜態網頁生成。
     *   **視覺化編輯器**: 內建 TinyMCE 6，提供所見即所得的流暢寫作體驗。
@@ -121,6 +123,6 @@ Model: `gemini-3-flash-preview`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.07.10.08` (UTC+8)
-CLI 版本: `0.27.2`
-模型名稱: `gemini-3-flash-preview`
+版本號: `v2026.02.07.15.00` (UTC+8)
+CLI 版本: `0.27.3`
+模型名稱: `gemini-3-pro-preview`

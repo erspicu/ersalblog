@@ -1,4 +1,4 @@
-# Gemini CLI Development Log
+﻿# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -54,8 +54,8 @@
 - [2026-02-01 15:15:00] 實作後台 SQLite 備份還原功能 (admin/tool_backup.php)。支援打包 SQLite 資料庫檔與靜態資源 (sqlitebase-*.zip)，並實作相應的還原與列表過濾邏輯。
 - [2026-02-01 15:30:00] 修正後台備份工具 (admin/tool_backup.php) 錯誤：補充缺失的 Helper Functions (addStaticFilesToZip, restoreStaticFiles, cleanupTempDir) 以解決 500 錯誤；修正備份列表過濾邏輯，確保 SQLite 模式下正確顯示 sqlitebase-* 檔案。
 - [2026-02-01 15:50:00] 修正 HISTORY.md 文件，重新整理並補全 2026-02-01 的開發紀錄，確保所有新功能 (Backup/Restore, SQLite Support, Filtering) 的 中英文內容完整對應且格式一致。
-- [2026-02-01 16:00:00] 補全 HISTORY.md 中 2026-01-30 與 2026-01-31 的繁體中文翻譯，確保全站歷史紀錄皆符合中英文同步規範。
-- [2026-02-01 19:15:00] 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.19.15，並完成 Git 發佈。
+- [2026-02-01 16:00:00] 補全 HISTORY.md 中 2026-01-30 與 2026-01-31 的繁體中文翻譯，確保全站歷史紀錄皆符合 中英文同步規範。
+- [2026-02-01 19:15:00] 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.19.15，並完成本地 Git Commit。
 - [2026-02-01 19:30:00] 實作全方位安裝引導精靈 (install.php)：
   - 支援環境檢測 (PHP 版本與 Unix 權限修復)。
   - 提供多模式資料庫連線測試 (MySQL/SQLite/File)。
@@ -215,7 +215,7 @@
   - 將全站 PHP 檔案中的 Null Coalescing 運算子 (`??`) 替換為 `isset() ? :` 語法。
   - 將短陣列初始化語法 (`[]`) 替換為傳統的 `array()` 語法，確保相容 PHP 5.4 以下版本。
   - 在 `admin/system_helper.php` 中實作 `random_bytes()` 回退函式，解決舊版 PHP 缺少原生安全隨機數生成的問題。
-  - 全面校閱 `admin/` 與 `api/` 目錄下的核心邏輯，修復因自動化替換產生的語法錯誤，確保程式在 PHP 5.x 環境下的穩定性。
+  - 全面校閱 `admin/` 與 `api/` 目錄下的核心邏輯，修復因自動化替換產生的語法錯誤，確保程式 在 PHP 5.x 環境下的穩定性。
 - [2026-02-07 14:35:00] 修正後台登入 500 錯誤：
   - 修復 `admin/lang_init.php` 在語系目錄扁平化後指向錯誤路徑 (`langs/admin`) 的問題。
   - 確保後台能正確讀取 `langs/` 根目錄下的語系檔案。
@@ -243,3 +243,12 @@
   - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行。
   - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護。
   - 確保腳本保護僅作用於使用者產生的文章內容，不影響樣板本身的合法腳本執行。
+- [2026-02-07 14:08:00] 啟動 Gemini CLI 執行環境，列出目錄檔案以確認現況。
+- [2026-02-07 14:40:00] 執行 API 全面精簡與重構：
+  - 重構 `api_filebase.php`, `api_sqlitebase.php`, `api_dbsqlbase.php`。
+  - 建立統一的 `get_data` 核心邏輯，消除 90% 以上的重複程式碼。
+  - 移除已不使用的 `page()` 進入點與多個輔助函式 (`del_by_value`, `startsWith` 等)。
+  - 確保介面與回傳格式完全相容前端 `blog.js` 調用。
+- [2026-02-07 14:50:00] 修正 StaticGenerator.php 語系支援：
+  - 修正 `StaticGenerator.php` 中硬編碼的中文標題 ("-文章總列表")。
+  - 改用 `langVars['list_page_title']` 動態變數，確保前台標題能隨語系設定正確切換。
