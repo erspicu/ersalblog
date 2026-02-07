@@ -19,6 +19,7 @@ The system supports two operating modes:
     *   User accesses `blog.html`.
     *   `static/blog.js` calls `api/api_filebase.php` (or SQLite/MySQL variants) via AJAX.
     *   **Unified API Logic**: All API endpoints (`api_*.php`) share a unified core logic (`get_data`) to ensure consistency across File, SQLite, and MySQL modes.
+    *   **Hybrid Pagination**: Implements server-side slicing for PHP modes (reducing IO load) and client-side slicing for Static JSON mode, using a unified `pagination` metadata structure.
     *   The PHP backend reads the data and returns JSON.
     *   The frontend uses the `<template>` tag for client-side rendering.
 2.  **Static Generation Mode (`make_html.php`)**:
@@ -136,6 +137,7 @@ Listed below are key directories and file rules in the Git repository:
     *   使用者存取 `blog.html`。
     *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php` (或 SQLite/MySQL 版本)。
     *   **統一 API 邏輯**: 所有 API 端點 (`api_*.php`) 共享統一的 `get_data` 核心邏輯，確保 File、SQLite 與 MySQL 模式間的行為一致性。
+    *   **混合式分頁**: 實作 PHP 模式下的伺服器端切割（減少 IO 負擔）與靜態 JSON 模式下的客戶端切割，並使用統一的 `pagination` 元數據結構。
     *   後端讀取資料並回傳 JSON。
     *   前端利用 `<template>` 標籤進行客戶端渲染。
 2.  **靜態生成模式 (`make_html.php`)**:

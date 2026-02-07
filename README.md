@@ -7,6 +7,7 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
 ### 🌟 Core Features
 
 *   **Hybrid Engine**: High-performance Static Site Generation (SSG) combined with a flexible Single Page Application (SPA).
+*   **Smart Pagination**: Hybrid server/client pagination system with a beautified UI and configurable post limits.
 *   **Zero-Database Option**: Runs entirely on plain text files, while also supporting MySQL and SQLite 3 for scalability.
 *   **Unified API Architecture**: A single, robust logic core powers API endpoints across all storage modes, ensuring consistency and ease of maintenance.
 *   **Admin Power-ups**:
@@ -68,9 +69,9 @@ Configurable in `config.js` via `theme_file`. Supports `blog.css` (Standard) and
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.07.15.00` (UTC+8)
+Version: `v2026.02.07.16.15` (UTC+8)
 CLI Version: `0.27.3`
-Model: `gemini-3-pro-preview`
+Model: `gemini-3-flash-preview`
 
 ---
 

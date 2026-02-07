@@ -23,10 +23,17 @@
     - **Code Reduction**: Eliminated 90% of duplicate logic and removed redundant `page()` entry points and helper functions.
     - **Compatibility**: Ensured refactored JSON output remains fully compatible with frontend `blog.js`.
 
-### [15:30] Static Site Generation (SSG) Refactoring
-- **Task**: Decouple "Data Publishing" from "Static Page Generation" to provide a flexible build pipeline.
+### [15:30] SSG & Pagination Refactoring
+- **Task**: Unify build logic and implement a high-performance hybrid pagination system.
 - **Implementation**:
-    - **Logic Encapsulation**: Created `PHP_LIB/StaticGenerator.php` class to unify SSG core logic.
-    - **Admin Integration**: Added "Rebuild Immediately" option in `admin/post_edit.php`.
-    - **i18n Support**: Replaced hardcoded title in `StaticGenerator.php` with dynamic language variable.
-    - **Compatibility**: Fixed PHP 5.3 limitation regarding `$this` in closures to ensure stability in legacy environments.
+    - **Generator Class**: Created `PHP_LIB/StaticGenerator.php` and fixed hardcoded titles for i18n support.
+    - **Hybrid Pagination**: Implemented Server-side (PHP API) and Client-side (JSON Mode) pagination logic, significantly improving performance for large datasets.
+    - **UI/UX Enhancement**: Created a beautified pagination component with Prev/Next navigation and dark mode support.
+    - **Admin Integration**: Added "Posts Per Page" management in admin settings.
+
+### [15:55] Navigation Logic Fixes & Security Hardening
+- **Task**: Resolve date filtering issues and continue stability optimizations.
+- **Implementation**:
+    - **Bugfix**: Fixed `date_range` logic to support both 4-digit (Year) and 6-digit (Year-Month) matching.
+    - **Sync Filter**: Enhanced API to automatically exclude posts without physical static files.
+    - **Stability**: Fixed CSRF validation and language path reference errors in the backup tool.
