@@ -1,4 +1,4 @@
-﻿# Gemini CLI Development Log
+# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -266,3 +266,5 @@
 - [2026-02-07 15:55:00] 修正日期篩選邏輯 (Date Range Bugfix)：
   - 修正三隻 API 程式中的日期比對邏輯，使其支援年份 (4碼) 與年月 (6碼) 的動態匹配。
   - 同步更新 `blog.js` 的 JSON 模式篩選器，確保全站日期導覽功能正常運作。
+- [2026-02-07 16:10:00] 修正 StaticGenerator.php 語系變數引用錯誤：
+  - 修正 `list_page_title` 鍵值缺少 `lang_` 前綴的問題，解決執行 make_html.php 時出現的 Undefined index 錯誤。
