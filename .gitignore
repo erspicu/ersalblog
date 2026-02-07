@@ -75,3 +75,10 @@ test/
 
 # Generated Build Cache Hash
 /contents/build_hash.json
+
+# Album Service
+/album/album.html
+/album/view/
+/album/Collection/**/*.jpg
+/album/Collection/**/Thumbnail/
+/album/static/*_example.html
