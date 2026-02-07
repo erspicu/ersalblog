@@ -441,3 +441,27 @@
     - **CLI 支援**: `make_album.php` 支援 `-s` (跳過縮圖) 與 `-f` (強制重製) 參數。
     - **Git 管理**: 設定 `.gitignore` 排除所有生成檔案與原始照片，僅保留程式碼與設定檔。
     - **文件化**: 為相簿各層級目錄建立詳細的 `readme.md` 說明文件。
+
+## [v2026.02.08.03.15] - 2026-02-08
+
+### 相簿服務 (Album Service) 優化
+- **短網址系統 (ShortURL)**:
+  - 實作 \`album/shorturl.php\`，支援 Base62 編碼與 MIME Type 自動辨識回傳。
+  - 升級混淆演算法：採用 **模乘雜湊 (Modular Multiplicative Hashing)** + XOR 掩碼，產生高度隨機的 5 碼 Slug。
+  - 生成器整合：\`make_album.php\` 現在會自動生成 \`shorturl.txt\` (格式：\`ID|Path\`) 供反查使用。
+- **前端重構 (De-Bootstrap)**:
+  - **移除依賴**: 完全移除 Bootstrap CSS/JS 框架，改用原生 HTML/CSS/JS 實作。
+  - **CSS Grid**: 重寫 \`album/static/album.css\`，採用現代 CSS Grid 進行響應式佈局。
+  - **輕量化**: 整合並內聯 SVG 圖示，移除所有外部字體與多餘資源，大幅提升載入速度。
+- **多重主題 (Theme System)**:
+  - 建立主題切換機制，支援 \`album\` (預設), \`album-dark\`, \`album-pink\`, \`album-matrix\` 四種風格。
+  - 新增 \`album/config.js\` 與 \`config.example.js\` 供使用者自訂預設主題。
+- **功能增強**:
+  - **原始檔下載**: 在詳情頁新增下載按鈕，直接連結至 Collection 下的高品質原圖。
+  - **進階分享**: 實作多尺寸連結分享視窗，支援一鍵複製與「原始路徑/短網址」切換功能。
+  - **導覽優化**: 統一全站分頁導覽列為置中顯示，修正標頭與內容寬度對齊問題。
+  - **EXIF 顯示**: 前端移除 \`exif.js\`，改由後端 PHP 讀取並直接渲染至靜態 HTML，提升相容性與效能。
+- **系統維護**:
+  - 更新 \`.gitignore\` 排除敏感設定檔與生成數據。
+  - 清理舊規則縮圖並強制重建所有靜態資源。
+  - 更新 \`album/Collection/相簿1/readme.md\` 規範。

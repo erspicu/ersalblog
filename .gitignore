@@ -77,6 +77,8 @@ test/
 /contents/build_hash.json
 
 # Album Service
+/album/config.js
+/album/shorturl.txt
 /album/album.html
 /album/view/
 /album/Collection/**/*.jpg

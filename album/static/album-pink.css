@@ -1,0 +1,69 @@
+/* =========================================
+   Baxermux Album - Soft Pink Theme
+   ========================================= */
+
+:root {
+    --bg-color: #fffafa; /* 溫暖的雪白色 */
+    --text-color: #5d4037; /* 深可可色，比純黑更溫柔 */
+    --muted-color: #a88a8a;
+    --primary-color: #ff8da1; /* 櫻花粉 */
+    --primary-hover: #ffb3c1;
+    --white: #ffffff;
+    --border-color: #fce4ec;
+    --shadow: 0 6px 15px rgba(255, 141, 161, 0.15);
+    --hover-shadow: 0 10px 25px rgba(255, 141, 161, 0.25);
+    --radius: 20px; /* 更圓潤的轉角 */
+}
+
+/* 針對粉色模式微調 */
+body {
+    background-image: radial-gradient(#ffebee 1px, transparent 1px);
+    background-size: 20px 20px; /* 微細點點背景 */
+}
+
+.header-bar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid #fce4ec;
+}
+
+.site-title { color: #d81b60; }
+
+.card {
+    border: 1px solid #fce4ec;
+}
+
+.card-badge {
+    background: rgba(255, 141, 161, 0.8);
+}
+
+.album-header-box {
+    background: #fff0f3;
+    border: 1px solid #ffc1cc;
+}
+
+.page-link {
+    color: #ff8da1;
+    border-color: #fce4ec;
+}
+
+.page-link.active {
+    background: #ff8da1;
+    border-color: #ff8da1;
+}
+
+/* 按鈕美化 */
+.btn-primary {
+    background: linear-gradient(135deg, #ff8da1 0%, #ffb3c1 100%);
+    box-shadow: 0 4px 10px rgba(255, 141, 161, 0.3);
+}
+
+/* 圖示濾鏡 (轉為粉紫色系) */
+.bi {
+    filter: sepia(1) saturate(5) hue-rotate(300deg);
+}
+
+/* Modal 修正 */
+.modal-box {
+    border: 2px solid #fce4ec;
+}

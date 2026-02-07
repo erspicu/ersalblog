@@ -24,6 +24,10 @@ if (isset($options['h']) || isset($options['help'])) {
 $skipThumbnails = (isset($options['s']) || isset($options['skip-thumb']));
 $forceThumbnail = (isset($options['f']) || isset($options['force']));
 
+// 用於記錄 shorturl 的清單
+$shortUrlList = array();
+$currentShortId = 0; // 全域 ID 計數器
+
 // 縮圖配置 (尺寸由大到小)
 $thumbConfigs = array(
     'thumbXL' => array('size' => 2048, 'quality' => 95),
@@ -146,10 +150,9 @@ function createSingleThumbnail($src, $dest, $maxSize, $quality) {
 // ==========================================
 // 1. 生成相簿首頁 (album.html)
 // ==========================================
-$indexBody = '<div class="row g-4" id="album-list-container">
-    <div class="col-12 text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 text-muted">載入相簿中...</p>
+$indexBody = '<div class="album-grid" id="album-list-container">
+    <div class="text-center py-5" style="grid-column: 1/-1;">
+        <p class="text-muted">載入相簿中...</p>
     </div>
 </div>';
 
@@ -162,6 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 $indexHtml = $tm->render($tm->getSource(), array(
     'path_to_static' => 'static/',
+    'path_to_config' => './',
     'page_title' => '首頁',
     'album_header' => '',
     'content_body' => $indexBody,
@@ -219,22 +223,22 @@ if (is_dir($collectionDir)) {
         $totalPhotoPages = ceil($photoCount / $photosPerPage);
         if ($totalPhotoPages == 0) $totalPhotoPages = 1;
 
+        $photoIdMap = array(); // filename => startId
+
         for ($p = 1; $p <= $totalPhotoPages; $p++) {
             $offset = ($p - 1) * $photosPerPage;
             $pagePhotos = array_slice($photos, $offset, $photosPerPage);
             $pageFilename = ($p == 1) ? $albumName . '.html' : $albumName . '_page' . $p . '.html';
             
             $albumBodyHeader = '
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="../album.html">首頁</a></li>
-                        <li class="breadcrumb-item active">' . htmlspecialchars($albumName) . '</li>
-                    </ol>
+            <div class="d-flex align-center justify-between mb-4">
+                <nav class="breadcrumb">
+                    <div class="breadcrumb-item"><a href="../album.html">首頁</a></div>
+                    <div class="breadcrumb-item active">' . htmlspecialchars($albumName) . '</div>
                 </nav>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-light text-dark border d-flex align-items-center px-3"><i class="bi bi-image me-2"></i>' . $photoCount . ' 張相片</span>
-                    <a href="../album.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house-door me-1"></i>返回首頁</a>
+                <div class="d-flex align-center gap-2">
+                    <span class="badge"><i class="bi bi-image"></i> ' . $photoCount . ' 張相片</span>
+                    <a href="../album.html" class="btn btn-outline"><i class="bi bi-house-door"></i> 返回首頁</a>
                 </div>
             </div>';
 
@@ -243,11 +247,28 @@ if (is_dir($collectionDir)) {
                 $filename = basename($photoPath);
                 $meta = isset($photoMeta[$filename]) ? $photoMeta[$filename] : array('title' => $filename, 'desc' => '');
                 
-                if (!$skipThumbnails) {
-                    foreach ($thumbConfigs as $prefix => $conf) {
-                        $destName = getThumbFilename($filename, $prefix);
-                        createSingleThumbnail($photoPath, $thumbDir . '/' . $destName, $conf['size'], $conf['quality']);
+                // 記錄此照片的起始 ID
+                $photoIdMap[$filename] = $currentShortId;
+
+                // --- ShortURL ID 計算 (Grid View 雖不顯示分享但仍需佔位以保持 ID 同步) ---
+                // 此處為了保持與詳情頁的 ID 計算一致，我們必須模擬一次完整的 ID 分配過程
+                // 順序: Original -> thumbXL -> thumbL -> thumbM -> thumb
+                
+                // 1. Original
+                $shortUrlList[] = $albumName . '/' . $filename;
+                $currentShortId++; 
+
+                // 2. Thumbnails
+                foreach ($thumbConfigs as $prefix => $conf) {
+                    $destName = getThumbFilename($filename, $prefix);
+                    $destPath = $thumbDir . '/' . $destName;
+                    
+                    if (!$skipThumbnails) {
+                        createSingleThumbnail($photoPath, $destPath, $conf['size'], $conf['quality']);
                     }
+                    
+                    $shortUrlList[] = $albumName . '/Thumbnail/' . $destName;
+                    $currentShortId++;
                 }
 
                 $gridThumbFile = getThumbFilename($filename, 'thumb');
@@ -266,33 +287,35 @@ if (is_dir($collectionDir)) {
             // 分頁導覽
             $paginationHtml = '';
             if ($totalPhotoPages > 1) {
-                $paginationHtml = '<nav aria-label="Page navigation" class="mt-5 mb-4 d-flex justify-content-center"><ul class="pagination pagination-sm">';
+                $paginationHtml = '<div id="pagination-container"><div class="pagination">';
                 
                 $prevLink = ($p <= 2) ? $albumName . '.html' : $albumName . '_page' . ($p - 1) . '.html';
-                $paginationHtml .= '<li class="page-item ' . (($p <= 1) ? 'disabled' : '') . '"><a class="page-link" href="' . $prevLink . '"><i class="bi bi-chevron-left"></i></a></li>';
+                $paginationHtml .= '<span class="page-item ' . (($p <= 1) ? 'disabled' : '') . '"><a class="page-link" href="' . $prevLink . '"><i class="bi bi-chevron-left"></i></a></span>';
 
                 for ($i = 1; $i <= $totalPhotoPages; $i++) {
                     $link = ($i == 1) ? $albumName . '.html' : $albumName . '_page' . $i . '.html';
-                    $paginationHtml .= '<li class="page-item ' . (($i == $p) ? 'active' : '') . '"><a class="page-link" href="' . $link . '">' . $i . '</a></li>';
+                    $activeClass = ($i == $p) ? 'active' : '';
+                    $paginationHtml .= '<span class="page-item ' . $activeClass . '"><a class="page-link" href="' . $link . '">' . $i . '</a></span>';
                 }
 
                 $nextLink = $albumName . '_page' . ($p + 1) . '.html';
-                $paginationHtml .= '<li class="page-item ' . (($p >= $totalPhotoPages) ? 'disabled' : '') . '"><a class="page-link" href="' . $nextLink . '"><i class="bi bi-chevron-right"></i></a></li>';
-                $paginationHtml .= '</ul></nav>';
+                $paginationHtml .= '<span class="page-item ' . (($p >= $totalPhotoPages) ? 'disabled' : '') . '"><a class="page-link" href="' . $nextLink . '"><i class="bi bi-chevron-right"></i></a></span>';
+                $paginationHtml .= '</div></div>';
             }
 
             // 生成相簿標頭 HTML
             $albumHeaderHtml = '
-            <div class="bg-white p-4 rounded-3 shadow-sm border mb-4">
-                <h2 class="fw-bold h4 mb-2">' . htmlspecialchars($displayAlbumName) . '</h2>
-                ' . (!empty($albumDesc) ? '<p class="text-muted mb-0">' . htmlspecialchars($albumDesc) . '</p>' : '') . '
+            <div class="album-header-box">
+                <h2 class="fw-bold mb-2" style="font-size:1.25rem">' . htmlspecialchars($displayAlbumName) . '</h2>
+                ' . (!empty($albumDesc) ? '<p class="text-muted small mb-0">' . htmlspecialchars($albumDesc) . '</p>' : '') . '
             </div>';
 
             $albumViewHtml = $tm->render($tm->getSource(), array(
                 'path_to_static' => '../static/',
+                'path_to_config' => '../',
                 'page_title' => $displayAlbumName . ($p > 1 ? " (頁 $p)" : ""),
                 'album_header' => $albumHeaderHtml,
-                'content_body' => $albumBodyHeader . '<div class="row g-3">' . $photoListHtml . '</div>' . $paginationHtml,
+                'content_body' => $albumBodyHeader . '<div class="album-grid">' . $photoListHtml . '</div>' . $paginationHtml,
                 'custom_scripts' => ''
             ));
             $albumViewHtml = $tm->removeTags($albumViewHtml, 'template');
@@ -326,6 +349,9 @@ if (is_dir($collectionDir)) {
             $nextLink = $photoList[($index + 1) % $totalPhotos] . '.html';
 
             $exifHtml = getExifHtml($collectionDir . '/' . $albumName . '/' . $filename);
+            
+            // 獲取 ShortID
+            $shortIdStart = isset($photoIdMap[$filename]) ? $photoIdMap[$filename] : 0;
 
             $photoBody = $tm->render($tm->getSubTemplate('tmpl_photo_detail_view'), array(
                 'pathToHome' => '../../',
@@ -336,6 +362,7 @@ if (is_dir($collectionDir)) {
                 'imgSrc' => $mainImgSrc,
                 'imgSrcXL' => $xlImgSrc,
                 'imgSrcOriginal' => '../../Collection/' . $albumName . '/' . $filename,
+                'shortIdStart' => $shortIdStart,
                 'photoTitle' => htmlspecialchars($meta['title']),
                 'photoDesc' => htmlspecialchars($meta['desc']),
                 'exif_info' => $exifHtml
@@ -352,6 +379,7 @@ if (is_dir($collectionDir)) {
 
             $photoPageHtml = $tm->render($tm->getSource(), array(
                 'path_to_static' => '../../static/',
+                'path_to_config' => '../../',
                 'page_title' => $filename . ' - ' . $albumName,
                 'album_header' => '', 
                 'content_body' => $photoBody,
@@ -362,4 +390,17 @@ if (is_dir($collectionDir)) {
         }
     }
 }
+
+// ==========================================
+// 4. 儲存 ShortURL 紀錄
+// ==========================================
+if (!empty($shortUrlList)) {
+    $shortUrlContent = "";
+    foreach ($shortUrlList as $index => $path) {
+        $shortUrlContent .= $index . "|" . $path . "\n";
+    }
+    file_put_contents($baseDir . '/shorturl.txt', $shortUrlContent);
+    echo "Generated: shorturl.txt (" . count($shortUrlList) . " entries)\n";
+}
+
 echo "Album generation complete!\n";

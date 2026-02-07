@@ -1,0 +1,121 @@
+/* =========================================
+   Baxermux Album - The Matrix Theme
+   ========================================= */
+
+:root {
+    --bg-color: #000000;
+    --text-color: #00ff41; /* 經典 Matrix 綠 */
+    --muted-color: #008f11;
+    --primary-color: #00ff41;
+    --primary-hover: #ffffff;
+    --white: #0d0d0d;
+    --border-color: #003b00;
+    --shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    --hover-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+    --radius: 0px; /* 駭客風格不使用圓角，要稜角分明 */
+}
+
+/* 核心背景特效 */
+body {
+    background-image: linear-gradient(0deg, rgba(0, 255, 65, 0.03) 50%, transparent 50%);
+    background-size: 100% 4px; /* 模擬電視掃描線 */
+    font-family: 'Courier New', Courier, monospace !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-bar {
+    background: #000;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.site-title { 
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-color);
+}
+
+.card {
+    border: 1px solid var(--border-color);
+    background: #000;
+}
+
+.card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color);
+}
+
+.card-body { background: #000; }
+
+.card-badge {
+    background: #000;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 0;
+}
+
+.album-header-box {
+    background: #000;
+    border: 1px solid var(--primary-color);
+}
+
+.page-link {
+    background: #000;
+    color: var(--primary-color);
+    border-color: var(--border-color);
+    border-radius: 0;
+}
+
+.page-link.active {
+    background: var(--primary-color);
+    color: #000;
+}
+
+/* 按鈕變更為終端機風格 */
+.btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 1px solid var(--primary-color);
+}
+
+.btn-primary {
+    background: #000;
+    color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background: var(--primary-color);
+    color: #000;
+}
+
+/* 圖示濾鏡 (全部轉為綠色) */
+.bi {
+    filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+}
+
+/* 圖片濾鏡 (稍微帶點綠色感) */
+.card-img {
+    filter: sepia(0.5) hue-rotate(80deg) brightness(0.8) contrast(1.2);
+}
+
+#photo-main-viewer {
+    filter: none; /* 詳情頁主圖不使用濾鏡，保留原色 */
+}
+
+.card:hover .card-img {
+    filter: none; /* 懸停時恢復原色，模擬「破解」效果 */
+}
+
+/* Modal 修正 */
+.modal-box {
+    background: #000;
+    border: 2px solid var(--primary-color);
+    border-radius: 0;
+    color: var(--primary-color);
+}
+.input-group input {
+    background: #000;
+    border: 1px solid var(--muted-color);
+    color: var(--primary-color);
+    border-radius: 0;
+}

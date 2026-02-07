@@ -4,149 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{page_title}} - Baxermux的相簿</title>
-    <link href="{{path_to_static}}css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{path_to_static}}css/bootstrap-icons.css">
-    <style>
-        :root {
-            --album-bg: #f8f9fa;
-            --card-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            --primary-color: #4a69bd;
-            --transition-speed: 0.2s;
+    <link rel="stylesheet" href="{{path_to_static}}album.css">
+    <script src="{{path_to_config}}config.js"></script>
+    <script>
+        if(typeof albumConfig !== 'undefined' && albumConfig.theme && albumConfig.theme !== 'album') {
+            document.write('<link rel="stylesheet" href="{{path_to_static}}' + albumConfig.theme + '.css">');
         }
-        body {
-            background-color: var(--album-bg);
-            font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #2d3436;
-        }
-        .main-content {
-            width: 96%;
-            margin: 0 auto;
-        }
-        .header-bar {
-            background: white;
-            padding: 25px 0;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #e9ecef;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-        
-        /* Card Styles */
-        .album-card, .photo-card {
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all var(--transition-speed) ease;
-            background: white;
-            height: 100%;
-            cursor: pointer;
-            box-shadow: var(--card-shadow);
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .album-card:hover, .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        .album-img-wrapper { aspect-ratio: 1 / 1; overflow: hidden; background: #dfe6e9; position: relative; }
-        .photo-img-wrapper { aspect-ratio: 3 / 2; overflow: hidden; background: #dfe6e9; position: relative; }
-        .img-fit { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-        .album-card:hover .img-fit { transform: scale(1.05); }
-        .photo-count {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6);
-            color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; backdrop-filter: blur(4px);
-        }
-        .info-box { padding: 15px; }
-        .info-title-text { font-weight: 700; color: #2d3436; font-size: 0.95rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .info-desc-text { color: #636e72; font-size: 0.8rem; margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Photo Viewer */
-        .photo-viewer-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); margin-bottom: 30px; }
-        .photo-stage { background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 50vh; position: relative; }
-        .photo-stage img { max-width: 100%; max-height: 80vh; object-fit: contain; }
-        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: none; width: 40px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10; text-decoration: none; }
-        .nav-btn:hover { background: rgba(255,255,255,0.2); color: white; }
-        .footer { padding: 40px 0; color: #b2bec3; font-size: 0.85rem; text-align: center; }
-        
-        /* Fullscreen Modal Styles */
-        #photoModal .modal-content { background: rgba(0,0,0,0.95); border: none; }
-        #photoModal .modal-body { padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; cursor: zoom-out; }
-        #modal-full-img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-    </style>
+    </script>
 </head>
 <body>
 
 <header class="header-bar">
-    <div class="main-content">
-        <div class="mb-3">
-            <h1 class="fw-bold h5 mb-0 d-inline-block">Baxermux的相簿</h1>
-            <span class="text-muted ms-2 small d-none d-sm-inline">| &nbsp; 放一些Blog用到的素材照片</span>
+    <div class="header-inner">
+        <div class="mb-2">
+            <h1 class="site-title">Baxermux的相簿</h1>
+            <span class="site-desc">| &nbsp; 放一些Blog用到的素材照片</span>
         </div>
-        <hr class="opacity-10 mb-0">
+        <hr class="divider">
     </div>
 </header>
 
 <main class="main-content">
-    <div id="album-header-section" class="mb-4">
+    <div id="album-header-section">
         {{album_header}}
     </div>
     {{content_body}}
-    <div id="pagination-container" class="mt-5 mb-4 d-flex justify-content-center"></div>
+    <div id="pagination-container"></div>
 </main>
 
 <footer class="footer"><p>&copy; 2026 Baxermux. All rights reserved.</p></footer>
 
-<!-- Fullscreen Photo Modal -->
-<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body" onclick="bootstrap.Modal.getInstance(document.getElementById('photoModal')).hide()">
-                <img src="" id="modal-full-img" alt="Fullscreen Photo">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Templates -->
 <template id="tmpl_index_album_item">
-    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-        <a href="{{link}}" class="album-card">
-            <div class="album-img-wrapper">
-                <img src="{{cover}}" alt="{{name}}" class="img-fit">
-                <span class="photo-count"><i class="bi bi-images me-1"></i>{{count}}</span>
-            </div>
-            <div class="info-box">
-                <h2 class="info-title-text">{{name}}</h2>
-                <p class="info-desc-text">{{desc}}</p>
-            </div>
-        </a>
-    </div>
+    <a href="{{link}}" class="card">
+        <div class="card-img-wrap ratio-1-1">
+            <img src="{{cover}}" alt="{{name}}" class="card-img">
+            <span class="card-badge"><i class="bi bi-images"></i> {{count}}</span>
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">{{name}}</h2>
+            <p class="card-desc">{{desc}}</p>
+        </div>
+    </a>
 </template>
 
 <template id="tmpl_album_photo_item">
-    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-        <a href="{{photoPageLink}}" class="photo-card">
-            <div class="photo-img-wrapper">
-                <img src="{{imgSrc}}" alt="{{filename}}" class="img-fit" loading="lazy">
-            </div>
-            <div class="info-box py-2 px-3 text-center">
-                <div class="info-desc-text" style="font-size:0.75rem">{{photoDesc}}</div>
-            </div>
-        </a>
-    </div>
+    <a href="{{photoPageLink}}" class="card">
+        <div class="card-img-wrap ratio-3-2">
+            <img src="{{imgSrc}}" alt="{{filename}}" class="card-img" loading="lazy">
+        </div>
+        <div class="card-body text-center" style="padding: 10px;">
+            <div class="card-desc">{{photoDesc}}</div>
+        </div>
+    </a>
 </template>
 
 <template id="tmpl_photo_detail_view">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 small">
-                <li class="breadcrumb-item"><a href="{{pathToHome}}album.html">首頁</a></li>
-                <li class="breadcrumb-item"><a href="../{{albumName}}.html">{{albumName}}</a></li>
-                <li class="breadcrumb-item active">{{filename}}</li>
-            </ol>
+    <div class="d-flex align-center justify-between" style="margin-bottom: 20px;">
+        <nav class="breadcrumb">
+            <div class="breadcrumb-item"><a href="{{pathToHome}}album.html">首頁</a></div>
+            <div class="breadcrumb-item"><a href="../{{albumName}}.html">{{albumName}}</a></div>
+            <div class="breadcrumb-item active">{{filename}}</div>
         </nav>
-        <a href="../{{albumName}}.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-grid-3x3-gap me-1"></i>返回列表</a>
+        <a href="../{{albumName}}.html" class="btn btn-outline"><i class="bi bi-grid-3x3-gap"></i> 返回列表</a>
     </div>
 
     <div class="photo-viewer-container">
@@ -155,24 +75,28 @@
             <img id="photo-main-viewer" src="{{imgSrc}}" alt="{{filename}}" onclick="openPhotoModal('{{imgSrcXL}}')" style="cursor:zoom-in">
             <a href="{{nextLink}}" class="nav-btn" style="right:0"><i class="bi bi-chevron-right"></i></a>
         </div>
-        <div class="photo-meta-panel p-4 border-top">
-            <div class="row">
-                <div class="col-md-4">
-                    <h6 class="fw-bold">照片資訊</h6>
-                    <p class="mb-1 fw-bold text-dark" style="font-size:1.1rem">{{photoTitle}}</p>
-                    <p class="text-muted small mb-2">{{photoDesc}}</p>
-                    <hr class="opacity-10">
-                    <p class="text-muted mb-3" style="font-size:0.75rem">檔案名稱: {{filename}}</p>
-                    <a href="{{imgSrcOriginal}}" download="{{filename}}" class="btn btn-primary btn-sm w-100 mb-2">
-                        <i class="bi bi-download me-2"></i>下載原始圖檔
+        <div class="photo-meta-panel" style="padding: 25px; border-top: 1px solid #eee;">
+            <div class="album-grid" style="grid-template-columns: 1fr 2fr; gap: 30px;">
+                <!-- Info Column -->
+                <div>
+                    <h6 class="fw-bold mb-2">照片資訊</h6>
+                    <p class="fw-bold" style="font-size:1.1rem; margin-bottom: 5px;">{{photoTitle}}</p>
+                    <p class="text-muted small" style="margin-bottom: 15px;">{{photoDesc}}</p>
+                    <hr class="divider" style="margin-bottom: 15px;">
+                    <p class="text-muted small" style="margin-bottom: 15px;">檔案名稱: {{filename}}</p>
+                    
+                    <a href="{{imgSrcOriginal}}" download="{{filename}}" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-download"></i> 下載原始圖檔
                     </a>
-                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="openShareModal('{{filename}}', '{{imgSrc}}', '{{imgSrcXL}}', '{{imgSrcOriginal}}')">
-                        <i class="bi bi-share me-2"></i>分享照片連結
+                    <button class="btn btn-outline w-100" onclick="openShareModal('{{filename}}', '{{imgSrc}}', '{{imgSrcXL}}', '{{imgSrcOriginal}}', '{{shortIdStart}}')">
+                        <i class="bi bi-share"></i> 分享照片連結
                     </button>
                 </div>
-                <div class="col-md-8">
-                    <h6 class="fw-bold">技術資訊 (EXIF)</h6>
-                    <div class="row g-3">
+                
+                <!-- EXIF Column -->
+                <div>
+                    <h6 class="fw-bold mb-2">技術資訊 (EXIF)</h6>
+                    <div class="album-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
                         {{exif_info}}
                     </div>
                 </div>
@@ -181,26 +105,34 @@
     </div>
 </template>
 
+<!-- Fullscreen Photo Modal -->
+<div id="photoModal" class="modal-overlay modal-fullscreen" onclick="closeModal('photoModal')">
+    <div class="modal-close"><i class="bi bi-x-lg"></i></div>
+    <img src="" id="modal-full-img" onclick="event.stopPropagation()">
+</div>
+
 <!-- Share Link Modal -->
-<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: white; color: #333;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">分享照片連結</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div id="shareModal" class="modal-overlay" onclick="closeModal('shareModal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h5 class="fw-bold">分享照片連結</h5>
+            <button class="close-btn" onclick="closeModal('shareModal')"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="d-flex justify-between align-center mb-3">
+                <p class="text-muted small mb-0">選擇分享尺寸：</p>
+                <label class="small fw-bold" style="cursor:pointer">
+                    <input type="checkbox" id="toggle-original-url" onchange="updateShareLinks()" style="vertical-align: middle;"> 顯示原始路徑
+                </label>
             </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">選擇您想分享的尺寸並複製連結：</p>
-                <div id="share-links-container" class="d-grid gap-3">
-                    <!-- JS will generate items here -->
-                </div>
+            <div id="share-links-container">
+                <!-- JS will generate items here -->
             </div>
         </div>
     </div>
 </div>
 
-<script src="{{path_to_static}}js/bootstrap.bundle.min.js"></script>
-<script src="{{path_to_static}}js/album.js"></script>
+<script src="{{path_to_static}}album.js"></script>
 {{custom_scripts}}
 </body>
 </html>
