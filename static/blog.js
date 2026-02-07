@@ -304,7 +304,9 @@ if (pathName.endsWith("blog.html")) {
                     filteredPosts = master.posts.filter(function(p) { return p.post_tags.indexOf(tagName) > -1; });
                 } else if (decQuery.indexOf("/date_range/") > -1) {
                     var dateVal = decQuery.split("/date_range/")[1].split("&")[0];
-                    var prefix = dateVal.length === 4 ? dateVal + "-" : dateVal.substring(0, 4) + "-" + dateVal.substring(4, 6);
+                    var f_year = dateVal.substring(0, 4);
+                    var f_mon = dateVal.substring(4, 6);
+                    var prefix = (f_mon !== "") ? (f_year + "-" + f_mon) : (f_year + "-");
                     filteredPosts = master.posts.filter(function(p) { return p.post_time.indexOf(prefix) === 0; });
                 }
 

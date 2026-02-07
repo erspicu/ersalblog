@@ -122,7 +122,10 @@ function get_data($filter_type, $filter_value)
                 }
             }
         } elseif ($filter_type === 'date') {
-            if (substr($date_str, 0, 7) === (substr($filter_value, 0, 4) . "-" . substr($filter_value, 4, 2))) $is_match = true;
+            $f_year = substr($filter_value, 0, 4);
+            $f_mon  = substr($filter_value, 4, 2);
+            $target_prefix = ($f_mon !== "") ? ($f_year . "-" . $f_mon) : ($f_year . "-");
+            if (strpos($date_str, $target_prefix) === 0) $is_match = true;
         }
 
         if ($is_match) {
