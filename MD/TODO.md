@@ -1,72 +1,55 @@
 # 部落格架構優化待辦事項 (TODO List)
 
-此文件記錄了關於系統架構的改進建議與待處理任務，主要聚焦於提升樣板生成的穩定性與代碼品質。
+此文件記錄了關於系統架構的改進建議與待處理任務，主要聚焦於提升系統穩定性、效能與使用者體驗。
 
 ---
 
-## 1. 樣板生成流程解耦 (Decoupling Template Generation)
+## 1. 核心邏輯優化
 
-### 狀態 (Status)
-**已完成 (COMPLETED)** ✅
+### API 全面重構 (API Consolidation)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 重構 `api_filebase.php`, `api_sqlitebase.php`, `api_dbsqlbase.php`。消除 90% 重複代碼，統一採用 `get_data` 核心，支援統一的分頁數據結構。
 
-### 解決方案 (Solution Implemented)
-*   **單一真理來源**：已修改 `make_html.php`，現在所有頁面 (`blog.html`, `post/xxx.html`) 皆直接讀取並解析 `static/blog_template.html` 原始碼。
-*   **平行生成**：移除了對 `blog.html` 生成結果的依賴，徹底解決了「影印本再影印」導致的結構劣化問題。
+### 混合式分頁系統 (Hybrid Pagination)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 實作了後端延遲讀取與前端客戶端切割兩種分頁模式，顯著提升載入大數據量文章時的效能。
 
----
-
-## 2. 強化標記與切割邏輯 (Marker & Splitting Logic)
-
-### 狀態 (Status)
-**已完成 (COMPLETED)** ✅
-
-### 解決方案 (Solution Implemented)
-*   **變數標準化**：全面將 `{xxx}` 佔位符替換為 `{{xxx}}`，避免與 CSS/JS 語法衝突。
-*   **字串替換**：棄用了脆弱的 `explode` 切割法，改用 `str_replace` 針對預定義的佔位符進行精確替換。
+### 靜態生成器類別化 (SSG Refactoring)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 建立 `PHP_LIB/StaticGenerator.php` 封裝所有建置邏輯，修復了語系變數前綴錯誤，確保 CLI 與後台整合一致。
 
 ---
 
-## 3. 提升樣板解析效能與精確度 (Template Parsing)
+## 2. 安全性與穩定性
 
-### 狀態 (Status)
-**已完成 (COMPLETED)** ✅
+### 文章內容腳本保護 (Script Tag Protection)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 實作 `protect_script_tags` 函式，防止文章內 `<script>` 被瀏覽器執行，同時維持文字內容的可見性。
 
-### 解決方案 (Solution Implemented)
-*   **移除 DOMDocument**：鑑於 `DOMDocument` (libxml) 對 HTML5 `<template>` 標籤的巢狀結構支援不佳，已完全移除該依賴。
-*   **導入 Regex 解析**：改用 `preg_match_all` 與 `preg_replace_callback` 處理樣板提取與圖片 Lazy Loading 優化，顯著提升了效能與 PHP 版本相容性 (支援 PHP 5.x+)。
-
----
-
-## 4. 自動化壓縮與清理 (Compression & Cleanup)
-
-### 狀態 (Status)
-**已完成 (COMPLETED)** ✅
-
-### 解決方案 (Solution Implemented)
-*   **排除機制**：`mini.py` 新增了針對巢狀目錄 (`admin/assets`) 與特定檔案 (`exif.js`) 的排除清單。
-*   **自動清理**：實作了清理邏輯，自動偵測並刪除誤生成的 `.min.js` / `.min.css` 檔案，保持專案目錄整潔。
+### 備份工具強化 (Backup Fixes)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 修復了備份工具的 CSRF 驗證錯誤與類別引用路徑問題。
 
 ---
 
-## 5. 已完成項目 (Completed Items)
+## 3. 已完成項目總覽 (History)
 
-*   [x] **Draft System**：草稿暫存機制 (File/DB/SQLite)。
-*   [x] **Filename Normalization**：自動補全日期前綴與副檔名清理。
-*   [x] **Admin Settings GUI**：後台 `config.js` 設定頁面。
-*   [x] **Dashboard Stats**：詳細區分已發布與草稿數量。
-*   [x] **Advanced Editor**：整合 TinyMCE 6 (Local Host) 並支援 `<!--more-->`。
-*   [x] **Translation**：完整的中英文語系支援 (含 TinyMCE)。
-*   [x] **Error Handling**：修正後台登入錯誤訊息顯示 (補全語系檔)。
-*   [x] **Front-end i18n**：前台樣板多語系支援與動態配置。
-*   [x] **Static JSON Mode**：實作單一資料源 (`data.json`) 支援純靜態主機。
-*   [x] **Smart Build Cache**：實作增量建置與內容雜湊比對。
-*   [x] **Security Hardening**：API 路徑遍歷防護與樣板 XSS 轉義。
-
-## 6. 其它建議項目
-
-*   [ ] **Server-side Pagination**：為 API 增加 `limit` 與 `offset` 支援。
-*   [ ] **Automatic WebP Conversion**：上傳圖片時自動轉換並生成縮圖。
+*   [x] **Template Decoupling**: 樣板生成流程解耦，統一讀取 `blog_template.html`。
+*   [x] **Placeholder Standardization**: 全面採用 `{{xxx}}` 雙大括號佔位符。
+*   [x] **Regex Engine**: 移除 DOMDocument，改用 Regex 解析以提升 PHP 5.x 相容性。
+*   [x] **Theme System**: 擴充 Pink 與 Matrix 主題，並強化佈局穩定性 (`clear: both`)。
+*   [x] **Posts Per Page**: 後台設定支援自訂分頁文章數量。
+*   [x] **Date Range Fix**: 支援 4 碼 (年份) 進行文章過濾。
 
 ---
-**Last Updated**: 2026-02-06
+
+## 4. 剩餘建議項目 (Future Improvements)
+
+*   [ ] **Automatic WebP Conversion**: 上傳圖片時自動轉換並生成縮圖 (LCP 優化)。
+*   [ ] **Media Manager**: 建立後台媒體庫介面，方便管理與重用照片資源。
+*   [ ] **Search Enhancement**: 進階關鍵字搜尋優化 (目前依賴 Google CSE)。
+*   [ ] **CSS Refactoring**: 進一步整合四款主題的共用 CSS 變數，減少重複定義。
+
+---
+**Last Updated**: 2026-02-07 (via Linux `date`)
 **Recorded by**: Gemini CLI Discussion
