@@ -94,12 +94,10 @@ a:hover {
     display: block;
     max-width: 90%;
     border: 1px solid #008f11;
-    filter: grayscale(100%) sepia(100%) hue-rotate(90deg) saturate(200%); /* Matrix 綠色濾鏡 */
-    transition: filter 0.5s;
+    transition: all 0.5s;
     height: auto;
 }
 .post_content img:hover {
-    filter: none; /* 滑鼠移過去恢復原色 */
     border-color: #00ff41;
     box-shadow: 0 0 15px #00ff41;
 }
