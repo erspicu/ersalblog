@@ -39,7 +39,7 @@ The system supports two operating modes:
     *   `config.php` and `config.js` contain database passwords and API settings and are ignored by Git.
 *   **Theming System**:
     *   Configurable via `config.js` (`theme_file` option).
-    *   Supports multiple CSS themes (e.g., `blog.css`, `blog-dark.css`).
+    *   Supports multiple CSS themes: `blog.css` (Standard), `blog-dark.css` (Dark Mode), `blog-pink.css` (Soft Pink), and `blog-matrix.css` (Hacker Style).
 *   **Initialization and Health Check**:
     *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system and check environment compatibility.
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity.
@@ -154,7 +154,7 @@ Listed below are key directories and file rules in the Git repository:
 
 ### 1.3 設定與環境 (Configuration)
 *   **敏感資料分離**: `config.php` 與 `config.js` 已被 Git 忽略。
-*   **主題系統 (Theming)**: 支援多重 CSS 主題 (如 `blog.css`, `blog-dark.css`)，前端根據設定動態載入。
+*   **主題系統 (Theming)**: 支援多重 CSS 主題，包括標準版、深色模式 (`blog-dark`)、粉柔風格 (`blog-pink`) 與駭客任務風格 (`blog-matrix`)，前端根據設定動態載入。
 *   **初始化與健康檢查**:
     *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。

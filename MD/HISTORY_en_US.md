@@ -37,3 +37,11 @@
     - **Bugfix**: Fixed `date_range` logic to support both 4-digit (Year) and 6-digit (Year-Month) matching.
     - **Sync Filter**: Enhanced API to automatically exclude posts without physical static files.
     - **Stability**: Fixed CSRF validation and language path reference errors in the backup tool.
+
+### [16:35] Multi-Theme Expansion & UI Stabilization
+- **Task**: Expand visual styles and reinforce layout stability.
+- **Implementation**:
+    - **Soft Pink Theme**: Added `blog-pink.css`, featuring Sakura pink tones, rounded UI elements, and soft shadows.
+    - **Matrix Theme**: Added `blog-matrix.css`, simulating terminal aesthetics with black/green palette and scanline effects.
+    - **Layout Hardening**: Enforced `clear: both` on all sidebar and pagination containers to prevent layout breakage.
+    - **Tweaks**: Removed image filters in Matrix theme to preserve original colors and optimized pagination responsiveness.

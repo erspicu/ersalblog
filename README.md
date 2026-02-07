@@ -64,12 +64,16 @@ We respect open-source contributors. This project utilizes:
 ---
 
 ### 🎨 Theming
-Configurable in `config.js` via `theme_file`. Supports `blog.css` (Standard) and `blog-dark.css` (Dark Mode).
+Configurable in `config.js` via `theme_file`. Supports:
+- `blog.css` (Standard)
+- `blog-dark.css` (Dark Mode)
+- `blog-pink.css` (Soft Pink)
+- `blog-matrix.css` (The Matrix Style)
 
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.07.16.15` (UTC+8)
+Version: `v2026.02.07.16.45` (UTC+8)
 CLI Version: `0.27.3`
 Model: `gemini-3-flash-preview`
 
