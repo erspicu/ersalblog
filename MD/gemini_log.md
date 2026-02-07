@@ -1,4 +1,4 @@
-# Gemini CLI Development Log
+﻿# Gemini CLI Development Log
 
 - [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
 - [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
@@ -92,7 +92,7 @@
 - [2026-02-01 22:59:53] 最終修正 Windows OS 偵測路徑與編碼問題
     回答內容摘要：加入了 PowerShell 完整路徑備案，並強化了 CP950 到 UTF-8 的強制編碼轉換，確保在任何 Windows PHP 環境下都能正確抓取詳細系統資訊。
 - [2026-02-01 23:00:36] 引入 COM/WMI 提升 Windows OS 偵測成功率
-    回答內容摘要：新增了基於 PHP COM 元件的 WMI 查詢作為 Windows 系統偵測的第一優先級，以解決在某些權限受限的環境下無法執行 PowerShell 的問題。
+    回答內容摘要：新增了基於 PHP COM 元件的 WMI 查詢作為 Windows 系統偵測標 第一優先級，以解決在某些權限受限的環境下無法執行 PowerShell 的問題。
 - [2026-02-01 23:06:10] 優化 install.php 系統資訊佈局
     回答內容摘要：將系統資訊欄位從一行四個改為兩行四個，提升各欄位顯示寬度，以利閱讀長的作業系統版本資訊。
 - [2026-02-01 23:14:24] 更新 gemini.md 加入 WSL2 Git 推送策略
@@ -131,7 +131,7 @@
 - [2026-02-03 00:52:15] (UTC+8) 修正 api/api_filebase.php：修復 get_index 函式中 file_get_contents 的路徑錯誤，解決 post_content 回傳空值的問題。
 - [2026-02-03 00:58:10] (UTC+8) 修正樣板連結樣式：移除 blog_template.html 中標題連結的行內樣式，並更新 CSS (blog.css/blog-dark.css) 確保各主題下連結顏色顯示正確。
 - [2026-02-03 01:05:30] (UTC+8) 同步配置與安裝：更新 config.example.js 並強化 install.php，在安裝過程中新增佈景主題 (Theme) 選擇功能，確保新舊配置與安裝流程一致。
-- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構進建議。
+- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建議。
 - [2026-02-03 23:33:51] Executed Update macro: Switched to Gemini 3 Pro, synced documentation, and baselined promo site development.
 - [2026-02-04 12:00:00] (UTC+8) 優化靜態生成流程 (make_html.php)：改用 blog_template.html 為單一來源，移除 blog.html 中繼解析與 header 行比對注入邏輯，統一改用變數佔位符 ({page_title}, {page_content} 等) 進行內容替換，大幅簡化邏輯並提升維護性。
 - [2026-02-04 12:15:00] (UTC+8) 統一樣板變數格式：將 static/blog_template.html 與 make_html.php 中所有的 {xxx} 單大括號變數統一為 {{xxx}} 雙大括號格式，與內層 template 區塊的語法保持一致，避免混淆並提升可讀性。
@@ -274,3 +274,4 @@
 - [2026-02-07 16:30:00] 新增駭客任務主題 (The Matrix Theme)：
   - 建立 `blog-matrix.css`，採用黑底綠字、終端機字體與掃描線特效，模擬經典 Matrix 風格。
   - 實現高科技感的互動反饋與視覺設計。
+- [2026-02-07 15:30:23] 規範時間抓取流程：在 gemini.md 中加入優先使用 Linux 'date' 指令抓取系統時間的準則，以確保環境一致性。
