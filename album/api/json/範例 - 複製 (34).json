@@ -1,0 +1,25 @@
+{
+    "name": "範例 - 複製 (34)",
+    "desc": "",
+    "photos": [
+        {
+            "filename": "MVIMG_20251027_115045.jpg",
+            "title": "MVIMG_20251027_115045.jpg",
+            "desc": "",
+            "src": "Collection\/範例 - 複製 (34)\/MVIMG_20251027_115045.jpg",
+            "thumb": "Collection\/範例 - 複製 (34)\/Thumbnail\/MVIMG_20251027_115045_thumb.jpg",
+            "thumbL": "Collection\/範例 - 複製 (34)\/Thumbnail\/MVIMG_20251027_115045_thumbL.jpg",
+            "thumbXL": "Collection\/範例 - 複製 (34)\/Thumbnail\/MVIMG_20251027_115045_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/2190s",
+                "iso": 50,
+                "focal": "8.7mm",
+                "date": "2025:10:27 11:50:45"
+            },
+            "shortIdStart": 1092
+        }
+    ]
+}

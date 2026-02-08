@@ -137,6 +137,30 @@ if ($source === 'db') {
         
         <!-- 數據卡片列 -->
         <div class="row g-3 mb-4">
+            <?php 
+            // 檢查相簿服務是否存在
+            $albumDir = __DIR__ . '/../album';
+            if (is_dir($albumDir)): 
+            ?>
+            <!-- 相簿服務入口 -->
+            <div class="col-md-3">
+                <a href="../album/admin/index.php" class="text-decoration-none">
+                    <div class="card stat-card text-white h-100" style="background-color: #6f42c1;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-0">相簿服務</h6>
+                                    <h2 class="my-2">管理</h2>
+                                    <small>前往相簿管理後台 &rarr;</small>
+                                </div>
+                                <span class="fs-1">🖼️</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <?php endif; ?>
+
             <!-- 文章總數 -->
             <div class="col-md-3">
                 <div class="card stat-card text-white bg-primary h-100">

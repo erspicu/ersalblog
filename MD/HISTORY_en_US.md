@@ -457,3 +457,64 @@ Recorded the development journey and original Prompt commands of this project th
 - **Implementation**:
     - **Bugfix**: Corrected language key references in `StaticGenerator.php` (added `lang_` prefix) to resolve `Undefined index` warnings during SSG execution.
     - **Rule Update**: Updated `gemini.md` to specify the use of Linux `date` command for timestamping, ensuring accurate logs and versioning.
+
+### [23:55] Album Service Module Development
+- **Task**: Build a standalone, database-free, file-system-based album service.
+- **Core Architecture**:
+    - **Generator**: Developed `album/make_album.php` to handle static HTML generation, thumbnail compression, and EXIF extraction.
+    - **API**: Created `album/api/api_album.php` to provide album list data and pagination.
+    - **Frontend**: Developed `album/static/js/album.js` and `album_template.html` for SPA experience and component-based rendering.
+- **Key Features**:
+    - **Multi-size Thumbnails**: Automatically generates `thumbXL` (2048px), `thumbL` (1600px), `thumbM` (1024px), `thumb` (800px).
+    - **EXIF Support**: Backend extracts EXIF info from original photos and renders it to static pages.
+    - **Static Pagination**: Implemented static pagination generation (24 items/page) for album inner pages.
+    - **Detail Interactions**: Supported fullscreen modal view, original file download, and social sharing links.
+    - **Smart Navigation**: Implemented smart breadcrumbs and "Back to List" logic returning to the correct pagination.
+- **Optimization & Standards**:
+    - **CLI Support**: `make_album.php` supports `-s` (skip thumbs) and `-f` (force rebuild) flags.
+    - **Git Management**: Configured `.gitignore` to exclude all generated files and original photos.
+    - **Documentation**: Created detailed `readme.md` files for all album directories.
+
+## [v2026.02.08.03.15] - 2026-02-08
+
+### Album Service Optimization
+- **ShortURL System**:
+  - Implemented `album/shorturl.php` with Base62 encoding and auto MIME type detection.
+  - Upgraded obfuscation algorithm: Modular Multiplicative Hashing + XOR mask for random-like 5-char slugs.
+  - Generator Integration: `make_album.php` now auto-generates `shorturl.txt` for reverse lookup.
+- **Frontend Refactoring (De-Bootstrap)**:
+  - **Dependency Removal**: Removed Bootstrap, switched to native HTML/CSS/JS.
+  - **CSS Grid**: Rewrote `album/static/album.css` using modern CSS Grid.
+  - **Lightweight**: Integrated SVG icons, removed external fonts for speed.
+- **Theme System**:
+  - Added theme switching support (`album`, `album-dark`, `album-pink`, `album-matrix`).
+  - Created `album/config.js` and `config.example.js` for user customization.
+- **Enhancements**:
+  - **Download**: Added download button for original high-quality images.
+  - **Advanced Sharing**: Multi-size link sharing window with copy and "Original/Short URL" toggle.
+  - **Nav Optimization**: Centered pagination, fixed header alignment.
+  - **EXIF Display**: Backend PHP rendering replaces frontend `exif.js`.
+- **Maintenance**:
+  - Updated `.gitignore`, cleaned old thumbnails, forced static asset rebuild.
+  - Updated `album/Collection/相簿1/readme.md` standards.
+
+## [v2026.02.08.14.00] - 2026-02-08
+
+### Album Admin Panel
+- **Standalone Admin Interface**:
+  - Established `album/admin/` with full CRUD capabilities (Create/Edit/Delete albums and photos).
+  - Integrated with the Blog Admin Dashboard to automatically detect and link to the Album service.
+- **Key Features**:
+  - **Settings Management**: Added a frontend settings page to directly modify `config.js` (Theme, API Mode, Items Per Page).
+  - **Photo Management**: Supported batch upload, cover setting, filename renaming, and metadata editing.
+  - **UI Optimization**: Adopted an 8-column wide layout with unified "Contain" (proportional scaling) preview style.
+  - **Performance**: Implemented `thumbXS` (320px) thumbnails for ultra-fast admin loading.
+
+### Album Service Architecture Refactoring
+- **Full SPA Transition**:
+  - Removed legacy static HTML generation (`view/`) in favor of a JSON-driven SPA architecture.
+  - Implemented decoupled pagination: Client-side for `json` mode, Server-side for `api_filebase` mode.
+- **System Optimizations**:
+  - Fixed API path resolution errors regarding URL encoding and non-UTF-8 directory names.
+  - Synchronized configuration structures between `config.js` and `config.example.js`.
+  - Improved date logic: Prioritizes metadata, falling back to file system timestamp if missing.
