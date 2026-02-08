@@ -46,6 +46,9 @@ body {
 
 .card-body { background: #000; }
 
+/* Meta & EXIF Info Cards */
+.info-card, .exif-card { border: 1px solid var(--primary-color); background: #050505; }
+
 .card-badge {
     background: #000;
     border: 1px solid var(--primary-color);

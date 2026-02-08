@@ -20,6 +20,20 @@ const AppState = {
 /* =========================================
    Router & Initialization
    ========================================= */
+function renderTemplate(templateId, vars = {}) {
+    const templateEl = document.getElementById(templateId);
+    if (!templateEl) {
+        console.error(`Template not found: ${templateId}`);
+        return `<!-- Missing Template: ${templateId} -->`;
+    }
+    let html = templateEl.innerHTML;
+    for (const key in vars) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        html = html.replace(regex, vars[key]);
+    }
+    return html;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     initRouter();
 });
@@ -124,29 +138,36 @@ function renderPaginationUI(pagination, baseUrlHash) {
         return;
     }
 
-    let html = '<div class="pagination">';
+    let itemsHtml = '';
     const cur = pagination.currentPage;
     const total = pagination.totalPages;
 
-    if (cur > 1) {
-        html += `<span class="page-item"><a class="page-link" href="${baseUrlHash}&page=${cur - 1}"><i class="bi bi-chevron-left"></i></a></span>`;
-    } else {
-        html += `<span class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></span>`;
-    }
+    // Previous
+    itemsHtml += renderTemplate('tmpl_pagination_item', {
+        link: (cur > 1) ? `${baseUrlHash}&page=${cur - 1}` : '#',
+        text: '<i class="bi bi-chevron-left"></i>',
+        activeClass: '',
+        disabledClass: (cur > 1) ? '' : 'disabled'
+    });
 
     for (let i = 1; i <= total; i++) {
-        const activeClass = (i === cur) ? 'active' : '';
-        html += `<span class="page-item ${activeClass}"><a class="page-link" href="${baseUrlHash}&page=${i}">${i}</a></span>`;
+        itemsHtml += renderTemplate('tmpl_pagination_item', {
+            link: `${baseUrlHash}&page=${i}`,
+            text: i,
+            activeClass: (i === cur) ? 'active' : '',
+            disabledClass: ''
+        });
     }
 
-    if (cur < total) {
-        html += `<span class="page-item"><a class="page-link" href="${baseUrlHash}&page=${cur + 1}"><i class="bi bi-chevron-right"></i></a></span>`;
-    } else {
-        html += `<span class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></span>`;
-    }
+    // Next
+    itemsHtml += renderTemplate('tmpl_pagination_item', {
+        link: (cur < total) ? `${baseUrlHash}&page=${cur + 1}` : '#',
+        text: '<i class="bi bi-chevron-right"></i>',
+        activeClass: '',
+        disabledClass: (cur < total) ? '' : 'disabled'
+    });
 
-    html += '</div>';
-    container.innerHTML = html;
+    container.innerHTML = renderTemplate('tmpl_pagination', { items: itemsHtml });
 }
 
 /* --- Home View --- */
@@ -179,14 +200,13 @@ async function loadHomeView(page = 1) {
 
     let listHtml = '<div class="album-grid" id="album-list-container">';
     pagedItems.forEach(album => {
-        let itemHtml = templateEl.innerHTML;
-        const link = `#album=${encodeURIComponent(album.id || album.name)}`;
-        itemHtml = itemHtml.replace(/{{link}}/g, link);
-        itemHtml = itemHtml.replace(/{{cover}}/g, album.cover);
-        itemHtml = itemHtml.replace(/{{name}}/g, album.name);
-        itemHtml = itemHtml.replace(/{{count}}/g, album.count);
-        itemHtml = itemHtml.replace(/{{desc}}/g, album.desc || "&nbsp;");
-        listHtml += itemHtml;
+        listHtml += renderTemplate('tmpl_index_album_item', {
+            link: `#album=${encodeURIComponent(album.id || album.name)}`,
+            cover: album.cover,
+            name: album.name,
+            count: album.count,
+            desc: album.desc || "&nbsp;"
+        });
     });
     listHtml += '</div>';
 
@@ -219,40 +239,30 @@ async function loadAlbumView(albumName, page = 1) {
         totalItems: totalItems
     };
 
-    const headerHtml = `
-    <div class="album-header-box">
-        <h2 class="fw-bold mb-2" style="font-size:1.25rem">${data.name}</h2>
-        ${data.desc ? `<p class="text-muted small mb-0">${data.desc}</p>` : ''}
-    </div>`;
+    const headerHtml = renderTemplate('tmpl_album_header', {
+        name: data.name,
+        desc_html: data.desc_html || ''
+    });
     setHeader(headerHtml);
 
-    const controlsHtml = `
-        <div class="d-flex align-center justify-between mb-4">
-            <nav class="breadcrumb">
-                <div class="breadcrumb-item"><a href="#">首頁</a></div>
-                <div class="breadcrumb-item active">${data.name}</div>
-            </nav>
-            <div class="d-flex align-center gap-2">
-                <span class="badge"><i class="bi bi-image"></i> ${totalItems} 張相片</span>
-                <a href="#" class="btn btn-outline"><i class="bi bi-house-door"></i> 返回首頁</a>
-            </div>
-        </div>
-    `;
+    const controlsHtml = renderTemplate('tmpl_album_controls', {
+        name: data.name,
+        total: totalItems
+    });
 
-    const templateEl = document.getElementById("tmpl_album_photo_item");
     let gridHtml = '<div class="album-grid">';
     
     if (pagedPhotos.length > 0) {
         pagedPhotos.forEach(photo => {
-            let itemHtml = templateEl.innerHTML;
             const photoLink = `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(photo.filename)}`;
             const imgSrc = photo.thumb || photo.src;
             
-            itemHtml = itemHtml.replace(/{{photoPageLink}}/g, photoLink);
-            itemHtml = itemHtml.replace(/{{imgSrc}}/g, imgSrc);
-            itemHtml = itemHtml.replace(/{{filename}}/g, photo.filename);
-            itemHtml = itemHtml.replace(/{{photoDesc}}/g, photo.title || photo.filename);
-            gridHtml += itemHtml;
+            gridHtml += renderTemplate('tmpl_album_photo_item', {
+                photoPageLink: photoLink,
+                imgSrc: imgSrc,
+                filename: photo.filename,
+                photoDesc: photo.title || photo.filename
+            });
         });
     } else {
         gridHtml += '<div class="col-12 text-muted">此相簿沒有照片</div>';
@@ -302,25 +312,27 @@ async function loadPhotoView(albumName, photoName) {
     const thumbXL = photo.thumbXL || photo.src;
     const original = photo.src; 
 
-    viewHtml = viewHtml.replace(/{{pathToHome}}album\.html/g, '#'); 
-    viewHtml = viewHtml.replace(/{{albumName}}/g, data.name);
-    viewHtml = viewHtml.replace(/{{filename}}/g, photo.filename);
-    viewHtml = viewHtml.replace(/{{prevLink}}/g, prevLink);
-    viewHtml = viewHtml.replace(/{{nextLink}}/g, nextLink);
-    viewHtml = viewHtml.replace(/{{imgSrc}}/g, thumbL); 
-    viewHtml = viewHtml.replace(/{{imgSrcXL}}/g, thumbXL);
-    viewHtml = viewHtml.replace(/{{imgSrcOriginal}}/g, original);
-    viewHtml = viewHtml.replace(/{{shortIdStart}}/g, photo.shortIdStart || '0');
-    viewHtml = viewHtml.replace(/{{photoTitle}}/g, photo.title || photo.filename);
-    viewHtml = viewHtml.replace(/{{photoDesc}}/g, photo.desc || '');
-
-    viewHtml = viewHtml.replace(new RegExp(`href="../${escapeRegExp(data.name)}.html"`, 'g'), `href="${albumLink}"`);
-
     const hasBackendExif = photo.exif && Object.keys(photo.exif).length > 0;
     const exifHtml = hasBackendExif ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small">正在載入技術資訊...</div>';
-    viewHtml = viewHtml.replace(/{{exif_info}}/g, exifHtml);
+
+    viewHtml = renderTemplate('tmpl_photo_detail_view', {
+        pathToHome: '#',
+        albumName: data.name,
+        albumLink: albumLink,
+        filename: photo.filename,
+        prevLink: prevLink,
+        nextLink: nextLink,
+        imgSrc: thumbL,
+        imgSrcXL: thumbXL,
+        imgSrcOriginal: original,
+        shortIdStart: photo.shortIdStart || '0',
+        photoTitle: photo.title || photo.filename,
+        photoDesc: photo.desc || '',
+        exif_info: exifHtml
+    });
 
     setContent(viewHtml);
+
     document.title = `${photo.filename} - ${data.name}`;
     window.scrollTo(0, 0);
 
@@ -399,80 +411,52 @@ function escapeRegExp(string) {
 function formatExifHtml(exif, source) {
     if (!exif || Object.keys(exif).length === 0) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
 
-    const make = exif.make || '未知';
-    const model = exif.model || '未知';
-    const aperture = exif.aperture || '未知';
-    const shutter = exif.shutter || '未知';
-    const iso = exif.iso || '未知';
-    const focal = exif.focal || '未知';
-    const date = exif.date || '未知';
-
     // 1. 來源標籤
     let sourceHtml = '';
     if (source) {
-        const label = source === 'PHP' ? '後端 (PHP)' : '前端 (JS)';
-        const color = source === 'PHP' ? '#2e7d32' : '#ef6c00';
-        const bg = source === 'PHP' ? '#e8f5e9' : '#fff3e0';
-        sourceHtml = `<div class="mb-2"><span style="font-size:0.65rem; padding:2px 8px; border-radius:12px; background:${bg}; color:${color}; font-weight:bold; display:inline-block;">來源: ${label}</span></div>`;
+        sourceHtml = renderTemplate('tmpl_exif_source_label', {
+            label: source === 'PHP' ? '後端 (PHP)' : '前端 (JS)',
+            color: source === 'PHP' ? '#2e7d32' : '#ef6c00',
+            bg: source === 'PHP' ? '#e8f5e9' : '#fff3e0'
+        });
     }
 
-    // 2. EXIF 參數清單 (改為條列式)
-    const itemsHtml = `
-        <div class="exif-vertical-list">
-            <div class="mb-1"><span class="text-muted">相機機型</span> <strong>${make} ${model}</strong></div>
-            <div class="mb-1"><span class="text-muted">快門速度</span> <strong>${shutter}</strong></div>
-            <div class="mb-1"><span class="text-muted">焦距</span> <strong>${focal}</strong></div>
-            <div class="mb-1"><span class="text-muted">光圈值</span> <strong>${aperture}</strong></div>
-            <div class="mb-1"><span class="text-muted">感光度</span> <strong>ISO ${iso}</strong></div>
-            <div class="mb-1"><span class="text-muted">拍攝日期</span> <strong>${date}</strong></div>
-        </div>
-    `;
+    // 2. EXIF 參數清單
+    const fields = [
+        { label: '相機機型', value: `${exif.make || '未知'} ${exif.model || '未知'}` },
+        { label: '快門速度', value: exif.shutter || '未知' },
+        { label: '焦距', value: exif.focal || '未知' },
+        { label: '光圈值', value: exif.aperture || '未知' },
+        { label: '感光度', value: `ISO ${exif.iso || '未知'}` },
+        { label: '拍攝日期', value: exif.date || '未知' }
+    ];
+
+    let itemsHtml = '';
+    fields.forEach(f => {
+        itemsHtml += renderTemplate('tmpl_exif_item', f);
+    });
+    const listHtml = renderTemplate('tmpl_exif_vertical_list', { items: itemsHtml });
 
     // 3. GPS 區塊處理
     const hasGps = exif.gps && exif.gps.lat !== undefined && exif.gps.lng !== undefined && exif.gps.lat !== null && exif.gps.lng !== null;
     
     if (hasGps) {
-        const lat = exif.gps.lat;
-        const lng = exif.gps.lng;
-        const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        const embedUrl = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
-
-        const gpsContent = `
-            <div class="exif-item">
-                <span class="text-muted small">GPS 座標 </span>
-                <strong>緯度: ${lat.toFixed(6)}, 經度: ${lng.toFixed(6)}</strong>
-                
-                <div class="map-preview-box mt-2" style="position:relative; height:360px; border-radius:8px; overflow:hidden; border:1px solid #ddd;">
-                    <iframe width="100%" height="100%" src="${embedUrl}" frameborder="0" style="border:0;" allowfullscreen></iframe>
-                    <a href="${mapLink}" target="_blank" class="map-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.05); z-index:10; display:flex; align-items:center; justify-content:center; text-decoration:none; opacity:0; transition:opacity 0.3s;">
-                        <span class="badge bg-primary text-white shadow"><i class="bi bi-box-arrow-up-right"></i> 開啟地圖</span>
-                    </a>
-                </div>
-            </div>
-            <style>
-                .map-preview-box:hover .map-overlay { opacity: 1 !important; }
-                @media (max-width: 768px) {
-                    .exif-split-layout { flex-direction: column !important; }
-                }
-            </style>
-        `;
+        const gpsHtml = renderTemplate('tmpl_gps_block', {
+            lat: exif.gps.lat.toFixed(6),
+            lng: exif.gps.lng.toFixed(6),
+            mapLink: `https://www.google.com/maps/search/?api=1&query=${exif.gps.lat},${exif.gps.lng}`,
+            embedUrl: `https://maps.google.com/maps?q=${exif.gps.lat},${exif.gps.lng}&z=15&output=embed`
+        });
 
         // 返回分割佈局
-        return `
-            <div class="exif-split-layout" style="display: flex; gap: 30px;">
-                <div style="flex: 1;">
-                    ${sourceHtml}
-                    ${itemsHtml}
-                </div>
-                <div style="flex: 1.5;">
-                    ${gpsContent}
-                </div>
-            </div>
-        `;
+        return renderTemplate('tmpl_exif_split_layout', {
+            left_content: sourceHtml + listHtml,
+            right_content: gpsHtml
+        });
     }
 
     // 無 GPS 時返回標準佈局
-    return sourceHtml + itemsHtml;
+    return sourceHtml + listHtml;
 }
 
 /* =========================================
@@ -616,14 +600,10 @@ function updateShareLinks() {
 
     let html = "";
     sizes.forEach(size => {
-        html += `
-        <div class="share-item">
-            <label class="small fw-bold" style="display:block; margin-bottom:4px;">${size.label}</label>
-            <div class="input-group">
-                <input type="text" value="${size.url}" readonly>
-                <button class="btn btn-primary" onclick="copyToClipboard(this, '${size.url}')">複製</button>
-            </div>
-        </div>`;
+        html += renderTemplate('tmpl_share_item', {
+            label: size.label,
+            url: size.url
+        });
     });
     container.innerHTML = html;
 }

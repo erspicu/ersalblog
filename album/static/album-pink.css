@@ -29,6 +29,9 @@ body {
 
 .site-title { color: #d81b60; }
 
+/* Meta & EXIF Info Cards */
+.info-card, .exif-card { border: 1px solid #ffc1cc; background-color: #fffafb; border-radius: var(--radius); }
+
 .card {
     border: 1px solid #fce4ec;
 }

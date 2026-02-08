@@ -234,6 +234,15 @@ ul { list-style: none; }
 .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 60px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; transition: 0.2s; }
 .nav-btn:hover { background: rgba(255,255,255,0.2); }
 
+/* Meta & EXIF Info Cards */
+.info-card, .exif-card {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fcfcfc;
+    height: 100%;
+}
+
 /* Album Header */
 .album-header-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e9ecef; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 

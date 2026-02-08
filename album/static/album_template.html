@@ -35,6 +35,24 @@
 <footer class="footer"><p>&copy; 2026 Baxermux. All rights reserved.</p></footer>
 
 <!-- Templates -->
+<template id="tmpl_app_container">
+    <div id="app-container">
+        <div class="text-center py-5">
+            <p class="text-muted">正在載入相簿應用程式...</p>
+        </div>
+    </div>
+</template>
+
+<template id="tmpl_pagination">
+    <div class="pagination">{{items}}</div>
+</template>
+
+<template id="tmpl_pagination_item">
+    <span class="page-item {{activeClass}} {{disabledClass}}">
+        <a class="page-link" href="{{link}}">{{text}}</a>
+    </span>
+</template>
+
 <template id="tmpl_index_album_item">
     <a href="{{link}}" class="card">
         <div class="card-img-wrap ratio-1-1">
@@ -46,6 +64,30 @@
             <p class="card-desc">{{desc}}</p>
         </div>
     </a>
+</template>
+
+<template id="tmpl_album_header">
+    <div class="album-header-box">
+        <h2 class="fw-bold mb-2" style="font-size:1.25rem">{{name}}</h2>
+        {{desc_html}}
+    </div>
+</template>
+
+<template id="tmpl_album_desc_inline">
+    <p class="text-muted small mb-0">{{desc}}</p>
+</template>
+
+<template id="tmpl_album_controls">
+    <div class="d-flex align-center justify-between mb-4">
+        <nav class="breadcrumb">
+            <div class="breadcrumb-item"><a href="#">首頁</a></div>
+            <div class="breadcrumb-item active">{{name}}</div>
+        </nav>
+        <div class="d-flex align-center gap-2">
+            <span class="badge"><i class="bi bi-image"></i> {{total}} 張相片</span>
+            <a href="#" class="btn btn-outline"><i class="bi bi-house-door"></i> 返回首頁</a>
+        </div>
+    </div>
 </template>
 
 <template id="tmpl_album_photo_item">
@@ -63,10 +105,10 @@
     <div class="d-flex align-center justify-between" style="margin-bottom: 20px;">
         <nav class="breadcrumb">
             <div class="breadcrumb-item"><a href="{{pathToHome}}album.html">首頁</a></div>
-            <div class="breadcrumb-item"><a href="../{{albumName}}.html">{{albumName}}</a></div>
+            <div class="breadcrumb-item"><a href="{{albumLink}}">{{albumName}}</a></div>
             <div class="breadcrumb-item active">{{filename}}</div>
         </nav>
-        <a href="../{{albumName}}.html" class="btn btn-outline"><i class="bi bi-grid-3x3-gap"></i> 返回列表</a>
+        <a href="{{albumLink}}" class="btn btn-outline"><i class="bi bi-grid-3x3-gap"></i> 返回列表</a>
     </div>
 
     <div class="photo-viewer-container">
@@ -76,9 +118,9 @@
             <a href="{{nextLink}}" class="nav-btn" style="right:0"><i class="bi bi-chevron-right"></i></a>
         </div>
         <div class="photo-meta-panel" style="padding: 25px; border-top: 1px solid #eee;">
-            <div class="album-grid" style="grid-template-columns: 1fr 2fr; gap: 30px;">
+            <div class="album-grid" style="grid-template-columns: 1fr 2fr; gap: 25px;">
                 <!-- Info Column -->
-                <div>
+                <div class="info-card">
                     <h6 class="fw-bold mb-2">照片資訊</h6>
                     <p class="fw-bold" style="font-size:1.1rem; margin-bottom: 5px;">{{photoTitle}}</p>
                     <p class="text-muted small" style="margin-bottom: 15px;">{{photoDesc}}</p>
@@ -94,13 +136,62 @@
                 </div>
                 
                 <!-- EXIF Column -->
-                <div>
+                <div class="exif-card">
                     <h6 class="fw-bold mb-2">技術資訊 (EXIF)</h6>
                     <div id="exif-info-container">
                         {{exif_info}}
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</template>
+
+<template id="tmpl_exif_source_label">
+    <div class="mb-2">
+        <span style="font-size:0.65rem; padding:2px 8px; border-radius:12px; background:{{bg}}; color:{{color}}; font-weight:bold; display:inline-block;">來源: {{label}}</span>
+    </div>
+</template>
+
+<template id="tmpl_exif_vertical_list">
+    <div class="exif-vertical-list">{{items}}</div>
+</template>
+
+<template id="tmpl_exif_item">
+    <div class="mb-1"><span class="text-muted">{{label}}</span> <strong>{{value}}</strong></div>
+</template>
+
+<template id="tmpl_exif_split_layout">
+    <div class="exif-split-layout" style="display: flex; gap: 30px;">
+        <div style="flex: 1;">
+            {{left_content}}
+        </div>
+        <div style="flex: 1.5;">
+            {{right_content}}
+        </div>
+    </div>
+</template>
+
+<template id="tmpl_gps_block">
+    <div class="exif-item">
+        <span class="text-muted small">GPS 座標 </span>
+        <strong>緯度: {{lat}}, 經度: {{lng}}</strong>
+        
+        <div class="map-preview-box mt-2" style="position:relative; height:360px; border-radius:8px; overflow:hidden; border:1px solid #ddd;">
+            <iframe width="100%" height="100%" src="{{embedUrl}}" frameborder="0" style="border:0;" allowfullscreen></iframe>
+            <a href="{{mapLink}}" target="_blank" class="map-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.05); z-index:10; display:flex; align-items:center; justify-content:center; text-decoration:none; opacity:0; transition:opacity 0.3s;">
+                <span class="badge bg-primary text-white shadow"><i class="bi bi-box-arrow-up-right"></i> 開啟地圖</span>
+            </a>
+        </div>
+    </div>
+</template>
+
+<template id="tmpl_share_item">
+    <div class="share-item">
+        <label class="small fw-bold" style="display:block; margin-bottom:4px;">{{label}}</label>
+        <div class="input-group">
+            <input type="text" value="{{url}}" readonly>
+            <button class="btn btn-primary" onclick="copyToClipboard(this, '{{url}}')">複製</button>
         </div>
     </div>
 </template>
@@ -133,7 +224,9 @@
 </div>
 
 <script src="{{path_to_static}}exif.js"></script>
-<script src="{{path_to_static}}album.js?v={{version}}"></script>
+<script>
+    document.write('<script src="{{path_to_static}}album.js?v=' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime()) + '"><\/script>');
+</script>
 {{custom_scripts}}
 </body>
 </html>

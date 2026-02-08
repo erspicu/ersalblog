@@ -4,6 +4,17 @@ Recorded the development journey through Vibe Coding with Gemini CLI.
 
 ---
 
+## [v2026.02.09.02.30] - 2026-02-09 (English)
+
+### Album UI/UX Deep Polish
+- **Templating Refactor**: Decoupled HTML structure from `album.js`, extracting all hardcoded HTML into `album_template.html` and implementing a `renderTemplate` helper.
+- **Detail View Layout**: Redesigned the photo detail page with a dynamic 50/50 split layout for EXIF info (left) and Map (right) when GPS data is present, increasing map height to 360px.
+- **Visual Consistency**: Synchronized CSS across all album themes (`album-dark`, `album-pink`, `album-matrix`) to ensure consistent card styling for Info and EXIF blocks.
+- **Stability Fixes**:
+  - Fixed template variable replacement errors that caused blank EXIF sections.
+  - Added versioning to `album.js` script tag to resolve browser caching issues.
+  - Removed album-specific labels from the main Blog language file to maintain module independence.
+
 ## [v2026.02.09.01.35] - 2026-02-09 (English)
 
 ### Imagery & Geolocation Enhancement

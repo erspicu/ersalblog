@@ -231,12 +231,8 @@ function generateThumbnail($src, $dest, $maxSize, $quality) {
 // ==========================================
 // 1. 生成相簿首頁 (album.html) - SPA Shell
 // ==========================================
-// 內容容器留空，交由 JS 填充
-$indexBody = '<div id="app-container">
-    <div class="text-center py-5">
-        <p class="text-muted">正在載入相簿應用程式...</p>
-    </div>
-</div>';
+// 內容容器，從樣板讀取
+$indexBody = $tm->getSubTemplate('tmpl_app_container');
 
 // 不再需要在這裡寫 loadAlbumList，改由 album.js 的 Router 處理
 $indexScript = '';
@@ -302,6 +298,12 @@ if (is_dir($collectionDir)) {
 
         if (empty($albumDate)) {
             $albumDate = date('Ymd', filemtime($albumPath));
+        }
+
+        // 渲染相簿描述 HTML (SPA 使用)
+        $albumDescHtml = '';
+        if (!empty($albumDesc)) {
+            $albumDescHtml = $tm->render($tm->getSubTemplate('tmpl_album_desc_inline'), array('desc' => $albumDesc));
         }
 
         // 讀取照片註解
@@ -389,6 +391,7 @@ if (is_dir($collectionDir)) {
         $singleAlbumData = array(
             'name' => $displayAlbumName,
             'desc' => $albumDesc,
+            'desc_html' => $albumDescHtml,
             'photos' => $albumPhotosJson
         );
         file_put_contents($jsonDir . '/' . $albumName . '.json', json_encode($singleAlbumData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));

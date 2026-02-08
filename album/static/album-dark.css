@@ -18,6 +18,13 @@
 .divider { border-top: 1px solid #333; }
 .card { border: 1px solid #333; }
 .card-body { background: #1e1e1e; }
+
+/* Meta & EXIF Info Cards */
+.info-card, .exif-card { border: 1px solid #333; background-color: #1a1a1a; }
+
+.photo-viewer-container { background: #1e1e1e; border: 1px solid #333; }
+.photo-meta-panel { border-top: 1px solid #333 !important; }
+
 .breadcrumb-item + .breadcrumb-item::before { color: #555; }
 .page-link { background: #1e1e1e; border-color: #333; color: var(--primary-color); }
 .page-link:hover { background: #2a2a2a; }

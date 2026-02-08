@@ -1,6 +1,7 @@
 {
     "name": "東京三日遊",
     "desc": "相簿內容詳細描述",
+    "desc_html": "\n    <p class=\"text-muted small mb-0\">相簿內容詳細描述<\/p>\n",
     "photos": [
         {
             "filename": "IMG_20251021_150129 - 複製 (2).jpg",
