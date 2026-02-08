@@ -68,6 +68,23 @@ function getExifData($file) {
         return null;
     }
 
+    return parseExifArray($exif);
+}
+
+// ==========================================
+// 輔助函式：將 EXIF 分數格式轉為浮點數
+// ==========================================
+function exifToFloat($value) {
+    $parts = explode('/', $value);
+    if (count($parts) <= 0) return 0;
+    if (count($parts) == 1) return (float)$parts[0];
+    return (float)$parts[0] / (float)$parts[1];
+}
+
+// ==========================================
+// 輔助函式：解析 EXIF 陣列為統一格式
+// ==========================================
+function parseExifArray($exif) {
     $make = isset($exif['Make']) ? trim($exif['Make']) : '未知';
     $model = isset($exif['Model']) ? trim($exif['Model']) : '未知';
     $iso = isset($exif['ISOSpeedRatings']) ? (is_array($exif['ISOSpeedRatings']) ? $exif['ISOSpeedRatings'][0] : $exif['ISOSpeedRatings']) : '未知';
@@ -98,6 +115,16 @@ function getExifData($file) {
         $focal = round((float)$val, 1) . 'mm';
     }
 
+    // GPS 處理
+    $gps = null;
+    if (isset($exif['GPSLatitude']) && isset($exif['GPSLongitude']) && isset($exif['GPSLatitudeRef']) && isset($exif['GPSLongitudeRef'])) {
+        $lat = exifToFloat($exif['GPSLatitude'][0]) + (exifToFloat($exif['GPSLatitude'][1]) / 60) + (exifToFloat($exif['GPSLatitude'][2]) / 3600);
+        $lng = exifToFloat($exif['GPSLongitude'][0]) + (exifToFloat($exif['GPSLongitude'][1]) / 60) + (exifToFloat($exif['GPSLongitude'][2]) / 3600);
+        if ($exif['GPSLatitudeRef'] == 'S') $lat = -$lat;
+        if ($exif['GPSLongitudeRef'] == 'W') $lng = -$lng;
+        $gps = array('lat' => round($lat, 6), 'lng' => round($lng, 6));
+    }
+
     return array(
         'make' => $make,
         'model' => $model,
@@ -105,22 +132,71 @@ function getExifData($file) {
         'shutter' => $shutter,
         'iso' => $iso,
         'focal' => $focal,
-        'date' => $date
+        'date' => $date,
+        'gps' => $gps
     );
 }
 
 // ==========================================
-// 輔助函式：生成單一縮圖
+// 輔助函式：生成單一縮圖 (ImageMagick 優先，GD 為備案)
 // ==========================================
-function createSingleThumbnail($src, $dest, $maxSize, $quality) {
+function generateThumbnail($src, $dest, $maxSize, $quality) {
     global $forceThumbnail;
     if (file_exists($dest) && !$forceThumbnail) return;
 
+    // 嘗試使用 ImageMagick
+    if (extension_loaded('imagick')) {
+        try {
+            $image = new Imagick($src);
+            $image->setImageCompressionQuality($quality);
+            
+            // 保留 EXIF (Profiles)
+            // 注意：某些縮圖可能不需要太大的 Profile，但要求保留則保留
+            // $image->stripImage(); // 移除所有 Profile (若要極致瘦身可開)
+
+            // 取得原始尺寸
+            $width = $image->getImageWidth();
+            $height = $image->getImageHeight();
+
+            // 如果原始圖小於目標尺寸，則直接複製 (或不處理)
+            if ($width <= $maxSize && $height <= $maxSize) {
+                // 如果需要轉檔或壓縮，還是走下面流程，這裡簡單起見直接 copy
+                copy($src, $dest);
+                echo "Copied (Small Original IM): " . basename($dest) . "\n";
+                $image->clear();
+                return;
+            }
+
+            // 計算新尺寸 (保持比例)
+            $ratio = $width / $height;
+            if ($width > $height) {
+                $newWidth = $maxSize;
+                $newHeight = $maxSize / $ratio;
+            } else {
+                $newHeight = $maxSize;
+                $newWidth = $maxSize * $ratio;
+            }
+
+            // 縮放 (使用 Lanczos 濾鏡獲得最佳品質)
+            $image->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
+            
+            // 寫入檔案
+            $image->writeImage($dest);
+            $image->clear();
+            echo "Created thumbnail (Imagick): " . basename($dest) . "\n";
+            return;
+
+        } catch (Exception $e) {
+            echo "Imagick failed: " . $e->getMessage() . ". Falling back to GD.\n";
+        }
+    }
+
+    // GD Fallback
     list($width, $height, $type) = getimagesize($src);
     
     if ($width <= $maxSize && $height <= $maxSize) {
         copy($src, $dest);
-        echo "Copied (Small Original): " . basename($dest) . "\n";
+        echo "Copied (Small Original GD): " . basename($dest) . "\n";
         return;
     }
 
@@ -141,11 +217,15 @@ function createSingleThumbnail($src, $dest, $maxSize, $quality) {
         default: return;
     }
 
+    // GD: 保留 EXIF 需要額外處理 (copy exif data)，GD 本身 resize 會丟失 EXIF。
+    // 若必須保留 EXIF 且 ImageMagick 不可用，需使用 pel 或 exif_read_data + iptcembed 等複雜操作。
+    // 這裡 GD 版本暫時維持不保留 EXIF (這是 GD 的限制，除非引入額外函式庫)。
+    
     imagecopyresampled($thumb, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
     imagejpeg($thumb, $dest, $quality);
     imagedestroy($thumb);
     imagedestroy($source);
-    echo "Created thumbnail: " . basename($dest) . "\n";
+    echo "Created thumbnail (GD): " . basename($dest) . "\n";
 }
 
 // ==========================================
@@ -161,13 +241,21 @@ $indexBody = '<div id="app-container">
 // 不再需要在這裡寫 loadAlbumList，改由 album.js 的 Router 處理
 $indexScript = '';
 
+// 引入版本資訊
+$appVersion = 'v1.0.0';
+if (file_exists($baseDir . '/../admin/version_config.php')) {
+    include $baseDir . '/../admin/version_config.php';
+    if (defined('APP_VERSION')) $appVersion = APP_VERSION;
+}
+
 $indexHtml = $tm->render($tm->getSource(), array(
     'path_to_static' => 'static/',
     'path_to_config' => './',
     'page_title' => '相簿首頁',
     'album_header' => '',
     'content_body' => $indexBody,
-    'custom_scripts' => $indexScript
+    'custom_scripts' => $indexScript,
+    'version' => $appVersion
 ));
 // 移除多餘的 template 標籤
 // $indexHtml = $tm->removeTags($indexHtml, 'template'); // Keep templates for SPA
@@ -252,7 +340,7 @@ if (is_dir($collectionDir)) {
                 $destPath = $thumbDir . '/' . $destName;
                 
                 if (!$skipThumbnails) {
-                    createSingleThumbnail($photoPath, $destPath, $conf['size'], $conf['quality']);
+                    generateThumbnail($photoPath, $destPath, $conf['size'], $conf['quality']);
                 }
                 
                 $shortUrlList[] = $albumName . '/Thumbnail/' . $destName;

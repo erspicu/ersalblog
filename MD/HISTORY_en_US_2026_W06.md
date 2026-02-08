@@ -4,6 +4,14 @@ Recorded the development journey through Vibe Coding with Gemini CLI.
 
 ---
 
+## [v2026.02.09.01.35] - 2026-02-09 (English)
+
+### Imagery & Geolocation Enhancement
+- **Thumbnail Optimization**: Integrated ImageMagick (Imagick) for high-quality resampling and EXIF preservation, with GD fallback.
+- **Multi-layered EXIF Failover**: Established a robust "Extension > Frontend JS" resolution architecture with optimized `onload` detection for consistent data display.
+- **GPS Map Integration**: Implemented coordinate parsing and Google Maps embedding, supporting latitude/longitude labeling and interactive 360px previews.
+- **Layout Refactoring**: Redesigned the detail view with a 50/50 split layout for EXIF data and Map previews, including responsive stacking logic.
+
 ## [v2026.02.08.22.52] - 2026-02-08 (English)
 
 ### System Polish & Interface Refinement

@@ -9,6 +9,14 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'list_albums';
 $collectionDir = __DIR__ . '/../Collection';
 $baseUrl = 'Collection'; 
 
+// 輔助函式：將 EXIF 分數格式轉為浮點數
+function exifToFloat($value) {
+    $parts = explode('/', $value);
+    if (count($parts) <= 0) return 0;
+    if (count($parts) == 1) return (float)$parts[0];
+    return (float)$parts[0] / (float)$parts[1];
+}
+
 // 輔助函式：EXIF 讀取
 function getExifData($file) {
     if (!function_exists('exif_read_data')) return null;
@@ -45,9 +53,20 @@ function getExifData($file) {
         $focal = round((float)$val, 1) . 'mm';
     }
 
+    // GPS 處理
+    $gps = null;
+    if (isset($exif['GPSLatitude']) && isset($exif['GPSLongitude']) && isset($exif['GPSLatitudeRef']) && isset($exif['GPSLongitudeRef'])) {
+        $lat = exifToFloat($exif['GPSLatitude'][0]) + (exifToFloat($exif['GPSLatitude'][1]) / 60) + (exifToFloat($exif['GPSLatitude'][2]) / 3600);
+        $lng = exifToFloat($exif['GPSLongitude'][0]) + (exifToFloat($exif['GPSLongitude'][1]) / 60) + (exifToFloat($exif['GPSLongitude'][2]) / 3600);
+        if ($exif['GPSLatitudeRef'] == 'S') $lat = -$lat;
+        if ($exif['GPSLongitudeRef'] == 'W') $lng = -$lng;
+        $gps = array('lat' => round($lat, 6), 'lng' => round($lng, 6));
+    }
+
     return array(
         'make' => $make, 'model' => $model, 'aperture' => $aperture,
-        'shutter' => $shutter, 'iso' => $iso, 'focal' => $focal, 'date' => $date
+        'shutter' => $shutter, 'iso' => $iso, 'focal' => $focal, 'date' => $date,
+        'gps' => $gps
     );
 }
 

@@ -96,7 +96,7 @@
                 <!-- EXIF Column -->
                 <div>
                     <h6 class="fw-bold mb-2">技術資訊 (EXIF)</h6>
-                    <div class="album-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <div id="exif-info-container">
                         {{exif_info}}
                     </div>
                 </div>
@@ -132,7 +132,8 @@
     </div>
 </div>
 
-<script src="{{path_to_static}}album.js"></script>
+<script src="{{path_to_static}}exif.js"></script>
+<script src="{{path_to_static}}album.js?v={{version}}"></script>
 {{custom_scripts}}
 </body>
 </html>

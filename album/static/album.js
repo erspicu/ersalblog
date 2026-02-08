@@ -316,20 +316,88 @@ async function loadPhotoView(albumName, photoName) {
 
     viewHtml = viewHtml.replace(new RegExp(`href="../${escapeRegExp(data.name)}.html"`, 'g'), `href="${albumLink}"`);
 
-    const exifHtml = formatExifHtml(photo.exif);
+    const hasBackendExif = photo.exif && Object.keys(photo.exif).length > 0;
+    const exifHtml = hasBackendExif ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small">正在載入技術資訊...</div>';
     viewHtml = viewHtml.replace(/{{exif_info}}/g, exifHtml);
 
     setContent(viewHtml);
     document.title = `${photo.filename} - ${data.name}`;
     window.scrollTo(0, 0);
+
+    // 如果後端沒有提供 EXIF，嘗試在前端抓取
+    if (!hasBackendExif) {
+        tryFetchExifClientSide();
+    }
+}
+
+function tryFetchExifClientSide() {
+    const img = document.getElementById('photo-main-viewer');
+    const container = document.getElementById('exif-info-container');
+    if (!img || !container || typeof EXIF === 'undefined') return;
+
+    const runExif = function() {
+        EXIF.getData(img, function() {
+            const all = EXIF.getAllTags(this);
+            if (!all || Object.keys(all).length === 0) return;
+
+            // 轉換數據格式以符合介面
+            const exif = {
+                make: all.Make || '',
+                model: all.Model || '',
+                aperture: all.FNumber ? `f/${all.FNumber.toFixed(1)}` : '未知',
+                iso: all.ISOSpeedRatings || '未知',
+                date: all.DateTimeOriginal || all.DateTime || '未知'
+            };
+
+            // 快門速度處理
+            if (all.ExposureTime) {
+                const val = parseFloat(all.ExposureTime);
+                exif.shutter = (val >= 1) ? val.toFixed(1) + 's' : `1/${Math.round(1/val)}s`;
+            } else {
+                exif.shutter = '未知';
+            }
+
+            // 焦距處理
+            if (all.FocalLength) {
+                exif.focal = parseFloat(all.FocalLength).toFixed(1) + 'mm';
+            } else {
+                exif.focal = '未知';
+            }
+
+            // GPS 處理 (JS 版)
+            if (all.GPSLatitude && all.GPSLongitude) {
+                const toDecimal = (dms, ref) => {
+                    const deg = dms[0].numerator / dms[0].denominator;
+                    const min = dms[1].numerator / dms[1].denominator;
+                    const sec = dms[2].numerator / dms[2].denominator;
+                    let dec = deg + (min / 60) + (sec / 3600);
+                    if (ref === 'S' || ref === 'W') dec = -dec;
+                    return dec;
+                };
+                exif.gps = {
+                    lat: toDecimal(all.GPSLatitude, all.GPSLatitudeRef),
+                    lng: toDecimal(all.GPSLongitude, all.GPSLongitudeRef)
+                };
+            }
+
+            container.innerHTML = formatExifHtml(exif, 'JS');
+        });
+    };
+
+    // 確保圖片載入完成才執行
+    if (img.complete) {
+        runExif();
+    } else {
+        img.onload = runExif;
+    }
 }
 
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function formatExifHtml(exif) {
-    if (!exif) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
+function formatExifHtml(exif, source) {
+    if (!exif || Object.keys(exif).length === 0) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
 
     const make = exif.make || '未知';
     const model = exif.model || '未知';
@@ -339,14 +407,72 @@ function formatExifHtml(exif) {
     const focal = exif.focal || '未知';
     const date = exif.date || '未知';
 
-    return `
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">相機機型</span><strong>${make} ${model}</strong></div>
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">光圈值</span><strong>${aperture}</strong></div>
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">快門速度</span><strong>${shutter}</strong></div>
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">感光度</span><strong>ISO ${iso}</strong></div>
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">焦距</span><strong>${focal}</strong></div>
-        <div class="col-6 col-md-4 exif-item"><span class="text-muted small d-block">拍攝日期</span><strong>${date}</strong></div>
+    // 1. 來源標籤
+    let sourceHtml = '';
+    if (source) {
+        const label = source === 'PHP' ? '後端 (PHP)' : '前端 (JS)';
+        const color = source === 'PHP' ? '#2e7d32' : '#ef6c00';
+        const bg = source === 'PHP' ? '#e8f5e9' : '#fff3e0';
+        sourceHtml = `<div class="mb-2"><span style="font-size:0.65rem; padding:2px 8px; border-radius:12px; background:${bg}; color:${color}; font-weight:bold; display:inline-block;">來源: ${label}</span></div>`;
+    }
+
+    // 2. EXIF 參數清單 (改為條列式)
+    const itemsHtml = `
+        <div class="exif-vertical-list">
+            <div class="mb-1"><span class="text-muted">相機機型</span> <strong>${make} ${model}</strong></div>
+            <div class="mb-1"><span class="text-muted">快門速度</span> <strong>${shutter}</strong></div>
+            <div class="mb-1"><span class="text-muted">焦距</span> <strong>${focal}</strong></div>
+            <div class="mb-1"><span class="text-muted">光圈值</span> <strong>${aperture}</strong></div>
+            <div class="mb-1"><span class="text-muted">感光度</span> <strong>ISO ${iso}</strong></div>
+            <div class="mb-1"><span class="text-muted">拍攝日期</span> <strong>${date}</strong></div>
+        </div>
     `;
+
+    // 3. GPS 區塊處理
+    const hasGps = exif.gps && exif.gps.lat !== undefined && exif.gps.lng !== undefined && exif.gps.lat !== null && exif.gps.lng !== null;
+    
+    if (hasGps) {
+        const lat = exif.gps.lat;
+        const lng = exif.gps.lng;
+        const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        const embedUrl = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+
+        const gpsContent = `
+            <div class="exif-item">
+                <span class="text-muted small">GPS 座標 </span>
+                <strong>緯度: ${lat.toFixed(6)}, 經度: ${lng.toFixed(6)}</strong>
+                
+                <div class="map-preview-box mt-2" style="position:relative; height:360px; border-radius:8px; overflow:hidden; border:1px solid #ddd;">
+                    <iframe width="100%" height="100%" src="${embedUrl}" frameborder="0" style="border:0;" allowfullscreen></iframe>
+                    <a href="${mapLink}" target="_blank" class="map-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.05); z-index:10; display:flex; align-items:center; justify-content:center; text-decoration:none; opacity:0; transition:opacity 0.3s;">
+                        <span class="badge bg-primary text-white shadow"><i class="bi bi-box-arrow-up-right"></i> 開啟地圖</span>
+                    </a>
+                </div>
+            </div>
+            <style>
+                .map-preview-box:hover .map-overlay { opacity: 1 !important; }
+                @media (max-width: 768px) {
+                    .exif-split-layout { flex-direction: column !important; }
+                }
+            </style>
+        `;
+
+        // 返回分割佈局
+        return `
+            <div class="exif-split-layout" style="display: flex; gap: 30px;">
+                <div style="flex: 1;">
+                    ${sourceHtml}
+                    ${itemsHtml}
+                </div>
+                <div style="flex: 1.5;">
+                    ${gpsContent}
+                </div>
+            </div>
+        `;
+    }
+
+    // 無 GPS 時返回標準佈局
+    return sourceHtml + itemsHtml;
 }
 
 /* =========================================
