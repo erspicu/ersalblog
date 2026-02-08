@@ -16,7 +16,7 @@
 
 ### 靜態生成器類別化 (SSG Refactoring)
 *   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 建立 `PHP_LIB/StaticGenerator.php` 封裝所有建置邏輯，修復了語系變數前綴錯誤，確保 CLI 與後台整合一致。
+*   **成果**: 建立 `PHP_LIB/StaticGenerator.php` 封裝所有建置邏輯，並強化路徑自動修復功能，確保跨目錄資源引用正確。
 
 ---
 
@@ -25,18 +25,22 @@
 ### 獨立相簿服務與媒體庫整合 (Album & Media Manager)
 *   **狀態**: **已完成 (COMPLETED)** ✅
 *   **成果**:
-    *   建立了基於檔案系統的獨立相簿服務 (SPA 架構)。
-    *   實作自動縮圖產生系統 (XL, L, M, Standard, XS)，全面採用 JPG 以確保最佳相容性。
-    *   建立後台管理介面，支援相簿與照片的完整 CRUD、批次上傳與封面設定。
-    *   **整合編輯器**: 在文章編輯器實作「相簿挑選器」，支援直接從相簿插入多種尺寸圖片與即時上傳。
+    *   建立基於檔案系統的獨立相簿服務 (SPA 架構) 與專屬後台。
+    *   **影像優化**: 整合 ImageMagick 實現高品質縮圖與 EXIF 保留，並具備 GD 回退機制。
+    *   **地圖整合**: 實作 GPS 座標解析與 Google Maps 嵌入，支援響應式分割佈局。
+    *   **編輯器整合**: 文章編輯器內建相簿挑選器，支援多尺寸插入與即時上傳。
 
 ---
 
 ## 3. 安全性與穩定性
 
+### 設定管理重構 (Settings Refactor)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**: 重構 `admin/settings.php`，分區管理前後端設定，實作資料夾選擇器與防呆寫入保護。
+
 ### 文章內容腳本保護 (Script Tag Protection)
 *   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 實作 `protect_script_tags` 函式，防止文章內 `<script>` 被瀏覽器執行，同時維持文字內容的可見性。
+*   **成果**: 實作 `protect_script_tags` 函式，防止文章內 `<script>` 被瀏覽器執行。
 
 ### 備份工具強化 (Backup Fixes)
 *   **狀態**: **已完成 (COMPLETED)** ✅
@@ -49,10 +53,10 @@
 *   [x] **Template Decoupling**: 樣板生成流程解耦，統一讀取 `blog_template.html`。
 *   [x] **Placeholder Standardization**: 全面採用 `{{xxx}}` 雙大括號佔位符。
 *   [x] **Regex Engine**: 移除 DOMDocument，改用 Regex 解析以提升 PHP 5.x 相容性。
-*   [x] **Theme System**: 擴充 Pink 與 Matrix 主題，並強化佈局穩定性 (`clear: both`)。
-*   [x] **Posts Per Page**: 後台設定支援自訂分頁文章數量。
-*   [x] **Date Range Fix**: 支援 4 碼 (年份) 進行文章過濾。
+*   [x] **Theme System**: 擴充 Pink 與 Matrix 主題，並強化佈局穩定性。
 *   [x] **Album SPA**: 相簿服務由靜態 HTML 生成轉向 SPA + JSON。
+*   [x] **Map Integration**: 相簿詳情頁整合 Google Maps 與 GPS 資訊。
+*   [x] **Folder Picker**: 後台設定新增相簿路徑選擇器。
 
 ---
 
@@ -63,5 +67,5 @@
 *   [ ] **Backup Cleanup**: 定期自動清理過期的備份檔案。
 
 ---
-**Last Updated**: 2026-02-08 (via Linux `date`)
+**Last Updated**: 2026-02-09 (via Linux `date`)
 **Recorded by**: Gemini CLI Discussion
