@@ -20,7 +20,19 @@
 
 ---
 
-## 2. 安全性與穩定性
+## 2. 媒體與內容管理
+
+### 獨立相簿服務與媒體庫整合 (Album & Media Manager)
+*   **狀態**: **已完成 (COMPLETED)** ✅
+*   **成果**:
+    *   建立了基於檔案系統的獨立相簿服務 (SPA 架構)。
+    *   實作自動縮圖產生系統 (XL, L, M, Standard, XS)，全面採用 JPG 以確保最佳相容性。
+    *   建立後台管理介面，支援相簿與照片的完整 CRUD、批次上傳與封面設定。
+    *   **整合編輯器**: 在文章編輯器實作「相簿挑選器」，支援直接從相簿插入多種尺寸圖片與即時上傳。
+
+---
+
+## 3. 安全性與穩定性
 
 ### 文章內容腳本保護 (Script Tag Protection)
 *   **狀態**: **已完成 (COMPLETED)** ✅
@@ -32,7 +44,7 @@
 
 ---
 
-## 3. 已完成項目總覽 (History)
+## 4. 已完成項目總覽 (History)
 
 *   [x] **Template Decoupling**: 樣板生成流程解耦，統一讀取 `blog_template.html`。
 *   [x] **Placeholder Standardization**: 全面採用 `{{xxx}}` 雙大括號佔位符。
@@ -40,16 +52,16 @@
 *   [x] **Theme System**: 擴充 Pink 與 Matrix 主題，並強化佈局穩定性 (`clear: both`)。
 *   [x] **Posts Per Page**: 後台設定支援自訂分頁文章數量。
 *   [x] **Date Range Fix**: 支援 4 碼 (年份) 進行文章過濾。
+*   [x] **Album SPA**: 相簿服務由靜態 HTML 生成轉向 SPA + JSON。
 
 ---
 
-## 4. 剩餘建議項目 (Future Improvements)
+## 5. 剩餘建議項目 (Future Improvements)
 
-*   [ ] **Automatic WebP Conversion**: 上傳圖片時自動轉換並生成縮圖 (LCP 優化)。
-*   [ ] **Media Manager**: 建立後台媒體庫介面，方便管理與重用照片資源。
 *   [ ] **Search Enhancement**: 進階關鍵字搜尋優化 (目前依賴 Google CSE)。
 *   [ ] **CSS Refactoring**: 進一步整合四款主題的共用 CSS 變數，減少重複定義。
+*   [ ] **Backup Cleanup**: 定期自動清理過期的備份檔案。
 
 ---
-**Last Updated**: 2026-02-07 (via Linux `date`)
+**Last Updated**: 2026-02-08 (via Linux `date`)
 **Recorded by**: Gemini CLI Discussion

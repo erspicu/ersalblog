@@ -145,7 +145,12 @@ $currentCats = array_map('trim', $currentCats);
 
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_html_content'); ?></label>
-                        <div class="form-text mb-1"><?php echo __('hint_html_content'); ?></div>
+                        <div class="d-flex justify-content-between align-items-end mb-1">
+                            <div class="form-text"><?php echo __('hint_html_content'); ?></div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.albumPicker.open()">
+                                <i class="bi bi-images"></i> 從相簿挑選圖片
+                            </button>
+                        </div>
                         <textarea name="post_content" class="form-control" style="height: 400px; font-family: monospace;"><?php echo htmlspecialchars($post['post_content']); ?></textarea>
                     </div>
 
@@ -203,7 +208,45 @@ $currentCats = array_map('trim', $currentCats);
 
 <?php require 'common_js_inc.php'; ?>
 <script src="assets/js/tinymce/tinymce.min.js"></script>
+<script src="assets/js/album_selector.js"></script>
+
+<!-- Album Selector Modal -->
+<div class="modal fade" id="albumSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">從相簿挑選圖片</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="button" id="btn-back-to-albums" class="btn btn-sm btn-secondary d-none">
+                        <i class="bi bi-chevron-left"></i> 返回相簿列表
+                    </button>
+                    <div></div>
+                </div>
+                <div id="album-picker-container">
+                    <!-- 動態載入內容 -->
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // 初始化相簿挑選器
+    window.albumPicker = new AlbumSelector({
+        onSelect: function(url, filename) {
+            // 插入圖片到 TinyMCE
+            if (tinymce.activeEditor) {
+                tinymce.activeEditor.insertContent(`<img src="${url}" alt="${filename}" style="max-width:100%; height:auto;">`);
+            }
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         tinymce.init({
             selector: 'textarea[name="post_content"]',
