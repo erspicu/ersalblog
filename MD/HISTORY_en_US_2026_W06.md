@@ -4,74 +4,71 @@ Recorded the development journey through Vibe Coding with Gemini CLI.
 
 ---
 
-## 2026-02-02 (English)
+## [v2026.02.08.22.52] - 2026-02-08 (English)
 
-### [23:11] Configuration Schema Optimization
-- **Task**: Restructured `config.php` and synchronized `config.example.php`.
-
-### [23:32] Static Path Standardisation
-- **Task**: Modified `make_html.php` to output static articles to `post/` directory.
-
----
-
-## 2026-02-03 (English)
-
-### [00:05] API Architecture Refactoring
-- **Task**: Moved `api_*.php` to `api/` directory.
-
-### [00:25] Multi-CSS Theme Implementation
-- **Task**: Created `blog-dark.css` and supported dynamic theme loading.
-
----
-
-## 2026-02-04 (English)
-
-### [12:00] SSG Pipeline Revamp
-- **Task**: Optimized `make_html.php` using placeholders.
-
-### [14:05] Regex-based Template Parsing
-- **Task**: Rewrote core parsing logic using Regex, eliminating `DOMDocument` dependencies.
-
----
-
-## 2026-02-05 (English)
-
-### [10:15] Front-end Multi-language Support
-- **Task**: Implemented frontend i18n with dynamic configuration.
-
-### [12:30] Pure Static JSON API Mode
-- **Task**: Implemented client-side routing and unified `data.json` generation.
-
----
-
-## 2026-02-06 (English)
-
-### [23:30] i18n Structure Flattening
-- **Task**: Moved all language files to the `langs/` root.
-
-### [23:45] Global PHP 5.x Compatibility
-- **Task**: Executed large-scale syntax downgrading.
-
----
-
-## 2026-02-07 (English)
-
-### [14:15] Script Tag Protection in Content
-- **Task**: Prevent `<script>` content in articles from executing.
-
-### [14:40] Comprehensive API Refactoring
-- **Task**: Eliminate code duplication and unify API logic.
-
-### [15:30] SSG & Pagination Refactoring
-- **Task**: Unify build logic and implement high-performance pagination.
-
----
+### System Polish & Interface Refinement
+- **Folder Picker**: Implemented a backend folder selection modal to simplify album path configuration.
+- **Validation Logic**: Strengthened `settings.php` save logic with mandatory checks for pagination limits and album path validity, plus a "Clear" option.
+- **i18n Completion**: Fully localized all album service interfaces (buttons, hints, status messages, post editor options) into English and Chinese.
+- **Album Entry**: Created `index.html` in `album/` directory for intuitive redirection to the album homepage.
 
 ## [v2026.02.08.20.36] - 2026-02-08 (English)
 
 ### Album Service Deep Integration
-- **Path Flexibility**: Introduced `$album_path` in `config.php`, supporting flexible relative path settings.
-- **Health Detection**: Implemented album service health check logic and dashboard integration.
-- **Editor Integration**: Integrated album picker with dynamic paths and API-side path correction.
-- **Settings Page Overhaul**: Refactored settings to separate backend and frontend configurations.
-- **Stability Fixes**: Fixed division-by-zero, regex replacement logic, and static path correction.
+- **Path Flexibility**: Introduced `$album_path` in `config.php`, supporting flexible relative path settings (e.g., `album/` or `../album/`).
+- **Health Detection**: Implemented album service health check logic and integrated it into the Blog Admin Dashboard for real-time status and access management.
+- **Editor Integration**: Integrated the album picker into the post editor, supporting dynamic paths and cross-directory image display with automated API-side path correction.
+- **Settings Page Overhaul**: Refactored `admin/settings.php` to separate backend core settings (config.php) and frontend interface settings (config.js) into independent forms and save buttons for better security.
+- **Stability Fixes**:
+  - Fixed division-by-zero error in the API caused by setting posts per page to 0, which previously led to frontend JSON parsing failures.
+  - Corrected regex replacement logic using `${1}` syntax to prevent conflicts between numbers and backreferences that corrupted `config.php`.
+  - Reinforced path correction in `StaticGenerator.php` to ensure correct image display in static articles across various deployment structures.
+
+## [v2026.02.08.14.00] - 2026-02-08 (English)
+
+### Album Admin Panel
+- **Standalone Admin Interface**:
+  - Established `album/admin/` with full CRUD capabilities (Create/Edit/Delete albums and photos).
+  - Integrated with the Blog Admin Dashboard to automatically detect and link to the Album service.
+- **Key Features**:
+  - **Settings Management**: Added a frontend settings page to directly modify `config.js` (Theme, API Mode, Items Per Page).
+  - **Photo Management**: Supported batch upload, cover setting, filename renaming, and metadata editing.
+  - **UI Optimization**: Adopted an 8-column wide layout with unified "Contain" (proportional scaling) preview style.
+  - **Performance**: Implemented `thumbXS` (320px) thumbnails for ultra-fast admin loading.
+
+### Album Service Architecture Refactoring
+- **Full SPA Transition**:
+  - Removed legacy static HTML generation (`view/`) in favor of a JSON-driven SPA architecture.
+  - Implemented decoupled pagination: Client-side for `json` mode, Server-side for `api_filebase` mode.
+- **System Optimizations**:
+  - Fixed API path resolution errors regarding URL encoding and non-UTF-8 directory names.
+  - Synchronized configuration structures between `config.js` and `config.example.js`.
+  - Improved date logic: Prioritizes metadata, falling back to file system timestamp if missing.
+
+## [v2026.02.08.03.15] - 2026-02-08 (English)
+
+### Album Service Optimization
+- **ShortURL System**:
+  - Implemented `album/shorturl.php` with Base62 encoding and auto MIME type detection.
+  - Upgraded obfuscation algorithm: Modular Multiplicative Hashing + XOR mask for random-like 5-char slugs.
+  - Generator Integration: `make_album.php` now auto-generates `shorturl.txt` for reverse lookup.
+- **Frontend Refactoring (De-Bootstrap)**:
+  - **Dependency Removal**: Removed Bootstrap, switched to native HTML/CSS/JS.
+  - **CSS Grid**: Rewrote `album/static/album.css` using modern CSS Grid.
+  - **Lightweight**: Integrated SVG icons, removed external fonts for speed.
+- **Theme System**:
+  - Added theme switching support (`album`, `album-dark`, `album-pink`, `album-matrix`).
+  - Created `album/config.js` and `config.example.js` for user customization.
+- **Enhancements**:
+  - **Download**: Added download button for original high-quality images.
+  - **Advanced Sharing**: Multi-size link sharing window with copy and "Original/Short URL" toggle.
+  - **Nav Optimization**: Centered pagination, fixed header alignment.
+  - **EXIF Display**: Backend PHP rendering replaces frontend `exif.js`.
+- **Maintenance**:
+  - Updated `.gitignore`, cleaned old thumbnails, forced static asset rebuild.
+  - Updated `album/Collection/相簿1/readme.md` standards.
+
+---
+
+## 2026-02-02 (English)
+... (omitted)

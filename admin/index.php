@@ -149,9 +149,9 @@ if ($source === 'db') {
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-title mb-0">相簿服務</h6>
-                                    <h2 class="my-2">管理</h2>
-                                    <small><?php echo $albumStatus['message']; ?></small>
+                                    <h6 class="card-title mb-0"><?php echo __('album_service_title'); ?></h6>
+                                    <h2 class="my-2"><?php echo __('album_manage_btn'); ?></h2>
+                                    <small><?php echo __('album_manage_hint'); ?></small>
                                 </div>
                                 <span class="fs-1">🖼️</span>
                             </div>
@@ -242,7 +242,7 @@ if ($source === 'db') {
                                     <small><?php echo __('stat_log'); ?></small>
                                 <?php endif; ?>
                                 <hr class="my-1 opacity-25">
-                                <small>相簿服務: <span class="badge <?php echo $albumStatus['status'] ? 'bg-success' : 'bg-danger'; ?>"><?php echo $albumStatus['status'] ? 'ON' : 'OFF'; ?></span></small>
+                                <small><?php echo __('album_service_title'); ?>: <span class="badge <?php echo $albumStatus['status'] ? 'bg-success' : 'bg-danger'; ?>"><?php echo $albumStatus['status'] ? 'ON' : 'OFF'; ?></span></small>
                                 <div style="font-size: 0.7rem;" class="text-truncate" title="<?php echo htmlspecialchars($albumStatus['message']); ?>"><?php echo htmlspecialchars($albumStatus['message']); ?></div>
                             </div>
                             <span class="fs-1">🔌</span>

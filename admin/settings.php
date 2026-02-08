@@ -26,6 +26,9 @@ $currentConfig['timezone'] = isset($GLOBALS['blog_timezone']) ? $GLOBALS['blog_t
 $currentConfig['posts_per_page'] = isset($GLOBALS['posts_per_page']) ? $GLOBALS['posts_per_page'] : 10;
 $currentConfig['posts_per_page_js'] = isset($currentConfig['posts_per_page_js']) ? $currentConfig['posts_per_page_js'] : 10;
 $currentConfig['album_path'] = isset($GLOBALS['album_path']) ? $GLOBALS['album_path'] : 'album/';
+$currentConfig['blog_title'] = isset($GLOBALS['blog_title']) ? $GLOBALS['blog_title'] : '';
+$currentConfig['blog_description'] = isset($GLOBALS['blog_description']) ? $GLOBALS['blog_description'] : '';
+$currentConfig['blog_introduce'] = isset($GLOBALS['blog_introduce']) ? $GLOBALS['blog_introduce'] : '';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -39,28 +42,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newTimezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
         $newPerPage = isset($_POST['posts_per_page']) ? (int)$_POST['posts_per_page'] : 10;
         $newAlbumPath = isset($_POST['album_path']) ? $_POST['album_path'] : 'album/';
+        $newTitle = isset($_POST['blog_title']) ? $_POST['blog_title'] : '';
+        $newDesc = isset($_POST['blog_description']) ? $_POST['blog_description'] : '';
+        $newIntro = isset($_POST['blog_introduce']) ? $_POST['blog_introduce'] : '';
 
-        $phpFile = __DIR__ . '/../config.php';
-        $phpContent = file_get_contents($phpFile);
-        
-        $phpContent = preg_replace('/(\$blog_lang\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newLang . '${3}', $phpContent);
-        $phpContent = preg_replace('/(\$blog_timezone\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newTimezone . '${3}', $phpContent);
-        $phpContent = preg_replace('/(\$posts_per_page\s*=\s*)([^;]*)(;)/', '${1}' . $newPerPage . '${3}', $phpContent);
-        
-        if (strpos($phpContent, '$album_path') !== false) {
-            $phpContent = preg_replace('/(\$album_path\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newAlbumPath . '${3}', $phpContent);
+        // --- 防呆檢查 ---
+        if ($newPerPage <= 0) {
+            $error = "每頁文章數量必須大於 0";
         } else {
-            $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
+            // 檢查相簿路徑有效性 (僅在非空時檢查)
+            if (!empty($newAlbumPath)) {
+                $actual_path = realpath(__DIR__ . '/../' . $newAlbumPath);
+                if (!$actual_path || !is_dir($actual_path)) {
+                    $error = "錯誤：指定的相簿路徑不存在。";
+                } elseif (!file_exists($actual_path . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . 'api_album.php')) {
+                    $error = "錯誤：該目錄似乎不是有效的相簿服務目錄 (找不到 api/api_album.php)。";
+                }
+            }
         }
 
-        if (file_put_contents($phpFile, $phpContent)) {
-            $msg = __('msg_settings_saved') . ' (config.php)';
-            $currentConfig['blog_lang'] = $newLang;
-            $currentConfig['timezone'] = $newTimezone;
-            $currentConfig['posts_per_page'] = $newPerPage;
-            $currentConfig['album_path'] = $newAlbumPath;
-        } else {
-            $error = __('error_config_write') . ' (config.php)';
+        if (!$error) {
+            $phpFile = __DIR__ . '/../config.php';
+            $phpContent = file_get_contents($phpFile);
+            
+            // 使用 ${1} 語法避免與數值產生歧義
+            $phpContent = preg_replace('/(\$blog_title\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newTitle) . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\$blog_description\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newDesc) . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\$blog_introduce\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newIntro) . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\$blog_lang\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newLang . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\$blog_timezone\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newTimezone . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\$posts_per_page\s*=\s*)([^;]*)(;)/', '${1}' . $newPerPage . '${3}', $phpContent);
+            
+            if (strpos($phpContent, '$album_path') !== false) {
+                $phpContent = preg_replace('/(\$album_path\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newAlbumPath . '${3}', $phpContent);
+            } else {
+                $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
+            }
+
+            if (file_put_contents($phpFile, $phpContent)) {
+                $msg = __('msg_settings_saved') . ' (config.php)';
+                $currentConfig['blog_lang'] = $newLang;
+                $currentConfig['timezone'] = $newTimezone;
+                $currentConfig['posts_per_page'] = $newPerPage;
+                $currentConfig['album_path'] = $newAlbumPath;
+                $currentConfig['blog_title'] = $newTitle;
+                $currentConfig['blog_description'] = $newDesc;
+                $currentConfig['blog_introduce'] = $newIntro;
+            } else {
+                $error = __('error_config_write') . ' (config.php)';
+            }
         }
 
     } elseif (isset($_POST['save_frontend'])) {
@@ -70,18 +100,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newPerPageJs = isset($_POST['posts_per_page_js']) ? (int)$_POST['posts_per_page_js'] : 10;
         $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
 
-        $newJsContent = "var AppConfig = {\n";
-        $newJsContent .= "    api_type: '$newApi',\n";
-        $newJsContent .= "    theme_file: '$newTheme',\n";
-        $newJsContent .= "    posts_per_page: $newPerPageJs,\n";
-        $newJsContent .= "    cse_id: '$newCse'\n";
-        $newJsContent .= "};";
-
-        if (file_put_contents($configFile, $newJsContent)) {
-            $msg = __('msg_settings_saved') . ' (config.js)';
-            $currentConfig = array_merge($currentConfig, getConfigValues($newJsContent));
+        if ($newPerPageJs <= 0) {
+            $error = "前端每頁文章數量必須大於 0";
         } else {
-            $error = __('error_config_write') . ' (config.js)';
+            $newJsContent = "var AppConfig = {\n";
+            $newJsContent .= "    api_type: '$newApi',\n";
+            $newJsContent .= "    theme_file: '$newTheme',\n";
+            $newJsContent .= "    posts_per_page: $newPerPageJs,\n";
+            $newJsContent .= "    cse_id: '$newCse'\n";
+            $newJsContent .= "};";
+
+            if (file_put_contents($configFile, $newJsContent)) {
+                $msg = __('msg_settings_saved') . ' (config.js)';
+                $currentConfig = array_merge($currentConfig, getConfigValues($newJsContent));
+            } else {
+                $error = __('error_config_write') . ' (config.js)';
+            }
         }
     }
 }
@@ -152,6 +186,21 @@ if (empty($themes)) $themes = array('blog');
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_blog_title'); ?></label>
+                        <input type="text" name="blog_title" class="form-control" value="<?php echo htmlspecialchars($currentConfig['blog_title']); ?>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_blog_description'); ?></label>
+                        <input type="text" name="blog_description" class="form-control" value="<?php echo htmlspecialchars($currentConfig['blog_description']); ?>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_blog_introduce'); ?></label>
+                        <textarea name="blog_introduce" class="form-control" rows="2"><?php echo htmlspecialchars($currentConfig['blog_introduce']); ?></textarea>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold"><?php echo __('label_blog_lang'); ?></label>
@@ -173,7 +222,15 @@ if (empty($themes)) $themes = array('blog');
 
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_album_path'); ?></label>
-                        <input type="text" name="album_path" class="form-control" value="<?php echo htmlspecialchars($currentConfig['album_path']); ?>">
+                        <div class="input-group">
+                            <input type="text" name="album_path" id="album_path_input" class="form-control" value="<?php echo htmlspecialchars($currentConfig['album_path']); ?>">
+                            <button class="btn btn-outline-secondary" type="button" onclick="openFolderPicker()">
+                                <i class="bi bi-folder2-open"></i> 瀏覽...
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" onclick="document.getElementById('album_path_input').value = '';">
+                                <i class="bi bi-x-circle"></i> 清空
+                            </button>
+                        </div>
                         <div class="form-text"><?php echo __('hint_album_path'); ?></div>
                     </div>
 
@@ -243,5 +300,82 @@ if (empty($themes)) $themes = array('blog');
 
 <?php require 'common_js_inc.php'; ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Folder Picker Modal -->
+<div class="modal fade" id="folderPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">選擇相簿目錄</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2 small text-muted">目前位置：<span id="current-folder-display">/</span></div>
+                <div class="list-group" id="folder-list" style="max-height: 400px; overflow-y: auto;">
+                    <!-- 動態載入目錄 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-folder">確定選擇</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let folderModal;
+    let selectedFolderPath = '';
+    let currentScanPath = '';
+
+    function openFolderPicker() {
+        if (!folderModal) {
+            folderModal = new bootstrap.Modal(document.getElementById('folderPickerModal'));
+        }
+        selectedFolderPath = document.getElementById('album_path_input').value;
+        loadFolders('');
+        folderModal.show();
+    }
+
+    async function loadFolders(path) {
+        const container = document.getElementById('folder-list');
+        const display = document.getElementById('current-folder-display');
+        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
+        
+        try {
+            const resp = await fetch(`tool_folders.php?action=list&path=${encodeURIComponent(path)}`);
+            const data = await resp.json();
+            currentScanPath = data.current;
+            display.innerText = data.current || '/ (Blog Root)';
+
+            let html = '';
+            data.items.forEach(item => {
+                const icon = item.is_parent ? 'bi-arrow-90deg-up' : 'bi-folder';
+                html += `
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                   onclick="event.preventDefault(); ${item.is_parent ? `loadFolders('${item.path}')` : `selectFolder('${item.path}')`}">
+                    <span><i class="bi ${icon} me-2"></i>${item.name}</span>
+                    ${!item.is_parent ? `<button class="btn btn-sm btn-link p-0" onclick="event.stopPropagation(); loadFolders('${item.path}')"><i class="bi bi-chevron-right"></i></button>` : ''}
+                </a>`;
+            });
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = '<div class="alert alert-danger">載入目錄失敗</div>';
+        }
+    }
+
+    function selectFolder(path) {
+        selectedFolderPath = path;
+        // 移除其他選取狀態
+        document.querySelectorAll('#folder-list .list-group-item').forEach(el => el.classList.remove('active'));
+        // 標記目前選取
+        event.currentTarget.classList.add('active');
+    }
+
+    document.getElementById('btn-confirm-folder').addEventListener('click', () => {
+        document.getElementById('album_path_input').value = selectedFolderPath;
+        folderModal.hide();
+    });
+</script>
 </body>
 </html>

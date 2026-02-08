@@ -16,6 +16,23 @@ class AlbumSelector {
         this.uploadUrl = options.uploadUrl || this.baseDir + 'admin/photo_actions.php';
         this.modalId = options.modalId || 'albumSelectorModal';
         this.onSelect = options.onSelect || null;
+
+        // 語系字串
+        this.lang = Object.assign({
+            loading_albums: '載入相簿中...',
+            loading_photos: '載入照片中...',
+            no_albums: '目前沒有任何相簿。',
+            no_photos: '此相簿目前沒有照片。',
+            album_label: '相簿：',
+            upload_btn: '直接上傳到此相簿',
+            uploading_msg: '正在上傳並產生縮圖...',
+            selected_msg: '選中：',
+            size_original: '原圖',
+            size_large: '大 (1600px)',
+            size_medium: '中 (800px)',
+            cancel_btn: '取消',
+            close_btn: '關閉'
+        }, options.lang || {});
         
         this.currentAlbumId = null;
         this.currentAlbumName = '';
@@ -49,7 +66,7 @@ class AlbumSelector {
         const container = document.getElementById('album-picker-container');
         const backBtn = document.getElementById('btn-back-to-albums');
         backBtn.classList.add('d-none');
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">載入相簿中...</p></div>';
+        container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">${this.lang.loading_albums}</p></div>`;
 
         try {
             const resp = await fetch(`${this.apiUrl}?action=list_albums`);
@@ -57,7 +74,7 @@ class AlbumSelector {
             const albums = data.items || [];
 
             if (albums.length === 0) {
-                container.innerHTML = '<div class="alert alert-info">目前沒有任何相簿。</div>';
+                container.innerHTML = `<div class="alert alert-info">${this.lang.no_albums}</div>`;
                 return;
             }
 
@@ -89,7 +106,7 @@ class AlbumSelector {
         const container = document.getElementById('album-picker-container');
         const backBtn = document.getElementById('btn-back-to-albums');
         backBtn.classList.remove('d-none');
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">載入照片中...</p></div>';
+        container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">${this.lang.loading_photos}</p></div>`;
 
         try {
             const resp = await fetch(`${this.apiUrl}?action=get_album&album=${encodeURIComponent(albumId)}`);
@@ -98,18 +115,18 @@ class AlbumSelector {
 
             let html = `
             <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                <h6 class="mb-0">相簿：<span class="text-primary">${albumName}</span></h6>
+                <h6 class="mb-0">${this.lang.album_label}<span class="text-primary">${albumName}</span></h6>
                 <div class="upload-mini-form">
                     <input type="file" id="album-mini-upload" class="d-none" multiple accept="image/jpeg">
                     <button class="btn btn-sm btn-success" onclick="document.getElementById('album-mini-upload').click()">
-                        <i class="bi bi-upload"></i> 直接上傳到此相簿
+                        <i class="bi bi-upload"></i> ${this.lang.upload_btn}
                     </button>
                 </div>
             </div>
             <div class="row g-2">`;
             
             if (photos.length === 0) {
-                html += '<div class="col-12 text-center py-4 text-muted">此相簿目前沒有照片。</div>';
+                html += `<div class="col-12 text-center py-4 text-muted">${this.lang.no_photos}</div>`;
             }
 
             photos.forEach(photo => {
@@ -151,7 +168,7 @@ class AlbumSelector {
 
         const container = document.getElementById('album-picker-container');
         const originalContent = container.innerHTML;
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p class="mt-2">正在上傳並產生縮圖...</p></div>';
+        container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-success"></div><p class="mt-2">${this.lang.uploading_msg}</p></div>`;
 
         try {
             const resp = await fetch(this.uploadUrl, {
@@ -161,7 +178,7 @@ class AlbumSelector {
             // 由於 photo_actions.php 是跳轉型的，這裡我們直接重新載入照片清單
             this.loadPhotos(this.currentAlbumId, this.currentAlbumName);
         } catch (e) {
-            alert('上傳失敗');
+            alert('Upload failed');
             container.innerHTML = originalContent;
         }
     }
@@ -175,13 +192,13 @@ class AlbumSelector {
         // 為了不依賴額外庫，我們在 Modal footer 顯示選擇
         const footer = document.querySelector(`#${this.modalId} .modal-footer`);
         const btnHtml = `
-            <div class="me-auto small text-muted">選中：${filename}</div>
+            <div class="me-auto small text-muted">${this.lang.selected_msg}${filename}</div>
             <div class="btn-group">
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${src}', '${filename}')">原圖</button>
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumbL}', '${filename}')">大 (1600px)</button>
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumb}', '${filename}')">中 (800px)</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${src}', '${filename}')">${this.lang.size_original}</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumbL}', '${filename}')">${this.lang.size_large}</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumb}', '${filename}')">${this.lang.size_medium}</button>
             </div>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${this.lang.cancel_btn}</button>
         `;
         footer.innerHTML = btnHtml;
     }
@@ -193,7 +210,7 @@ class AlbumSelector {
         this.modal.hide();
         // 重設 footer
         setTimeout(() => {
-            document.querySelector(`#${this.modalId} .modal-footer`).innerHTML = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>';
+            document.querySelector(`#${this.modalId} .modal-footer`).innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${this.lang.close_btn}</button>`;
         }, 500);
     }
 

@@ -156,7 +156,7 @@ $currentCats = array_map('trim', $currentCats);
                             <div class="form-text"><?php echo __('hint_html_content'); ?></div>
                             <?php if ($album_enabled): ?>
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.albumPicker.open()">
-                                <i class="bi bi-images"></i> 從相簿挑選圖片
+                                <i class="bi bi-images"></i> <?php echo __('btn_pick_from_album'); ?>
                             </button>
                             <?php endif; ?>
                         </div>
@@ -195,7 +195,7 @@ $currentCats = array_map('trim', $currentCats);
                         <div class="form-check me-3">
                             <input class="form-check-input" type="checkbox" name="auto_build" value="1" id="autoBuildCheck">
                             <label class="form-check-label" for="autoBuildCheck">
-                                <?php echo isset($lang['label_auto_build']) ? $lang['label_auto_build'] : '儲存後立即重建靜態網頁'; ?>
+                                <?php echo __('label_auto_build'); ?>
                             </label>
                         </div>
 
@@ -218,7 +218,11 @@ $currentCats = array_map('trim', $currentCats);
 <?php require 'common_js_inc.php'; ?>
 <script src="assets/js/tinymce/tinymce.min.js"></script>
 <?php if ($album_enabled): ?>
-<script src="assets/js/album_selector.js"></script>
+<?php 
+    // 加入版本號以防快取
+    $jsVer = defined('APP_VERSION') ? APP_VERSION : time();
+?>
+<script src="assets/js/album_selector.js?v=<?php echo $jsVer; ?>"></script>
 <?php endif; ?>
 
 <!-- Album Selector Modal -->
@@ -227,13 +231,13 @@ $currentCats = array_map('trim', $currentCats);
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-light">
-                <h5 class="modal-title">從相簿挑選圖片</h5>
+                <h5 class="modal-title"><?php echo __('modal_album_picker_title'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <button type="button" id="btn-back-to-albums" class="btn btn-sm btn-secondary d-none">
-                        <i class="bi bi-chevron-left"></i> 返回相簿列表
+                        <i class="bi bi-chevron-left"></i> <?php echo __('btn_back_to_albums'); ?>
                     </button>
                     <div></div>
                 </div>
@@ -242,7 +246,7 @@ $currentCats = array_map('trim', $currentCats);
                 </div>
             </div>
             <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('btn_cancel'); ?></button>
             </div>
         </div>
     </div>
@@ -254,6 +258,21 @@ $currentCats = array_map('trim', $currentCats);
     // 初始化相簿挑選器
     window.albumPicker = new AlbumSelector({
         albumPath: '<?php echo $actual_album_path; ?>',
+        lang: {
+            loading_albums: '<?php echo __('album_loading'); ?>',
+            loading_photos: '<?php echo __('photo_loading'); ?>',
+            no_albums: '<?php echo __('no_albums_found'); ?>',
+            no_photos: '<?php echo __('no_photos_found'); ?>',
+            album_label: '<?php echo __('label_album_name'); ?>',
+            upload_btn: '<?php echo __('btn_direct_upload'); ?>',
+            uploading_msg: '<?php echo __('uploading_wait'); ?>',
+            selected_msg: '<?php echo __('msg_selected'); ?>',
+            size_original: '<?php echo __('btn_size_original'); ?>',
+            size_large: '<?php echo __('btn_size_large'); ?>',
+            size_medium: '<?php echo __('btn_size_medium'); ?>',
+            cancel_btn: '<?php echo __('btn_cancel'); ?>',
+            close_btn: '<?php echo __('close_btn'); ?>'
+        },
         onSelect: function(url, filename) {
             // 插入圖片到 TinyMCE
             if (tinymce.activeEditor) {
