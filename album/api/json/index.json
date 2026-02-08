@@ -1,6 +1,15 @@
 {
     "items": [
         {
+            "name": "圖床測試",
+            "id": "圖床測試",
+            "desc": "",
+            "cover": "Collection\/圖床測試\/Thumbnail\/1500_thumb.jpg",
+            "count": 5,
+            "date": "20260208",
+            "link": "#album=%E5%9C%96%E5%BA%8A%E6%B8%AC%E8%A9%A6"
+        },
+        {
             "name": "相簿2",
             "id": "相簿2",
             "desc": "",
@@ -481,7 +490,7 @@
     "pagination": {
         "currentPage": 1,
         "totalPages": 1,
-        "totalItems": 53,
-        "itemsPerPage": 53
+        "totalItems": 54,
+        "itemsPerPage": 54
     }
 }

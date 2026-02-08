@@ -1,5 +1,5 @@
 /**
- * Baxermux Album System Core JS (SPA Version - Client Side Pagination Only)
+ * Baxermux Album System Core JS (SPA Version - Client Side Pagination & Dynamic Share Filtering)
  */
 
 /* =========================================
@@ -411,20 +411,44 @@ function getObfuscatedSlug(id) {
 
 let currentShareData = null;
 
+/**
+ * 開啟分享視窗 (具備尺寸偵測與過濾功能)
+ */
 function openShareModal(filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart) {
-    currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart };
-    const toggle = document.getElementById('toggle-original-url');
-    if (toggle) toggle.checked = false;
-    updateShareLinks();
+    const container = document.getElementById('share-links-container');
+    container.innerHTML = '<div class="text-center py-3 text-muted">正在分析照片尺寸...</div>';
     openModal('shareModal');
+
+    // 預先載入原圖以獲取真實尺寸
+    const tempImg = new Image();
+    tempImg.src = originalImgSrc;
+    
+    tempImg.onload = function() {
+        const width = tempImg.naturalWidth;
+        currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: width };
+        const toggle = document.getElementById('toggle-original-url');
+        if (toggle) toggle.checked = false;
+        updateShareLinks();
+    };
+    
+    tempImg.onerror = function() {
+        // 若偵測失敗則全開
+        currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: 99999 };
+        const toggle = document.getElementById('toggle-original-url');
+        if (toggle) toggle.checked = false;
+        updateShareLinks();
+    };
 }
 
+/**
+ * 更新分享連結列表 (核心過濾邏輯)
+ */
 function updateShareLinks() {
     if (!currentShareData) return;
     const container = document.getElementById('share-links-container');
     const isOriginal = document.getElementById('toggle-original-url').checked;
     
-    const { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart } = currentShareData;
+    const { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth } = currentShareData;
     const baseHref = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     
     const getAbs = (relPath) => {
@@ -441,23 +465,28 @@ function updateShareLinks() {
     let sizes = [];
     const shortBase = baseHref + 'shorturl.php?i=';
 
-    if (isOriginal) {
-        sizes = [
-            { label: '超大尺寸 (2048px)', url: getAbs(thumbBasePath + namePart + '_thumbXL' + ext) },
-            { label: '大型尺寸 (1600px)', url: getAbs(thumbBasePath + namePart + '_thumbL' + ext) },
-            { label: '中型尺寸 (1024px)', url: getAbs(thumbBasePath + namePart + '_thumbM' + ext) },
-            { label: '預覽尺寸 (800px)', url: getAbs(thumbBasePath + namePart + '_thumb' + ext) },
-            { label: '原始圖檔 (高品質)', url: getAbs(originalImgSrc) }
-        ];
-    } else {
-        sizes = [
-            { label: '超大尺寸 (2048px)', url: shortBase + getObfuscatedSlug(sid + 1) },
-            { label: '大型尺寸 (1600px)', url: shortBase + getObfuscatedSlug(sid + 2) },
-            { label: '中型尺寸 (1024px)', url: shortBase + getObfuscatedSlug(sid + 3) },
-            { label: '預覽尺寸 (800px)', url: shortBase + getObfuscatedSlug(sid + 4) },
-            { label: '原始圖檔 (高品質)', url: shortBase + getObfuscatedSlug(sid) }
-        ];
-    }
+    // 定義規格與過濾閾值 (minW: 原圖必須大於此寬度才會顯示該選項)
+    const specs = [
+        { label: '超大尺寸 (2048px)', suffix: '_thumbXL', offset: 1, minW: 1601 }, 
+        { label: '大型尺寸 (1600px)', suffix: '_thumbL',  offset: 2, minW: 1025 },
+        { label: '中型尺寸 (1024px)', suffix: '_thumbM',  offset: 3, minW: 801 },
+        { label: '預覽尺寸 (800px)',  suffix: '_thumb',   offset: 4, minW: 321 },
+        { label: '極小尺寸 (320px)',  suffix: '_thumbXS', offset: 5, minW: 0 }
+    ];
+
+    specs.forEach(spec => {
+        // 如果原圖寬度夠大，或是該規格是最小的 XS，則顯示
+        if (realWidth >= spec.minW) {
+            const label = (realWidth < spec.minW * 1.2 && spec.minW > 0) ? `${spec.label} (接近原圖)` : spec.label;
+            const url = isOriginal ? getAbs(thumbBasePath + namePart + spec.suffix + ext) : (shortBase + getObfuscatedSlug(sid + spec.offset));
+            sizes.push({ label, url });
+        }
+    });
+
+    // 原始圖檔永遠顯示
+    const originalLabel = `原始圖檔 (${realWidth}px)`;
+    const originalUrl = isOriginal ? getAbs(originalImgSrc) : (shortBase + getObfuscatedSlug(sid));
+    sizes.push({ label: originalLabel, url: originalUrl });
 
     let html = "";
     sizes.forEach(size => {

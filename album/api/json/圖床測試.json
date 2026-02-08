@@ -1,0 +1,101 @@
+{
+    "name": "圖床測試",
+    "desc": "",
+    "photos": [
+        {
+            "filename": "1500.jpg",
+            "title": "1500.jpg",
+            "desc": "",
+            "src": "Collection\/圖床測試\/1500.jpg",
+            "thumb": "Collection\/圖床測試\/Thumbnail\/1500_thumb.jpg",
+            "thumbL": "Collection\/圖床測試\/Thumbnail\/1500_thumbL.jpg",
+            "thumbXL": "Collection\/圖床測試\/Thumbnail\/1500_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48"
+            },
+            "shortIdStart": 0
+        },
+        {
+            "filename": "1920.jpg",
+            "title": "1920.jpg",
+            "desc": "",
+            "src": "Collection\/圖床測試\/1920.jpg",
+            "thumb": "Collection\/圖床測試\/Thumbnail\/1920_thumb.jpg",
+            "thumbL": "Collection\/圖床測試\/Thumbnail\/1920_thumbL.jpg",
+            "thumbXL": "Collection\/圖床測試\/Thumbnail\/1920_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48"
+            },
+            "shortIdStart": 6
+        },
+        {
+            "filename": "240.jpg",
+            "title": "240.jpg",
+            "desc": "",
+            "src": "Collection\/圖床測試\/240.jpg",
+            "thumb": "Collection\/圖床測試\/Thumbnail\/240_thumb.jpg",
+            "thumbL": "Collection\/圖床測試\/Thumbnail\/240_thumbL.jpg",
+            "thumbXL": "Collection\/圖床測試\/Thumbnail\/240_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48"
+            },
+            "shortIdStart": 12
+        },
+        {
+            "filename": "720.jpg",
+            "title": "720.jpg",
+            "desc": "",
+            "src": "Collection\/圖床測試\/720.jpg",
+            "thumb": "Collection\/圖床測試\/Thumbnail\/720_thumb.jpg",
+            "thumbL": "Collection\/圖床測試\/Thumbnail\/720_thumbL.jpg",
+            "thumbXL": "Collection\/圖床測試\/Thumbnail\/720_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48"
+            },
+            "shortIdStart": 18
+        },
+        {
+            "filename": "900.jpg",
+            "title": "900.jpg",
+            "desc": "",
+            "src": "Collection\/圖床測試\/900.jpg",
+            "thumb": "Collection\/圖床測試\/Thumbnail\/900_thumb.jpg",
+            "thumbL": "Collection\/圖床測試\/Thumbnail\/900_thumbL.jpg",
+            "thumbXL": "Collection\/圖床測試\/Thumbnail\/900_thumbXL.jpg",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48"
+            },
+            "shortIdStart": 24
+        }
+    ]
+}
