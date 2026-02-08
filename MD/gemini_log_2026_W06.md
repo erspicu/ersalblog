@@ -1,0 +1,251 @@
+# Gemini CLI Development Log (2026_W06)
+
+- [2026-02-02 00:00:51] 執行關鍵詞指令：「簡單更新」
+    回答內容摘要：已完成本地 Git Commit 並生成含時間標記的訊息，提醒使用者手動執行遠端推送。
+- [2026-02-02 00:02:02] 撤銷上一次 Commit 並清理暫存區
+    回答內容摘要：執行了 git reset --soft HEAD~1 以撤銷 Commit 並保留變更，同時從 Git 暫存區移除了不應被追蹤的備份 ZIP 檔案。
+- [2026-02-02 00:02:51] 執行關鍵詞指令：「簡單更新」
+    回答內容摘要：已完成本地 Git Commit 並生成含時間標記的訊息，此次已排除備份 ZIP 檔，並提醒使用者手動執行遠端推送。
+- [2026-02-02 23:11:55] (UTC+8) 了解 config.php 定義方式與內容的變更，並同步更新 config.example.php。
+- [2026-02-02 23:18:34] (UTC+8) 更新 install.php 及其語系檔，全面支援 config.php 的新結構並實作正式安裝功能。
+- [2026-02-02 23:25:21] (UTC+8) 檢查 api_*.php 及 admin/ 相關檔案，確認不受 config.php 變更影響，系統運作正常。
+- [2026-02-02 23:32:15] (UTC+8) 修改 make_html.php：將靜態文章輸出至 post/ 目錄，並實作資源路徑 (../) 的自動修正與 Sitemap 更新。
+- [2026-02-02 23:40:42] (UTC+8) 修正 blog.js：將首頁「繼續閱讀」與「日期歸檔」的文章連結加上 post/ 前綴，以對應新的目錄結構。
+- [2026-02-02 23:48:15] (UTC+8) 修正 api_filebase.php：分類掃描功能增加 is_dir 檢查，避免誤將一般檔案 (如 readme.md) 識別為分類目錄。
+- [2026-02-02 23:55:38] (UTC+8) 修正 admin/tool_backup.php 與 admin/file_init.php：將新增的 post/ 目錄納入備份與初始化清單，確保功能 完整性。
+- [2026-02-02 23:50:41] (UTC+8) 更新 .gitignore：將 /post/ 目錄加入排除名單，防止靜態生成檔案進入 Git 追蹤。
+- [2026-02-02 23:58:12] (UTC+8) 修改 admin/tool_backup.php：在備份與還原流程中排除 pic/ 目錄，減小備份檔體積。
+- [2026-02-03 00:05:27] (UTC+8) 重構 API 架構：將 api_*.php 移至 api/ 目錄，並更新前端 (blog.js) 與後端 (Config 引入、File/SQLite 路 徑) 的相依性設定。
+- [2026-02-03 00:15:42] (UTC+8) 文件整理：將所有非根目錄核心檔案的 .md 移至 MD/ 目錄，並更新 gemini.md 規則以反映新的文件結構。
+- [2026-02-03 00:25:10] (UTC+8) 實作多重 CSS 主題功能：建立 blog-dark.css，更新設定檔結構，並修改模板以支援從 config.js 動態載入主題 。
+- [2026-02-03 00:27:16] (UTC+8) 優化與準備壓縮流程：手動清理 .min.css 檔案，安裝 terser/clean-css 工具，並優化 mini.py 以大幅提升掃描效能；使用者將於 Windows 環境手動執行最終壓縮。
+- [2026-02-03 00:38:22] (UTC+8) 修正 make_html.php：更新靜態頁面生成邏輯，解決動態 JS 主題載入路徑錯誤，確保 post/ 目錄下能正確讀取上層 CSS 資源。
+- [2026-02-03 00:45:10] (UTC+8) 優化 blog-dark.css：調整文章標題顏色為淺藍色 (#66b3ff)，提升深色模式下的對比度與視覺層次。
+- [2026-02-03 00:52:15] (UTC+8) 修正 api/api_filebase.php：修復 get_index 函式中 file_get_contents 的路徑錯誤，解決 post_content 回傳空值的問題。
+- [2026-02-03 00:58:10] (UTC+8) 修正樣板連結樣式：移除 blog_template.html 中標題連結的行內樣式，並更新 CSS (blog.css/blog-dark.css)  確保各主題下連結顏色顯示正確。
+- [2026-02-03 01:05:30] (UTC+8) 同步配置與安裝：更新 config.example.js 並強化 install.php，在安裝過程中新增佈景主題 (Theme) 選擇功能 ，確保新舊配置與安裝流程一致。
+- [2026-02-03 01:23:23] (UTC+8) 建立架稿待辦清單：新增 MD/TODO.md，詳細記錄樣板生成流程解耦、標記邏輯強化及 DOM 解析優化等架構改進建 議。
+- [2026-02-03 23:33:51] Executed Update macro: Switched to Gemini 3 Pro, synced documentation, and baselined promo site development.
+- [2026-02-04 12:00:00] (UTC+8) 優化靜態生成流程 (make_html.php)：改用 blog_template.html 為單一來源，移除 blog.html 中繼解析與 header 行比對注入邏輯，統一改用變數佔位符 ({page_title}, {page_content} 等) 進行內容替換，大幅簡化邏輯並提升維護性。
+- [2026-02-04 12:15:00] (UTC+8) 統一樣板變數格式：將 static/blog_template.html 與 make_html.php 中所有的 {xxx} 單大括號變數統一為 {{xxx}} 雙大括號格式，與內層 template 區塊的語法保持一致，避免混淆並提升可讀性。
+- [2026-02-04 12:35:00] (UTC+8) 修正 make_html.php 語法錯誤與模板保留邏輯：修復字串串接錯誤導致的 PHP Warning，並在生成 blog.html 時 保留 <template> 標籤，解決前端 blog.js 因找不到樣板而回報的 innerHTML null 錯誤。
+- [2026-02-04 12:55:00] (UTC+8) 修正 make_html.php 模板標籤轉碼問題：針對 DOMDocument saveHTML 會將 {{ }} 轉碼為 %7B%7B %7D%7D 的行為，新增反轉碼邏輯，確保前端 blog.js 的正則替換能正確運作，解決文章標題出現 {{year}} 的顯示錯誤。
+- [2026-02-04 13:10:00] (UTC+8) 修復 blog.html 模板巢狀結構錯亂問題：DOMDocument 解析器在處理 <template> 標籤內的不完整 HTML 時導致內容錯位 (Main Template 被 Date Template 覆蓋)，已修改 make_html.php 跳過 blog.html 的 DOM 解析與圖片優化，直接進行字串替換，確保模板結構完整。
+- [2026-02-04 13:30:00] (UTC+8) 優化 mini.py 壓縮腳本：新增排除清單功能，自動忽略 admin/assets 及 exif.js 等第三方套件，並實作 cleanup_extra_files 函式以自動清除先前誤產生的 .min.js/.min.css 檔案。
+- [2026-02-04 13:45:00] (UTC+8) 清理 make_html.php 程式碼：移除已棄用的 Html2Text 函式庫引用與相關 use 宣告，精簡建置腳本以提升維護性。
+- [2026-02-04 14:05:00] (UTC+8) 重構 make_html.php 核心解析邏輯：完全移除 DOMDocument 依賴，改用 Regex (preg_match_all, preg_replace_callback) 處理樣板解析與圖片優化，徹底解決 HTML5 標籤相容性、屬性自動轉碼及內容巢狀錯誤問題，同時大幅提升 PHP 5.x 相容性與執行效能。
+- [2026-02-04 14:25:00] (UTC+8) 修正 make_html.php 語法與邏輯：修復了 Regex 語法錯誤，並校正了 fix_resource_paths_for_post_dir 函式中的字串替換邏輯 (移除了多餘的空白)，確保靜態網頁 (post/*.html) 能正確載入上一層的 CSS 主題檔案。
+- [2026-02-04 14:40:00] (UTC+8) 修正 mini.py 排除邏輯：更新資料夾排除判斷，支援巢狀路徑 (如 admin/assets) 的正確比對，並新增 langs 與 PHP_LIB 至排除清單，防止誤壓縮第三方語系檔與函式庫。
+- [2026-02-04 14:50:00] (UTC+8) 清理誤生成的壓縮檔案：根據 Git 狀態比對，刪除 admin/assets 目錄下所有未追蹤的 .min.js 檔案，並還原被 覆蓋的原始 .min.js 檔案，恢復專案目錄的整潔。
+- [2026-02-04 15:05:00] (UTC+8) 修復後台登入訊息：修正 langs/admin/admin-zh_TW.php 中遺漏的 login_failed_msg 與 login_locked_msg 翻譯鍵值，解決登入失敗時顯示 raw key 的問題。
+- [2026-02-04 15:20:00] (UTC+8) 樣板 CSS 分離：將 static/blog_template.html 中的行內樣式 (Inline Styles) 提取並獨立至 blog.css 與 blog-dark.css，優化代碼維護性與 CSP 相容性。
+- [2026-02-04 15:35:00] (UTC+8) 修復 HTML 排版工具導致的內容缺失：發現 `dindent` 在處理複雜 HTML5 結構時會導致內容截斷，已暫時禁用 `make_html.php` 中的排版功能以確保生成的 blog.html 完整性。
+- [2026-02-04 15:55:00] (UTC+8) 修復樣板內容缺失問題：還原被錯誤的取代操作破壞的 static/blog_template.html，補回遺失的列表區塊 (AllPostList, AllTagList 等)，確保 blog.html 能正常渲染並執行 JS。
+- [2026-02-05 10:15:00] (UTC+8) 實作前台多語系與動態配置 (i18n & Config)：
+  - 建立 langs/template 目錄，新增 template-zh_TW.php 與 template-en_US.php 語系檔.
+  - 更新 static/blog_template.html，將所有硬編碼中文改為 {{variable}} 佔位符.
+  - 更新 make_html.php，支援讀取 config.js 語系設定 (blog_lang) 與時區 (timezone)，並動態載入對應語系檔進行替換.
+  - 更新 config.example.php，新增 $blog_lang 設定範本.
+  - 更新 admin/settings.php，新增「部落格語系」與「時區」設定欄位，並支援寫入 config.js.
+  - 更新 install.php，在安裝流程中新增語系與時區選擇，並正確寫入 config.php/js.
+  - 更新 langs/admin/admin-*.php 與 install_*.php，補齊新功能所需的翻譯鍵值.
+- [2026-02-05 10:45:00] (UTC+8) 修正配置邏輯：
+  - 將部落格語系 (`blog_lang`) 與時區 (`blog_timezone`) 設定由 `config.js` 移回 `config.php`，確保其符合靜態生成 (SSG) 邏輯.
+  - 更新 `make_html.php`，改回直接從 `config.php` 讀取全域變數.
+  - 更新 `admin/settings.php` 與 `install.php`，確保這些設定能正確寫入 `config.php` 且不影響 `config.js`.
+- [2026-02-05 11:15:00] (UTC+8) 修正靜態頁面生成問題：
+  - 修正 `make_html.php` 中 `tmpl_post_tag_container` 與 `tmpl_post_cat_container` 渲染時漏傳語系變數的問題，解決前台出現 `{{lang_post_tags_title}}` 的錯誤.
+  - 優化 `matchCategories` 函式，改為同時比對「完整檔名」與「無副檔名」的檔案，以相容舊有的分類標記方式，解決文章分類顯示不正確的問題.
+- [2026-02-05 11:30:00] (UTC+8) 修正樣板渲染與分類統計邏輯：
+  - 補齊 `make_html.php` 中所有子樣板（`tmpl_post_main`, `tmpl_blog_list_container`）渲染時缺失的全域語系變數，解決 `{{lang_back_to_top}}` 與 `{{lang_list_page_title}}` 佔位符未被替換的問題.
+  - 更新 `make_html.php` 的 `scanCategories` 與 `api/api_filebase.php` 的 `category_deal`，改為同時檢查「檔名」與「檔名.html」是否存 在，確保舊式（無副檔名）分類標記能正確計數且不計入遺失的文章.
+  - 修正 `api/api_filebase.php` 的 `check_category` 與 `get_Category_index` 的比對邏輯，支援完整檔名與無副檔名的雙向相容.
+- [2026-02-05 12:00:00] (UTC+8) 執行安全性強化 (Security Hardening)：
+  - 修正 `api/api_filebase.php` 中的路徑遍歷漏洞 (Path Traversal)，對分類參數強制使用 `basename()` 過濾.
+  - 修正 `make_html.php` 中的靜態生成 XSS 風險，對標題、標籤與分類名稱執行 `htmlspecialchars` 轉義.
+  - 修正 `static/blog.js` 中的 DOM XSS 風險，新增 `escapeHtml` 函式並在渲染 API 資料時進行轉義.
+  - 確認後台 `post_edit.php` 與 `posts.php` 已具備正確的輸出轉義防護.
+- [2026-02-05 12:30:00] (UTC+8) 實作純靜態 JSON API 模式：
+  - 更新 `config.js` 與 `admin/settings.php`，新增 `api_type: 'json'` 選項.
+  - 更新 `make_html.php`，新增 `-json` 參數. 啟用後會自動將所有文章索引、分類、標籤與日期歸檔預先生成為靜態 JSON 檔案 (存於 `api/json/`).
+  - 更新 `static/blog.js`，實作前端路由邏輯. 當檢測到 `api_type: 'json'` 時，自動根據網址參數 (`?/category/`, `?/tag/` 等) 讀取對應的預生成 JSON 檔，達成無 PHP 後端的全靜態瀏覽體驗.
+  - 更新 `install.php`，在安裝流程中加入 Static JSON 模式選項.
+- [2026-02-05 13:00:00] (UTC+8) 優化純靜態 JSON API 模式：
+  - 將原本分散的多個 JSON 檔案合併為單一 `api/json/data.json`，解決不同系統下中文字元編碼導致的檔名亂碼 (404) 問題.
+  - 更新 `make_html.php`，改為生成單一 `data.json` 並自動清理舊有的分散檔案.
+  - 更新 `static/blog.js`，實作前端過濾邏輯. 在 JSON 模式下僅載入一次 `data.json`，並在瀏覽器端根據 URL 參數動態篩選文章，提升執行效 率與部署便利性.
+- [2026-02-05 13:30:00] (UTC+8) 實作智慧建置快取 (Smart Build Cache)：
+  - 修改 `make_html.php`，引入基於 Config 變數雜湊 (Hash) 的快取機制.
+  - 將設定變數分為「全域影響」($blog_title, $site_url 等) 與「首頁影響」($blog_description) 兩類.
+  - 系統現在會比對 `contents/build_hash.json`，僅在相關設定變更時強制重建對應頁面，否則依賴檔案修改時間 (mtime) 判斷，大幅減少不必要 的 I/O 操作.
+  - 移除 `make_html.php` 中對 `config.php` 的實體檔案依賴檢查，改由 Hash 邏輯接管.
+- [2026-02-05 13:45:00] (UTC+8) 優化 HTML 語系宣告：
+  - 更新語系檔與 `static/blog_template.html`，使 `<html>` 標籤的 `lang` 屬性支援動態切換（如 `zh-Hant` 或 `en`），提升 SEO 與網頁相容性.
+- [2026-02-05 14:00:00] (UTC+8) 修正日期多語系單位顯示：
+  - 修正 `template_date_post_item` 樣板，將硬編碼的「日」改為 `{{lang_day_suffix}}`.
+  - 在語系檔中補齊 `day_suffix` 定義，解決年月單位可能未正確顯示的問題.
+- [2026-02-05 14:15:00] (UTC+8) 強化建置快取與單位顯示：
+  - 更新 `make_html.php`，將語系檔內容納入全域雜湊 (Hash) 計算，並加入 `checkCache` 相依性檢查，確保語系檔變更時能正確觸發重建.
+  - 優化英文語系單位顯示，將原本空的字串改為具描述性的預設值，避免顯示「消失」的錯覺.
+- [2026-02-05 14:50:00] (UTC+8) 切換 AI 開發模型：
+  - 應使用者要求，將開發模型切換為 **Gemini 3 Pro** (gemini-3-pro-preview)，用於後續的功能開發與邏輯優化.
+  - 同步更新 `admin/version_config.php` 中的模型元數據.
+- [2026-02-05 14:45:00] (UTC+8) 修正英文語系日期單位遺漏：
+  - 補齊 `template-en_US.php` 中的 `day_suffix` 定義，解決英文模式下只有年、月顯示而無日單位的問題.
+- [2026-02-05 14:30:00] (UTC+8) 修復 `make_html.php` 語法錯誤與強化穩定性：
+  - 修復因錯誤取代導致的 `build` 函式語法錯誤 (Brace mismatch).
+  - 強化 `build` 函式內部全域變數合併邏輯，增加 `langVars` 狀態檢查，確保語系佔位符能被正確替換.
+  - 修正單篇文章與列表頁的實體相依檢查，納入 `commonDeps` 以確保樣板或語系變更時能正確觸發重建.
+- [2026-02-06 23:21:10] 我現在跑的是哪款ai模型?
+    回答內容摘要：目前運行的是 Gemini 3 Pro (gemini-3-pro-preview)，CLI 版本為 0.27.2.
+- [2026-02-06 23:30:02] 重構語系檔案結構 (i18n Refactoring)：
+  - 將 `langs/admin/` 與 `langs/template/` 下的所有語系檔移至 `langs/` 根目錄，並移除子目錄.
+  - 更新 `make_html.php`，修正樣板語系檔讀取路徑.
+  - 更新 `install.php`，修正安裝程式語系檔讀取路徑.
+  - 更新 `admin/lang_init.php`，修正後台語系檔掃描目錄.
+  - 更新 `admin/common_js_inc.php`，修正後台 JS 語系檔載入路徑.
+- [2026-02-06 23:45:00] PHP 5.x 相容性強化 (Compatibility Reinforcement)：
+  - 將全站 PHP 檔案中的 Null Coalescing 運算子 (`??`) 替換為 `isset() ? :` 語法.
+  - 將短陣列初始化語法 (`[]`) 替換為傳統的 `array()` 語法，確保相容 PHP 5.4 以下版本.
+  - 在 `admin/system_helper.php` 中實作 `random_bytes()` 回退函式，解決舊版 PHP 缺少原生安全隨機數生成的問題.
+  - 全面校閱 `admin/` 與 `api/` 目錄下的核心邏輯，修復因自動化替換產生的語法錯誤，確保程式 在 PHP 5.x 環境下的穩定性.
+- [2026-02-07 14:35:00] 修正後台登入 500 錯誤：
+  - 修復 `admin/lang_init.php` 在語系目錄扁平化後指向錯誤路徑 (`langs/admin`) 的問題.
+  - 確保後台能正確讀取 `langs/` 根目錄下的語系檔案.
+- [2026-02-07 14:45:00] 修正備份工具 500 錯誤：
+  - 修復 `admin/tool_backup.php` 缺少 `data_provider.php` 引用導致找不到 `DataManager` 類別的問題.
+  - 修正備份建立表單的 ID 不一致問題 (backupForm -> createBackupForm).
+  - 優化變數宣告順序，避免 `uploadLimitStr` 產生的未定義變數警告.
+- [2026-02-07 14:50:00] 修正備份工具 CSRF 驗證錯誤：
+  - 補齊備份清單中「還原」與「刪除」表單缺失的 CSRF Token 欄位.
+- [2026-02-07 15:05:00] 強化 API 回傳邏輯：
+  - 更新 `api/api_filebase.php`, `api/api_sqlitebase.php`, `api/api_dbsqlbase.php`.
+  - 增加「靜態檔檢查」過濾條件：API 僅回傳在 `post/` 目錄下已存在實體 `.html` 檔案的文章.
+  - 同步更新 `make_html.php` 的 JSON 生成邏輯，確保 `data.json` 與實體檔案一致.
+- [2026-02-07 15:30:00] 靜態生成邏輯重構與後台整合：
+  - 建立 `PHP_LIB/StaticGenerator.php` 類別，封裝所有 SSG 核心邏輯.
+  - 重寫 `make_html.php`，改為調用 `StaticGenerator` 執行建置.
+  - 更新 `admin/post_edit.php`，新增「儲存後立即重建靜態網頁」選項.
+  - 更新 `admin/post_save.php`，實作勾選後自動觸發 `StaticGenerator` 的邏輯，達成發布與建置的解耦與可選整合.
+- [2026-02-07 15:45:00] 修正 SSG 重構後的 500 錯誤與相容性優化：
+  - 修復 `StaticGenerator.php` 中的引號轉義錯誤與 Regex 語法錯誤.
+  - 修正 `StaticGenerator.php` 在 PHP 5.3 下不支援在 Closure 中使用 `$this` 的問題（改為邏輯內聯）.
+  - 將語系檔 (`langs/template-*.php`) 的短陣列 `[]` 降級為 `array()` 以相容舊版 PHP.
+  - 強化 `post_save.php` 的錯誤捕捉機制.
+- [2026-02-07 14:15:00] 實作文章內容 Script 標籤保護：
+  - 在 `admin/system_helper.php` 中建立 `protect_script_tags()` 函式，將 `<script>` 標籤轉義為 HTML 實體（如 `&lt;script&gt;`），使其在技術文章中可見但不執行.
+  - 更新 `make_html.php` 與所有 API 檔案，在輸出文章內容前對 `post_content` 執行腳本保護.
+  - 確保腳本保護僅作用於使用者產生的文章內容，不影響樣板本身的合法腳本執行.
+- [2026-02-07 14:08:00] 啟動 Gemini CLI 執行環境，列出目錄檔案以確認現況.
+- [2026-02-07 14:40:00] 執行 API 全面精簡與重構：
+  - 重構 `api_filebase.php`, `api_sqlitebase.php`, `api_dbsqlbase.php`.
+  - 建立統一的 `get_data` 核心邏輯，消除 90% 以上的重複程式碼.
+  - 移除已不使用的 `page()` 進入點與多個輔助函式 (`del_by_value`, `startsWith` 等).
+  - 確保介面與回傳格式完全相容前端 `blog.js` 調用.
+- [2026-02-07 14:50:00] 修正 StaticGenerator.php 語系支援：
+  - 修正 `StaticGenerator.php` 中硬編碼的中文標題 ("-文章總列表").
+  - 改用 `langVars['list_page_title']` 動態變數，確保前台標題能隨語系設定正確切換.
+- [2026-02-07 15:10:00] 實作前台 SPA 分頁功能：
+  - 在 `admin/settings.php` 加入「每頁文章數量」設定，並同步寫入 `config.php` 與 `config.js`.
+  - 更新 `blog.css` 與 `blog-dark.css`，將 `#PaginationList` 預設設為隱藏.
+  - 更新 `static/blog.js`，實作客戶端分頁邏輯與分頁按鈕動態生成.
+- [2026-02-07 15:20:00] 升級混合式分頁系統 (Hybrid Pagination)：
+  - 實作伺服器端分頁 (PHP API)：優化 `api_*.php` 核心邏輯，支援 `page` 參數與 `pagination` 數據回傳，提升動態模式下的效能與 IO 效率.
+  - 實作客戶端分頁 (JSON Mode)：在 `blog.js` 中對全量 JSON 資料執行本地切割，模擬 API 回傳格式.
+  - 統一數據結構：無論動態或靜態模式，前端均使用一致的 `pagination` 元數據進行 UI 渲染.
+- [2026-02-07 15:35:00] 美化分頁組件 (UI/UX Enhancement)：
+  - 更新 `blog.css` 與 `blog-dark.css`，實作現代感的按鈕樣式，支援深淺色主題.
+  - 優化 `blog.js` 分頁生成邏輯，新增「上一頁」與「下一頁」按鈕，並實作禁用 (Disabled) 狀態.
+- [2026-02-07 15:55:00] 修正日期篩選邏輯 (Date Range Bugfix)：
+  - 修正三隻 API 程式中的日期比對邏輯，使其支援年份 (4碼) 與年月 (6碼) 的動態匹配.
+  - 同步更新 `blog.js` 的 JSON 模式篩選器，確保全站日期導覽功能正常運作.
+- [2026-02-07 16:10:00] 修正 StaticGenerator.php 語系變數引用錯誤：
+  - 修正 `list_page_title` 鍵值缺少 `lang_` 前綴的問題，解決執行 make_html.php 時出現的 Undefined index 錯誤.
+- [2026-02-07 16:20:00] 新增粉柔主題 (Soft Pink Theme)：
+  - 建立 `blog-pink.css`，採用櫻花粉與玫瑰色系設計，提供圓潤的 UI 元素與溫柔的視覺體驗.
+  - 確保主題能被後台設定自動偵測並切換.
+- [2026-02-07 16:30:00] 新增駭客任務主題 (The Matrix Theme)：
+  - 建立 `blog-matrix.css`，採用黑底綠字、終端機字體與掃描線特效，模擬經典 Matrix 風格.
+  - 實現高科技感的互動反饋與視覺設計.
+- [2026-02-07 15:30:23] 規範時間抓取流程：在 gemini.md 中加入優先使用 Linux 'date' 指令抓取系統時間的準則，以確保環境一致性.
+- [2026-02-07 20:09:31] ls
+- [2026-02-07 20:12:45] 幫我在album目錄內的static內建立一個相簿首頁範例
+- [2026-02-07 20:13:58] 依照現在的album/Collection內現況重生相簿首頁範例
+- [2026-02-07 20:20:15] 調整相簿首頁範例佈局為一橫排 6 個相簿
+- [2026-02-07 20:23:45] 縮小相簿預覽圖尺寸為一半
+- [2026-02-07 20:25:32] 恢復相簿大圖樣式，並調整容器寬度為 90%
+- [2026-02-07 20:28:45] 建立相簿內頁範例 (東京三日遊)
+- [2026-02-07 20:31:15] 建立照片詳情頁範例 (IMG_20251021_150129.jpg)
+- [2026-02-07 20:38:15] 更新 gemini.md：新增相簿服務獨立開發規範
+- [2026-02-07 20:47:15] 統一所有範例標頭風格：合併標題與描述至同一行，並縮小 Baxermux 字體
+- [2026-02-07 20:51:15] 整合範例新增快速切換按鈕區 (#index, #album, #pic)
+- [2026-02-07 20:58:15] 修正 album/api/api_album.php 中的封面圖片路徑 (baseUrl)
+- [2026-02-07 21:05:15] 修正 album/make_album.php 中的靜態頁面圖片相對路徑錯誤
+- [2026-02-07 21:28:15] 實作相簿縮圖讀取邏輯：優先搜尋 Thumbnail 目錄下帶有 thumb_ 前綴的檔案
+- [2026-02-07 21:18:15] 提升相簿縮圖品質至 90% 並重新生成
+- [2026-02-07 21:23:15] 為 album/make_album.php 新增 $skipThumbnails 參數，支援可選的縮圖生成流程
+- [2026-02-07 21:26:15] 為 album/make_album.php 加入 CLI 參數支援 (-s, -f, -h)
+- [2026-02-07 21:28:15] 調整相簿樣板容器寬度至 96%，並重新建置網頁
+- [2026-02-07 21:30:15] 調整縮圖最大尺寸至 640px，並強制重新生成
+- [2026-02-07 22:01:52] 調整縮圖最大尺寸至 800px，並強制重新生成
+- [2026-02-07 22:09:12] 實作照片詳情頁點擊照片觸發全螢幕 Modal 效果
+- [2026-02-07 22:11:30] 重構相簿 JavaScript：將 JS 內容從樣板與生成器中提取至獨立檔案 album/static/js/album.js
+- [2026-02-07 22:16:39] 重構相簿系統為樣板驅動模式：將 HTML 片段移至 album_template.html 並整合 TemplateManager
+- [2026-02-07 22:19:22] 修正首頁無法載入問題：在生成 album.html 時保留 <template> 標籤供 JS 渲染使用
+- [2026-02-07 22:21:07] 整合 EXIF.js 於照片詳情頁，實作自動讀取並顯示照片拍攝參數 (相機、光圈、快門、ISO 等)
+- [2026-02-07 22:57:59] 更新縮圖命名規則為 FILENAME_PREFIX.EXTENSION，並重新生成所有縮圖與網頁
+- [2026-02-07 22:59:04] 清理舊規則縮圖檔案 (移除所有 thumb_* 前綴檔案)
+- [2026-02-07 23:00:20] 徹底清理舊規則縮圖檔案 (使用括號群組化 find 條件進行 delete)
+- [2026-02-07 23:07:59] 更新照片描述解析邏輯：支援「檔案名稱|標題|描述」格式，並同步更新樣板 UI
+- [2026-02-07 23:08:47] 修正 EXIF 讀取導致的 Fatal Error：加入 function_exists 檢查以相容未開啟 EXIF 模組的環境
+- [2026-02-07 23:13:06] 於 WSL2 環境成功執行 php album/make_album.php：完成縮圖生成、EXIF 讀取與靜態頁面建置
+- [2026-02-07 23:15:46] 實作相簿首頁分頁功能：API 支援分頁回傳 (24 個一頁)，前端 JS 動態渲染分頁按鈕
+- [2026-02-07 23:21:33] 實作相簿內頁 (Gallery Grid) 靜態分頁功能：每頁 24 張，生成多個靜態分頁檔，並更新詳情頁返回連結
+- [2026-02-07 23:28:45] 於照片詳情頁新增「下載原始圖檔」按鈕，並指向 Collection 目錄下的原始檔案
+- [2026-02-07 23:30:43] 實作相簿分享功能：提供多尺寸連結選取與一鍵複製功能，自動根據網址產生絕對路徑
+- [2026-02-07 23:33:19] 執行靜態頁面重建 (php album/make_album.php -s)
+- [2026-02-07 23:35:28] 於相簿內頁新增「相簿標題與詳細描述」呈現區塊
+- [2026-02-07 23:38:46] 修正 make_album.php 解析 comment_album.txt 的錯誤，確保相簿標題與描述能正確顯示，並修復代碼語法錯誤
+- [2026-02-07 23:42:06] 調整麵包屑導覽顯示規則：將名稱改回實體目錄名稱，大標題則維持自定義顯示名稱
+- [2026-02-07 23:49:16] 更新 .gitignore：排除相簿系統生成的 HTML、縮圖及原始照片 (.jpg)，但保留第三方套件資源
+- [2026-02-07 23:53:25] 於相簿目錄及其子目錄生成 readme.md 文件，詳細描述系統架構、目錄用途與描述檔格式規範
+- [2026-02-08 00:00:07] 執行巨集指令：「更新」。完成全站文件同步、版本號更新至 v2026.02.07.23.55，並完成本地 Git Commit.
+- [2026-02-08 00:01:44] 重整相簿1描述文件：將 readme.txt 轉換為結構化的 readme.md 並優化內容邏輯
+- [2026-02-08 00:03:18] 執行巨集指令：「更新」。完成文件重整與 Git 發佈.
+- [2026-02-08 01:39:21] 於 make_album.php 中實作路徑紀錄功能，生成 album/shorturl.txt (包含流水號與所有實體檔案位置)
+- [2026-02-08 01:40:17] 修改 shorturl.txt 分隔符號為 |
+- [2026-02-08 01:46:46] 建立 album/shorturl.php：實作短網址反查與圖片回傳功能，支援 Base62 解碼與 MIME Type 自動辨識
+- [2026-02-08 01:53:36] 更新 album/static/js/album.js：實作 Base62 編碼 (補零至 5 碼) 與短網址連結生成邏輯，並更新生成器以傳遞正確的 ID
+- [2026-02-08 02:05:20] 實作雙次 Base62 混淆演算法：將原始 ID 轉換為具有混淆效果的 Slug，並在後端成功實作還原解碼邏輯
+- [2026-02-08 02:10:35] 升級短網址混淆演算法：改用模乘雜湊 (Modular Multiplicative Hashing) + XOR 掩碼，產生更隨機且不可預測的短網址 Slug
+- [2026-02-08 02:25:40] 移除 Bootstrap 框架，重構 album.css 與 JS，改用原生 CSS Grid 實現響應式佈局與組件樣式
+- [2026-02-08 02:28:27] 修正相簿內頁佈局：移除殘留的 Bootstrap 類別，同步更新 CSS Grid 結構與相簿標頭樣式
+- [2026-02-08 02:30:34] 清理未使用的靜態資源：移除 Bootstrap 原生檔案 (css/bootstrap.min.css, js/bootstrap.bundle.min.js)
+- [2026-02-08 02:31:15] 清理未使用的腳本：移除 exif.js (已改由 PHP 後端渲染 EXIF 資訊)
+- [2026-02-08 02:35:23] 實作輕量化圖示系統：移除 150KB+ 的字體圖示，改用嵌入式 SVG Data URI 方案 (css/icons.css)
+- [2026-02-08 02:36:49] 整合靜態資源：將 SVG 圖示樣式 (icons.css) 併入核心樣式表 (album.css)，進一步優化 HTTP 請求次數
+- [2026-02-08 02:39:20] 扁平化靜態資源目錄：將 css/ 與 js/ 目錄內容移至 static/ 根目錄，並同步更新樣板與生成路徑
+- [2026-02-08 02:40:53] 修正分頁導覽箭頭顏色：將箭頭 SVG 顏色由白色改為深灰色，以解決在白色背景下看不清楚的問題
+- [2026-02-08 02:43:37] 統一分頁導覽列位置：修正靜態生成邏輯，將導覽 HTML 包覆於 #pagination-container 以實現全站置中顯示
+- [2026-02-08 02:48:00] 實作深色主題與動態配置機制：建立 album-dark.css 與 config.js，並更新樣板支援主題自動切換
+- [2026-02-08 02:49:44] 建立「粉柔主題 (Soft Pink)」：新增 album-pink.css，優化圓潤 UI 與粉色系視覺，並擴充 config.js 主題切換機制
+- [2026-02-08 02:52:21] 建立「駭客任務主題 (The Matrix)」：新增 album-matrix.css，實作掃描線特效、螢幕綠字風格與圖片濾鏡互動效果
+- [2026-02-08 02:54:00] 修正 Matrix 主題：移除照片詳情頁主圖的綠色濾鏡，確保瀏覽原始照片時色彩真實
+- [2026-02-08 02:56:17] 修正標頭對齊問題：為 .header-inner 補上 max-width 限制，使其邊界與主內容區域同步
+- [2026-02-08 03:02:33] 於照片分享視窗新增「顯示原始路徑」勾選功能，支援在短網址與實體檔案連結之間動態切換
+- [2026-02-08 03:06:13] 統一主題設定格式：修改 config.js 與樣板，支援直接映射 CSS 檔名載入主題，與 Blog 服務保持一致
+- [2026-02-08 03:09:02] 清理 HTML 內聯樣式：將樣板中所有 <style> 內容遷移至外部檔案 album.css，實現動靜完全分離
+- [2026-02-08 03:11:54] 建立 album/config.example.js 設定檔範本
+- [2026-02-08 03:13:36] 更新 .gitignore：排除 album/config.js 與 album/shorturl.txt
+- [2026-02-08 03:20:35] 執行巨集指令：「更新」。完成文件同步、版本號更新至 v2026.02.08.03.15，並完成本地 Git Commit.
+- [2026-02-08 19:55:59] 在根目錄 config.php 與 config.example.php 中新增 $album_path 變數，用於定義相簿服務相對路徑，並修正 config.php 中遺漏的 $posts_per_page 變數名稱.
+- [2026-02-08 20:10:00] 調整相簿服務路徑設定為「../album/」，以支援相簿與 Blog 目錄平行的部署架構.
+- [2026-02-08 20:15:00] 更新 StaticGenerator.php 的路徑修復邏輯，確保靜態文章頁面能正確解析平行目錄下的相簿圖片路徑.
+- [2026-02-08 20:25:00] 完成相簿服務與 Blog 主系統的全面整合，包含健康偵測、儀表板動態入口及跨目錄路徑自動修正功能.
+- [2026-02-08 20:30:00] 將相簿服務路徑恢復為預設的「album/」子目錄結構.
+- [2026-02-08 20:40:00] 修正 config.php 中 $posts_per_page 為 0 導致 API 發生除以零錯誤，進而引發前端 JSON 解析失敗的問題.
+- [2026-02-08 20:50:00] 實作 API 端路徑自動修正功能，將文章內容中相對於 admin/ 的相簿路徑轉換為適用於根目錄的正確路徑，解決 Blog 首頁圖片失效的問題.
+- [2026-02-08 21:15:00] 修復 admin/settings.php 因代碼替換導致的語法錯誤 (Unclosed '{')，改用單引號連接方式並重寫檔案以確保結構完整.
+- [2026-02-08 21:25:00] 修復 config.php 中損壞的 $posts_per_page 設定，並將 admin/settings.php 改為使用分區介面顯示設定，同時強化了設定寫入的穩定性.
+- [2026-02-08 21:35:00] 在網站系統設定中補齊前端分頁數量設定 (posts_per_page_js)，並標註其適用於 Static JSON 模式，明確區分前後端設定範圍.
+- [2026-02-08 21:40:00] 實施文件按週切割策略，將歷史紀錄與開發日誌依週數 (YYYY_Www) 進行歸檔與管理，並更新 gemini.md 規則以支援此自動化流程。

@@ -1,0 +1,110 @@
+# Gemini CLI Development Log (2026_W05)
+
+- [2026-01-31 12:05:00] 讀取gemini.txt , 然後按照裡面的要求執行.
+- [2026-01-31 12:15:00] 後台管理 儀表板資訊那邊,連線資訊希望增加mysql版本顯示
+- [2026-01-31 12:20:00] 希望能夠有 mysql 或是 mariadb 這種詳細資訊
+- [2026-01-31 12:30:00] 因為我的blog架構,目前呈現檔案系統.資料庫系統併行,我希望在登入階段能夠讓user選擇進入後的管理版本,如果選擇非資 料庫版本,登入後介面基本上跟資料庫版本一樣,但管理的內容從檔案blog的檔案系統而來.
+- [2026-01-31 12:35:00] gemini_log.txt 我這邊打開看是亂碼,希望能夠讓它在繁體中文環境中正常顯示.
+- [2026-01-31 12:36:00] 我這邊是win11,utf8檔案用筆記本開還是亂碼請修正.
+- [2026-01-31 12:38:00] 新紀錄的log是正常的,但前面幾筆的資訊內容是亂碼.
+- [2026-01-31 12:40:00] 還是有問題,請參考gemini.txt的紀錄形式去修正.
+- [2026-01-31 12:45:00] 這次正常了 幫我將這動作配置(寫入正確紀錄)寫到gemini.txt內
+- [2026-01-31 16:07:42] 後臺管理登入,顯示目前是否有正確的blog資料庫環境和資料內容與連線能力,也檢查是否有檔案架構blog所需之資料檔和目 錄架構,如果沒有請做畫面提示,並且禁止登入無法使用的系統.
+- [2026-02-01 11:55:00] 實作後台 SQLite3 支援：
+  - 建立 admin/sqlite_init.php 初始化與匯入腳本。
+  - 建立 api_sqlitebase.php。
+  - 更新 admin/auth.php 支援動態 DB 連線。
+  - 更新 admin/health_check.php 新增 SQLite 檢查。
+  - 更新 admin/login.php 新增 SQLite 登入選項。
+  - 更新 admin/data_provider.php 兼容 SQLite 語法 (移除 NOW(), INSERT IGNORE)。
+- [2026-02-01 12:05:00] 修正 SQLite 下文章列表 500 錯誤：移除 GROUP_CONCAT 中的 SEPARATOR 關鍵字，改用預設逗號分隔以相容 MySQL 與 SQLite。
+- [2026-02-01 12:10:00] 全面檢查並修正 GROUP_CONCAT 語法：
+  - 修正 api_sqlitebase.php。
+  - 修正 admin/file_init.php (確保 SQLite 轉檔案模式相容性)。
+- [2026-02-01 12:20:00] 修正後台介面顯示：
+  - 更新 admin/index.php 儀表板，支援顯示 SQLite 檔案大小與詳細連線資訊。
+  - 更新 admin/posts.php, admin/categories.php, admin/tool_migrate.php 的 Sidebar，正確顯示 SQLite 模式標籤。
+- [2026-02-01 12:35:00] 強化環境相容性防護：
+  - 修正 admin/health_check.php，增加 PDO Extension 與 Drivers (mysql, sqlite) 的存在檢查，避免 Fatal Error。
+  - 更新 admin/auth.php，增加連線前的 PDO 檢查。
+- [2026-02-01 12:45:00] 優化資料遷移工具：
+  - 將「資料匯入」更名為「資料遷移」(Data Migration)，避免語意混淆。
+  - 更新 admin/tool_migrate.php，新增 File to SQLite 遷移功能。
+  - 支援 MySQL 與 SQLite 雙目標選擇，並自動處理 SQL 語法差異 (UPSERT)。
+- [2026-02-01 13:00:00] 實作雙向資料遷移：
+  - 更新 admin/tool_migrate.php 支援「反向遷移」(Database -> File System)。
+  - 開放 Sidebar 連結，讓資料庫模式下也能存取遷移工具。
+  - 根據當前登入模式自動切換「匯入」或「匯出」介面。
+- [2026-02-01 13:15:00] 強化資料遷移工具：
+  - 在檔案模式下新增「從資料庫還原」(DB -> File) 功能。
+  - 支援從 MySQL 或 SQLite 來源還原資料至檔案系統。
+  - 實現了完整的雙向資料同步 (Push/Pull) 介面。
+- [2026-02-01 13:30:00] 完善雙向遷移功能：
+  - 更新 admin/tool_migrate.php，在資料庫模式下新增「從檔案系統匯入」(Import from File) 選項。
+  - 實現了 File Mode 與 DB Mode 下絕對對稱的 Push/Pull 遷移功能。
+- [2026-02-01 13:45:00] 實現全方位資料遷移 (File <-> MySQL <-> SQLite)：
+  - 更新 admin/tool_migrate.php，在資料庫模式下新增 DB 對 DB 的遷移選項。
+  - 實作 runDBMigration 函數，支援跨資料庫類型的資料同步 (Schema Sync + UPSERT)。
+  - UI 介面全面升級，支援動態偵測並顯示可用的匯出/匯入目標。
+- [2026-02-01 13:50:00] 更新 gemini.md，將偏好執行環境設定為 Git Bash (MinGW)，以解決編碼亂碼問題並提升指令相容性。
+- [2026-02-01 14:15:00] 刪除誤上傳的備份檔案 filebase-20260201-140447-backup.zip 並從 Git 紀錄中移除。
+- [2026-02-01 14:30:00] 後台備份工具 (admin/tool_backup.php) 新增 PHP 設定提示，提醒使用者在還原大型備份檔時需調整 php.ini 參數 (upload_max_filesize, post_max_size, memory_limit, max_execution_time, max_input_time)，並提供範例參數與 FTP 替代方案提示。
+- [2026-02-01 14:45:00] 實作後台 MySQL 資料庫備份還原功能 (admin/tool_backup.php)。新增 createMysqlDump 與 restoreMysqlDump 函數，支 援匯出 SQL 結構與資料並打包靜態資源 (dbsqlbase-*.zip)，以及從 ZIP 還原資料庫與檔案。
+- [2026-02-01 15:00:00] 優化後台備份列表顯示：根據當前模式 (File System 或 Database) 自動過濾備份檔，避免混淆 (filebase-* vs dbsqlbase-*)。
+- [2026-02-01 15:15:00] 實作後台 SQLite 備份還原功能 (admin/tool_backup.php)。支援打包 SQLite 資料庫檔與靜態資源 (sqlitebase-*.zip)，並實作相應的還原與列表過濾邏輯。
+- [2026-02-01 15:30:00] 修正後台備份工具 (admin/tool_backup.php) 錯誤：補充缺失的 Helper Functions (addStaticFilesToZip, restoreStaticFiles, cleanupTempDir) 以解決 500 錯誤；修正備份列表過濾邏輯，確保 SQLite 模式下正確顯示 sqlitebase-* 檔案。
+- [2026-02-01 15:50:00] 修正 HISTORY.md 文件，重新整理並補全 2026-02-01 的開發紀錄，確保所有新功能 (Backup/Restore, SQLite Support, Filtering) 的 中英文內容完整對應且格式一致。
+- [2026-02-01 16:00:00] 補全 HISTORY.md 中 2026-01-30 與 2026-01-31 的繁體中文翻譯，確保全站歷史紀錄皆符合 中英文同步規範。
+- [2026-02-01 19:15:00] 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.19.15，並完成本地 Git Commit。
+- [2026-02-01 19:30:00] 實作全方位安裝引導精靈 (install.php)：
+  - 支援環境檢測 (PHP 版本與 Unix 權限修復)。
+  - 提供多模式資料庫連線測試 (MySQL/SQLite/File)。
+  - 實作多語系支援並將語系檔獨立管理 (langs/admin/install_*.php)。
+  - 整合系統版本資訊顯示與配置自動生成介面。
+- [2026-02-01 19:35:00] 執行巨集指令：「更新」。完成全站核心文件同步、版本號更新至 v2026.02.01.19.30，並發佈變更至 GitHub。
+- [2026-02-01 21:47:54] gemini cli 在現在win11 wsl2 ubuntu 24.04環境運作合適嗎?
+    回答內容摘要：非常合適。WSL2 提供原生 Linux 環境，能完美支援 Shell 指令執行與 UTF-8 編碼，是開發與執行 Gemini CLI 的理想平台。
+- [2026-02-01 21:57:45] 幫我在wsl2內安裝 apache2 php8 mysql 環境
+    回答內容摘要：已成功安裝 Apache2, MySQL 8.0 與 PHP 8.3 套件，並確認服務已啟動。提供了建立專案軟連結的建議操作。
+- [2026-02-01 21:59:14] 執行 Apache 與專案目錄配置
+    回答內容摘要：建立了專案軟連結，啟用了 rewrite 模組，並修正了 AllowOverride All 設定以支援 .htaccess。
+- [2026-02-01 22:00:33] 設定 MySQL 使用者與資料庫連線
+    回答內容摘要：在 WSL2 MySQL 中建立了專案所需的資料庫與使用者，並驗證連線成功，現在專案已完全具備執行條件。
+- [2026-02-01 22:00:43] 完成 WSL2 LAMP 開發環境全自動配置
+    回答內容摘要：環境已完全就緒，包含 Apache、PHP 8.3、MySQL 資料庫設定與專案目錄軟連結。提供了存取網址與服務管理指令。
+- [2026-02-01 22:04:56] 修改 Apache2 監聽埠為 8086
+    回答內容摘要：已將 Apache2 監聽埠從 80 改為 8086，並同步更新虛擬主機設定與重啟服務。
+- [2026-02-01 22:17:50] 安裝並配置 phpMyAdmin
+    回答內容摘要：成功安裝 phpMyAdmin 並整合至 Apache2，可透過 8086 埠存取，並提供了登入憑據資訊。
+- [2026-02-01 22:22:48] 修正 install.php 在 WSL2 NT 掛載環境下的權限檢測
+    回答內容摘要：實作了 WSL2 + NTFS 環境偵測，並在安裝程式中自動跳過無法執行的權限修復步驟，提供專屬的環境提示訊息。
+- [2026-02-01 22:26:31] 強化 install.php 的作業系統資訊顯示
+    回答內容摘要：更新了 OS 偵測邏輯，現在能顯示 Linux 發行版名稱（如 Ubuntu 24.04）或 Windows 的具體建置版本號，並標註 WSL2環境。
+- [2026-02-01 22:27:14] 重構並強化系統資訊顯示功能
+    回答內容摘要：建立了共用 system_helper.php，統一了詳細 OS 資訊的偵測邏輯，並同步更新至安裝精靈與管理後台儀表板。
+- [2026-02-01 22:46:16] 執行巨集指令：「更新」
+    回答內容摘要：已完成全站文件同步 (HISTORY.md, ARCHITECTURE.md)，更新版本號至 v2026.02.01.22.43，並完成本地 Git Commit。Push 操作 因 GitHub 驗證限制失敗，需由使用者手動執行。
+- [2026-02-01 22:53:01] 整合 Windows PowerShell OS 偵測
+    回答內容摘要：透過 shell_exec 呼叫 powershell.exe 取得 Win32_OperatingSystem 資訊，使 Windows 環境下的 OS 顯示能包含完整的產品名 稱 (Caption) 與架構。
+- [2026-02-01 22:56:43] 修正 Windows OS 偵測解析失敗問題
+    回答內容摘要：針對 PowerShell 可能回傳的 UTF-16 編碼進行轉換，並加入純文字抓取備案，解決 json_decode 失敗導致回退到 Build 9200 的問題。
+- [2026-02-01 22:57:25] 強化 Windows OS 偵測編碼相容性
+    回答內容摘要：改用直接字串輸出並加入編碼偵測轉換邏輯，解決在 AppServ/Windows 環境下因 Big5 編碼衝突導致 OS 資訊抓取失敗的問題。
+- [2026-02-01 22:59:53] 最終修正 Windows OS 偵測路徑與編碼問題
+    回答內容摘要：加入了 PowerShell 完整路徑備案，並強化了 CP950 到 UTF-8 的強制編碼轉換，確保在任何 Windows PHP 環境下都能正確抓取詳細系統資訊。
+- [2026-02-01 23:00:36] 引入 COM/WMI 提升 Windows OS 偵測成功率
+    回答內容摘要：新增了基於 PHP COM 元件的 WMI 查詢作為 Windows 系統偵測標 第一優先級，以解決在某些權限受限的環境下無法執行 PowerShell 的問題。
+- [2026-02-01 23:06:10] 優化 install.php 系統資訊佈局
+    回答內容摘要：將系統資訊欄位從一行四個改為兩行四個，提升各欄位顯示寬度，以利閱讀長的作業系統版本資訊。
+- [2026-02-01 23:14:24] 更新 gemini.md 加入 WSL2 Git 推送策略
+    回答內容摘要：在 gemini.md 中明確規範當 Linux git push 失敗時，應自動切換為呼叫 Windows 版本的 git.exe 以利用 Windows 憑證管理員 完成推送。
+- [2026-02-01 23:28:33] 更新 gemini.md：調整 WSL2 Git 推送策略
+    回答內容摘要：將 Git 推送規則修改為「在 WSL2 僅執行本地 Commit，Push 動作由使用者手動執行」，並同步更新了「更新」巨集的作業流程。
+- [2026-02-01 23:33:36] 執行巨集指令：「更新」
+    回答內容摘要：已完成 HISTORY.md 內容清理與同步，更新版本號至 v2026.02.01.23.30，並完成本地 Git Commit。已提醒使用者手動執行遠端推送。
+- [2026-02-01 23:52:21] 執行全站安全性強化 (CSRF, Rate Limiting, Session Hardening)
+    回答內容摘要：實作了完整的 CSRF 防禦機制、登入暴力破解 IP 鎖定、以及安全的 Session 管理，全面提升後台系統的抗攻擊能力。
+- [2026-02-01 23:53:45] 更新 ROADMAP.md：標記已完成項目
+    回答內容摘要：將 SQLite 支援、進階備份還原工具及安全性強化項目在 ROADMAP.md 中註記為已完成 (COMPLETED)。
+- [2026-02-01 23:58:01] 新增關鍵詞指令：「簡單更新」
+    回答內容摘要：在 gemini.md 中定義了「簡單更新」指令，專注於自動化執行本地 Git Commit 並生成含時間標記的訊息，簡化快速同步流程。
