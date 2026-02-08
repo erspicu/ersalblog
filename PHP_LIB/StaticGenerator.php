@@ -325,8 +325,18 @@ class StaticGenerator {
     }
 
     private function fix_resource_paths($html) {
+        // Fix standard static and root resource paths
         $html = str_replace('href="static/', 'href="../static/', $html);
         $html = str_replace('src="static/', 'src="../static/', $html);
+        
+        // Fix album path (if it points to a sibling directory like ../album/)
+        if (isset($this->config['album_path']) && strpos($this->config['album_path'], '../') === 0) {
+            // If post content contains src="../album/", change to src="../../album/" for post/*.html
+            $search = 'src="' . $this->config['album_path'];
+            $replace = 'src="../' . $this->config['album_path'];
+            $html = str_replace($search, $replace, $html);
+        }
+
         $root_files = array('config.js', 'blog.css', 'blog.min.css', 'favicon.ico', 'apple-touch-icon.png', 'blog.html', 'blog_list.html');
         foreach ($root_files as $file) {
             $html = str_replace('href="' . $file, 'href="../' . $file, $html);
@@ -413,6 +423,10 @@ class StaticGenerator {
             $content_parts = explode('<!--more-->', $p['content']);
             $summary = protect_script_tags($content_parts[0]);
             
+            // 修正相簿路徑 (給根目錄/JSON API 使用)
+            $album_path = isset($self->config['album_path']) ? $self->config['album_path'] : 'album/';
+            $summary = fix_album_paths_for_root($summary, $album_path);
+
             $filename = $p['filename'];
             $nameNoExt = str_replace(".html", "", $filename);
             $matched = array();

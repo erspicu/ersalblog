@@ -8,69 +8,88 @@ $configFile = __DIR__ . '/../config.js';
 $msg = '';
 $error = '';
 
-// Helper to read config values
 function getConfigValues($content) {
     $values = array();
     if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
     if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
+    if (preg_match("/posts_per_page:\s*(\d+)/", $content, $m)) $values['posts_per_page_js'] = (int)$m[1];
     if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
     return $values;
 }
 
-// Read current config
+// Read current values
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
-// Defaults from config.php (already included via auth.php -> data_provider.php)
 $currentConfig['blog_lang'] = isset($GLOBALS['blog_lang']) ? $GLOBALS['blog_lang'] : 'zh_TW';
 $currentConfig['timezone'] = isset($GLOBALS['blog_timezone']) ? $GLOBALS['blog_timezone'] : 'Asia/Taipei';
 $currentConfig['posts_per_page'] = isset($GLOBALS['posts_per_page']) ? $GLOBALS['posts_per_page'] : 10;
+$currentConfig['posts_per_page_js'] = isset($currentConfig['posts_per_page_js']) ? $currentConfig['posts_per_page_js'] : 10;
+$currentConfig['album_path'] = isset($GLOBALS['album_path']) ? $GLOBALS['album_path'] : 'album/';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate CSRF
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF Validation Failed");
     }
 
-    $newApi = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_filebase';
-    $newTheme = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
-    $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
-    $newLang = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
-    $newTimezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
-    $newPerPage = isset($_POST['posts_per_page']) ? (int)$_POST['posts_per_page'] : 10;
+    if (isset($_POST['save_backend'])) {
+        // --- Save config.php ---
+        $newLang = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
+        $newTimezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
+        $newPerPage = isset($_POST['posts_per_page']) ? (int)$_POST['posts_per_page'] : 10;
+        $newAlbumPath = isset($_POST['album_path']) ? $_POST['album_path'] : 'album/';
 
-    // 1. Update config.js (API, Theme, CSE, PerPage)
-    $newJsContent = "var AppConfig = {\n";
-    $newJsContent .= "    api_type: '$newApi',\n";
-    $newJsContent .= "    theme_file: '$newTheme',\n";
-    $newJsContent .= "    posts_per_page: $newPerPage,\n";
-    $newJsContent .= "    cse_id: '$newCse'\n";
-    $newJsContent .= "};";
+        $phpFile = __DIR__ . '/../config.php';
+        $phpContent = file_get_contents($phpFile);
+        
+        $phpContent = preg_replace('/(\$blog_lang\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newLang . '${3}', $phpContent);
+        $phpContent = preg_replace('/(\$blog_timezone\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newTimezone . '${3}', $phpContent);
+        $phpContent = preg_replace('/(\$posts_per_page\s*=\s*)([^;]*)(;)/', '${1}' . $newPerPage . '${3}', $phpContent);
+        
+        if (strpos($phpContent, '$album_path') !== false) {
+            $phpContent = preg_replace('/(\$album_path\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newAlbumPath . '${3}', $phpContent);
+        } else {
+            $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
+        }
 
-    // 2. Update config.php (Lang, Timezone, PerPage) using regex to preserve other settings
-    $phpFile = __DIR__ . '/../config.php';
-    $phpContent = file_get_contents($phpFile);
-    $phpContent = preg_replace("/(\\\$blog_lang\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newLang$3", $phpContent);
-    $phpContent = preg_replace("/(\\\$blog_timezone\s*=\s*['\"])([^'\"]*)(['\"];)/", "$1$newTimezone$3", $phpContent);
-    $phpContent = preg_replace("/(\\\$posts_per_page\s*=\s*)([^;]*)(;)/", "$1$newPerPage$3", $phpContent);
+        if (file_put_contents($phpFile, $phpContent)) {
+            $msg = __('msg_settings_saved') . ' (config.php)';
+            $currentConfig['blog_lang'] = $newLang;
+            $currentConfig['timezone'] = $newTimezone;
+            $currentConfig['posts_per_page'] = $newPerPage;
+            $currentConfig['album_path'] = $newAlbumPath;
+        } else {
+            $error = __('error_config_write') . ' (config.php)';
+        }
 
-    if (file_put_contents($configFile, $newJsContent) && file_put_contents($phpFile, $phpContent)) {
-        $msg = __('msg_settings_saved');
-        $currentConfig = getConfigValues($newJsContent); // Refresh JS parts
-        $currentConfig['blog_lang'] = $newLang;
-        $currentConfig['timezone'] = $newTimezone;
-        $currentConfig['posts_per_page'] = $newPerPage;
-    } else {
-        $error = __('error_config_write');
+    } elseif (isset($_POST['save_frontend'])) {
+        // --- Save config.js ---
+        $newApi = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_filebase';
+        $newTheme = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
+        $newPerPageJs = isset($_POST['posts_per_page_js']) ? (int)$_POST['posts_per_page_js'] : 10;
+        $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
+
+        $newJsContent = "var AppConfig = {\n";
+        $newJsContent .= "    api_type: '$newApi',\n";
+        $newJsContent .= "    theme_file: '$newTheme',\n";
+        $newJsContent .= "    posts_per_page: $newPerPageJs,\n";
+        $newJsContent .= "    cse_id: '$newCse'\n";
+        $newJsContent .= "};";
+
+        if (file_put_contents($configFile, $newJsContent)) {
+            $msg = __('msg_settings_saved') . ' (config.js)';
+            $currentConfig = array_merge($currentConfig, getConfigValues($newJsContent));
+        } else {
+            $error = __('error_config_write') . ' (config.js)';
+        }
     }
 }
 
-// Scan Themes
 $themeFiles = glob(__DIR__ . '/../blog*.css');
 $themes = array();
 foreach ($themeFiles as $f) {
-    if (strpos($f, '.min.css') !== false) continue; // Skip minified
+    if (strpos($f, '.min.css') !== false) continue;
     $name = basename($f, '.css');
     $themes[] = $name;
 }
@@ -85,6 +104,22 @@ if (empty($themes)) $themes = array('blog');
     <title><?php echo __('settings_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .settings-section-title {
+            padding: 10px 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #495057;
+            border-left: 5px solid #0d6efd;
+        }
+        .card-settings {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
     </style>
 </head>
 <body>
@@ -98,17 +133,72 @@ if (empty($themes)) $themes = array('blog');
         <h2 class="mb-4"><?php echo __('settings_title'); ?></h2>
 
         <?php if ($msg): ?>
-            <div class="alert alert-success"><?php echo $msg; ?></div>
+            <div class="alert alert-success alert-dismissible fade show">
+                <?php echo $msg; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         <?php endif; ?>
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo $error; ?></div>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <?php echo $error; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         <?php endif; ?>
 
-        <div class="card shadow-sm">
+        <!-- Section 1: Backend Settings -->
+        <div class="card shadow-sm mb-4">
+            <div class="settings-section-title mb-0"><?php echo __('section_backend'); ?></div>
             <div class="card-body">
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_blog_lang'); ?></label>
+                            <select name="blog_lang" class="form-select">
+                                <option value="zh_TW" <?php echo ($currentConfig['blog_lang'] == 'zh_TW') ? 'selected' : ''; ?>><?php echo __('lang_zh_tw'); ?></option>
+                                <option value="en_US" <?php echo ($currentConfig['blog_lang'] == 'en_US') ? 'selected' : ''; ?>><?php echo __('lang_en_us'); ?></option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_timezone'); ?></label>
+                            <select name="timezone" class="form-select">
+                                <option value="Asia/Taipei" <?php echo ($currentConfig['timezone'] == 'Asia/Taipei') ? 'selected' : ''; ?>>Asia/Taipei</option>
+                                <option value="UTC" <?php echo ($currentConfig['timezone'] == 'UTC') ? 'selected' : ''; ?>>UTC</option>
+                                <option value="America/New_York" <?php echo ($currentConfig['timezone'] == 'America/New_York') ? 'selected' : ''; ?>>America/New_York</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_album_path'); ?></label>
+                        <input type="text" name="album_path" class="form-control" value="<?php echo htmlspecialchars($currentConfig['album_path']); ?>">
+                        <div class="form-text"><?php echo __('hint_album_path'); ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_posts_per_page'); ?></label>
+                        <input type="number" name="posts_per_page" class="form-control" value="<?php echo htmlspecialchars($currentConfig['posts_per_page']); ?>" min="1" max="100">
+                        <div class="form-text"><?php echo __('hint_posts_per_page'); ?></div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" name="save_backend" class="btn btn-primary px-4">
+                            <i class="bi bi-save"></i> 儲存後端設定
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section 2: Frontend Settings -->
+        <div class="card shadow-sm mb-5">
+            <div class="settings-section-title mb-0"><?php echo __('section_frontend'); ?></div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_api_type'); ?></label>
                         <select name="api_type" class="form-select">
@@ -121,29 +211,6 @@ if (empty($themes)) $themes = array('blog');
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><?php echo __('label_blog_lang'); ?></label>
-                        <select name="blog_lang" class="form-select">
-                            <option value="zh_TW" <?php echo ($currentConfig['blog_lang'] == 'zh_TW') ? 'selected' : ''; ?>><?php echo __('lang_zh_tw'); ?></option>
-                            <option value="en_US" <?php echo ($currentConfig['blog_lang'] == 'en_US') ? 'selected' : ''; ?>><?php echo __('lang_en_us'); ?></option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><?php echo __('label_timezone'); ?></label>
-                        <select name="timezone" class="form-select">
-                            <option value="Asia/Taipei" <?php echo ($currentConfig['timezone'] == 'Asia/Taipei') ? 'selected' : ''; ?>>Asia/Taipei</option>
-                            <option value="UTC" <?php echo ($currentConfig['timezone'] == 'UTC') ? 'selected' : ''; ?>>UTC</option>
-                            <option value="America/New_York" <?php echo ($currentConfig['timezone'] == 'America/New_York') ? 'selected' : ''; ?>>America/New_York</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><?php echo __('label_posts_per_page'); ?></label>
-                        <input type="number" name="posts_per_page" class="form-control" value="<?php echo htmlspecialchars($currentConfig['posts_per_page']); ?>" min="1" max="100">
-                        <div class="form-text"><?php echo __('hint_posts_per_page'); ?></div>
-                    </div>
-
-                    <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_theme'); ?></label>
                         <select name="theme_file" class="form-select">
                             <?php foreach ($themes as $t): ?>
@@ -153,12 +220,21 @@ if (empty($themes)) $themes = array('blog');
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_posts_per_page_js'); ?></label>
+                        <input type="number" name="posts_per_page_js" class="form-control" value="<?php echo htmlspecialchars($currentConfig['posts_per_page_js']); ?>" min="1" max="100">
+                        <div class="form-text"><?php echo __('hint_posts_per_page_js'); ?></div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_cse_id'); ?></label>
                         <input type="text" name="cse_id" class="form-control" value="<?php echo htmlspecialchars(isset($currentConfig['cse_id']) ? $currentConfig['cse_id'] : ''); ?>">
                     </div>
 
-                    <hr>
-                    <button type="submit" class="btn btn-primary"><?php echo __('btn_save_settings'); ?></button>
+                    <div class="text-end">
+                        <button type="submit" name="save_frontend" class="btn btn-secondary px-4">
+                            <i class="bi bi-save"></i> 儲存前端設定
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -166,5 +242,6 @@ if (empty($themes)) $themes = array('blog');
 </div>
 
 <?php require 'common_js_inc.php'; ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </body>
 </html>

@@ -64,6 +64,25 @@ function get_detailed_os_info() {
 }
 
 /**
+ * 修正文章內容中的相簿路徑，使其適用於根目錄 (Root) 環境
+ * 文章編輯器插入時是相對於 admin/ 的路徑 (例如 ../album/)
+ * 在根目錄顯示時應改為正確的相對路徑 (例如 album/)
+ */
+function fix_album_paths_for_root($html, $album_path) {
+    if (empty($html) || empty($album_path)) return $html;
+    
+    // 確保 album_path 結尾有斜線
+    $album_path = rtrim($album_path, '/') . '/';
+    
+    // 編輯器插入的是 ../album/ 或 ../../album/ (取決於配置)
+    // 我們需要將其轉換為相對於根目錄的 album_path
+    $search = 'src="../' . $album_path;
+    $replace = 'src="' . $album_path;
+    
+    return str_replace($search, $replace, $html);
+}
+
+/**
  * 針對 PHP 5.x 的 random_bytes 回退方案
  */
 if (!function_exists('random_bytes')) {

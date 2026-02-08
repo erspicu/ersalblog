@@ -223,6 +223,9 @@ return [
     'health_sqlite_ready' => 'SQLite 就緒 (文章數: %d)',
     'health_sqlite_table_missing' => 'SQLite 資料表遺失',
     'health_sqlite_error' => 'SQLite 錯誤: %s',
+    'health_album_ready' => '相簿服務已就緒 (連線正常)',
+    'health_album_not_set' => '相簿服務路徑未設定',
+    'health_album_not_found' => '相簿服務路徑不存在',
 
     // Backup Tool
     'nav_backup' => '📦 備份還原',
@@ -230,12 +233,18 @@ return [
     'backup_title' => '系統備份',
     
     // Settings
-    'settings_title' => '網站設定 (config.js)',
+    'settings_title' => '網站系統設定',
+    'section_backend' => '後端核心設定 (config.php)',
+    'section_frontend' => '前端介面設定 (config.js)',
     'label_api_type' => '資料來源模式 (API Type)',
     'label_blog_lang' => '部落格語系 (Blog Language)',
     'label_timezone' => '時區 (Timezone)',
-    'label_posts_per_page' => '每頁文章數量',
-    'hint_posts_per_page' => '設定前台 SPA 模式下，每頁顯示的文章篇數。',
+    'label_album_path' => '相簿服務路徑',
+    'hint_album_path' => '設定相簿服務相對於 Blog 根目錄的路徑 (預設為 album/)。',
+    'label_posts_per_page' => '每頁文章數量 (後端)',
+    'hint_posts_per_page' => '設定動態模式下，伺服器 API 每頁回傳的文章篇數。',
+    'label_posts_per_page_js' => '每頁文章數量 (前端)',
+    'hint_posts_per_page_js' => '主要用於「Static JSON」純靜態模式，控制瀏覽器端的分頁顯示。',
     'lang_zh_tw' => '繁體中文 (Traditional Chinese)',
     'lang_en_us' => '英文 (English)',
     'label_theme' => '網站主題 (Theme)',

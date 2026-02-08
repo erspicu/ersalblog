@@ -29,6 +29,8 @@ return [
     'site_url_help' => 'Enter the full URL of the site, including the trailing slash.',
     'blog_lang' => 'Blog Language',
     'timezone' => 'Timezone',
+    'album_path' => 'Album Service Path',
+    'album_path_help' => 'Path relative to the root directory (default: album/).',
     'debug_mode' => 'Enable Debug Mode',
     'debug_mode_help' => 'Recommended to turn off in production.',
     'step_2' => '2. Storage Engine',

@@ -175,6 +175,7 @@ if (isset($_GET['action'])) {
         $site_url = isset($_POST['site_url']) ? $_POST['site_url'] : '';
         $blog_lang_install = isset($_POST['blog_lang']) ? $_POST['blog_lang'] : 'zh_TW';
         $timezone = isset($_POST['timezone']) ? $_POST['timezone'] : 'Asia/Taipei';
+        $album_path = isset($_POST['album_path']) ? $_POST['album_path'] : 'album/';
         $debug_mode = isset($_POST['debug_mode']) ? 'true' : 'false';
 
         $api_type = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_dbsqlbase';
@@ -201,7 +202,8 @@ if (isset($_GET['action'])) {
         $config_php .= "\$site_url = " . var_export($site_url, true) . "; // 網站網址\n";
         $config_php .= "\$blog_lang = " . var_export($blog_lang_install, true) . "; // 部落格語系\n";
         $config_php .= "\$blog_timezone = " . var_export($timezone, true) . "; // 系統時區\n\n";
-        $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n\n";
+        $config_php .= "\$sqlite_path = " . var_export($sqlite_path, true) . "; // SQLite 資料庫路徑\n";
+        $config_php .= "\$album_path = " . var_export($album_path, true) . "; // 相簿服務路徑\n\n";
         $config_php .= "\$dbConfig = array(\n";
         $config_php .= "    'host'     => " . var_export($db_host, true) . ",\n";
         $config_php .= "    'dbname'   => " . var_export($db_name, true) . ",\n";
@@ -365,6 +367,7 @@ if (isset($_GET['action'])) {
                             <option value="America/New_York">America/New_York</option>
                         </select>
                     </div>
+                    <div class="col-md-6"><label for="album_path" class="form-label"><?php echo _t('album_path'); ?></label><input type="text" class="form-control" id="album_path" name="album_path" value="album/"><div class="form-text"><?php echo _t('album_path_help'); ?></div></div>
                     <div class="col-12">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="debug_mode" name="debug_mode" checked>

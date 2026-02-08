@@ -29,6 +29,8 @@ return [
     'site_url_help' => '請輸入網站的完整網址，包含最後的斜線。',
     'blog_lang' => '部落格語系',
     'timezone' => '時區',
+    'album_path' => '相簿服務路徑',
+    'album_path_help' => '相對於根目錄的路徑 (預設為 album/)。',
     'debug_mode' => '開啟除錯模式',
     'debug_mode_help' => '上線環境建議關閉此選項。',
     'step_2' => '2. 資料儲存方式 (Storage Engine)',

@@ -7,6 +7,7 @@ $site_url = "https://example.com/blog/"; // 網站網址
 $blog_lang = "zh_TW"; // 部落格語系 (zh_TW, en_US)
 $blog_timezone = "Asia/Taipei"; // 系統時區
 $posts_per_page = 10; // 每頁文章數量 (SPA 模式)
+$album_path = "album/"; // 相簿服務相對路徑 (相對於 Blog 根目錄)
 
 $sqlite_path = "blog.sqlite3"; // SQLite 資料庫檔案名稱 (若使用 SQLite 模式)
 

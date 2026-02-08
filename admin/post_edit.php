@@ -6,6 +6,13 @@ requireLogin();
 $dataManager = new DataManager();
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 
+// 檢查相簿服務是否可用
+$album_enabled = false;
+$actual_album_path = isset($album_path) ? $album_path : 'album/';
+if (!empty($actual_album_path) && is_dir(__DIR__ . '/../' . $actual_album_path)) {
+    $album_enabled = true;
+}
+
 $post = array(
     'post_title' => '',
     'post_filename' => '', 
@@ -147,9 +154,11 @@ $currentCats = array_map('trim', $currentCats);
                         <label class="form-label fw-bold"><?php echo __('label_html_content'); ?></label>
                         <div class="d-flex justify-content-between align-items-end mb-1">
                             <div class="form-text"><?php echo __('hint_html_content'); ?></div>
+                            <?php if ($album_enabled): ?>
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.albumPicker.open()">
                                 <i class="bi bi-images"></i> 從相簿挑選圖片
                             </button>
+                            <?php endif; ?>
                         </div>
                         <textarea name="post_content" class="form-control" style="height: 400px; font-family: monospace;"><?php echo htmlspecialchars($post['post_content']); ?></textarea>
                     </div>
@@ -208,9 +217,12 @@ $currentCats = array_map('trim', $currentCats);
 
 <?php require 'common_js_inc.php'; ?>
 <script src="assets/js/tinymce/tinymce.min.js"></script>
+<?php if ($album_enabled): ?>
 <script src="assets/js/album_selector.js"></script>
+<?php endif; ?>
 
 <!-- Album Selector Modal -->
+<?php if ($album_enabled): ?>
 <div class="modal fade" id="albumSelectorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
@@ -235,10 +247,13 @@ $currentCats = array_map('trim', $currentCats);
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <script>
+    <?php if ($album_enabled): ?>
     // 初始化相簿挑選器
     window.albumPicker = new AlbumSelector({
+        albumPath: '<?php echo $actual_album_path; ?>',
         onSelect: function(url, filename) {
             // 插入圖片到 TinyMCE
             if (tinymce.activeEditor) {
@@ -246,6 +261,7 @@ $currentCats = array_map('trim', $currentCats);
             }
         }
     });
+    <?php endif; ?>
 
     document.addEventListener('DOMContentLoaded', function() {
         tinymce.init({

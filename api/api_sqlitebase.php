@@ -175,7 +175,9 @@ function get_data($filter_type, $filter_value)
 
     foreach ($paged_posts as &$p) {
         $content_parts = explode('<!--more-->', $p['raw_content']);
-        $p['post_content'] = protect_script_tags($content_parts[0]);
+        $summary = protect_script_tags($content_parts[0]);
+        // 修正相簿圖片路徑
+        $p['post_content'] = fix_album_paths_for_root($summary, $GLOBALS['album_path']);
         unset($p['raw_content']);
     }
 

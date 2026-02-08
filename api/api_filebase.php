@@ -159,7 +159,9 @@ function get_data($filter_type, $filter_value)
     foreach ($paged_posts as &$p) {
         $html = file_get_contents("../contents/post_files/" . $p['post_index']);
         $html_split = explode("<!--more-->", $html);
-        $p['post_content'] = protect_script_tags($html_split[0]);
+        $summary = protect_script_tags($html_split[0]);
+        // 修正相簿圖片路徑
+        $p['post_content'] = fix_album_paths_for_root($summary, $posts_per_page_global_or_album_path = $GLOBALS['album_path']);
     }
 
     $ret_all = array(

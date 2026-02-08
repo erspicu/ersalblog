@@ -223,6 +223,9 @@ return [
     'health_sqlite_ready' => 'SQLite Ready (Posts: %d)',
     'health_sqlite_table_missing' => 'SQLite Tables Missing',
     'health_sqlite_error' => 'SQLite Error: %s',
+    'health_album_ready' => 'Album Service Ready (Path found)',
+    'health_album_not_set' => 'Album Path Not Set',
+    'health_album_not_found' => 'Album Path Not Found',
 
     // Backup Tool
     'nav_backup' => '📦 Backup',
@@ -230,12 +233,18 @@ return [
     'backup_title' => 'System Backup',
 
     // Settings
-    'settings_title' => 'Site Settings (config.js)',
+    'settings_title' => 'Site Configuration',
+    'section_backend' => 'Backend Core Settings (config.php)',
+    'section_frontend' => 'Frontend Interface Settings (config.js)',
     'label_api_type' => 'Data Source (API Type)',
     'label_blog_lang' => 'Blog Language',
     'label_timezone' => 'Timezone',
-    'label_posts_per_page' => 'Posts Per Page',
-    'hint_posts_per_page' => 'Set the number of posts displayed per page in the frontend SPA mode.',
+    'label_album_path' => 'Album Service Path',
+    'hint_album_path' => 'Set the relative path of the album service from the blog root (default: album/).',
+    'label_posts_per_page' => 'Posts Per Page (Backend)',
+    'hint_posts_per_page' => 'Controls how many posts the Server API returns per page in dynamic mode.',
+    'label_posts_per_page_js' => 'Posts Per Page (Frontend)',
+    'hint_posts_per_page_js' => 'Mainly used for "Static JSON" mode to control client-side pagination.',
     'lang_zh_tw' => 'Traditional Chinese',
     'lang_en_us' => 'English',
     'label_theme' => 'Site Theme',

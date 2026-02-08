@@ -130,6 +130,29 @@ class SystemHealth {
         return $result;
     }
 
+    public static function checkAlbum() {
+        global $album_path;
+        $result = array(
+            'status' => false,
+            'message' => ''
+        );
+
+        if (!isset($album_path) || empty($album_path)) {
+            $result['message'] = __('health_album_not_set');
+            return $result;
+        }
+
+        $target = __DIR__ . '/../' . $album_path;
+        if (is_dir($target)) {
+            $result['status'] = true;
+            $result['message'] = __('health_album_ready');
+        } else {
+            $result['message'] = __('health_album_not_found');
+        }
+
+        return $result;
+    }
+
     public static function checkInstaller() {
         $installerPath = __DIR__ . '/../install.php';
         if (file_exists($installerPath)) {

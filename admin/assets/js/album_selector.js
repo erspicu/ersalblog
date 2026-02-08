@@ -3,8 +3,17 @@
  */
 class AlbumSelector {
     constructor(options) {
-        this.apiUrl = options.apiUrl || '../album/api/api_album.php';
-        this.uploadUrl = options.uploadUrl || '../album/admin/photo_actions.php';
+        this.albumPath = options.albumPath || 'album/';
+        // 確保路徑結尾有斜線
+        if (!this.albumPath.endsWith('/')) {
+            this.albumPath += '/';
+        }
+        
+        // 從後台 admin/ 目錄看，相簿目錄在 ../ + albumPath
+        this.baseDir = '../' + this.albumPath;
+        
+        this.apiUrl = options.apiUrl || this.baseDir + 'api/api_album.php';
+        this.uploadUrl = options.uploadUrl || this.baseDir + 'admin/photo_actions.php';
         this.modalId = options.modalId || 'albumSelectorModal';
         this.onSelect = options.onSelect || null;
         
@@ -58,7 +67,7 @@ class AlbumSelector {
                 <div class="col-4 col-md-2">
                     <div class="card h-100 album-pick-card border-0 shadow-sm" style="cursor:pointer" onclick="window.albumPicker.loadPhotos('${album.id}', '${album.name}')">
                         <div class="ratio ratio-1x1 bg-light">
-                            <img src="../album/${album.cover}" style="object-fit:contain; padding:5px;">
+                            <img src="${this.baseDir}${album.cover}" style="object-fit:contain; padding:5px;">
                         </div>
                         <div class="p-2 text-center">
                             <div class="small fw-bold text-truncate" title="${album.name}">${album.name}</div>
@@ -109,7 +118,7 @@ class AlbumSelector {
                 <div class="col-3 col-md-2 col-lg-1-5">
                     <div class="card h-100 photo-pick-card border-0 shadow-sm" style="cursor:pointer" onclick="window.albumPicker.showSizeOptions(this, '${photo.filename}', '${photo.src}', '${photo.thumbL}', '${photo.thumb}')">
                         <div class="ratio ratio-1x1 bg-light">
-                            <img src="../album/${thumb}" style="object-fit:contain">
+                            <img src="${this.baseDir}${thumb}" style="object-fit:contain">
                         </div>
                     </div>
                 </div>`;
@@ -168,9 +177,9 @@ class AlbumSelector {
         const btnHtml = `
             <div class="me-auto small text-muted">選中：${filename}</div>
             <div class="btn-group">
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('../album/${src}', '${filename}')">原圖</button>
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('../album/${thumbL}', '${filename}')">大 (1600px)</button>
-                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('../album/${thumb}', '${filename}')">中 (800px)</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${src}', '${filename}')">原圖</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumbL}', '${filename}')">大 (1600px)</button>
+                <button class="btn btn-sm btn-primary" onclick="window.albumPicker.confirmSelect('${this.baseDir}${thumb}', '${filename}')">中 (800px)</button>
             </div>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
         `;
