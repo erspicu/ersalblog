@@ -1,0 +1,220 @@
+/* =========================================
+   Baxermux Album - GameBoy Retro Style
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --gb-darkest: #0f380f;
+    --gb-dark: #306230;
+    --gb-light: #8bac0f;
+    --gb-lightest: #9bbc0f;
+    --font-pixel: 'Press Start 2P', cursive;
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--gb-darkest);
+    color: var(--gb-darkest);
+    font-family: var(--font-pixel);
+    font-size: 14px; /* 整體放大 */
+    margin: 0;
+    padding: 0;
+    /* Dithered Background Pattern */
+    background-image: radial-gradient(var(--gb-dark) 1px, transparent 1px);
+    background-size: 4px 4px;
+}
+
+a { color: var(--gb-darkest); text-decoration: none; }
+
+/* --- Layout --- */
+.main-content {
+    background-color: var(--gb-lightest);
+    width: 95%;
+    max-width: 1200px; /* 放寬寬度，避免地圖被壓縮 */
+    margin: 20px auto;
+    padding: 20px;
+    border: 10px solid var(--gb-darkest);
+    border-radius: 0 0 40px 0; /* Simulating the GB corner curve */
+    box-shadow: 15px 15px 0px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+/* 針對 GameBoy 模式下的照片詳情頁優化 */
+.photo-meta-panel {
+    border-top: 4px dashed var(--gb-darkest) !important;
+}
+
+.photo-meta-panel .text-muted.small {
+    font-size: 12px !important; /* 資訊內容放大 */
+    line-height: 1.6;
+}
+
+.photo-meta-panel strong {
+    font-size: 12px !important;
+}
+
+.photo-meta-panel > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important; /* 優先改為堆疊，因為像素字體較大 */
+}
+
+@media (min-width: 992px) {
+    .photo-meta-panel > div[style*="grid-template-columns"] {
+        grid-template-columns: 350px 1fr !important; /* 寬螢幕才分欄 */
+    }
+}
+
+/* --- Header (Screen Bezel) --- */
+.header-bar {
+    background: var(--gb-dark);
+    padding: 15px;
+    margin-bottom: 30px;
+    border: 4px solid var(--gb-darkest);
+    text-align: center;
+}
+
+.site-title {
+    color: var(--gb-lightest);
+    font-size: 18px; /* 標題放大 */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.site-desc {
+    display: block;
+    color: var(--gb-light);
+    font-size: 12px; /* 描述放大 */
+    margin-top: 10px;
+}
+
+.divider {
+    border: 0;
+    border-top: 4px dashed var(--gb-darkest);
+    margin: 20px 0;
+}
+
+/* --- Breadcrumb --- */
+.breadcrumb {
+    font-size: 12px; /* 放大 */
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    padding: 0 5px;
+}
+
+/* --- Grid & Cards --- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* 配合字體放大格尺寸 */
+    gap: 20px;
+}
+
+.card {
+    background: var(--gb-light);
+    border: 4px solid var(--gb-darkest);
+    padding: 5px;
+    transition: transform 0.1s;
+    image-rendering: pixelated;
+}
+
+.card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 4px 4px 0 var(--gb-darkest);
+    background: var(--gb-lightest);
+}
+
+.card-img-wrap {
+    border: 2px solid var(--gb-darkest);
+    background: var(--gb-darkest);
+}
+
+.card-img {
+    filter: grayscale(1) contrast(1.5) brightness(1.2);
+    /* Apply a greenish tint to all images */
+    mix-blend-mode: multiply;
+    opacity: 0.8;
+}
+
+.card-body { padding: 8px 0; text-align: center; }
+
+.card-title {
+    font-size: 12px; /* 放大 */
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.card-badge {
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    font-size: 10px; /* 放大 */
+    padding: 2px 4px;
+}
+
+/* --- Buttons (A/B Buttons) --- */
+.btn {
+    font-family: var(--font-pixel);
+    font-size: 12px; /* 按鈕文字放大 */
+    background: var(--gb-dark);
+    color: var(--gb-lightest);
+    border: 4px solid var(--gb-darkest);
+    padding: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+}
+
+.btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+.btn-primary { background: #8b0000; color: #fff; border-color: #4a0000; } /* Special Red for A button vibe */
+
+/* --- Pagination --- */
+.page-link {
+    background: var(--gb-light);
+    border: 2px solid var(--gb-darkest);
+    color: var(--gb-darkest);
+    margin: 0 2px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.page-link.active {
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+}
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    background: var(--gb-light);
+    border: 4px solid var(--gb-darkest);
+    padding: 10px;
+}
+
+.photo-stage {
+    background: var(--gb-darkest);
+    border: 4px inset var(--gb-lightest);
+}
+
+#photo-main-viewer {
+    filter: grayscale(1) sepia(1) hue-rotate(50deg) saturate(2) contrast(1.5);
+}
+
+.info-card, .exif-card {
+    background: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
+    font-size: 12px; /* 內部文字放大 */
+}
+
+.info-card p, .exif-card p {
+    margin-bottom: 10px;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: var(--gb-light); }
+::-webkit-scrollbar-thumb { background: var(--gb-darkest); border: 2px solid var(--gb-lightest); }

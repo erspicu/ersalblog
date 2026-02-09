@@ -85,9 +85,5 @@ test/
 /album/Collection/**/*.jpg
 /album/Collection/**/Thumbnail/
 /album/static/*_example.html
-!/album/static/
-!/album/static/**/*.gif
-!/album/static/**/*.jpg
-!/album/static/**/*.png
-!/album/static/**/*.js
-!/album/static/**/*.css
+!/album/static/themes/
+!/album/static/themes/**/*

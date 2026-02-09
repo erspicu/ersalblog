@@ -1,0 +1,348 @@
+/* =========================================
+   Baxermux Album - Windows 3.1 Style
+   ========================================= */
+
+:root {
+    --bg-color: #008080; /* Teal Background */
+    --win-bg: #FFFFFF;
+    --win-title-bg: #000080; /* Active Title Bar */
+    --win-title-text: #FFFFFF;
+    --win-border-light: #FFFFFF;
+    --win-border-shadow: #808080;
+    --win-border-dark: #000000;
+    --btn-bg: #C0C0C0;
+    --text-color: #000000;
+    --link-color: #0000FF;
+    --font-ui: "Microsoft Sans Serif", "MS Sans Serif", "Geneva", sans-serif;
+    --font-content: "Times New Roman", Times, serif;
+}
+
+/* --- Global Reset for Win3.1 --- */
+* {
+    border-radius: 0 !important;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: var(--font-ui);
+    color: var(--text-color);
+    margin: 0;
+    padding: 10px;
+    font-size: 13px;
+    /* 點陣圖案背景 */
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2r9//38gYGAEESAAEGBAAQMAbNwGQ76Kk3oAAAAASUVORK5CYII='); 
+    background-size: 2px 2px;
+}
+
+a { color: var(--link-color); text-decoration: none; }
+a:hover { background-color: var(--win-title-bg); color: white; }
+
+/* --- Window Layout (Main Content) --- */
+.main-content {
+    /* 模擬主視窗 Program Manager */
+    background: #C0C0C0;
+    border: 3px outset #FFFFFF;
+    border-right-color: #000000;
+    border-bottom-color: #000000;
+    padding: 4px;
+    margin: 0 auto;
+    max-width: 1024px;
+    position: relative;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+}
+
+/* Inner white workspace */
+#app-container {
+    background: #FFFFFF;
+    border: 2px inset #FFFFFF;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    min-height: 400px;
+    padding: 10px;
+}
+
+#album-header-section:empty {
+    display: none;
+}
+
+#album-header-section {
+    background: #FFFFFF;
+    border: 2px inset #FFFFFF;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+/* --- Header Bar (Title Bar) --- */
+.header-bar {
+    background: var(--win-title-bg);
+    color: var(--win-title-text);
+    padding: 2px 4px;
+    margin-bottom: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    border: 1px solid black;
+}
+
+.site-title {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.site-desc {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #dedede;
+}
+
+.header-inner::before {
+    content: "━"; /* System Menu Button */
+    display: inline-block;
+    background: #C0C0C0;
+    color: black;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    text-align: center;
+    margin-right: 8px;
+    border: 1px outset white;
+    box-shadow: 1px 1px 0 black;
+    font-family: monospace;
+    font-size: 14px;
+    cursor: default;
+}
+
+.header-inner::after {
+    content: "▼▲"; /* Max/Min Buttons */
+    float: right;
+    background: #C0C0C0;
+    color: black;
+    font-size: 10px;
+    padding: 0 4px;
+    border: 1px outset white;
+    height: 18px;
+    line-height: 18px;
+    box-shadow: 1px 1px 0 black;
+}
+
+.divider { border: 0; border-bottom: 1px solid black; margin: 10px 0; }
+
+/* --- Breadcrumb (Menu Bar) --- */
+.breadcrumb {
+    background: #FFFFFF;
+    border-bottom: 1px solid black;
+    padding: 2px 10px;
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+.breadcrumb-item {
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    display: none; /* Windows 3.1 menus don't have separators like this */
+}
+
+.breadcrumb-item a {
+    color: black;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    background-color: var(--win-title-bg);
+    color: white;
+}
+
+/* --- Grid & Cards (Icon View) --- */
+.album-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: flex-start; /* 由左至右 */
+}
+
+.card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    width: 120px; /* Classic Icon Size */
+    text-align: center;
+    cursor: pointer;
+}
+
+.card:hover .card-title {
+    background-color: var(--win-title-bg);
+    color: white;
+    outline: 1px dotted white;
+}
+
+.card-img-wrap {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 5px auto;
+    border: none;
+    overflow: visible; /* Allow "icon" feel */
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Pixelate the images slightly for retro feel */
+    image-rendering: pixelated; 
+    border: 1px solid black;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+}
+
+.card-body { padding: 0; }
+
+.card-title {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: black;
+    margin-bottom: 2px;
+    display: inline-block;
+    padding: 0 2px;
+}
+
+.card-desc { display: none; } /* Hide description in icon view */
+.card-badge { display: none; } 
+
+/* --- Buttons --- */
+.btn {
+    background: var(--btn-bg);
+    color: black;
+    border: 2px outset white;
+    border-right-color: black;
+    border-bottom-color: black;
+    padding: 4px 12px;
+    font-family: var(--font-ui);
+    font-weight: bold;
+    font-size: 12px;
+    cursor: default;
+    box-shadow: 1px 1px 0px black;
+    display: inline-flex; /* 改用 flex 並置中 */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.btn:active {
+    border: 2px inset white;
+    border-right-color: #dfdfdf;
+    border-bottom-color: #dfdfdf;
+    padding: 5px 11px 3px 13px; /* Shift content */
+}
+
+.btn-primary { border: 3px double black; }
+
+/* --- Pagination --- */
+.page-link {
+    background: var(--btn-bg);
+    border: 1px solid black;
+    box-shadow: 2px 2px 0 black;
+    color: black;
+    margin: 0 2px;
+    font-weight: bold;
+}
+
+.page-link.active {
+    background: white;
+    border: 1px inset black;
+}
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    background: #C0C0C0; /* MDI Window Background */
+    border: 2px inset white;
+    padding: 10px;
+}
+
+.photo-stage {
+    background: #808080; /* App Workspace */
+    border: 2px inset black;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.photo-stage img {
+    border: 2px solid black;
+    box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
+}
+
+/* --- Modals (Dialog Boxes) --- */
+.modal-box {
+    background: var(--btn-bg);
+    border: 2px outset #FFFFFF;
+    border-right-color: #000000;
+    border-bottom-color: #000000;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+    padding: 2px;
+    width: 450px;
+    color: black;
+}
+
+.modal-header {
+    background: var(--win-title-bg);
+    color: white;
+    padding: 3px 6px;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.modal-body {
+    background: var(--btn-bg);
+    padding: 15px;
+}
+
+.input-group input {
+    border: 2px inset #FFFFFF;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    background: white;
+    padding: 4px;
+    flex: 1; /* 填滿剩餘空間 */
+}
+
+/* --- Share Modal Fixes --- */
+.share-item {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.share-item label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 2px;
+}
+
+.input-group .btn {
+    padding: 2px 10px;
+}
+
+/* --- Misc --- */
+.badge {
+    background: transparent;
+    color: black;
+    border: none;
+    font-weight: normal;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzjIHFBMwALRCiAlqKgAAAdUEglCxG3wAAAAAElFTkSuQmCC'); }
+::-webkit-scrollbar-thumb { background: #C0C0C0; border: 1px outset white; box-shadow: 1px 1px 0 black; }
+::-webkit-scrollbar-button { background: #C0C0C0; border: 1px outset white; height: 16px; }

@@ -34,6 +34,51 @@
         
         // 只有施工中貼圖
         scatterConstructionStickers();
+
+        // --- 土氣特效 E: 模擬 IE 指令碼錯誤 ---
+        setTimeout(showIEScriptError, 5000); // 載入 5 秒後跳出，增加驚喜感
+    }
+
+    function showIEScriptError() {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'ie-script-error';
+        errorDiv.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 400px; background: #c0c0c0; border: 2px outset white;
+            border-right-color: black; border-bottom-color: black;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.5); z-index: 10001;
+            font-family: 'MS Sans Serif', 'Arial', sans-serif; font-size: 12px;
+            color: black; padding: 2px;
+        `;
+
+        errorDiv.innerHTML = `
+            <div style="background: navy; color: white; padding: 2px 5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span>Internet Explorer</span>
+                <button onclick="this.closest('#ie-script-error').remove()" style="background: #c0c0c0; border: 1px outset white; border-right-color: black; border-bottom-color: black; width: 16px; height: 14px; line-height: 12px; font-size: 9px; cursor: pointer; padding: 0;">X</button>
+            </div>
+            <div style="padding: 15px; display: flex; align-items: flex-start; gap: 15px;">
+                <div style="background: yellow; color: red; border: 2px solid red; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; flex-shrink: 0;">!</div>
+                <div>
+                    <p style="margin: 0 0 10px 0;">An error has occurred in the script on this page.</p>
+                    <table style="font-size: 11px; border-collapse: collapse;">
+                        <tr><td style="padding-right: 10px;">Line:</td><td>245</td></tr>
+                        <tr><td>Char:</td><td>13</td></tr>
+                        <tr><td>Error:</td><td>'Object' is undefined</td></tr>
+                        <tr><td>Code:</td><td>0</td></tr>
+                        <tr><td>URL:</td><td style="word-break: break-all;">${window.location.href}</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div style="padding: 10px; border-top: 1px solid #808080; text-align: center;">
+                <p style="margin-bottom: 10px;">Do you want to continue running scripts on this page?</p>
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button onclick="this.closest('#ie-script-error').remove()" style="background: #c0c0c0; border: 2px outset white; border-right-color: black; border-bottom-color: black; padding: 2px 20px; cursor: pointer;">Yes</button>
+                    <button onclick="this.closest('#ie-script-error').remove()" style="background: #c0c0c0; border: 2px outset white; border-right-color: black; border-bottom-color: black; padding: 2px 20px; cursor: pointer;">No</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(errorDiv);
     }
 
     function updateUserGreeting(name) {
@@ -50,8 +95,8 @@
     }
 
     function scatterConstructionStickers() {
-        // 只使用下載好的施工中 GIF
-        const stickerPath = 'static/album-y2k/construction.gif';
+        // 只使用下載好的施工中 GIF (更新為 themes 目錄結構)
+        const stickerPath = 'static/themes/album-y2k/construction.gif';
 
         const count = 12; // 增加數量，讓它到處都是
         for (let i = 0; i < count; i++) {

@@ -3,7 +3,23 @@ header('Content-Type: application/json; charset=utf-8');
 
 // 設定時區與編碼
 date_default_timezone_set('Asia/Taipei');
-mb_internal_encoding('UTF-8');
+if (function_exists('mb_internal_encoding')) {
+    mb_internal_encoding('UTF-8');
+}
+
+/**
+ * 簡易的 mb_convert_encoding 替代方案 (僅處理 UTF-8)
+ */
+function safe_mb_convert($str) {
+    if (function_exists('mb_convert_encoding')) {
+        return mb_convert_encoding($str, 'UTF-8', 'auto');
+    }
+    // 如果沒有 mbstring，假設來源已經是 UTF-8 或嘗試 iconv
+    if (function_exists('iconv')) {
+        return @iconv('UTF-8', 'UTF-8//IGNORE', $str);
+    }
+    return $str;
+}
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list_albums';
 $collectionDir = __DIR__ . '/../Collection';
@@ -78,7 +94,7 @@ if ($action === 'list_albums') {
         foreach ($dirs as $dir) {
             if ($dir === '.' || $dir === '..') continue;
             
-            $dirUtf8 = mb_convert_encoding($dir, 'UTF-8', 'auto');
+            $dirUtf8 = safe_mb_convert($dir);
             $albumPath = $collectionDir . '/' . $dir;
             if (is_dir($albumPath)) {
                 $albumData = array(

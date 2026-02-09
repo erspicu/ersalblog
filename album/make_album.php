@@ -1,7 +1,9 @@
 <?php
 // 設定時區與編碼
 date_default_timezone_set('Asia/Taipei');
-mb_internal_encoding('UTF-8');
+if (function_exists('mb_internal_encoding')) {
+    mb_internal_encoding('UTF-8');
+}
 
 // 定義路徑
 $baseDir = __DIR__;

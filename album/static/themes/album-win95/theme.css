@@ -1,0 +1,335 @@
+/* =========================================
+   Baxermux Album - Windows 95 Style
+   ========================================= */
+
+:root {
+    --win-bg: #008080;
+    --win-face: #C0C0C0;
+    --win-text: #000000;
+    --win-highlight: #000080;
+    --win-highlight-text: #FFFFFF;
+    --win-gray-light: #DFDFDF;
+    --win-gray-dark: #808080;
+    --win-black: #000000;
+    --win-white: #FFFFFF;
+}
+
+/* --- Global Reset --- */
+* {
+    box-sizing: border-box;
+    border-radius: 0 !important; /* Win95 has NO rounded corners */
+}
+
+body {
+    background-color: var(--win-bg);
+    color: var(--win-text);
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", "Tahoma", sans-serif;
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Desktop shouldn't scroll */
+    height: 100vh;
+}
+
+/* --- Main Window Container --- */
+.main-content {
+    /* Transform main content into a draggable window */
+    background: var(--win-face);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-black) var(--win-black) var(--win-white);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    width: 90%;
+    height: 80vh;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    position: relative;
+    max-width: none;
+}
+
+/* --- Title Bar --- */
+.header-bar {
+    background: linear-gradient(90deg, var(--win-highlight), #1084d0);
+    color: var(--win-highlight-text);
+    padding: 3px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    cursor: default;
+    min-height: 24px;
+}
+
+.site-title {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.site-title::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url('start_icon.png') no-repeat center/contain;
+}
+
+.site-desc { display: none; } /* Hide description in title bar */
+
+/* Window Controls (Min, Max, Close) */
+.header-bar::after {
+    content: "_ □ X";
+    font-family: monospace;
+    background: var(--win-face);
+    color: black;
+    border: 2px outset white;
+    padding: 0 4px;
+    font-size: 10px;
+    margin-left: auto;
+    height: 18px;
+    line-height: 16px;
+    cursor: pointer;
+}
+
+.divider { display: none; }
+
+/* --- Menu Bar & Toolbar Area --- */
+#album-header-section {
+    background: var(--win-face);
+    padding: 0;
+    border: none;
+}
+
+.win95-menubar {
+    display: flex;
+    gap: 10px;
+    padding: 2px 8px;
+    border-bottom: 1px solid var(--win-gray-dark);
+}
+
+.win95-menubar span {
+    cursor: pointer;
+}
+.win95-menubar span:first-letter { text-decoration: underline; }
+
+/* --- Client Area (File View) --- */
+#app-container {
+    background: var(--win-white);
+    border: 2px inset white;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    margin: 4px;
+    /* Custom Scrollbar for Webkit */
+}
+
+/* --- Grid (File Explorer Large Icons) --- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 15px;
+    align-items: start;
+    justify-content: start;
+}
+
+.card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.card:hover .card-title {
+    background-color: var(--win-highlight);
+    color: var(--win-highlight-text);
+    outline: 1px dotted var(--win-highlight-text);
+}
+
+.card-img-wrap {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 5px auto;
+    background: transparent;
+    border: none;
+    overflow: visible;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: none;
+}
+
+.card-body { padding: 0; }
+
+.card-title {
+    font-size: 12px;
+    color: black;
+    padding: 2px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.card-desc, .card-badge { display: none; }
+
+/* --- Photo Viewer (Imaging Style) --- */
+.photo-viewer-container {
+    background: var(--win-gray-dark);
+    border: 2px inset white;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.photo-stage {
+    background: #808080;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 2px solid var(--win-face);
+    overflow: auto;
+}
+
+.photo-stage img {
+    box-shadow: 2px 2px 5px black;
+    border: 1px solid white;
+}
+
+.photo-meta-panel {
+    display: none !important; /* 隱藏原本的底部面板，改用彈窗顯示 */
+}
+
+/* Properties Dialog Tabs */
+.win95-tabs {
+    display: flex;
+    padding-left: 10px;
+    margin-bottom: -1px;
+}
+
+.win95-tab {
+    background: var(--win-face);
+    border: 1px solid;
+    border-color: var(--win-white) var(--win-black) transparent var(--win-white);
+    padding: 3px 15px;
+    margin-right: 2px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.win95-tab.active {
+    padding-top: 5px;
+    margin-top: -2px;
+    font-weight: bold;
+}
+
+.win95-tab-content {
+    background: var(--win-face);
+    border: 1px solid;
+    border-color: var(--win-white) var(--win-black) var(--win-black) var(--win-white);
+    padding: 15px;
+    min-height: 250px;
+}
+
+.properties-btn {
+    margin-top: 10px;
+}
+
+/* --- Buttons --- */
+.btn {
+    background: var(--win-face);
+    color: black;
+    border: 2px outset white;
+    border-right-color: var(--win-black);
+    border-bottom-color: var(--win-black);
+    padding: 4px 12px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:active {
+    border: 2px inset white;
+    padding: 5px 11px 3px 13px;
+}
+
+.btn-primary { font-weight: bold; }
+
+/* --- Taskbar (Fixed Bottom) --- */
+.win95-taskbar {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%; height: 28px;
+    background: var(--win-face);
+    border-top: 2px outset white;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    z-index: 10000;
+}
+
+.start-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 2px 6px;
+    margin-right: 10px;
+    height: 22px;
+    background: var(--win-face);
+    border: 2px outset white;
+    border-right-color: var(--win-black);
+    border-bottom-color: var(--win-black);
+    cursor: pointer;
+}
+
+.start-btn img { height: 16px; width: 16px; }
+
+.taskbar-tray {
+    margin-left: auto;
+    border: 2px inset white;
+    border-right-color: white;
+    border-bottom-color: white;
+    padding: 0 10px;
+    height: 22px;
+    line-height: 20px;
+    font-size: 12px;
+    background: var(--win-face);
+}
+
+/* --- Modal --- */
+.modal-box {
+    background: var(--win-face);
+    border: 2px outset white;
+    border-right-color: var(--win-black);
+    border-bottom-color: var(--win-black);
+    box-shadow: 2px 2px 0 black;
+}
+
+.modal-header {
+    background: var(--win-highlight);
+    color: white;
+    padding: 2px 4px;
+    margin-bottom: 10px;
+}
+
+.input-group input {
+    border: 2px inset white;
+    background: white;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 16px; height: 16px; background: var(--win-face); }
+::-webkit-scrollbar-thumb { background: var(--win-face); border: 2px outset white; }
+::-webkit-scrollbar-button { background: var(--win-face); border: 2px outset white; width: 16px; height: 16px; }

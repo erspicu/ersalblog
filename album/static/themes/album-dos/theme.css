@@ -1,0 +1,327 @@
+/* =========================================
+   Baxermux Album - MS-DOS / Norton Commander Style
+   ========================================= */
+
+:root {
+    --dos-bg: #0000AA; /* Classic Blue Background */
+    --dos-fg: #AAAAAA; /* Low-intensity White */
+    --dos-hl: #FFFF55; /* High-intensity Yellow */
+    --dos-win: #00AAAA; /* Cyan Window */
+    --dos-sel: #000000; /* Selected Background */
+    --dos-sel-fg: #AAAAAA;
+    --dos-border: #AAAAAA;
+    --container-width: 98%;
+}
+
+/* --- Global Reset & Fonts --- */
+body {
+    background-color: #000000; /* Monitor Border */
+    color: var(--dos-fg);
+    font-family: 'Courier New', 'Lucida Console', monospace; /* Monospace is MUST */
+    font-size: 16px;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* --- CRT Monitor Effect (Optional Scanline) --- */
+body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+a { color: var(--dos-hl); text-decoration: none; }
+a:hover { background-color: var(--dos-sel); color: var(--dos-fg); }
+
+/* --- Layout --- */
+.main-content {
+    background-color: var(--dos-bg);
+    width: 100%;
+    min-height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* --- Header (Top Menu Bar) --- */
+.header-bar {
+    background: #AAAAAA;
+    color: #000000;
+    padding: 2px 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #000000; /* Simulated shadow */
+    text-transform: uppercase;
+}
+
+.site-title {
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.site-title::before { content: "≡ "; } /* Hamburger icon text */
+
+.divider {
+    border: 0;
+    border-top: 1px dashed var(--dos-fg);
+    margin: 10px 0;
+}
+
+/* --- Breadcrumb (Path) --- */
+.breadcrumb {
+    background: var(--dos-bg);
+    color: var(--dos-hl);
+    padding: 5px 0;
+    font-weight: bold;
+}
+
+.breadcrumb::before { content: "C:\> "; color: var(--dos-fg); }
+.breadcrumb-item { display: inline-block; }
+.breadcrumb-item + .breadcrumb-item::before { content: ""; color: var(--dos-fg); padding: 0 5px; }
+.breadcrumb-item a { color: var(--dos-hl); }
+.breadcrumb-item.active { color: var(--dos-hl); }
+.breadcrumb-item.active::after { content: "_"; animation: blink 1s step-end infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --- Card (File Item) --- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: transparent;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.card-img-wrap {
+    border: 2px solid var(--dos-fg); /* Simple single line */
+    padding: 2px;
+    background: #000;
+    position: relative;
+    aspect-ratio: 1/1;
+}
+
+.card-img {
+    filter: contrast(1.2) saturation(0.8);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Hover Effect: Invert Colors */
+.card:hover .card-img-wrap {
+    border-color: var(--dos-hl);
+    background: var(--dos-hl);
+}
+
+.card:hover .card-title {
+    background: var(--dos-hl);
+    color: #000;
+}
+
+.card-body { padding: 5px 0; }
+
+.card-title {
+    font-size: 14px;
+    color: var(--dos-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-block;
+    padding: 0 4px;
+}
+
+/* Directory Simulation */
+.card-title::after { content: " <DIR>"; font-size: 14px; color: #55FFFF; font-weight: bold; }
+
+.card-desc { display: none; }
+.card-badge { 
+    background: var(--dos-sel); 
+    color: var(--dos-hl); 
+    border: 1px solid var(--dos-fg);
+    position: absolute; 
+    top: 0; right: 0; 
+    font-size: 12px; 
+    padding: 0 4px; 
+}
+
+/* --- Buttons ([ OK ]) --- */
+.btn {
+    background: var(--dos-win);
+    color: #000;
+    border: none;
+    box-shadow: 4px 4px 0px #000;
+    font-family: inherit;
+    font-weight: bold;
+    padding: 5px 15px;
+    text-transform: uppercase;
+    display: inline-flex; /* 改用 flex 並置中 */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000;
+}
+
+.btn::before { content: "[ "; color: #FFF; }
+.btn::after { content: " ]"; color: #FFF; }
+
+.btn-primary { background: #00AA00; color: #FFF; } /* Green button */
+
+/* --- Pagination --- */
+#pagination-container { 
+    margin-top: 40px; 
+    text-align: center;
+    width: 100%;
+}
+
+.pagination { 
+    display: inline-flex; 
+    gap: 5px;
+    background: #000; /* 背景黑 */
+    padding: 2px;
+    border: 2px solid var(--dos-fg);
+}
+
+.page-item { display: inline-flex; }
+
+.page-link {
+    background: var(--dos-win);
+    color: #000;
+    border: none;
+    padding: 4px 10px;
+    font-weight: bold;
+    font-size: 14px;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-link:hover {
+    background: #FFF;
+    color: #000;
+}
+
+.page-link.active {
+    background: var(--dos-hl); /* 黃色代表目前頁面 */
+    color: #000;
+}
+
+.page-item.disabled .page-link {
+    background: #555;
+    color: #888;
+    pointer-events: none;
+}
+
+/* 讓箭頭更有特色 */
+.page-link i { font-style: normal; }
+
+/* --- Modal (ASCII Box) --- */
+.modal-overlay { background: rgba(0,0,0,0.8); }
+
+.modal-box {
+    background: var(--dos-win); /* Cyan Dialog */
+    border: 4px double #FFF;
+    box-shadow: 10px 10px 0px #000;
+    color: #000;
+    width: 500px;
+    font-weight: bold;
+    padding: 0; /* Header handles its own padding */
+}
+
+.modal-header {
+    background: #FFF;
+    color: #000;
+    text-align: center;
+    padding: 5px 10px;
+    border-bottom: 2px solid #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h5, .modal-header .modal-title {
+    margin: 0;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.modal-header h5::before { content: "▐ "; }
+.modal-header h5::after { content: " ▌"; }
+
+.close-btn {
+    background: #AA0000;
+    color: #FFF;
+    border: 1px solid #FFF;
+    padding: 0 5px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* --- Share Modal Fixes --- */
+.share-item {
+    margin-bottom: 15px;
+    text-align: left;
+    color: #000;
+}
+
+.share-item label {
+    display: block;
+    margin-bottom: 4px;
+    text-decoration: underline;
+}
+
+.input-group {
+    display: flex;
+    gap: 0; /* DOS style usually tight */
+}
+
+.input-group input {
+    background: #FFF;
+    border: 2px solid #000;
+    color: #000;
+    padding: 4px;
+    flex: 1;
+    font-family: inherit;
+}
+
+.input-group .btn {
+    border: 2px solid #000;
+    box-shadow: none;
+}
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    border: 4px double var(--dos-fg);
+    background: #000;
+    padding: 10px;
+}
+
+.info-card, .exif-card {
+    border: 1px dashed var(--dos-fg);
+    background: var(--dos-bg);
+    color: var(--dos-fg);
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 16px; background: #000; }
+::-webkit-scrollbar-thumb { background: var(--dos-fg); border: 2px solid #000; }
+::-webkit-scrollbar-track { background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2r9//38gYGAEESAAEGBAAQMAbNwGQ76Kk3oAAAAASUVORK5CYII='); }

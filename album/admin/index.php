@@ -25,7 +25,7 @@ if (is_dir($collectionDir)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>相簿後台 - 儀表板</title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -68,6 +68,6 @@ if (is_dir($collectionDir)) {
     </div>
 </div>
 
-<script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

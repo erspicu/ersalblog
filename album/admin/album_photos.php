@@ -79,7 +79,7 @@ foreach ($pagedPhotos as $path) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>照片管理 - <?php echo htmlspecialchars($displayName); ?></title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .photo-card img { 
@@ -245,7 +245,7 @@ foreach ($pagedPhotos as $path) {
     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 </form>
 
-<script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 <script>
 var editModal = new bootstrap.Modal(document.getElementById('editPhotoModal'));
 

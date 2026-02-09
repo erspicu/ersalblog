@@ -1,0 +1,172 @@
+/* =========================================
+   Baxermux Album - Synthwave / Vaporwave Style
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Vibur&display=swap');
+
+:root {
+    --vapor-pink: #ff00ff;
+    --vapor-blue: #00ffff;
+    --vapor-purple: #240b36;
+    --vapor-dark: #0f0524;
+    --vapor-text: #fff;
+    --font-heading: 'Vibur', cursive;
+    --font-ui: 'Orbitron', sans-serif;
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--vapor-dark);
+    color: var(--vapor-text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    /* Animated Neon Grid Background */
+    background-image: 
+        linear-gradient(transparent 0%, rgba(255, 0, 255, 0.2) 2%, transparent 3%),
+        linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.2) 2%, transparent 3%);
+    background-size: 50px 50px;
+    animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+    from { background-position: 0 0; }
+    to { background-position: 0 1000px; }
+}
+
+/* VHS Scanlines */
+body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    z-index: 9999;
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+a { color: var(--vapor-blue); text-decoration: none; text-shadow: 0 0 5px var(--vapor-blue); }
+a:hover { color: var(--vapor-pink); text-shadow: 0 0 10px var(--vapor-pink); }
+
+/* --- Header --- */
+.header-bar {
+    background: transparent;
+    padding: 60px 0;
+    text-align: center;
+    border-bottom: 2px solid var(--vapor-pink);
+    box-shadow: 0 0 20px var(--vapor-pink);
+    margin-bottom: 40px;
+}
+
+.site-title {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: #fff;
+    text-shadow: 
+        3px 3px 0px var(--vapor-pink),
+        -1px -1px 0px var(--vapor-blue),
+        0 0 20px var(--vapor-pink);
+    transform: skew(-10deg);
+}
+
+.site-desc {
+    font-family: var(--font-ui);
+    color: var(--vapor-blue);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 0.8rem;
+}
+
+/* --- Cards --- */
+.album-grid { gap: 30px; }
+
+.card {
+    background: rgba(36, 11, 54, 0.8);
+    border: 2px solid var(--vapor-blue);
+    border-radius: 0 !important;
+    padding: 5px;
+    box-shadow: 5px 5px 0px var(--vapor-pink);
+    transition: all 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05) rotate(1deg);
+    box-shadow: 10px 10px 0px var(--vapor-blue);
+    border-color: var(--vapor-pink);
+}
+
+.card-img-wrap {
+    border-radius: 0 !important;
+    background: #000;
+}
+
+.card-img {
+    filter: saturate(1.5) contrast(1.2) hue-rotate(-10deg);
+}
+
+.card-title {
+    color: var(--vapor-blue);
+    font-size: 12px;
+    margin-top: 10px;
+    text-shadow: 0 0 5px var(--vapor-blue);
+}
+
+.card-badge {
+    background: var(--vapor-pink);
+    color: #fff;
+    border-radius: 0 !important;
+    font-size: 10px;
+}
+
+/* --- Buttons --- */
+.btn {
+    background: transparent;
+    border: 2px solid var(--vapor-blue);
+    color: var(--vapor-blue);
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 3px 3px 0px var(--vapor-pink);
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: var(--vapor-blue);
+    color: var(--vapor-purple);
+    box-shadow: 0 0 15px var(--vapor-blue);
+}
+
+/* --- Pagination --- */
+.page-link {
+    background: var(--vapor-purple);
+    border: 1px solid var(--vapor-pink);
+    color: var(--vapor-pink);
+}
+
+.page-link.active {
+    background: var(--vapor-pink);
+    color: #fff;
+    box-shadow: 0 0 10px var(--vapor-pink);
+}
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    background: rgba(15, 5, 36, 0.9);
+    border: 3px double var(--vapor-blue);
+    padding: 20px;
+    box-shadow: 0 0 30px var(--vapor-purple);
+}
+
+.info-card, .exif-card {
+    background: rgba(36, 11, 54, 0.5);
+    border: 1px solid var(--vapor-blue);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--vapor-dark); }
+::-webkit-scrollbar-thumb { background: linear-gradient(var(--vapor-pink), var(--vapor-blue)); }

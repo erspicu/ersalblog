@@ -22,7 +22,7 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>前端設定 - 相簿後台</title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -49,6 +49,14 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
                             <option value="album-pink" <?php echo ($currentTheme === 'album-pink') ? 'selected' : ''; ?>>粉紅風格 (Pink)</option>
                             <option value="album-matrix" <?php echo ($currentTheme === 'album-matrix') ? 'selected' : ''; ?>>駭客任務 (Matrix)</option>
                             <option value="album-y2k" <?php echo ($currentTheme === 'album-y2k') ? 'selected' : ''; ?>>復古 Y2K (Y2K)</option>
+                            <option value="album-win31" <?php echo ($currentTheme === 'album-win31') ? 'selected' : ''; ?>>Windows 3.1 (Win3.1)</option>
+                            <option value="album-dos" <?php echo ($currentTheme === 'album-dos') ? 'selected' : ''; ?>>MS-DOS (256色)</option>
+                            <option value="album-art" <?php echo ($currentTheme === 'album-art') ? 'selected' : ''; ?>>藝術大師 (Art Master)</option>
+                            <option value="album-gameboy" <?php echo ($currentTheme === 'album-gameboy') ? 'selected' : ''; ?>>GameBoy (經典掌機)</option>
+                            <option value="album-win95" <?php echo ($currentTheme === 'album-win95') ? 'selected' : ''; ?>>Windows 95 (Win95)</option>
+                            <option value="album-netscape" <?php echo ($currentTheme === 'album-netscape') ? 'selected' : ''; ?>>Netscape Navigator (經典瀏覽器)</option>
+                            <option value="album-terminal" <?php echo ($currentTheme === 'album-terminal') ? 'selected' : ''; ?>>Terminal (ASCII 字符畫)</option>
+                            <option value="album-vapor" <?php echo ($currentTheme === 'album-vapor') ? 'selected' : ''; ?>>Synthwave (迷幻電子)</option>
                         </select>
                         <div class="form-text">切換相簿整體的配色方案。</div>
                     </div>
@@ -86,6 +94,6 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
     </div>
 </div>
 
-<script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

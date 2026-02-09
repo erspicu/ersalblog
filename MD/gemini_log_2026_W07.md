@@ -50,3 +50,65 @@
   Updated .gitignore to explicitly include all assets (GIF, JPG, PNG, JS, CSS) within the `album/static/` directory.
 - [2026-02-09 22:49:36] 實作網址 Hash 風格覆蓋功能 (#style=...)
   Modified `album_template.html` to prioritize the `style` parameter from URL hash for CSS and JS plugin loading. Regenerated `album.html`.
+- [2026-02-09 23:34:26] 修正 mbstring 擴充功能相容性問題 (Fatal error: Call to undefined function mb_internal_encoding)
+  Added `function_exists()` checks for mbstring functions and provided `safe_mb_convert` fallback in `api_album.php` and `make_album.php`.
+- [2026-02-10 00:25:02] 同步相簿後台 Assets 並解除對 Blog 的依賴
+  Copied Bootstrap CSS/JS, SweetAlert2, and album_selector.js to `album/admin/assets/`. Updated all admin PHP files to use local asset paths.
+- [2026-02-10 00:29:06] 升級 Matrix 主題：改用 Canvas 實作數位雨
+  Created `album-matrix.js` for high-performance Canvas rendering of the digital rain effect. Cleaned up obsolete CSS animations in `album-matrix.css`.
+- [2026-02-10 00:34:19] 新增 Windows 3.1 復古主題 (album-win31)
+  Created `album-win31.css` (Teal background, 3D borders) and `album-win31.js` (Startup sound, Draggable windows). Added option to Admin Settings.
+- [2026-02-10 00:39:48] 優化 Win3.1 主題：修正麵包屑白線與強化視窗結構
+  Fixed breadcrumb layout and refined `.main-content` to look like a true Windows 3.1 MDI window with grey borders and white workspace.
+- [2026-02-10 00:41:30] 修正 Win3.1 主題視覺異常 (白色長方形)
+  Removed universal min-height from `#album-header-section` and added `:empty { display: none; }` to prevent ghost white boxes on the home page.
+- [2026-02-10 00:42:37] 徹底移除 Win3.1 主題圓角與優化對話框
+  Added global `* { border-radius: 0 !important; }` and refined modal styling to match Windows 3.1 dialog specifications.
+- [2026-02-10 00:44:54] 調整 Win3.1 照片/相簿排列為靠左對齊
+  Changed `justify-content: center` to `flex-start` in `.album-grid` to match Windows 3.1 file manager behavior.
+- [2026-02-10 00:48:03] 重構相簿主題架構 (Encapsulated Themes)
+  Moved theme CSS/JS/Assets from `static/` to `static/themes/{theme_name}/`. Standardized naming to `theme.css` and `theme.js`. Updated loader in `album_template.html` and fixed asset paths.
+- [2026-02-10 00:54:08] 新增 MS-DOS 復古主題 (album-dos)
+  Created `theme.css` (Blue background, Monospace) and `theme.js` (BIOS POST simulation). Added option to Admin Settings.
+- [2026-02-10 00:56:30] 修正 Win3.1 與 DOS 主題按鈕文字對齊問題
+  Changed `.btn` to `display: inline-flex` with centered alignment in both themes to fix inconsistent layout between 'Download' and 'Share' buttons.
+- [2026-02-10 00:57:50] 修正 Win3.1 與 DOS 主題分享視窗框線跑掉問題
+  Added specific styles for `.share-item` and `.input-group` in both themes to ensure input boxes and buttons align correctly within the retro dialog boxes.
+- [2026-02-10 01:00:16] 修正 DOS 主題 Modal Header 渲染問題
+  Simplified ASCII decorations in `.modal-header` to prevent layout breaking. Changed to a side-bracket style (▐ ▌) for better compatibility with title text.
+- [2026-02-10 01:03:21] 調整 DOS 主題相簿後綴為 <DIR>
+  Changed `.ALB` to ` <DIR>` in `theme.css` to better mimic MS-DOS command line directory listings.
+- [2026-02-10 01:07:13] 新增「藝術大師」主題 (album-art)
+  Created `theme.css` (Gallery style, Cinzel/Playfair fonts, Golden borders) and `theme.js` (Staggered fade-in, Curator notes). Added to Admin Settings.
+- [2026-02-10 01:11:08] 修正 DOS 主題分頁格式問題
+  Redesigned `.pagination` to look like a classic TUI function key bar. Improved button spacing and added highlighted yellow state for the active page.
+- [2026-02-10 01:14:19] 新增 GameBoy 掌機復古主題 (album-gameboy)
+  Created `theme.css` (Classic 4-shade green, pixel font) and `theme.js` (Startup 'Ding' sound, falling logo animation). Added to Admin Settings.
+- [2026-02-10 01:18:42] 透過 CSS 強制優化照片詳情頁佈局 (不需重建)
+  Used `!important` to override hardcoded inline grid styles in the template. Increased map area and enforced button centering across all themes.
+- [2026-02-10 01:20:50] 執行相簿完整重建以驗證佈局穩定性
+  Ran `php make_album.php` to ensure core CSS optimizations (map layout, button centering) work correctly across all generated pages.
+- [2026-02-10 01:22:56] 優化 GameBoy 主題佈局 (防止地圖壓縮)
+  Increased `.main-content` max-width to 1200px and optimized grid column logic for the photo detail view in `album-gameboy/theme.css`.
+- [2026-02-10 01:24:23] 調整 GameBoy 主題字體大小 (提升閱讀性)
+  Increased base font-size to 14px and adjusted sizes for titles, descriptions, and buttons in `album-gameboy/theme.css`. Also enlarged grid items to accommodate larger text.
+- [2026-02-10 01:30:57] y2k 主題新增模擬 IE 指令碼錯誤對話框
+  Added `showIEScriptError()` to `theme.js` which triggers a classic 'An error has occurred in the script on this page' dialog 5 seconds after load.
+- [2026-02-10 01:37:44] 新增 Windows 95 經典主題 (album-win95)
+  Created `theme.css` (Classic Teal/Silver UI) and `theme.js` (Taskbar, Start Button, Startup Sound). Added BSOD easter egg.
+- [2026-02-10 01:40:56] 升級 Win95 主題：實作「內容 (Properties)」屬性對話框
+  Hidden default meta panel and implemented a tabbed 'Properties' dialog in `theme.js`. Added 'General' and 'Details' tabs to display photo/EXIF info separately.
+- [2026-02-10 01:42:18] 加寬 Win95 屬性對話框以容納地圖
+  Increased `props-dialog` width to 800px in `theme.js` to ensure Google Maps and EXIF data display correctly.
+- [2026-02-10 01:44:19] 啟用 Win95 Help 選單：實作 About 對話框
+  Made the 'Help' menu item functional. Clicking it triggers `showAboutDialog()` which displays site version and description in a retro Win95 style.
+- [2026-02-10 01:52:06] 新增 Netscape Navigator 經典瀏覽器主題 (album-netscape)
+  Created `theme.css` (Grey chrome, beveled toolbars) and `theme.js` (Toolbar buttons, Location bar, Pulsing 'N' logo loader). Added to Admin Settings.
+- [2026-02-10 01:53:06] 恢復 Netscape 主題網站標題與描述
+  Enabled `.header-bar` visibility and applied early 90s web styling (centered, Times New Roman, navy blue) within the simulated browser viewport.
+- [2026-02-10 01:57:24] 新增 Terminal / ASCII 字符畫主題 (album-terminal)
+  Implemented a real-time image-to-ASCII converter in `theme.js`. Created a monochromatic green terminal UI with CRT effects.
+- [2026-02-10 02:00:26] 修正 Terminal 主題 ASCII 預覽不顯示問題
+  Fixed logical errors in `convertToAscii` loop and updated CSS to ensure `.card-img` dimensions are available for Canvas processing. Added smooth fade-in for ASCII blocks.
+- [2026-02-10 02:02:18] 新增 Synthwave 迷幻電子主題 (album-vapor)
+  Created `theme.css` (Neon grid, glowing text, VHS scanlines) and `theme.js` (Lo-fi music, glitch effects). Added to Admin Settings.

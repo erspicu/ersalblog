@@ -234,6 +234,32 @@ ul { list-style: none; }
 .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 60px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; transition: 0.2s; }
 .nav-btn:hover { background: rgba(255,255,255,0.2); }
 
+/* Meta & EXIF Info Layout */
+.photo-meta-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* 左側固定寬度，右側地圖盡量大 */
+    gap: 25px;
+}
+
+@media (max-width: 1199px) {
+    .photo-meta-grid {
+        grid-template-columns: 1fr; /* 窄螢幕改為上下堆疊 */
+    }
+}
+
+/* Meta & EXIF Info Layout (強力覆蓋樣板行內樣式) */
+.photo-meta-panel > div[style*="grid-template-columns"] {
+    display: grid !important;
+    grid-template-columns: 350px 1fr !important; /* 左側固定，右側地圖伸展 */
+    gap: 25px !important;
+}
+
+@media (max-width: 1199px) {
+    .photo-meta-panel > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important; /* 窄螢幕自動堆疊 */
+    }
+}
+
 /* Meta & EXIF Info Cards */
 .info-card, .exif-card {
     border: 1px solid #eee;
@@ -241,6 +267,18 @@ ul { list-style: none; }
     padding: 20px;
     background-color: #fcfcfc;
     height: 100%;
+}
+
+/* 強制所有按鈕內容置中 */
+.btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.info-card .btn {
+    justify-content: center; /* 確保按鈕內容置中 */
 }
 
 /* Album Header */

@@ -1,0 +1,221 @@
+/* =========================================
+   Baxermux Album - Art Master (Gallery Style)
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+    --art-bg: #1a1a1a;
+    --art-text: #e0e0e0;
+    --art-gold: #d4af37;
+    --art-accent: #f5f5f5;
+    --art-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    --font-heading: 'Cinzel', serif;
+    --font-body: 'Playfair Display', serif;
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--art-bg);
+    background-image: url('texture.jpg'); /* Local linen texture */
+    color: var(--art-text);
+    font-family: var(--font-body);
+    line-height: 1.8;
+}
+
+a { color: var(--art-gold); transition: all 0.4s ease; }
+a:hover { color: #fff; letter-spacing: 1px; }
+
+/* --- Layout --- */
+.main-content {
+    max-width: 1400px;
+    padding: 60px 20px;
+}
+
+/* --- Header --- */
+.header-bar {
+    background: transparent;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 40px 0;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.site-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--art-gold);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+}
+
+.site-desc {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: #888;
+    font-size: 1rem;
+}
+
+.divider {
+    width: 100px;
+    height: 1px;
+    background: var(--art-gold);
+    margin: 20px auto;
+}
+
+/* --- Breadcrumb (Minimalist) --- */
+.breadcrumb {
+    background: transparent;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+}
+
+.breadcrumb-item a { color: #666; }
+.breadcrumb-item.active { color: var(--art-gold); }
+
+/* --- Album Grid & Cards (Framed Art) --- */
+.album-grid {
+    gap: 40px;
+}
+
+.card {
+    background: #222;
+    border: none;
+    border-radius: 0;
+    padding: 15px; /* The Frame */
+    box-shadow: var(--art-shadow);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Golden Frame Ornament */
+.card::before {
+    content: "";
+    position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 1px solid var(--art-gold);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.card:hover {
+    transform: scale(1.03) translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    background: #2a2a2a;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card-img-wrap {
+    border-radius: 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.card-img {
+    filter: sepia(0.2) contrast(1.1);
+    transition: all 0.8s ease;
+}
+
+.card:hover .card-img {
+    filter: none;
+}
+
+.card-body {
+    padding: 20px 0 10px 0;
+    text-align: center;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--art-gold);
+    margin-bottom: 5px;
+}
+
+.card-desc {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: #777;
+    font-style: italic;
+}
+
+.card-badge {
+    background: var(--art-gold);
+    color: #000;
+    font-family: var(--font-heading);
+    border-radius: 0;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 10px;
+}
+
+/* --- Buttons --- */
+.btn {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 0;
+    border: 1px solid var(--art-gold);
+    background: transparent;
+    color: var(--art-gold);
+    padding: 10px 25px;
+    transition: all 0.4s ease;
+}
+
+.btn:hover {
+    background: var(--art-gold);
+    color: #000;
+}
+
+.btn-primary {
+    background: var(--art-gold);
+    color: #000;
+}
+
+/* --- Pagination --- */
+.page-link {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-family: var(--font-heading);
+    margin: 0 10px;
+}
+
+.page-link.active {
+    color: var(--art-gold);
+    border-bottom: 2px solid var(--art-gold);
+}
+
+/* --- Modal & Photo View --- */
+.modal-box {
+    background: #111;
+    border: 1px solid var(--art-gold);
+    box-shadow: 0 0 100px rgba(0,0,0,1);
+    color: var(--art-text);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.photo-viewer-container {
+    background: #000;
+    border: 10px solid #222; /* Thick wooden frame feel */
+    outline: 1px solid var(--art-gold);
+}
+
+.info-card, .exif-card {
+    background: #151515;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: var(--art-gold); }

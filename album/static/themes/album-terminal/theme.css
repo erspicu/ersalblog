@@ -1,0 +1,159 @@
+/* =========================================
+   Baxermux Album - Terminal / ASCII Style
+   ========================================= */
+
+:root {
+    --term-bg: #0a0a0a;
+    --term-fg: #00ff00; /* Classic Green */
+    --term-dim: #004400;
+    --term-hl: #ffffff;
+    --font-mono: 'Courier New', Courier, monospace;
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--term-bg);
+    color: var(--term-fg);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.2;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+a { color: var(--term-fg); text-decoration: none; border-bottom: 1px dashed var(--term-fg); }
+a:hover { background: var(--term-fg); color: var(--term-bg); }
+
+/* --- Layout --- */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-bar {
+    border-bottom: 1px solid var(--term-fg);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.site-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.site-title::before { content: "root@baxermux:~/album$ "; font-weight: normal; font-size: 1rem; }
+.site-title::after { content: "_"; animation: blink 1s step-end infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.site-desc { display: block; color: var(--term-dim); font-size: 0.9rem; margin-top: 5px; }
+
+/* --- Grid & ASCII Container --- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: transparent;
+    border: 1px solid var(--term-dim);
+    padding: 10px;
+    transition: border-color 0.3s;
+    cursor: pointer;
+}
+
+.card:hover {
+    border-color: var(--term-fg);
+    box-shadow: 0 0 10px var(--term-dim);
+}
+
+/* Hide original image, show ASCII */
+.card-img-wrap {
+    background: #000;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.card-img {
+    opacity: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+}
+
+.ascii-art {
+    font-family: var(--font-mono);
+    font-size: 4px; /* Tiny font for ASCII detail */
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--term-fg);
+    white-space: pre;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.card-title::before { content: "[ "; }
+.card-title::after { content: " ]"; }
+
+.card-desc { color: var(--term-dim); font-size: 12px; }
+
+/* --- Pagination --- */
+.page-link {
+    border: 1px solid var(--term-fg);
+    background: transparent;
+    color: var(--term-fg);
+    padding: 5px 15px;
+}
+.page-link.active { background: var(--term-fg); color: var(--term-bg); }
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    border: 1px solid var(--term-fg);
+    background: #000;
+    padding: 20px;
+}
+
+.photo-stage {
+    background: #000;
+    border: 1px dashed var(--term-dim);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Show original photo in viewer but with monochromatic filter */
+#photo-main-viewer {
+    filter: grayscale(1) brightness(0.8) contrast(1.2) sepia(1) hue-rotate(70deg) saturate(4);
+}
+
+.info-card, .exif-card {
+    background: transparent;
+    border: 1px solid var(--term-dim);
+    color: var(--term-fg);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: var(--term-dim); }
+::-webkit-scrollbar-thumb:hover { background: var(--term-fg); }

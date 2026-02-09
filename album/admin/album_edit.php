@@ -31,7 +31,7 @@ if (file_exists($metaFile)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>編輯相簿 - <?php echo htmlspecialchars($id); ?></title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -83,6 +83,6 @@ if (file_exists($metaFile)) {
     </div>
 </div>
 
-<script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -82,7 +82,7 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>相簿管理 - 相簿列表</title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .album-card img { 
@@ -216,7 +216,7 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 </form>
 
-<script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 <script>
 function confirmDelete(id) {
     if(confirm('確定要刪除相簿「' + id + '」嗎？\n這將會刪除所有照片且無法復原！')) {

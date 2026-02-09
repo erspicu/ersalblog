@@ -1,0 +1,224 @@
+/* =========================================
+   Baxermux Album - Netscape Navigator Style
+   ========================================= */
+
+:root {
+    --ns-bg: #C0C0C0; /* Classic Grey Chrome */
+    --ns-text: #000000;
+    --ns-link: #0000EE;
+    --ns-vlink: #551A8B;
+    --ns-border-light: #FFFFFF;
+    --ns-border-shadow: #808080;
+}
+
+/* --- Base --- */
+body {
+    background-color: #808080;
+    color: var(--ns-text);
+    font-family: "Times New Roman", Times, serif; /* Content font */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* UI Font */
+.ns-ui-font {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+/* --- Browser Chrome (Toolbar Area) --- */
+.ns-chrome {
+    background: var(--ns-bg);
+    border-bottom: 2px solid var(--ns-border-shadow);
+    padding: 2px;
+    z-index: 1000;
+}
+
+.ns-toolbar {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border-bottom: 1px solid var(--ns-border-shadow);
+}
+
+.ns-btn {
+    background: var(--ns-bg);
+    border: 1px outset var(--ns-border-light);
+    padding: 2px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    cursor: default;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+}
+
+.ns-btn:active {
+    border-style: inset;
+    padding: 3px 7px 1px 9px;
+}
+
+.ns-btn img {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+    filter: grayscale(0.5);
+}
+
+/* Address Bar (Location) */
+.ns-location-bar {
+    display: flex;
+    align-items: center;
+    padding: 4px 5px;
+    gap: 5px;
+}
+
+.ns-label {
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+}
+
+.ns-url-input {
+    flex-grow: 1;
+    background: #FFF;
+    border: 2px inset var(--ns-border-light);
+    padding: 2px 5px;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+/* The N Logo Area */
+.ns-logo-container {
+    width: 45px;
+    height: 45px;
+    background: #000;
+    border: 2px inset var(--ns-border-light);
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.ns-logo-n {
+    color: #3366FF;
+    font-size: 32px;
+    font-family: "Times New Roman", serif;
+    font-weight: bold;
+    font-style: italic;
+    text-shadow: 1px 1px #FFF;
+}
+
+.ns-logo-n.loading {
+    animation: ns-pulse 1s infinite alternate;
+}
+
+@keyframes ns-pulse {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(1.2); opacity: 0.7; color: #FFF; }
+}
+
+/* --- Viewport (The Web Page) --- */
+.main-content {
+    background: #FFF;
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    border: 2px inset var(--ns-border-light);
+    padding: 20px;
+}
+
+/* --- Elements Styling --- */
+.header-bar { 
+    display: block !important; 
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 20px 0 !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
+}
+
+.site-title { 
+    font-family: "Times New Roman", Times, serif !important; 
+    color: #000080 !important; 
+    font-size: 2.5rem !important;
+    margin-bottom: 5px !important;
+}
+
+.site-desc {
+    color: #333 !important;
+    font-size: 1rem !important;
+    display: block !important;
+}
+
+.divider { border-top: 2px groove #EEE !important; margin: 15px 0 !important; }
+
+.card {
+    background: #FFF;
+    border: 1px solid #CCC;
+    border-radius: 0 !important;
+    box-shadow: none;
+    padding: 10px;
+}
+
+.card:hover {
+    transform: none;
+    box-shadow: none;
+    outline: 2px solid var(--ns-link);
+}
+
+.card-title {
+    color: var(--ns-link);
+    text-decoration: underline;
+    font-size: 1.1rem;
+}
+
+.card-badge {
+    background: var(--ns-bg);
+    color: #000;
+    border: 1px solid var(--ns-border-shadow);
+}
+
+/* --- Status Bar --- */
+.ns-status-bar {
+    background: var(--ns-bg);
+    border-top: 1px solid var(--ns-border-shadow);
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+}
+
+.ns-progress-area {
+    width: 150px;
+    height: 14px;
+    border: 1px inset var(--ns-border-light);
+    margin-right: 10px;
+    background: #FFF;
+}
+
+.ns-progress-fill {
+    height: 100%;
+    background: #000080;
+    width: 0%;
+}
+
+.ns-lock-icon {
+    margin-left: auto;
+    font-size: 14px;
+}
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar { width: 16px; background: var(--ns-bg); }
+::-webkit-scrollbar-thumb { background: var(--ns-bg); border: 1px outset var(--ns-border-light); }
