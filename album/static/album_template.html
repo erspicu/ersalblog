@@ -7,9 +7,24 @@
     <link rel="stylesheet" href="{{path_to_static}}album.css">
     <script src="{{path_to_config}}config.js"></script>
     <script>
-        if(typeof albumConfig !== 'undefined' && albumConfig.theme && albumConfig.theme !== 'album') {
-            document.write('<link rel="stylesheet" href="{{path_to_static}}' + albumConfig.theme + '.css">');
-        }
+        (function() {
+            // 從 Hash 中獲取 style 參數
+            var getThemeFromUrl = function() {
+                var hash = window.location.hash;
+                if (hash) {
+                    var params = new URLSearchParams(hash.substring(1));
+                    return params.get('style');
+                }
+                return null;
+            };
+
+            var theme = getThemeFromUrl() || (typeof albumConfig !== 'undefined' ? albumConfig.theme : 'album');
+            window.currentActiveTheme = theme; // 存給底部的 JS 插件載入器使用
+
+            if(theme && theme !== 'album') {
+                document.write('<link rel="stylesheet" id="theme-css" href="{{path_to_static}}' + theme + '.css">');
+            }
+        })();
     </script>
 </head>
 <body>
@@ -230,18 +245,18 @@
 
     // --- 前端主題插件載入機制 ---
     (function() {
-        if(typeof albumConfig !== 'undefined' && albumConfig.theme && albumConfig.theme !== 'album') {
-            const themeName = albumConfig.theme;
+        // 優先使用由 head 區塊確定的主題
+        const themeName = window.currentActiveTheme || (typeof albumConfig !== 'undefined' ? albumConfig.theme : 'album');
+        
+        if(themeName && themeName !== 'album') {
             const script = document.createElement('script');
             script.src = '{{path_to_static}}' + themeName + '.js';
             script.id = 'theme-plugin-js';
             script.onload = function() {
                 console.log('[Theme] Plugin loaded: ' + themeName);
-                // 發送一個自訂事件，讓插件知道 App 可能已經 Ready
                 window.dispatchEvent(new CustomEvent('themePluginReady', { detail: { theme: themeName } }));
             };
             script.onerror = function() {
-                // 如果檔案不存在，安靜地失敗，不影響主程式
                 console.warn('[Theme] No JS plugin found for: ' + themeName);
             };
             document.head.appendChild(script);

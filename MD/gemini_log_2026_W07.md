@@ -48,3 +48,5 @@
   Confirmed successful download of `construction.gif` (6.1K). Updated `album-y2k.js` to remove other stickers and exclusively use the local construction icon.
 - [2026-02-09 22:41:12] 修改 .gitignore 以包含 album/static/ 素材
   Updated .gitignore to explicitly include all assets (GIF, JPG, PNG, JS, CSS) within the `album/static/` directory.
+- [2026-02-09 22:49:36] 實作網址 Hash 風格覆蓋功能 (#style=...)
+  Modified `album_template.html` to prioritize the `style` parameter from URL hash for CSS and JS plugin loading. Regenerated `album.html`.
