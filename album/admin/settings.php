@@ -48,6 +48,7 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
                             <option value="album-dark" <?php echo ($currentTheme === 'album-dark') ? 'selected' : ''; ?>>深色模式 (Dark)</option>
                             <option value="album-pink" <?php echo ($currentTheme === 'album-pink') ? 'selected' : ''; ?>>粉紅風格 (Pink)</option>
                             <option value="album-matrix" <?php echo ($currentTheme === 'album-matrix') ? 'selected' : ''; ?>>駭客任務 (Matrix)</option>
+                            <option value="album-y2k" <?php echo ($currentTheme === 'album-y2k') ? 'selected' : ''; ?>>復古 Y2K (Y2K)</option>
                         </select>
                         <div class="form-text">切換相簿整體的配色方案。</div>
                     </div>

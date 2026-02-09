@@ -40,6 +40,7 @@ No external CDNs required for core functionality. TinyMCE, SweetAlert2, and Boot
 ### 📂 Directory Structure Overview
 
 *   `admin/`: Backend management system.
+*   `album/`: Independent Album Service.
 *   `api/`: Dynamic API endpoints (File/MySQL/SQLite).
 *   `langs/`: Centralized i18n files for Admin and Templates.
 *   `PHP_LIB/`: Core libraries including `StaticGenerator` and `TemplateManager`.
@@ -69,11 +70,13 @@ Configurable in `config.js` via `theme_file`. Supports:
 - `blog-dark.css` (Dark Mode)
 - `blog-pink.css` (Soft Pink)
 - `blog-matrix.css` (The Matrix Style)
+- `album-y2k.css` (Retro 2000s Style)
+- `album-matrix.css` (Hacker Style with Digital Rain)
 
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.07.15.39` (UTC+8)
+Version: `v2026.02.09.22.50` (UTC+8)
 CLI Version: `0.27.3`
 Model: `gemini-3-flash-preview`
 
@@ -118,6 +121,7 @@ Model: `gemini-3-flash-preview`
 ### 📂 目錄結構簡述
 
 *   `admin/`: 後台管理系統。
+*   `album/`: 獨立相簿服務目錄。
 *   `api/`: 各種模式的資料接口。
 *   `langs/`: 集中管理的語系檔案。
 *   `PHP_LIB/`: 核心邏輯類別庫 (StaticGenerator, TemplateManager)。
@@ -128,6 +132,6 @@ Model: `gemini-3-flash-preview`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.07.15.00` (UTC+8)
+版本號: `v2026.02.09.22.50` (UTC+8)
 CLI 版本: `0.27.3`
-模型名稱: `gemini-3-pro-preview`
+模型名稱: `gemini-3-flash-preview`

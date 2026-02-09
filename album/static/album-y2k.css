@@ -1,0 +1,347 @@
+/* =========================================
+   Baxermux Album - Real Y2K / GeoCities Style
+   ========================================= */
+
+:root {
+    --bg-color: #000033; /* Deep Blue Space */
+    --text-color: #ffffff;
+    --muted-color: #bbbbbb;
+    --primary-color: #00ffff; /* Cyan */
+    --accent-color: #ff00ff; /* Magenta */
+    --border-light: #eeeeee;
+    --border-dark: #666666;
+    --container-width: 96%;
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--bg-color);
+    font-family: "Verdana", "Arial", sans-serif;
+    color: var(--text-color);
+    /* Tacky Star Background Tile */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M10 10l2 2m20 20l3 3m50 10l1 1m-40 40l2 2m50-20l1 1' stroke='white'/%3E%3Ccircle cx='50' cy='50' r='1' fill='white'/%3E%3Ccircle cx='10' cy='80' r='1' fill='yellow'/%3E%3Ccircle cx='90' cy='20' r='1' fill='cyan'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    font-size: 14px;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+a:hover {
+    color: yellow;
+    background-color: navy;
+    text-decoration: none;
+}
+
+/* --- Components: Header --- */
+.header-bar {
+    background: navy;
+    border-bottom: 4px ridge #4444ff;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.site-title {
+    font-family: "Comic Sans MS", "Chalkboard SE", sans-serif;
+    font-size: 2.5rem;
+    color: yellow;
+    text-shadow: 3px 3px #ff0000;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: tacky-blink 1s steps(1) infinite, pseudo-marquee 10s linear infinite;
+    display: inline-block;
+}
+
+@keyframes pseudo-marquee {
+    0% { transform: translateX(50vw); }
+    100% { transform: translateX(-50vw); }
+}
+
+@keyframes tacky-blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; color: cyan; }
+}
+
+.site-desc {
+    color: var(--primary-color);
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    background: black;
+    display: inline-block;
+    padding: 2px 10px;
+    border: 1px dashed white;
+    border-radius: 0 !important;
+}
+
+.divider {
+    border: 0;
+    height: 5px;
+    background: repeating-linear-gradient(45deg, yellow, yellow 10px, red 10px, red 20px);
+    margin: 15px 0;
+}
+
+/* --- Breadcrumb --- */
+.breadcrumb {
+    background: #555;
+    padding: 5px;
+    border: 2px inset white;
+    border-radius: 0 !important;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: white;
+    content: ">";
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.breadcrumb-item.active {
+    color: #ffff00;
+}
+
+/* --- Card (The "Table Layout" Look) --- */
+.card {
+    background: #000000;
+    border: 3px double #ffffff;
+    border-radius: 0 !important;
+    box-shadow: 8px 8px 0px #ff00ff;
+    padding: 5px;
+}
+
+.card:hover {
+    border-color: yellow;
+    background-color: #000088;
+    box-shadow: 4px 4px 0px #00ffff;
+}
+
+.card-img-wrap {
+    border: 3px inset #c0c0c0;
+    background: #000;
+    border-radius: 0 !important;
+}
+
+.card-img-wrap::after {
+    display: none; /* No scanlines */
+}
+
+.card-img {
+    filter: none;
+    transition: none;
+    border-radius: 0 !important;
+}
+
+.card:hover .card-img {
+    filter: contrast(1.5);
+}
+
+.card-badge {
+    background: #ff00ff;
+    color: white;
+    border: 2px solid white;
+    border-radius: 0 !important;
+    font-family: "Arial", sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    box-shadow: 2px 2px 0px black;
+    top: 5px; right: 5px;
+}
+
+.card-body {
+    padding: 10px;
+    text-align: center;
+    background: #000;
+}
+
+.card-title {
+    color: yellow;
+    font-family: "Verdana", sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.card-desc {
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+}
+
+/* --- Buttons (Windows 95/98 Style) --- */
+.btn {
+    border-radius: 0 !important;
+    font-family: "Verdana", sans-serif;
+    font-size: 11px;
+    background: #c0c0c0; /* Classic Grey */
+    border: 2px outset #ffffff;
+    color: black;
+    cursor: pointer;
+    padding: 4px 8px;
+    box-shadow: none;
+}
+
+.btn:active {
+    border: 2px inset #ffffff;
+    background: #a0a0a0;
+}
+
+.btn-primary {
+    background: #0000aa;
+    color: white;
+    border: 2px outset #4444ff;
+}
+
+.btn-primary:hover {
+    background: #0000ff;
+    color: yellow;
+}
+
+.btn-outline {
+    background: #ff0000;
+    border: 2px outset white;
+    color: white;
+}
+
+.btn-outline:hover {
+    background: #aa0000;
+    color: yellow;
+}
+
+/* --- Pagination --- */
+.page-link {
+    border-radius: 0 !important;
+    background: #000066;
+    border: 2px outset white;
+    color: white;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+}
+
+.page-link:hover {
+    background: yellow;
+    color: red;
+}
+
+.page-link.active {
+    background: white;
+    color: black;
+    border: 2px inset gray;
+}
+
+/* --- Icons --- */
+/* No crazy filters, just simple white or cyan */
+.bi {
+    filter: invert(100%);
+}
+
+/* --- Badge --- */
+.badge {
+    border-radius: 0 !important;
+    background: lime;
+    border: 2px solid black;
+    color: black;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* --- Modal --- */
+.modal-box {
+    background: #c0c0c0;
+    border: 2px outset white;
+    border-radius: 0 !important;
+    box-shadow: 5px 5px 15px black;
+    color: black;
+}
+
+.modal-header {
+    background: navy;
+    border-bottom: 2px solid #c0c0c0;
+    color: white;
+    padding: 5px 10px;
+}
+
+.input-group input {
+    background: white;
+    border: 2px inset #999;
+    color: black;
+    font-family: "Verdana", sans-serif;
+    border-radius: 0 !important;
+}
+
+.close-btn {
+    color: white;
+    background: #c0c0c0;
+    border: 1px outset white;
+    width: 20px;
+    height: 20px;
+    line-height: 16px;
+    font-size: 14px;
+}
+
+/* Photo Viewer */
+.photo-viewer-container {
+    background: #000;
+    border: 5px double var(--accent-color);
+    border-radius: 0 !important;
+    padding: 10px;
+}
+
+.info-card, .exif-card {
+    background: #222;
+    border: 2px solid var(--primary-color);
+    border-radius: 0 !important;
+    color: #fff;
+}
+
+.album-header-box {
+    background: #00ff00;
+    border: 5px dashed #ff00ff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 0 !important;
+}
+
+.album-header-box h2 {
+    color: #000000;
+    font-family: "Comic Sans MS", sans-serif;
+    text-transform: uppercase;
+    background: yellow;
+    display: inline-block;
+    padding: 5px 15px;
+    border: 2px solid black;
+}
+
+.album-header-box p {
+    color: #000;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Scrollbar (Webkit) - IE5.5 Colored Scrollbars style */
+::-webkit-scrollbar {
+    width: 16px;
+    background: #000033;
+}
+::-webkit-scrollbar-track {
+    background: #000033;
+    border-left: 1px solid white;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border: 2px outset white;
+}
+::-webkit-scrollbar-button {
+    background: #c0c0c0;
+    border: 2px outset white;
+    height: 16px;
+}
+
+/* Selection */
+::selection {
+    background: yellow;
+    color: black;
+}

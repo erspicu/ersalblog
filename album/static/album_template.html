@@ -225,7 +225,28 @@
 
 <script src="{{path_to_static}}exif.js"></script>
 <script>
+    // 主程式載入 (帶版本號避免快取)
     document.write('<script src="{{path_to_static}}album.js?v=' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime()) + '"><\/script>');
+
+    // --- 前端主題插件載入機制 ---
+    (function() {
+        if(typeof albumConfig !== 'undefined' && albumConfig.theme && albumConfig.theme !== 'album') {
+            const themeName = albumConfig.theme;
+            const script = document.createElement('script');
+            script.src = '{{path_to_static}}' + themeName + '.js';
+            script.id = 'theme-plugin-js';
+            script.onload = function() {
+                console.log('[Theme] Plugin loaded: ' + themeName);
+                // 發送一個自訂事件，讓插件知道 App 可能已經 Ready
+                window.dispatchEvent(new CustomEvent('themePluginReady', { detail: { theme: themeName } }));
+            };
+            script.onerror = function() {
+                // 如果檔案不存在，安靜地失敗，不影響主程式
+                console.warn('[Theme] No JS plugin found for: ' + themeName);
+            };
+            document.head.appendChild(script);
+        }
+    })();
 </script>
 {{custom_scripts}}
 </body>

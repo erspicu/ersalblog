@@ -16,12 +16,163 @@
 }
 
 /* 核心背景特效 */
+html {
+    background-color: #000;
+}
+
 body {
-    background-image: linear-gradient(0deg, rgba(0, 255, 65, 0.03) 50%, transparent 50%);
-    background-size: 100% 4px; /* 模擬電視掃描線 */
+    background-color: transparent;
     font-family: 'Courier New', Courier, monospace !important;
     text-transform: uppercase;
     letter-spacing: 1px;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Digital Rain Animation using html pseudo-elements for maximum visibility */
+html::before {
+    content: "日月中火水木金土サシスセソABCDE0123456789$+-*/=%#!?ΔΣΦΩΨ√∞∫≈≠☠☢☣⚡⚙█▓▒░†‡∆∇∏∑√∝∞∟∠∡∢∧∨∩∪∫∬∭∮∯∰∱∲∳∴∵∶∷∸∹∺∻∼∽∾∿≀≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹⊺⊻⊼⊽⊾⊿⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭⋮⋯⋰⋱";
+    position: fixed;
+    top: -200vh;
+    left: 20px;
+    width: 20px;
+    font-size: 16px;
+    color: rgba(0, 255, 65, 0.35);
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    pointer-events: none;
+    z-index: -1;
+    animation: rain 10s linear infinite;
+    letter-spacing: 10px;
+    
+    /* 極高密度陰影鏈 (覆蓋 0-4500px, 間距縮小) */
+    text-shadow: 
+        50px 100px rgba(0, 255, 65, 0.2), 100px 300px rgba(0, 255, 65, 0.1),
+        150px 0px rgba(0, 255, 65, 0.2), 200px 450px rgba(0, 255, 65, 0.1),
+        250px 150px rgba(0, 255, 65, 0.2), 300px 50px rgba(0, 255, 65, 0.1),
+        350px 250px rgba(0, 255, 65, 0.2), 400px 120px rgba(0, 255, 65, 0.1),
+        450px 20px rgba(0, 255, 65, 0.2), 500px 380px rgba(0, 255, 65, 0.1),
+        550px 180px rgba(0, 255, 65, 0.2), 600px 60px rgba(0, 255, 65, 0.1),
+        650px 320px rgba(0, 255, 65, 0.2), 700px 100px rgba(0, 255, 65, 0.1),
+        750px 10px rgba(0, 255, 65, 0.2), 800px 210px rgba(0, 255, 65, 0.1),
+        850px 140px rgba(0, 255, 65, 0.2), 900px 30px rgba(0, 255, 65, 0.1),
+        950px 260px rgba(0, 255, 65, 0.2), 1000px 90px rgba(0, 255, 65, 0.1),
+        1050px 180px rgba(0, 255, 65, 0.2), 1100px 400px rgba(0, 255, 65, 0.1),
+        1150px 50px rgba(0, 255, 65, 0.2), 1200px 150px rgba(0, 255, 65, 0.1),
+        1250px 300px rgba(0, 255, 65, 0.2), 1300px 20px rgba(0, 255, 65, 0.1),
+        1350px 120px rgba(0, 255, 65, 0.2), 1400px 240px rgba(0, 255, 65, 0.1),
+        1450px 60px rgba(0, 255, 65, 0.2), 1500px 330px rgba(0, 255, 65, 0.1),
+        1550px 10px rgba(0, 255, 65, 0.2), 1600px 190px rgba(0, 255, 65, 0.1),
+        1650px 250px rgba(0, 255, 65, 0.2), 1700px 80px rgba(0, 255, 65, 0.1),
+        1750px 140px rgba(0, 255, 65, 0.2), 1800px 210px rgba(0, 255, 65, 0.1),
+        1850px 30px rgba(0, 255, 65, 0.2), 1900px 280px rgba(0, 255, 65, 0.1),
+        1950px 160px rgba(0, 255, 65, 0.2), 2000px 50px rgba(0, 255, 65, 0.1),
+        2050px 350px rgba(0, 255, 65, 0.2), 2100px 100px rgba(0, 255, 65, 0.1),
+        2150px 200px rgba(0, 255, 65, 0.2), 2200px 450px rgba(0, 255, 65, 0.1),
+        2250px 20px rgba(0, 255, 65, 0.2), 2300px 300px rgba(0, 255, 65, 0.1),
+        2350px 150px rgba(0, 255, 65, 0.2), 2400px 50px rgba(0, 255, 65, 0.1),
+        2450px 400px rgba(0, 255, 65, 0.2), 2500px 120px rgba(0, 255, 65, 0.1),
+        2550px 10px rgba(0, 255, 65, 0.2), 2600px 330px rgba(0, 255, 65, 0.1),
+        2650px 200px rgba(0, 255, 65, 0.2), 2700px 80px rgba(0, 255, 65, 0.1),
+        2750px 140px rgba(0, 255, 65, 0.2), 2800px 250px rgba(0, 255, 65, 0.1),
+        2850px 30px rgba(0, 255, 65, 0.2), 2900px 180px rgba(0, 255, 65, 0.1),
+        2950px 280px rgba(0, 255, 65, 0.2), 3000px 50px rgba(0, 255, 65, 0.1),
+        3100px 100px rgba(0, 255, 65, 0.2), 3200px 400px rgba(0, 255, 65, 0.1),
+        3300px 20px rgba(0, 255, 65, 0.2), 3400px 150px rgba(0, 255, 65, 0.1),
+        3500px 250px rgba(0, 255, 65, 0.2), 3600px 50px rgba(0, 255, 65, 0.1),
+        3700px 120px rgba(0, 255, 65, 0.2), 3800px 300px rgba(0, 255, 65, 0.1),
+        3900px 40px rgba(0, 255, 65, 0.2), 4000px 210px rgba(0, 255, 65, 0.1),
+        4100px 320px rgba(0, 255, 65, 0.2), 4200px 100px rgba(0, 255, 65, 0.1),
+        4300px 50px rgba(0, 255, 65, 0.2), 4400px 240px rgba(0, 255, 65, 0.1),
+        4500px 180px rgba(0, 255, 65, 0.2);
+}
+
+/* 第二層雨：中景層，更多變化的符號 */
+html::after {
+    content: "ΔΣΦΩΨ√∞∫≈≠☠☢☣⚡⚙█▓▒░ABCDE0123456789日月中火水木金土あいうえおかきくけこサシスセソ";
+    position: fixed;
+    top: -200vh;
+    left: 40px;
+    width: 20px;
+    font-size: 13px;
+    color: rgba(0, 255, 65, 0.15);
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    pointer-events: none;
+    z-index: -2;
+    animation: rain 7s linear infinite;
+    animation-delay: -3s;
+    letter-spacing: 5px;
+    
+    text-shadow: 
+        125px 20px rgba(0, 255, 65, 0.08), 325px 120px rgba(0, 255, 65, 0.08),
+        525px -50px rgba(0, 255, 65, 0.08), 725px 200px rgba(0, 255, 65, 0.08),
+        925px 30px rgba(0, 255, 65, 0.08), 1125px 250px rgba(0, 255, 65, 0.08),
+        1325px -20px rgba(0, 255, 65, 0.08), 1525px 100px rgba(0, 255, 65, 0.08),
+        1725px 50px rgba(0, 255, 65, 0.08), 1925px 180px rgba(0, 255, 65, 0.08),
+        2125px 10px rgba(0, 255, 65, 0.08), 2325px 150px rgba(0, 255, 65, 0.08),
+        2525px -30px rgba(0, 255, 65, 0.08), 2725px 220px rgba(0, 255, 65, 0.08),
+        2925px 40px rgba(0, 255, 65, 0.08), 3125px 130px rgba(0, 255, 65, 0.08),
+        3325px 70px rgba(0, 255, 65, 0.08), 3525px 190px rgba(0, 255, 65, 0.08),
+        3725px 20px rgba(0, 255, 65, 0.08), 3925px 280px rgba(0, 255, 65, 0.08),
+        4125px 60px rgba(0, 255, 65, 0.08), 4325px 140px rgba(0, 255, 65, 0.08);
+}
+
+/* 第三層雨：背景底層，極細且慢，營造遠景感 */
+body::before {
+    content: "10101010101010101010101010101010101010101010101010101010101010101010101010101010101010";
+    position: fixed;
+    top: -200vh;
+    left: 60px;
+    width: 20px;
+    font-size: 10px;
+    color: rgba(0, 255, 65, 0.05);
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    pointer-events: none;
+    z-index: -3;
+    animation: rain 15s linear infinite;
+    animation-delay: -5s;
+    letter-spacing: 2px;
+    
+    text-shadow: 
+        200px 0px rgba(0, 255, 65, 0.03), 400px 100px rgba(0, 255, 65, 0.03),
+        600px -50px rgba(0, 255, 65, 0.03), 800px 50px rgba(0, 255, 65, 0.03),
+        1000px 150px rgba(0, 255, 65, 0.03), 1200px -20px rgba(0, 255, 65, 0.03),
+        1400px 80px rgba(0, 255, 65, 0.03), 1600px 200px rgba(0, 255, 65, 0.03),
+        1800px 10px rgba(0, 255, 65, 0.03), 2000px 120px rgba(0, 255, 65, 0.03),
+        2200px -40px rgba(0, 255, 65, 0.03), 2400px 60px rgba(0, 255, 65, 0.03),
+        2600px 180px rgba(0, 255, 65, 0.03), 2800px -10px rgba(0, 255, 65, 0.03),
+        3000px 90px rgba(0, 255, 65, 0.03), 3200px 210px rgba(0, 255, 65, 0.03),
+        3400px -30px rgba(0, 255, 65, 0.03), 3600px 130px rgba(0, 255, 65, 0.03),
+        3800px 50px rgba(0, 255, 65, 0.03), 4000px 240px rgba(0, 255, 65, 0.03),
+        4200px -20px rgba(0, 255, 65, 0.03), 4400px 110px rgba(0, 255, 65, 0.03);
+}
+
+@keyframes rain {
+    from { transform: translateY(0); }
+    to { transform: translateY(200vh); }
+}
+
+@keyframes rain {
+    from { transform: translateY(0); }
+    to { transform: translateY(200vh); }
+}
+
+@keyframes rain {
+    from { transform: translate(-50%, 0); }
+    to { transform: translate(-50%, 200vh); }
+}
+
+/* 掃描線疊加層 */
+.header-bar::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(0deg, rgba(0, 255, 65, 0.03) 50%, transparent 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 9999;
 }
 
 .header-bar {

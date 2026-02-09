@@ -40,6 +40,14 @@ The system supports two operating modes:
 *   **Theming System**:
     *   Configurable via `config.js` (`theme_file` option).
     *   Supports multiple CSS themes: `blog.css` (Standard), `blog-dark.css` (Dark Mode), `blog-pink.css` (Soft Pink), and `blog-matrix.css` (Hacker Style).
+    *   **Frontend Theme Plugins**: Dynamic loading of `{theme}.js` for theme-specific logic (e.g., custom animations, interaction, or media players).
+
+*   **Album Service**:
+    *   Located in the `/album` directory as an independent service.
+    *   Features a dedicated SSG and SPA architecture.
+    *   Supports diverse visual themes including `album-matrix` (with Digital Rain) and `album-y2k` (Retro 2000s style).
+    *   Integrates YouTube IFrame API for background music in specific themes.
+
 *   **Initialization and Health Check**:
     *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system and check environment compatibility.
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity.
@@ -155,6 +163,13 @@ Listed below are key directories and file rules in the Git repository:
 ### 1.3 設定與環境 (Configuration)
 *   **敏感資料分離**: `config.php` 與 `config.js` 已被 Git 忽略。
 *   **主題系統 (Theming)**: 支援多重 CSS 主題，包括標準版、深色模式 (`blog-dark`)、粉柔風格 (`blog-pink`) 與駭客任務風格 (`blog-matrix`)，前端根據設定動態載入。
+    *   **前端主題插件**: 支援動態載入 `{theme}.js`，用於實作特定主題的專屬邏輯（如：自訂動畫、互動特效或媒體播放器）。
+
+*   **相簿服務 (Album Service)**:
+    *   位於 `/album` 目錄下的獨立服務，具備專屬的 SSG 與 SPA 架構。
+    *   提供多樣化視覺主題，包含 `album-matrix` (具備數位雨特效) 與 `album-y2k` (復古 2000 年代風格)。
+    *   特定主題整合 YouTube IFrame API 提供背景音樂功能。
+
 *   **初始化與健康檢查**:
     *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。
