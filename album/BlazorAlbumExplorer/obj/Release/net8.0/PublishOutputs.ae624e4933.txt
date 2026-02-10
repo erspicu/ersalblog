@@ -1,0 +1,6 @@
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/dist/web.config
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/dist/dist/wwwroot/sample-data/weather.json
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/dist/dist/wwwroot/_framework/blazor.boot.json
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/dist/wwwroot/sample-data/weather.json
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/dist/wwwroot/_framework/blazor.boot.json
+/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/dist/web.config

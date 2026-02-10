@@ -1,5 +1,22 @@
 # History Logs - 2026 Week 07 (English)
 
+## [2026-02-10]
+### Added
+- **Blazor WASM Album Explorer (Experimental)**: Created a new experimental project under `album/BlazorAlbumExplorer` using Blazor WebAssembly.
+- **WinForms/WPF UI Style**: Successfully simulated the Windows File Explorer and windowing system experience using HTML/CSS.
+- **Features**:
+    - **Desktop Environment**: Includes taskbar, start menu, system tray, and live clock.
+    - **Window Management**: Implemented full window dragging, maximize/minimize, and foreground/background (Z-Index) switching.
+    - **File Browsing**: Reads `api/json/` data to display album lists with Windows 11-style folder icons and previews.
+    - **Photo Viewer**: Built-in independent photo viewer window supporting mouse (left/right click) and keyboard arrow navigation.
+    - **Slideshow Mode**: Supports fullscreen slideshow playback with ESC key exit.
+    - **Info Panel**: Integrated EXIF data and Google Maps embedding.
+    - **Photo Edit Simulation**: Implemented clockwise/counter-clockwise rotation (CSS Transform).
+- **Windows 11 Visual Enhancements**:
+    - **Refined Folders**: Used CSS to draw layered, shadowed Win11-style folder icons with content previews.
+    - **Rounded Corners**: Applied standard 8px rounded corners to windows and dialogs.
+    - **MessageBox**: Implemented standard Windows message boxes for Start Menu info display.
+
 ## [2026-02-09]
 ### Added
 - **Album Service: Y2K Theme**: Created a "clumsy" retro 2000s style theme (`album-y2k.css`) featuring deep blue backgrounds, cyan/magenta accents, and Windows 95-style UI elements.

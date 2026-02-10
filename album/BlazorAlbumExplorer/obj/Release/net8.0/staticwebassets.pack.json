@@ -1,0 +1,69 @@
+{
+  "Files": [
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/bin/Release/net8.0/wwwroot/_framework/blazor.webassembly.js",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/obj/Release/net8.0/compressed/fhmn4bhn1g.gz",
+      "PackagePath": "staticwebassets/_framework/blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/obj/Release/net8.0/scopedcss/bundle/BlazorAlbumExplorer.styles.css",
+      "PackagePath": "staticwebassets/BlazorAlbumExplorer.styles.css"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/css/app.css",
+      "PackagePath": "staticwebassets/css/app.css"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/css/bootstrap/bootstrap.min.css",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css.map"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/css/wpf-modern.css",
+      "PackagePath": "staticwebassets/css/wpf-modern.css"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/favicon.png",
+      "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/icon-192.png",
+      "PackagePath": "staticwebassets/icon-192.png"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/js/window-manager.js",
+      "PackagePath": "staticwebassets/js/window-manager.js"
+    },
+    {
+      "Id": "/mnt/c/appserv/www/ersalblog/album/BlazorAlbumExplorer/wwwroot/sample-data/weather.json",
+      "PackagePath": "staticwebassets/sample-data/weather.json"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.BlazorAlbumExplorer.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.build.BlazorAlbumExplorer.props",
+      "PackagePath": "build\\BlazorAlbumExplorer.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.buildMultiTargeting.BlazorAlbumExplorer.props",
+      "PackagePath": "buildMultiTargeting\\BlazorAlbumExplorer.props"
+    },
+    {
+      "Id": "obj/Release/net8.0/staticwebassets/msbuild.buildTransitive.BlazorAlbumExplorer.props",
+      "PackagePath": "buildTransitive\\BlazorAlbumExplorer.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

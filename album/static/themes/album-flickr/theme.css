@@ -1,0 +1,213 @@
+/* =========================================
+   Baxermux Album - Flickr Style Theme
+   ========================================= */
+
+:root {
+    --flickr-blue: #0063dc;
+    --flickr-pink: #ff0084;
+    --bg-color: #f3f5f6; /* Flickr 的淺灰底色 */
+    --text-color: #212124;
+    --header-bg: #000000;
+    --header-text: #ffffff;
+    --container-width: 98%; /* 幾乎滿版 */
+    --radius: 3px; /* 極小的圓角 */
+}
+
+/* --- Base --- */
+body {
+    background-color: var(--bg-color);
+    font-family: "Proxima Nova", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+}
+
+a {
+    color: var(--text-color);
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--flickr-blue);
+}
+
+/* --- Header (Black Bar) --- */
+.header-bar {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 15px 0;
+    border-bottom: none;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.site-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 透過 JS 注入的藍粉點點會在這裡 */
+
+.site-desc {
+    color: #999;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.divider {
+    border-top: 1px solid #333;
+    margin: 15px 0 0 0;
+}
+
+/* --- Breadcrumb --- */
+.breadcrumb {
+    padding: 10px 0;
+    font-size: 0.95rem;
+}
+
+.breadcrumb-item a {
+    color: var(--flickr-blue);
+    font-weight: 600;
+}
+
+.breadcrumb-item.active {
+    color: #555;
+}
+
+/* --- Cards (Clean Look) --- */
+.album-grid {
+    gap: 10px; /* 更緊密的間距 */
+}
+
+.card {
+    background: #fff;
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-img-wrap {
+    background: #e0e0e0;
+}
+
+/* 懸停時圖片稍微變亮 */
+.card:hover .card-img {
+    filter: brightness(1.05);
+}
+
+.card-body {
+    padding: 10px 12px;
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #212124;
+}
+
+.card-desc {
+    color: #898989;
+    font-size: 0.85rem;
+}
+
+/* --- Buttons --- */
+.btn {
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: var(--flickr-blue);
+    border: 1px solid var(--flickr-blue);
+}
+
+.btn-primary:hover {
+    background: #0050b3;
+}
+
+.btn-outline {
+    border-color: #c5c5c5;
+    background: #fff;
+    color: #212124;
+}
+
+.btn-outline:hover {
+    background: #f3f5f6;
+    border-color: #999;
+}
+
+/* --- Pagination --- */
+.page-link {
+    border: none;
+    background: transparent;
+    color: var(--flickr-blue);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.page-link:hover {
+    background: #e0e0e0;
+    border-radius: 50%;
+}
+
+.page-link.active {
+    background: var(--flickr-pink);
+    color: #fff;
+    border-radius: 50%;
+    border: none;
+}
+
+/* --- Photo Viewer --- */
+.photo-viewer-container {
+    background: #212124; /* 深色背景看圖 */
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0; /* 滿版感 */
+}
+
+.photo-stage {
+    background: #000;
+    min-height: 80vh;
+}
+
+.photo-meta-panel {
+    background: #f3f5f6;
+    padding: 20px 40px !important;
+}
+
+.info-card, .exif-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.info-card h6, .exif-card h6 {
+    color: #898989;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- Badges --- */
+.badge {
+    background: #e0e0e0;
+    color: #555;
+    border: none;
+    font-weight: normal;
+}
+
+/* --- Footer --- */
+.footer {
+    background: #000;
+    color: #fff;
+    padding: 40px 0;
+}

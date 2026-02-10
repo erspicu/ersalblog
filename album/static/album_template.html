@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{page_title}} - Baxermux的相簿</title>
-    <link rel="stylesheet" href="{{path_to_static}}album.css">
+    <link rel="stylesheet" href="{{path_to_static}}base.css">
     <script src="{{path_to_config}}config.js"></script>
     <script>
         (function() {
@@ -21,9 +21,8 @@
             var theme = getThemeFromUrl() || (typeof albumConfig !== 'undefined' ? albumConfig.theme : 'album');
             window.currentActiveTheme = theme; // 存給底部的 JS 插件載入器使用
 
-            if(theme && theme !== 'album') {
-                document.write('<link rel="stylesheet" id="theme-css" href="{{path_to_static}}themes/' + theme + '/theme.css">');
-            }
+            // Always load the theme CSS (now even default 'album' is in themes/)
+            document.write('<link rel="stylesheet" id="theme-css" href="{{path_to_static}}themes/' + theme + '/theme.css">');
         })();
     </script>
 </head>

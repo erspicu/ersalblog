@@ -1,0 +1,15 @@
+/* Default Theme Variables */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #2d3436;
+    --muted-color: #636e72;
+    --primary-color: #4a69bd;
+    --primary-hover: #3c5aa8;
+    --white: #ffffff;
+    --border-color: #e9ecef;
+    --shadow: 0 4px 10px rgba(0,0,0,0.05);
+    --hover-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --transition: 0.2s ease;
+    --container-width: 96%;
+}

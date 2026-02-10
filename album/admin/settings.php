@@ -44,21 +44,48 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
                     <div class="mb-4">
                         <label class="form-label fw-bold">相簿主題 (Theme)</label>
                         <select name="theme" class="form-select">
-                            <option value="album" <?php echo ($currentTheme === 'album') ? 'selected' : ''; ?>>預設主題 (Default)</option>
-                            <option value="album-dark" <?php echo ($currentTheme === 'album-dark') ? 'selected' : ''; ?>>深色模式 (Dark)</option>
-                            <option value="album-pink" <?php echo ($currentTheme === 'album-pink') ? 'selected' : ''; ?>>粉紅風格 (Pink)</option>
-                            <option value="album-matrix" <?php echo ($currentTheme === 'album-matrix') ? 'selected' : ''; ?>>駭客任務 (Matrix)</option>
-                            <option value="album-y2k" <?php echo ($currentTheme === 'album-y2k') ? 'selected' : ''; ?>>復古 Y2K (Y2K)</option>
-                            <option value="album-win31" <?php echo ($currentTheme === 'album-win31') ? 'selected' : ''; ?>>Windows 3.1 (Win3.1)</option>
-                            <option value="album-dos" <?php echo ($currentTheme === 'album-dos') ? 'selected' : ''; ?>>MS-DOS (256色)</option>
-                            <option value="album-art" <?php echo ($currentTheme === 'album-art') ? 'selected' : ''; ?>>藝術大師 (Art Master)</option>
-                            <option value="album-gameboy" <?php echo ($currentTheme === 'album-gameboy') ? 'selected' : ''; ?>>GameBoy (經典掌機)</option>
-                            <option value="album-win95" <?php echo ($currentTheme === 'album-win95') ? 'selected' : ''; ?>>Windows 95 (Win95)</option>
-                            <option value="album-netscape" <?php echo ($currentTheme === 'album-netscape') ? 'selected' : ''; ?>>Netscape Navigator (經典瀏覽器)</option>
-                            <option value="album-terminal" <?php echo ($currentTheme === 'album-terminal') ? 'selected' : ''; ?>>Terminal (ASCII 字符畫)</option>
-                            <option value="album-vapor" <?php echo ($currentTheme === 'album-vapor') ? 'selected' : ''; ?>>Synthwave (迷幻電子)</option>
+                            <?php
+                            $themesDir = __DIR__ . '/../static/themes';
+                            $themes = [];
+                            if (is_dir($themesDir)) {
+                                $scan = scandir($themesDir);
+                                foreach ($scan as $entry) {
+                                    if ($entry === '.' || $entry === '..') continue;
+                                    $fullPath = $themesDir . '/' . $entry;
+                                    
+                                    // 僅偵測目錄且名稱以 'album' 開頭
+                                    if (is_dir($fullPath) && strpos($entry, 'album') === 0) {
+                                        $displayName = $entry; // 預設顯示目錄名
+                                        $readme = $fullPath . '/readme.txt';
+                                        
+                                        if (file_exists($readme)) {
+                                            $lines = file($readme, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                                            foreach ($lines as $line) {
+                                                if (stripos($line, 'Name:') === 0) {
+                                                    $displayName = trim(substr($line, 5));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        $themes[$entry] = $displayName;
+                                    }
+                                }
+                            }
+                            
+                            // 排序 (讓 album 排前面，其他字母順序)
+                            uksort($themes, function($a, $b) {
+                                if ($a === 'album') return -1;
+                                if ($b === 'album') return 1;
+                                return strcmp($a, $b);
+                            });
+                            
+                            foreach ($themes as $key => $name) {
+                                $selected = ($currentTheme === $key) ? 'selected' : '';
+                                echo "<option value=\"$key\" $selected>" . htmlspecialchars($name) . "</option>";
+                            }
+                            ?>
                         </select>
-                        <div class="form-text">切換相簿整體的配色方案。</div>
+                        <div class="form-text">切換相簿整體的配色方案 (自動偵測 themes 目錄)。</div>
                     </div>
 
                     <div class="mb-4">

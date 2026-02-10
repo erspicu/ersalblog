@@ -112,3 +112,5 @@
   Fixed logical errors in `convertToAscii` loop and updated CSS to ensure `.card-img` dimensions are available for Canvas processing. Added smooth fade-in for ASCII blocks.
 - [2026-02-10 02:02:18] 新增 Synthwave 迷幻電子主題 (album-vapor)
   Created `theme.css` (Neon grid, glowing text, VHS scanlines) and `theme.js` (Lo-fi music, glitch effects). Added to Admin Settings.
+- [2026-02-10 22:43:59] 技術評估：決定採用 Blazor WASM 實驗 WinForms 風格相簿介面。已安裝 .NET 8.0 SDK 並建立 BlazorAlbumExplorer 專案。
+- [2026-02-10 22:46:33] Blazor WASM 開發進度：實作 WinForms/WPF 風格 UI (Desktop + File Explorer)。已完成資料對接邏輯，並成功發佈至 dist 目錄。

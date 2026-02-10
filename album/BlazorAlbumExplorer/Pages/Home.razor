@@ -1,0 +1,370 @@
+@page "/"
+@page "/index.html"
+@inject HttpClient Http
+@using System.Net.Http.Json
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+@using System.Text.Json.Serialization
+
+<div class="desktop" @onclick="@(() => activeWindow = "")">
+    @* File Explorer Window *@
+    <div @ref="explorerRef" class="wpf-window shadow-lg" 
+         style="@GetExplorerStyle()" 
+         @onmousedown="@(() => FocusWindow("explorer"))">
+        <div @ref="explorerHandle" class="wpf-titlebar" @ondblclick="ToggleExplorerMaximize">
+            <div class="wpf-title">
+                <i class="fa-solid fa-folder-open wpf-title-icon" style="color: #F0C243;"></i>
+                Album Explorer - @(currentAlbum?.Name ?? "Baxermux 的相簿")
+            </div>
+            <div class="wpf-controls" @onmousedown:stopPropagation>
+                <div class="wpf-control-btn" @onclick="MinimizeExplorer"><i class="fa-solid fa-minus"></i></div>
+                <div class="wpf-control-btn" @onclick="ToggleExplorerMaximize"><i class="fa-regular @(isExplorerMaximized ? "fa-copy" : "fa-square")"></i></div>
+                <div class="wpf-control-btn close" @onclick="() => isExplorerMinimized = true"><i class="fa-solid fa-xmark"></i></div>
+            </div>
+        </div>
+        
+        <div class="explorer-toolbar">
+            <div class="btn-group me-2">
+                <button class="btn btn-sm btn-light border" @onclick="GoHome" disabled="@(currentAlbum == null)"><i class="fa-solid fa-arrow-left"></i></button>
+                <button class="btn btn-sm btn-light border" @onclick="GoHome" disabled="@(currentAlbum == null)"><i class="fa-solid fa-arrow-up"></i></button>
+            </div>
+            <div class="input-group input-group-sm flex-grow-1">
+                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-folder text-warning"></i></span>
+                <input type="text" class="form-control border-start-0 bg-white" value="@currentPath" readonly />
+            </div>
+        </div>
+
+        <div class="wpf-content">
+            <div class="explorer-sidebar">
+                <div class="fw-bold mb-2">This PC</div>
+                <div class="ps-2 mb-1 fw-bold text-primary" @onclick="GoHome" style="cursor: pointer;"><i class="fa-solid fa-images me-2"></i>Pictures</div>
+                <div class="ps-4 mb-1 border-start ms-3 @(currentAlbum == null ? "fw-bold" : "")" @onclick="GoHome" style="cursor: pointer;">Albums</div>
+            </div>
+            <div class="explorer-main">
+                @if (isLoading)
+                {
+                    <div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>
+                }
+                else if (currentAlbum == null)
+                {
+                    <div class="explorer-grid">
+                        @foreach (var album in albums)
+                        {
+                            <div class="explorer-item" @onclick="() => OpenAlbum(album)">
+                                <div class="win11-folder"><div class="folder-back"></div>@if(!string.IsNullOrEmpty(album.Cover)){<div class="folder-content-wrapper"><img src="../../../@album.Cover" class="folder-content-img" /></div>}<div class="folder-front"><div class="folder-front-lip"></div></div></div>
+                                <div class="explorer-item-name">@album.Name</div>
+                                <div class="text-muted small">@album.Count Photos</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="explorer-grid">
+                        @foreach (var photo in currentAlbum.Photos)
+                        {
+                            <div class="explorer-item" @onclick="() => ViewPhoto(photo)" @onclick:stopPropagation>
+                                <div class="explorer-item-photo-wrapper mb-1 border"><img src="../../../@photo.Thumb" /></div>
+                                <div class="explorer-item-name">@photo.Filename</div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* Photo Viewer Window *@
+    @if (selectedPhoto != null)
+    {
+        <div @ref="viewerRef" class="wpf-window shadow-lg" 
+             style="@GetViewerStyle()" 
+             @onmousedown="@(() => FocusWindow("viewer"))">
+             
+            @if (!isSlideshowActive) 
+            {
+                <div @ref="viewerHandle" class="wpf-titlebar" style="background: #222; color: white;" @ondblclick="ToggleViewerMaximize">
+                    <div class="wpf-title">
+                        <i class="fa-solid fa-image wpf-title-icon text-info"></i>
+                        <span class="ms-2 small" style="color: #aaa;">@selectedPhoto.Src</span>
+                    </div>
+                    <div class="wpf-controls" @onmousedown:stopPropagation>
+                        <div class="wpf-control-btn text-white" @onclick="MinimizeViewer"><i class="fa-solid fa-minus"></i></div>
+                        <div class="wpf-control-btn text-white" @onclick="ToggleViewerMaximize"><i class="fa-regular @(isViewerMaximized ? "fa-copy" : "fa-square")"></i></div>
+                        <div class="wpf-control-btn close text-white" @onclick="ClosePhoto"><i class="fa-solid fa-xmark"></i></div>
+                    </div>
+                </div>
+            }
+
+            <div class="wpf-content" 
+                 style="background: #000; position: relative; cursor: @(isSlideshowActive ? "none" : "default"); border-radius: @(isSlideshowActive ? "0" : "0 0 8px 8px");">
+                 
+                <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden;"
+                     @onmousedown="HandleSlideshowMouseClick"
+                     @oncontextmenu:preventDefault="isSlideshowActive">
+                    <img src="../../../@selectedPhoto.Src" 
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(@(photoRotation)deg);" />
+                </div>
+                
+                @if (showInfoPanel && !isSlideshowActive)
+                {
+                    <div class="info-panel" @onmousedown:stopPropagation>
+                        <h5 class="mb-3 border-bottom pb-2">Information</h5>
+                        <div class="mb-2"><small class="text-secondary">Filename</small><br/>@selectedPhoto.Filename</div>
+                        @if (selectedPhoto.Exif != null)
+                        {
+                            <h6 class="text-info mt-3 border-bottom pb-1">Camera Details</h6>
+                            <div class="mb-1"><small class="text-secondary">Model:</small> @selectedPhoto.Exif.Model</div>
+                            <div class="mb-1"><small class="text-secondary">Aperture:</small> @selectedPhoto.Exif.Aperture</div>
+                            <div class="mb-1"><small class="text-secondary">Shutter:</small> @selectedPhoto.Exif.Shutter</div>
+                            <div class="mb-1"><small class="text-secondary">ISO:</small> @selectedPhoto.Exif.Iso</div>
+                            <div class="mb-1"><small class="text-secondary">Focal:</small> @selectedPhoto.Exif.Focal</div>
+                            <div class="mb-1"><small class="text-secondary">Date:</small> @selectedPhoto.Exif.Date</div>
+                            @if (selectedPhoto.Exif.Gps != null)
+                            {
+                                <div class="mt-2 border rounded overflow-hidden position-relative" style="height: 150px;">
+                                    <iframe width="100%" height="150" frameborder="0" src="https://maps.google.com/maps?q=@selectedPhoto.Exif.Gps.Lat,@selectedPhoto.Exif.Gps.Lng&z=15&output=embed"></iframe>
+                                    <div style="position: absolute; top:0; left:0; width: 100%; height: 20px; background: transparent;"></div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                @if (!isSlideshowActive)
+                {
+                    <div class="photo-tools" @onmousedown:stopPropagation>
+                        <i class="fa-solid fa-backward" @onclick="PrevPhoto"></i>
+                        <i class="fa-solid fa-play" @onclick="ToggleSlideshow"></i>
+                        <i class="fa-solid fa-forward" @onclick="NextPhoto"></i>
+                        <div class="vr bg-secondary mx-2"></div>
+                        <i class="fa-solid fa-rotate-left" @onclick="RotateLeft"></i>
+                        <i class="fa-solid fa-rotate-right" @onclick="RotateRight"></i>
+                        <div class="vr bg-secondary mx-2"></div>
+                        <i class="fa-solid fa-expand" @onclick="ToggleViewerMaximize"></i>
+                        <i class="fa-solid fa-circle-info @(showInfoPanel ? "text-info" : "")" @onclick="ToggleInfoPanel"></i>
+                    </div>
+                }
+                else
+                {
+                    <div class="slideshow-controls" @onmousedown:stopPropagation><i class="fa-solid fa-pause" @onclick="ToggleSlideshow"></i></div>
+                }
+            </div>
+        </div>
+    }
+
+    @* MessageBox Style Info Window *@
+    @if (showAlbumInfo)
+    {
+        <div @ref="infoRef" class="wpf-window shadow-lg win-info-centered win-messagebox" 
+             style="@GetInfoStyle()" 
+             @onmousedown="@(() => FocusWindow("info"))">
+            <div @ref="infoHandle" class="wpf-titlebar" style="border-radius: 8px 8px 0 0;">
+                <div class="wpf-title">Baxermux 的相簿</div>
+                <div class="wpf-controls"><div class="wpf-control-btn close" @onclick="ToggleAlbumInfo"><i class="fa-solid fa-xmark"></i></div></div>
+            </div>
+            <div class="wpf-content p-4" style="flex-direction: column; overflow: hidden; background: #f0f0f0; border-radius: 0 0 8px 8px;">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa-solid fa-circle-info text-primary me-3" style="font-size: 32px;"></i>
+                    <div class="fs-6 text-dark">放一些 Blog 用到的素材照片</div>
+                </div>
+                <div class="mt-auto text-end">
+                    <button class="btn btn-light border px-4 shadow-sm" style="min-width: 80px;" @onclick="ToggleAlbumInfo">OK</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Taskbar *@
+    <div class="taskbar" @onmousedown:stopPropagation>
+        <div class="start-btn @(showAlbumInfo ? "bg-light" : "")" @onclick="ToggleAlbumInfo"><i class="fa-brands fa-windows text-primary fs-4"></i></div>
+        <div class="flex-grow-1 d-flex">
+            <div class="px-3 border-bottom border-3 me-1 taskbar-item @(isExplorerMinimized ? "" : "border-primary active-task") @(activeWindow == "explorer" ? "focused-task" : "")" @onclick="ToggleExplorerTask">
+                <i class="fa-solid fa-folder-open me-2 text-warning"></i> Explorer
+            </div>
+            @if (selectedPhoto != null)
+            {
+                <div class="px-3 border-bottom border-3 taskbar-item @(isViewerMinimized ? "" : "border-info active-task") @(activeWindow == "viewer" ? "focused-task" : "")" @onclick="ToggleViewerTask">
+                    <i class="fa-solid fa-image me-2 text-info"></i> Photos
+                </div>
+            }
+        </div>
+        <div class="system-tray">
+            <div class="clock">
+                <div>@DateTime.Now.ToString("HH:mm")</div>
+                <div>@DateTime.Now.ToString("yyyy/M/d")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .wpf-window { transition: z-index 0s; pointer-events: auto; }
+    .win-info-centered { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%); }
+    .win-messagebox { width: 400px !important; height: 180px !important; border: 1px solid #999; resize: none !important; }
+    .taskbar-item { background: rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; min-width: 120px; display: flex; align-items: center; }
+    .active-task { background: rgba(255,255,255,0.4); }
+    .focused-task { background: rgba(255,255,255,0.7); border-bottom-width: 4px !important; }
+    .explorer-item-name { width: 100px; font-size: 11px; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; line-height: 1.2; height: 2.4em; }
+    .explorer-item-photo-wrapper { width: 100px; height: 80px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #eee; }
+    .explorer-item-photo-wrapper img { max-width: 100%; max-height: 100%; object-fit: cover; }
+    .win11-folder { width: 90px; height: 75px; position: relative; margin: 0 auto 5px auto; }
+    .folder-back { position: absolute; top: 10px; left: 0; width: 100%; height: 65px; background: #F0C243; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .folder-tab { position: absolute; top: -6px; left: 0; width: 42px; height: 12px; background: #F0C243; border-radius: 6px 6px 0 0; }
+    .folder-content-wrapper { position: absolute; top: 12px; left: 6px; right: 6px; bottom: 12px; z-index: 2; display: flex; align-items: flex-end; overflow: hidden; }
+    .folder-content-img { width: 100%; height: auto; max-height: 100%; object-fit: cover; border-radius: 3px; background: white; border: 1.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .folder-front { position: absolute; bottom: 0; left: 0; width: 100%; height: 36px; background: linear-gradient(to bottom, #FFE68E 0%, #FFD65E 100%); border-radius: 0 0 6px 6px; z-index: 3; box-shadow: 0 -2px 10px rgba(0,0,0,0.15); border-top: 1px solid rgba(255,255,255,0.5); }
+    .folder-front-lip { position: absolute; top: -10px; left: 0; width: 100%; height: 10px; background: #FFE68E; clip-path: polygon(0% 100%, 0% 40%, 5% 10%, 35% 10%, 40% 40%, 45% 100%, 100% 100%); border-radius: 4px 4px 0 0; }
+    .photo-tools { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(30,30,30,0.9); padding: 10px 30px; border-radius: 30px; display: flex; align-items: center; gap: 25px; color: white; z-index: 100; }
+    .photo-tools i { cursor: pointer; font-size: 1.2rem; }
+    .slideshow-controls { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 200; opacity: 0.3; transition: opacity 0.3s; }
+    .slideshow-controls:hover { opacity: 1; background: rgba(0,0,0,0.7); }
+    .info-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; background: rgba(30,30,30,0.95); color: #ddd; padding: 20px; border-left: 1px solid #444; font-size: 13px; z-index: 90; overflow-y: auto; }
+    .clock { text-align: right; font-size: 11px; line-height: 1.1; }
+</style>
+
+@code {
+    private List<AlbumItem> albums = new();
+    private AlbumDetail? currentAlbum;
+    private PhotoItem? selectedPhoto;
+    private string currentPath = @"C:\Users\Admin\Pictures\Albums";
+
+    private ElementReference explorerRef, explorerHandle;
+    private ElementReference viewerRef, viewerHandle;
+    private ElementReference infoRef, infoHandle;
+    
+    private bool isExplorerMaximized = false;
+    private bool isExplorerMinimized = false;
+    private bool isViewerMaximized = false;
+    private bool isViewerMinimized = false;
+    
+    private int explorerX = 60, explorerY = 40;
+    private int viewerX = 120, viewerY = 80;
+    private int infoX = 0, infoY = 0; 
+
+    private int nextZIndex = 1000;
+    private int explorerZ = 100;
+    private int viewerZ = 101;
+    private int infoZ = 102;
+    private string activeWindow = "explorer";
+
+    private void FocusWindow(string name) 
+    { 
+        activeWindow = name;
+        nextZIndex++;
+        if (name == "explorer") explorerZ = nextZIndex;
+        else if (name == "viewer") viewerZ = nextZIndex;
+        else if (name == "info") infoZ = nextZIndex;
+        StateHasChanged(); 
+    }
+
+    private string GetExplorerStyle() 
+    {
+        var radius = isExplorerMaximized ? "0" : "8px";
+        if (isExplorerMinimized) return "display: none;";
+        return (isExplorerMaximized ? "top: 0; left: 0; width: 100vw; height: calc(100vh - 40px);" : $"top: {explorerY}px; left: {explorerX}px; width: 850px; height: 550px;") + $" z-index: {explorerZ}; border-radius: {radius};";
+    }
+
+    private string GetViewerStyle() 
+    {
+        if (isViewerMinimized) return "display: none;";
+        if (isSlideshowActive) return "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; border: none; border-radius: 0;";
+        var radius = isViewerMaximized ? "0" : "8px";
+        return (isViewerMaximized ? "top: 0; left: 0; width: 100vw; height: calc(100vh - 40px);" : $"top: {viewerY}px; left: {viewerX}px; width: 750px; height: 500px;") + $" z-index: {viewerZ}; border-radius: {radius};";
+    }
+    
+    private string GetInfoStyle()
+    {
+        if (infoX != 0 || infoY != 0) return $"top: {infoY}px; left: {infoX}px; z-index: {infoZ}; transform: none; border-radius: 8px;";
+        return $"z-index: {infoZ}; border-radius: 8px;";
+    }
+
+    [JSInvokable] public void UpdateExplorerPos(int x, int y) { explorerX = x; explorerY = y; FocusWindow("explorer"); }
+    [JSInvokable] public void UpdateViewerPos(int x, int y) { viewerX = x; viewerY = y; FocusWindow("viewer"); }
+    [JSInvokable] public void UpdateInfoPos(int x, int y) { infoX = x; infoY = y; FocusWindow("info"); }
+
+    [JSInvokable]
+    public void OnKeyPress(string key) 
+    { 
+        if (key == "Escape") { if (isSlideshowActive) _ = ToggleSlideshow(); } 
+        else if (key == "ArrowLeft") { if (selectedPhoto != null) PrevPhoto(); }
+        else if (key == "ArrowRight") { if (selectedPhoto != null) NextPhoto(); }
+        StateHasChanged(); 
+    }
+
+    private void MinimizeExplorer() { isExplorerMinimized = true; }
+    private void MinimizeViewer() { isViewerMinimized = true; }
+    private void ToggleExplorerTask() { isExplorerMinimized = !isExplorerMinimized; if (!isExplorerMinimized) FocusWindow("explorer"); }
+    private void ToggleViewerTask() { isViewerMinimized = !isViewerMinimized; if (!isViewerMinimized) FocusWindow("viewer"); }
+    private void ToggleExplorerMaximize() { isExplorerMaximized = !isExplorerMaximized; FocusWindow("explorer"); }
+    private async Task ToggleViewerMaximize() { if (isSlideshowActive) return; isViewerMaximized = !isViewerMaximized; FocusWindow("viewer"); StateHasChanged(); if (!isViewerMaximized && !isViewerMinimized) await InitDrag(viewerRef, viewerHandle, "UpdateViewerPos"); }
+    
+    private async Task ToggleAlbumInfo() 
+    { 
+        showAlbumInfo = !showAlbumInfo; 
+        if (showAlbumInfo) 
+        {
+            FocusWindow("info");
+            StateHasChanged();
+            await Task.Delay(100);
+            await InitDrag(infoRef, infoHandle, "UpdateInfoPos");
+        }
+    }
+
+    private bool showInfoPanel = false;
+    private bool showAlbumInfo = false; 
+    private bool isSlideshowActive = false;
+    private int currentPhotoIndex = 0;
+    private int photoRotation = 0;
+    private System.Threading.CancellationTokenSource? slideshowCts;
+    private DotNetObjectReference<Home>? dotNetHelper;
+
+    private void ToggleInfoPanel() => showInfoPanel = !showInfoPanel;
+    private void NextPhoto() { ChangePhoto(1); photoRotation = 0; }
+    private void PrevPhoto() { ChangePhoto(-1); photoRotation = 0; }
+    private void ChangePhoto(int direction) { if (currentAlbum?.Photos == null || currentAlbum.Photos.Count == 0) return; currentPhotoIndex = (currentPhotoIndex + direction + currentAlbum.Photos.Count) % currentAlbum.Photos.Count; selectedPhoto = currentAlbum.Photos[currentPhotoIndex]; }
+    private void RotateLeft() => photoRotation -= 90;
+    private void RotateRight() => photoRotation += 90;
+    private void HandleSlideshowMouseClick(MouseEventArgs e) { if (!isSlideshowActive) return; if (e.Button == 0) PrevPhoto(); else if (e.Button == 2) NextPhoto(); }
+
+    private async Task ToggleSlideshow() 
+    { 
+        isSlideshowActive = !isSlideshowActive; 
+        if (isSlideshowActive) { FocusWindow("viewer"); showInfoPanel = false; photoRotation = 0; slideshowCts = new System.Threading.CancellationTokenSource(); _ = SlideshowLoop(slideshowCts.Token); } 
+        else { slideshowCts?.Cancel(); await Task.Delay(50); if (!isViewerMaximized && !isViewerMinimized) await InitDrag(viewerRef, viewerHandle, "UpdateViewerPos"); } 
+    }
+
+    private async Task SlideshowLoop(System.Threading.CancellationToken token) { try { while (!token.IsCancellationRequested) { await Task.Delay(3000, token); NextPhoto(); StateHasChanged(); } } catch (TaskCanceledException) { } }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (firstRender) { dotNetHelper = DotNetObjectReference.Create(this); await InitDrag(explorerRef, explorerHandle, "UpdateExplorerPos"); await JSRuntime.InvokeVoidAsync("registerGlobalKeyboardHandler", dotNetHelper); } }
+    private async Task InitDrag(ElementReference el, ElementReference handle, string callback) { try { await JSRuntime.InvokeVoidAsync("dragElement", el, handle, dotNetHelper, callback); } catch {} }
+
+    protected override async Task OnInitializedAsync() => await LoadAlbums();
+    private bool isLoading = true;
+    private async Task LoadAlbums() { isLoading = true; try { albums = (await Http.GetFromJsonAsync<AlbumIndex>("../../../api/json/index.json"))?.Items ?? new(); } catch { } finally { isLoading = false; } }
+
+    private async Task OpenAlbum(AlbumItem album)
+    {
+        isLoading = true; FocusWindow("explorer"); currentPath = $@"C:\Users\Admin\Pictures\Albums\{album.Name}";
+        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>($"../../../api/json/{album.Id}.json"); } catch { } finally { isLoading = false; }
+    }
+
+    private async Task ViewPhoto(PhotoItem photo)
+    {
+        selectedPhoto = photo; FocusWindow("viewer"); photoRotation = 0;
+        if (currentAlbum != null) currentPhotoIndex = currentAlbum.Photos.IndexOf(photo);
+        isViewerMinimized = false; isSlideshowActive = false; StateHasChanged(); await Task.Delay(50); await InitDrag(viewerRef, viewerHandle, "UpdateViewerPos");
+    }
+
+    private void ClosePhoto() { selectedPhoto = null; isSlideshowActive = false; slideshowCts?.Cancel(); FocusWindow("explorer"); }
+    private void GoHome() { currentAlbum = null; selectedPhoto = null; currentPath = @"C:\Users\Admin\Pictures\Albums"; FocusWindow("explorer"); }
+
+    public void Dispose() => dotNetHelper?.Dispose();
+
+    public class AlbumIndex { public List<AlbumItem> Items { get; set; } = new(); }
+    public class AlbumItem { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public int Count { get; set; } public string Cover { get; set; } = ""; }
+    public class AlbumDetail { public string Name { get; set; } = ""; public string Desc { get; set; } = ""; public List<PhotoItem> Photos { get; set; } = new(); }
+    public class PhotoItem { [JsonPropertyName("filename")] public string Filename { get; set; } = ""; [JsonPropertyName("thumb")] public string Thumb { get; set; } = ""; [JsonPropertyName("src")] public string Src { get; set; } = ""; [JsonPropertyName("exif")] public ExifData? Exif { get; set; } }
+    public class ExifData { [JsonPropertyName("model")] public string Model { get; set; } = ""; [JsonPropertyName("aperture")] public string Aperture { get; set; } = ""; [JsonPropertyName("shutter")] public string Shutter { get; set; } = ""; [JsonPropertyName("iso")] public object Iso { get; set; } = 0; [JsonPropertyName("focal")] public string Focal { get; set; } = ""; [JsonPropertyName("date")] public string Date { get; set; } = ""; [JsonPropertyName("gps")] public GpsData? Gps { get; set; } }
+    public class GpsData { [JsonPropertyName("lat")] public double Lat { get; set; } [JsonPropertyName("lng")] public double Lng { get; set; } }
+}
