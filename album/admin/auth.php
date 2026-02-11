@@ -10,10 +10,10 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 
 session_start();
 
-// 引入上層的設定檔
-$configFile = __DIR__ . '/../config.php';
+// 引入設定檔
+$configFile = __DIR__ . '/../config/config.php';
 if (!file_exists($configFile)) {
-    die("Album configuration file (config.php) not found. Please copy config.example.php to config.php.");
+    die("Album configuration file (config.php) not found. Please copy config.example.php to config.php in the config/ directory.");
 }
 require_once $configFile;
 

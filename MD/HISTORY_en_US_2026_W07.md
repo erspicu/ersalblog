@@ -17,6 +17,7 @@
 - **Git Optimization**: Added .NET build artifact ignore rules to `.gitignore` to prevent repository bloat.
 - **Path Resolution**: Fixed internal path depths for Blazor in Apache subdirectory environments (adjusted from 3 levels to 5 levels) to ensure JSON and images load correctly.
 - **Environment Cleanup**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.
+- **Album Service: Configuration Centralization**: Created `album/config/` directory to group `config.php` and `config.js` for better organization, updating all internal loading paths.
 
 ## [2026-02-10]
 ### Added

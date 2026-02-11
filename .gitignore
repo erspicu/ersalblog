@@ -82,8 +82,8 @@ publish/
 /contents/build_hash.json
 
 # Album Service
-/album/config.php
-/album/config.js
+/album/config/config.php
+/album/config/config.js
 /album/shorturl.txt
 /album/album.html
 /album/view/

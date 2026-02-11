@@ -2,7 +2,7 @@
 require_once 'auth.php';
 requireAlbumLogin();
 
-$configFile = __DIR__ . '/../config.js';
+$configFile = __DIR__ . '/../config/config.js';
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 
 // 簡單的 Regex 讀取 JS 物件屬性 (這部分若 config.js 格式太複雜可能需更精確)

@@ -248,7 +248,7 @@ if (file_exists($baseDir . '/../admin/version_config.php')) {
 
 $indexHtml = $tm->render($tm->getSource(), array(
     'path_to_static' => 'static/',
-    'path_to_config' => './',
+    'path_to_config' => 'config/',
     'page_title' => '相簿首頁',
     'album_header' => '',
     'content_body' => $indexBody,
