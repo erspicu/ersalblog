@@ -88,6 +88,7 @@ publish/
 /album/album.html
 /album/view/
 /album/view_blazor/
+/album/static/themes/album-win11/dist/
 /album/Collection/**/*.jpg
 /album/Collection/**/Thumbnail/
 /album/static/*_example.html

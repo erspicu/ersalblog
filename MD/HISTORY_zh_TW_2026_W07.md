@@ -38,7 +38,7 @@
 - **環境清理**：移除了專案目錄下的暫存檔 `(backup)config.php` 與測試用的截圖 (`qa1.png`, `qa3.png`)。
 - **Blazor 修正**：清理了 `BlazorAlbumExplorer` 因遞迴發佈產生的極深嵌套目錄 (`bin`, `obj`, `publish`)，並在 `.gitignore` 中加入相關忽略規則以防再次發生。
 - **路徑優化**：修正了 Blazor 總管在 Apache 子目錄環境下的資源讀取路徑（從 `../../../` 修正為 `../../`），解決圖片與 JSON 無法載入的問題。
-- **相簿服務：Win11 主題移植成功**：將 Blazor 專案的 WPF/Modern UI 邏輯成功移植回相簿服務主題 (`album-win11`)。
-    - **擬真視窗**：實作了可拖拽的視窗系統、Windows 11 桌面背景與工作列。
-    - **啟動水印**：仿照 Windows 未啟動狀態，在右下角加入了「啟動 Experimental Project」水印，標註專案實驗性質。
-    - **SPA 整合**：透過主題插件 JS 自動將 SPA 內容包裹進擬真視窗中。
+- **相簿服務：Win11 主題 (真・Blazor 移植)**：放棄 CSS 模擬，改採全屏嵌入編譯後的 Blazor WASM 引擎。
+    - **技術端整合**：將 Blazor 專案正式發佈至主題目錄 `dist/`，並透過 `theme.js` 插件進行全自動載入。
+    - **原生水印**：直接在 Razor Layout 中實作「啟動 Experimental Project」水印，標註技術端採用 Blazor WASM。
+    - **路徑自動適配**：修正了 Blazor 內部資源讀取層級，確保在子目錄環境下仍能正確讀取 `api/json/` 與 `Collection/` 圖片。

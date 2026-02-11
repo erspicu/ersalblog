@@ -56,7 +56,7 @@
                                     @if (!string.IsNullOrEmpty(album.Cover))
                                     {
                                         <div class="folder-content-wrapper">
-                                            <img src="../../@album.Cover" class="folder-content-img" />
+                                            <img src="../../../@album.Cover" class="folder-content-img" />
                                         </div>
                                     }
                                     <div class="folder-front">
@@ -76,7 +76,7 @@
                         {
                             <div class="explorer-item" @onclick="() => ViewPhoto(photo)" @onclick:stopPropagation>
                                 <div class="explorer-item-photo-wrapper mb-1 border">
-                                    <img src="../../@photo.Thumb" />
+                                    <img src="../../../@photo.Thumb" />
                                 </div>
                                 <div class="explorer-item-name">@photo.Filename</div>
                             </div>
@@ -115,7 +115,7 @@
                 <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden;"
                      @onmousedown="HandleSlideshowMouseClick"
                      @oncontextmenu:preventDefault="isSlideshowActive">
-                    <img src="../../@selectedPhoto.Src" 
+                    <img src="../../../@selectedPhoto.Src" 
                          style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(@(photoRotation)deg);" />
                 </div>
                 
@@ -356,12 +356,12 @@
 
     protected override async Task OnInitializedAsync() => await LoadAlbums();
     private bool isLoading = true;
-    private async Task LoadAlbums() { isLoading = true; try { albums = (await Http.GetFromJsonAsync<AlbumIndex>("../../api/json/index.json"))?.Items ?? new(); } catch { } finally { isLoading = false; } }
+    private async Task LoadAlbums() { isLoading = true; try { albums = (await Http.GetFromJsonAsync<AlbumIndex>("../../../api/json/index.json"))?.Items ?? new(); } catch { } finally { isLoading = false; } }
 
     private async Task OpenAlbum(AlbumItem album)
     {
         isLoading = true; FocusWindow("explorer"); currentPath = $@"C:\Users\Admin\Pictures\Albums\{album.Name}";
-        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
+        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
     }
 
     private async Task ViewPhoto(PhotoItem photo)

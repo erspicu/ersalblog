@@ -2,6 +2,13 @@
 
 <div class="main-viewport">
     @Body
+    
+    @* Windows Activation Style Watermark *@
+    <div class="activation-watermark">
+        <div class="line-1">啟動 Experimental Project</div>
+        <div class="line-2">移至 [設定] 以啟動此相簿專案。</div>
+        <div class="line-2" style="margin-top:5px; opacity: 0.8;">此為實驗性質專案，技術端採用 Blazor WASM。</div>
+    </div>
 </div>
 
 <style>
@@ -9,5 +16,27 @@
         width: 100vw;
         height: 100vh;
         overflow: hidden;
+        position: relative;
+    }
+
+    .activation-watermark {
+        position: fixed;
+        right: 30px;
+        bottom: 60px;
+        color: rgba(255, 255, 255, 0.3);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        pointer-events: none;
+        user-select: none;
+        z-index: 99999;
+        text-align: left;
+    }
+
+    .activation-watermark .line-1 {
+        font-size: 1.8rem;
+        margin-bottom: 2px;
+    }
+
+    .activation-watermark .line-2 {
+        font-size: 0.95rem;
     }
 </style>
