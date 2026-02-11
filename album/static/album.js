@@ -24,6 +24,16 @@ class DownloadManager {
         });
     }
 
+    /**
+     * 將下載任務加入佇列 (儲存檔案)
+     */
+    async download(url, filename) {
+        return new Promise((resolve, reject) => {
+            this.queue.push({ url, filename, type: 'download', resolve, reject });
+            this.processQueue();
+        });
+    }
+
     async processQueue() {
         if (this.currentConcurrent >= this.maxConcurrent || this.queue.length === 0) {
             return;
@@ -33,23 +43,24 @@ class DownloadManager {
         const task = this.queue.shift();
         const { url, filename, imgElement, type, resolve, reject } = task;
 
-        console.log(`[DownloadManager] ${type === 'display' ? 'Loading' : 'Downloading'}: ${url} (Active: ${this.currentConcurrent})`);
-
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok && response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             
             if (type === 'display' && imgElement) {
                 imgElement.src = blobUrl;
                 imgElement.classList.add('loaded');
-                // 圖片載入後不立即釋放 blobUrl，否則圖片會消失
-                // 我們存在元素上以便後續清理
                 imgElement._blobUrl = blobUrl;
+                
+                // 【核心修正】觸發自訂事件，通知 EXIF 等模組圖片已就緒
+                imgElement.dispatchEvent(new CustomEvent('managed-image-loaded', { 
+                    detail: { url, blobUrl } 
+                }));
+                
                 resolve(blobUrl);
             } else {
-                // 觸發瀏覽器下載
                 const a = document.createElement('a');
                 a.href = blobUrl;
                 a.download = filename || url.split('/').pop();
@@ -72,12 +83,8 @@ class DownloadManager {
     }
 }
 
-// 全域共享實例
 window.albumDownloadManager = new DownloadManager(3);
 
-/**
- * 掃描頁面中具備 data-src 的圖片並交由管理員載入
- */
 function managedLoadImages() {
     const images = document.querySelectorAll('img[data-managed-src]:not(.managed-init)');
     images.forEach(img => {
@@ -95,7 +102,6 @@ const AppState = {
     currentAlbum: null,
     currentPhoto: null,
     currentPage: 1,
-    // 從 config.js 讀取設定，預設 24
     itemsPerPage: (typeof albumConfig !== 'undefined' && albumConfig.items_per_page) ? albumConfig.items_per_page : 24,
     albumDataCache: {}, 
     homeData: null,
@@ -107,10 +113,7 @@ const AppState = {
    ========================================= */
 function renderTemplate(templateId, vars = {}) {
     const templateEl = document.getElementById(templateId);
-    if (!templateEl) {
-        console.error(`Template not found: ${templateId}`);
-        return `<!-- Missing Template: ${templateId} -->`;
-    }
+    if (!templateEl) return `<!-- Missing Template: ${templateId} -->`;
     let html = templateEl.innerHTML;
     for (const key in vars) {
         const regex = new RegExp(`{{${key}}}`, 'g');
@@ -119,35 +122,21 @@ function renderTemplate(templateId, vars = {}) {
     return html;
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    initRouter();
-});
-
-window.addEventListener("hashchange", function() {
-    handleRoute();
-});
-
-function initRouter() {
-    handleRoute();
-}
+document.addEventListener("DOMContentLoaded", () => initRouter());
+window.addEventListener("hashchange", () => handleRoute());
+function initRouter() { handleRoute(); }
 
 function handleRoute() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1)); 
-
     const album = params.get('album');
     const photo = params.get('photo');
     const page = parseInt(params.get('page')) || 1;
-
     AppState.currentPage = page;
 
-    if (photo && album) {
-        loadPhotoView(album, photo);
-    } else if (album) {
-        loadAlbumView(album, page);
-    } else {
-        loadHomeView(page);
-    }
+    if (photo && album) loadPhotoView(album, photo);
+    else if (album) loadAlbumView(album, page);
+    else loadHomeView(page);
 }
 
 /* =========================================
@@ -155,50 +144,34 @@ function handleRoute() {
    ========================================= */
 function getApiUrl(type, params = {}) {
     const isJson = AppState.apiType === 'json';
-    
-    if (type === 'home') {
-        return isJson ? 'api/json/index.json' : `api/api_album.php?action=list_albums`;
-    } else if (type === 'album') {
+    if (type === 'home') return isJson ? 'api/json/index.json' : `api/api_album.php?action=list_albums`;
+    if (type === 'album') {
         const name = params.name;
-        if (isJson) {
-            return `api/json/${name}.json`;
-        } else {
-            return `api/api_album.php?action=get_album&album=${encodeURIComponent(name)}`;
-        }
+        return isJson ? `api/json/${name}.json` : `api/api_album.php?action=get_album&album=${encodeURIComponent(name)}`;
     }
     return '';
 }
 
 async function fetchHomeData() {
     if (AppState.homeData) return AppState.homeData;
-    
     const url = getApiUrl('home');
     try {
         const resp = await fetch(url);
-        if (!resp.ok) throw new Error('Network error');
         const data = await resp.json();
         AppState.homeData = data;
         return data;
-    } catch (e) {
-        console.error("Fetch Home Error:", e);
-        return { items: [] };
-    }
+    } catch (e) { return { items: [] }; }
 }
 
 async function fetchAlbumData(albumName) {
     if (AppState.albumDataCache[albumName]) return AppState.albumDataCache[albumName];
-
     const url = getApiUrl('album', { name: albumName });
     try {
         const resp = await fetch(url);
-        if (!resp.ok) throw new Error('Album not found');
         const data = await resp.json();
         AppState.albumDataCache[albumName] = data;
         return data;
-    } catch (e) {
-        console.error("Fetch Album Error:", e);
-        return null;
-    }
+    } catch (e) { return null; }
 }
 
 /* =========================================
@@ -216,18 +189,14 @@ function setHeader(html) {
 
 function renderPaginationUI(pagination, baseUrlHash) {
     const container = document.getElementById('pagination-container');
-    if (!container) return;
-    
-    if (!pagination || pagination.totalPages <= 1) {
-        container.innerHTML = '';
+    if (!container || !pagination || pagination.totalPages <= 1) {
+        if(container) container.innerHTML = '';
         return;
     }
-
     let itemsHtml = '';
     const cur = pagination.currentPage;
     const total = pagination.totalPages;
 
-    // Previous
     itemsHtml += renderTemplate('tmpl_pagination_item', {
         link: (cur > 1) ? `${baseUrlHash}&page=${cur - 1}` : '#',
         text: '<i class="bi bi-chevron-left"></i>',
@@ -244,488 +213,240 @@ function renderPaginationUI(pagination, baseUrlHash) {
         });
     }
 
-    // Next
     itemsHtml += renderTemplate('tmpl_pagination_item', {
         link: (cur < total) ? `${baseUrlHash}&page=${cur + 1}` : '#',
         text: '<i class="bi bi-chevron-right"></i>',
         activeClass: '',
         disabledClass: (cur < total) ? '' : 'disabled'
     });
-
     container.innerHTML = renderTemplate('tmpl_pagination', { items: itemsHtml });
 }
 
-/* --- Home View --- */
 async function loadHomeView(page = 1) {
     AppState.currentView = 'home';
     setHeader(''); 
     setContent('<div class="text-center py-5">載入相簿列表中...</div>');
-
     const data = await fetchHomeData();
     let rawItems = data.items || [];
-    
     const totalItems = rawItems.length;
     const totalPages = Math.ceil(totalItems / AppState.itemsPerPage);
     const start = (page - 1) * AppState.itemsPerPage;
     const pagedItems = rawItems.slice(start, start + AppState.itemsPerPage);
 
-    const pagination = {
-        currentPage: page,
-        totalPages: totalPages,
-        totalItems: totalItems
-    };
-    
-    const templateEl = document.getElementById("tmpl_index_album_item");
-    if (!templateEl) return;
-
-    if (pagedItems.length === 0 && page === 1) {
-        setContent("<div class='text-center text-muted py-5'>目前沒有相簿</div>");
-        return;
-    }
-
     let listHtml = '<div class="album-grid" id="album-list-container">';
     pagedItems.forEach(album => {
         listHtml += renderTemplate('tmpl_index_album_item', {
             link: `#album=${encodeURIComponent(album.id || album.name)}`,
-            cover: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
+            cover: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
             name: album.name,
             count: album.count,
             desc: album.desc || "&nbsp;"
         });
     });
     listHtml += '</div>';
-
     setContent(listHtml);
-    
-    // 手動注入真正的圖片網址供管理員載入
     const cards = document.querySelectorAll('#album-list-container .card-img');
-    pagedItems.forEach((album, idx) => {
-        if(cards[idx]) {
-            cards[idx].setAttribute('data-managed-src', album.cover);
-        }
-    });
+    pagedItems.forEach((album, idx) => { if(cards[idx]) cards[idx].setAttribute('data-managed-src', album.cover); });
     managedLoadImages();
-
-    renderPaginationUI(pagination, '#');
+    renderPaginationUI({currentPage: page, totalPages: totalPages}, '#');
     document.title = "相簿首頁 - Baxermux的相簿";
-    window.scrollTo(0, 0);
 }
 
-/* --- Album View --- */
 async function loadAlbumView(albumName, page = 1) {
     AppState.currentView = 'album';
     setContent('<div class="text-center py-5">載入照片中...</div>');
-
     const data = await fetchAlbumData(albumName);
-    if (!data) {
-        setContent('<div class="text-center text-danger py-5">找不到相簿或載入失敗</div>');
-        return;
-    }
-
+    if (!data) { setContent('<div class="text-center text-danger py-5">找不到相簿</div>'); return; }
     let rawPhotos = data.photos || [];
     const totalItems = rawPhotos.length;
     const totalPages = Math.ceil(totalItems / AppState.itemsPerPage);
     const start = (page - 1) * AppState.itemsPerPage;
     const pagedPhotos = rawPhotos.slice(start, start + AppState.itemsPerPage);
 
-    const pagination = {
-        currentPage: page,
-        totalPages: totalPages,
-        totalItems: totalItems
-    };
-
-    const headerHtml = renderTemplate('tmpl_album_header', {
-        name: data.name,
-        desc_html: data.desc_html || ''
-    });
-    setHeader(headerHtml);
-
-    const controlsHtml = renderTemplate('tmpl_album_controls', {
-        name: data.name,
-        total: totalItems
-    });
-
-    let gridHtml = '<div class="album-grid">';
-    
-    if (pagedPhotos.length > 0) {
-        pagedPhotos.forEach(photo => {
-            const photoLink = `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(photo.filename)}`;
-            const imgSrc = photo.thumb || photo.src;
-            
-            gridHtml += renderTemplate('tmpl_album_photo_item', {
-                photoPageLink: photoLink,
-                imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
-                filename: photo.filename,
-                photoDesc: photo.title || photo.filename
-            });
+    setHeader(renderTemplate('tmpl_album_header', { name: data.name, desc_html: data.desc_html || '' }));
+    let gridHtml = renderTemplate('tmpl_album_controls', { name: data.name, total: totalItems }) + '<div class="album-grid">';
+    pagedPhotos.forEach(photo => {
+        gridHtml += renderTemplate('tmpl_album_photo_item', {
+            photoPageLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(photo.filename)}`,
+            imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+            filename: photo.filename,
+            photoDesc: photo.title || photo.filename
         });
-    } else {
-        gridHtml += '<div class="col-12 text-muted">此相簿沒有照片</div>';
-    }
-    gridHtml += '</div>';
-
-    setContent(controlsHtml + gridHtml);
-
-    // 注入真實路徑
-    const imgs = document.querySelectorAll('.album-grid .card-img');
-    pagedPhotos.forEach((photo, idx) => {
-        if(imgs[idx]) {
-            imgs[idx].setAttribute('data-managed-src', photo.thumb || photo.src);
-        }
     });
+    gridHtml += '</div>';
+    setContent(gridHtml);
+    const imgs = document.querySelectorAll('.album-grid .card-img');
+    pagedPhotos.forEach((photo, idx) => { if(imgs[idx]) imgs[idx].setAttribute('data-managed-src', photo.thumb || photo.src); });
     managedLoadImages();
-
-    renderPaginationUI(pagination, `#album=${encodeURIComponent(albumName)}`);
+    renderPaginationUI({currentPage: page, totalPages: totalPages}, `#album=${encodeURIComponent(albumName)}`);
     document.title = `${data.name} - Baxermux的相簿`;
-    window.scrollTo(0, 0);
 }
 
-/* --- Photo View --- */
 async function loadPhotoView(albumName, photoName) {
     AppState.currentView = 'photo';
     setHeader(''); 
-    document.getElementById('pagination-container').innerHTML = '';
-
     const data = await fetchAlbumData(albumName);
-    if (!data || !data.photos) {
-        setContent('<div class="text-center text-danger py-5">無法載入相簿資料</div>');
-        return;
-    }
-
-    const photoIndex = data.photos.findIndex(p => p.filename === photoName);
-    if (photoIndex === -1) {
-        setContent('<div class="text-center text-danger py-5">找不到照片</div>');
-        return;
-    }
-
+    const photoIndex = data?.photos?.findIndex(p => p.filename === photoName) ?? -1;
+    if (photoIndex === -1) { setContent('<div class="text-center text-danger py-5">找不到照片</div>'); return; }
     const photo = data.photos[photoIndex];
-    const templateEl = document.getElementById("tmpl_photo_detail_view");
-    let viewHtml = templateEl.innerHTML;
+    const prevPhoto = data.photos[(photoIndex - 1 + data.photos.length) % data.photos.length];
+    const nextPhoto = data.photos[(photoIndex + 1) % data.photos.length];
 
-    const prevIndex = (photoIndex - 1 + data.photos.length) % data.photos.length;
-    const nextIndex = (photoIndex + 1) % data.photos.length;
-    const prevPhoto = data.photos[prevIndex];
-    const nextPhoto = data.photos[nextIndex];
-
-    const prevLink = `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(prevPhoto.filename)}`;
-    const nextLink = `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(nextPhoto.filename)}`;
-    
-    const backPage = Math.floor(photoIndex / AppState.itemsPerPage) + 1;
-    const albumLink = `#album=${encodeURIComponent(albumName)}&page=${backPage}`;
-
-    const thumbL = photo.thumbL || photo.src;
-    const thumbXL = photo.thumbXL || photo.src;
-    const original = photo.src; 
-
-    const hasBackendExif = photo.exif && Object.keys(photo.exif).length > 0;
-    const exifHtml = hasBackendExif ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small">正在載入技術資訊...</div>';
-
-    viewHtml = renderTemplate('tmpl_photo_detail_view', {
+    setContent(renderTemplate('tmpl_photo_detail_view', {
         pathToHome: '#',
         albumName: data.name,
-        albumLink: albumLink,
+        albumLink: `#album=${encodeURIComponent(albumName)}&page=${Math.floor(photoIndex / AppState.itemsPerPage) + 1}`,
         filename: photo.filename,
-        prevLink: prevLink,
-        nextLink: nextLink,
-        imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
-        imgSrcXL: thumbXL,
-        imgSrcOriginal: original,
+        prevLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(prevPhoto.filename)}`,
+        nextLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(nextPhoto.filename)}`,
+        imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+        imgSrcXL: photo.thumbXL || photo.src,
+        imgSrcOriginal: photo.src,
         shortIdStart: photo.shortIdStart || '0',
         photoTitle: photo.title || photo.filename,
         photoDesc: photo.desc || '',
-        exif_info: exifHtml
-    });
+        exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small">正在載入技術資訊...</div>'
+    }));
 
-    setContent(viewHtml);
-
-    // 注入主要照片
     const mainImg = document.getElementById('photo-main-viewer');
     if(mainImg) {
-        mainImg.setAttribute('data-managed-src', thumbL);
+        mainImg.setAttribute('data-managed-src', photo.thumbL || photo.src);
         managedLoadImages();
     }
-
     document.title = `${photo.filename} - ${data.name}`;
-    window.scrollTo(0, 0);
-
-    // 如果後端沒有提供 EXIF，嘗試在前端抓取
-    if (!hasBackendExif) {
-        tryFetchExifClientSide();
-    }
+    if (!photo.exif || Object.keys(photo.exif).length === 0) tryFetchExifClientSide();
 }
 
+/**
+ * 【核心修正】所有主題通用的 EXIF 偵測，現在監聽 DownloadManager 的事件
+ */
 function tryFetchExifClientSide() {
     const img = document.getElementById('photo-main-viewer');
     const container = document.getElementById('exif-info-container');
     if (!img || !container || typeof EXIF === 'undefined') return;
 
     const runExif = function() {
+        if (img.src.startsWith('data:image/gif;base64')) return;
         EXIF.getData(img, function() {
             const all = EXIF.getAllTags(this);
             if (!all || Object.keys(all).length === 0) return;
-
-            // 轉換數據格式以符合介面
             const exif = {
-                make: all.Make || '',
-                model: all.Model || '',
+                make: all.Make || '', model: all.Model || '',
                 aperture: all.FNumber ? `f/${all.FNumber.toFixed(1)}` : '未知',
                 iso: all.ISOSpeedRatings || '未知',
                 date: all.DateTimeOriginal || all.DateTime || '未知'
             };
-
-            // 快門速度處理
             if (all.ExposureTime) {
                 const val = parseFloat(all.ExposureTime);
                 exif.shutter = (val >= 1) ? val.toFixed(1) + 's' : `1/${Math.round(1/val)}s`;
-            } else {
-                exif.shutter = '未知';
-            }
-
-            // 焦距處理
-            if (all.FocalLength) {
-                exif.focal = parseFloat(all.FocalLength).toFixed(1) + 'mm';
-            } else {
-                exif.focal = '未知';
-            }
-
-            // GPS 處理 (JS 版)
+            } else exif.shutter = '未知';
+            if (all.FocalLength) exif.focal = parseFloat(all.FocalLength).toFixed(1) + 'mm'; else exif.focal = '未知';
             if (all.GPSLatitude && all.GPSLongitude) {
                 const toDecimal = (dms, ref) => {
-                    const deg = dms[0].numerator / dms[0].denominator;
-                    const min = dms[1].numerator / dms[1].denominator;
-                    const sec = dms[2].numerator / dms[2].denominator;
-                    let dec = deg + (min / 60) + (sec / 3600);
-                    if (ref === 'S' || ref === 'W') dec = -dec;
-                    return dec;
+                    let dec = (dms[0].numerator/dms[0].denominator) + (dms[1].numerator/dms[1].denominator/60) + (dms[2].numerator/dms[2].denominator/3600);
+                    return (ref === 'S' || ref === 'W') ? -dec : dec;
                 };
-                exif.gps = {
-                    lat: toDecimal(all.GPSLatitude, all.GPSLatitudeRef),
-                    lng: toDecimal(all.GPSLongitude, all.GPSLongitudeRef)
-                };
+                exif.gps = { lat: toDecimal(all.GPSLatitude, all.GPSLatitudeRef), lng: toDecimal(all.GPSLongitude, all.GPSLongitudeRef) };
             }
-
             container.innerHTML = formatExifHtml(exif, 'JS');
         });
     };
 
-    // 確保圖片載入完成才執行
-    if (img.complete) {
-        runExif();
-    } else {
-        img.onload = runExif;
-    }
-}
-
-function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    img.addEventListener('managed-image-loaded', runExif);
+    if (img.complete && !img.src.startsWith('data:image/gif;base64')) runExif();
 }
 
 function formatExifHtml(exif, source) {
-    if (!exif || Object.keys(exif).length === 0) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
-
-    // 1. 來源標籤
-    let sourceHtml = '';
-    if (source) {
-        sourceHtml = renderTemplate('tmpl_exif_source_label', {
-            label: source === 'PHP' ? '後端 (PHP)' : '前端 (JS)',
-            color: source === 'PHP' ? '#2e7d32' : '#ef6c00',
-            bg: source === 'PHP' ? '#e8f5e9' : '#fff3e0'
-        });
-    }
-
-    // 2. EXIF 參數清單
+    if (!exif) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
+    let sourceHtml = source ? renderTemplate('tmpl_exif_source_label', {
+        label: source === 'PHP' ? '後端 (PHP)' : '前端 (JS)',
+        color: source === 'PHP' ? '#2e7d32' : '#ef6c00',
+        bg: source === 'PHP' ? '#e8f5e9' : '#fff3e0'
+    }) : '';
     const fields = [
-        { label: '相機機型', value: `${exif.make || '未知'} ${exif.model || '未知'}` },
+        { label: '相機機型', value: `${exif.make || ''} ${exif.model || ''}`.trim() || '未知' },
         { label: '快門速度', value: exif.shutter || '未知' },
         { label: '焦距', value: exif.focal || '未知' },
         { label: '光圈值', value: exif.aperture || '未知' },
         { label: '感光度', value: `ISO ${exif.iso || '未知'}` },
         { label: '拍攝日期', value: exif.date || '未知' }
     ];
-
     let itemsHtml = '';
-    fields.forEach(f => {
-        itemsHtml += renderTemplate('tmpl_exif_item', f);
-    });
+    fields.forEach(f => { itemsHtml += renderTemplate('tmpl_exif_item', f); });
     const listHtml = renderTemplate('tmpl_exif_vertical_list', { items: itemsHtml });
-
-    // 3. GPS 區塊處理
-    const hasGps = exif.gps && exif.gps.lat !== undefined && exif.gps.lng !== undefined && exif.gps.lat !== null && exif.gps.lng !== null;
-    
-    if (hasGps) {
+    if (exif.gps && exif.gps.lat) {
         const gpsHtml = renderTemplate('tmpl_gps_block', {
-            lat: exif.gps.lat.toFixed(6),
-            lng: exif.gps.lng.toFixed(6),
+            lat: exif.gps.lat.toFixed(6), lng: exif.gps.lng.toFixed(6),
             mapLink: `https://www.google.com/maps/search/?api=1&query=${exif.gps.lat},${exif.gps.lng}`,
             embedUrl: `https://maps.google.com/maps?q=${exif.gps.lat},${exif.gps.lng}&z=15&output=embed`
         });
-
-        // 返回分割佈局
-        return renderTemplate('tmpl_exif_split_layout', {
-            left_content: sourceHtml + listHtml,
-            right_content: gpsHtml
-        });
+        return renderTemplate('tmpl_exif_split_layout', { left_content: sourceHtml + listHtml, right_content: gpsHtml });
     }
-
-    // 無 GPS 時返回標準佈局
     return sourceHtml + listHtml;
 }
 
 /* =========================================
    Modal & Utilities
    ========================================= */
-
 function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden'; 
-    }
+    const m = document.getElementById(modalId);
+    if (m) { m.classList.add('show'); document.body.style.overflow = 'hidden'; }
 }
-
 function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
+    const m = document.getElementById(modalId);
+    if (m) { m.classList.remove('show'); document.body.style.overflow = ''; }
 }
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === "Escape") {
-        document.querySelectorAll('.modal-overlay.show').forEach(modal => {
-            closeModal(modal.id);
-        });
-    }
-});
-
-function openPhotoModal(src) {
-    const modalImg = document.getElementById('modal-full-img');
-    if (modalImg) {
-        modalImg.src = src;
-        openModal('photoModal');
-    }
-}
+document.addEventListener('keydown', (e) => { if (e.key === "Escape") document.querySelectorAll('.modal-overlay.show').forEach(m => closeModal(m.id)); });
+function openPhotoModal(src) { const img = document.getElementById('modal-full-img'); if (img) { img.src = src; openModal('photoModal'); } }
 
 function base62Encode(num) {
     const charset = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let n = BigInt(num);
-    if (n === 0n) return charset[0];
-    let result = '';
-    const base = 62n;
-    while (n > 0n) {
-        let rem = n % base;
-        result = charset[Number(rem)] + result;
-        n = n / base;
-    }
-    return result;
+    let n = BigInt(num); if (n === 0n) return charset[0];
+    let res = ''; while (n > 0n) { res = charset[Number(n % 62n)] + res; n = n / 62n; }
+    return res;
 }
-
 function getObfuscatedSlug(id) {
-    const MOD = 2147483648n;
-    const PRIME = 1580030173n;
-    const MASK = 87369521n;
-    let n = BigInt(id);
-    n = (n * PRIME) % MOD;
-    n = n ^ MASK;
-    return base62Encode(n);
+    let n = (BigInt(id) * 1580030173n) % 2147483648n;
+    return base62Encode(n ^ 87369521n);
 }
 
 let currentShareData = null;
-
-/**
- * 開啟分享視窗 (具備尺寸偵測與過濾功能)
- */
 function openShareModal(filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart) {
     const container = document.getElementById('share-links-container');
-    container.innerHTML = '<div class="text-center py-3 text-muted">正在分析照片尺寸...</div>';
+    container.innerHTML = '<div class="text-center py-3 text-muted">分析中...</div>';
     openModal('shareModal');
-
-    // 預先載入原圖以獲取真實尺寸
-    const tempImg = new Image();
-    tempImg.src = originalImgSrc;
-    
-    tempImg.onload = function() {
-        const width = tempImg.naturalWidth;
-        currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: width };
-        const toggle = document.getElementById('toggle-original-url');
-        if (toggle) toggle.checked = false;
-        updateShareLinks();
-    };
-    
-    tempImg.onerror = function() {
-        // 若偵測失敗則全開
-        currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: 99999 };
-        const toggle = document.getElementById('toggle-original-url');
-        if (toggle) toggle.checked = false;
-        updateShareLinks();
-    };
+    const temp = new Image(); temp.src = originalImgSrc;
+    temp.onload = () => { currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: temp.naturalWidth }; updateShareLinks(); };
+    temp.onerror = () => { currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: 9999 }; updateShareLinks(); };
 }
 
-/**
- * 更新分享連結列表 (核心過濾邏輯)
- */
 function updateShareLinks() {
     if (!currentShareData) return;
-    const container = document.getElementById('share-links-container');
     const isOriginal = document.getElementById('toggle-original-url').checked;
-    
-    const { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth } = currentShareData;
+    const { filename, originalImgSrc, shortIdStart, realWidth } = currentShareData;
     const baseHref = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    
-    const getAbs = (relPath) => {
-        if(relPath.startsWith('./')) relPath = relPath.substring(2);
-        return new URL(relPath, baseHref).href;
-    }
-
+    const getAbs = (p) => new URL(p.startsWith('./') ? p.substring(2) : p, baseHref).href;
     const basePath = originalImgSrc.substring(0, originalImgSrc.lastIndexOf('/') + 1); 
-    const thumbBasePath = basePath + 'Thumbnail/';
-    const namePart = filename.substring(0, filename.lastIndexOf('.'));
+    const thumbPath = basePath + 'Thumbnail/';
+    const name = filename.substring(0, filename.lastIndexOf('.'));
     const ext = filename.substring(filename.lastIndexOf('.'));
     const sid = parseInt(shortIdStart);
 
-    let sizes = [];
-    const shortBase = baseHref + 'shorturl.php?i=';
-
-    // 定義規格與過濾閾值 (minW: 原圖必須大於此寬度才會顯示該選項)
-    const specs = [
-        { label: '超大尺寸 (2048px)', suffix: '_thumbXL', offset: 1, minW: 1601 }, 
-        { label: '大型尺寸 (1600px)', suffix: '_thumbL',  offset: 2, minW: 1025 },
-        { label: '中型尺寸 (1024px)', suffix: '_thumbM',  offset: 3, minW: 801 },
-        { label: '預覽尺寸 (800px)',  suffix: '_thumb',   offset: 4, minW: 321 },
-        { label: '極小尺寸 (320px)',  suffix: '_thumbXS', offset: 5, minW: 0 }
-    ];
-
-    specs.forEach(spec => {
-        // 如果原圖寬度夠大，或是該規格是最小的 XS，則顯示
-        if (realWidth >= spec.minW) {
-            const label = (realWidth < spec.minW * 1.2 && spec.minW > 0) ? `${spec.label} (接近原圖)` : spec.label;
-            const url = isOriginal ? getAbs(thumbBasePath + namePart + spec.suffix + ext) : (shortBase + getObfuscatedSlug(sid + spec.offset));
-            sizes.push({ label, url });
+    let html = "";
+    [{l:'超大 (2048px)',s:'_thumbXL',o:1,w:1601},{l:'大型 (1600px)',s:'_thumbL',o:2,w:1025},{l:'中型 (1024px)',s:'_thumbM',o:3,w:801},{l:'預覽 (800px)',s:'_thumb',o:4,w:321},{l:'極小 (320px)',s:'_thumbXS',o:5,w:0}]
+    .forEach(s => {
+        if (realWidth >= s.w) {
+            const url = isOriginal ? getAbs(thumbPath + name + s.s + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + s.o));
+            html += renderTemplate('tmpl_share_item', { label: s.l, url: url });
         }
     });
-
-    // 原始圖檔永遠顯示
-    const originalLabel = `原始圖檔 (${realWidth}px)`;
-    const originalUrl = isOriginal ? getAbs(originalImgSrc) : (shortBase + getObfuscatedSlug(sid));
-    sizes.push({ label: originalLabel, url: originalUrl });
-
-    let html = "";
-    sizes.forEach(size => {
-        html += renderTemplate('tmpl_share_item', {
-            label: size.label,
-            url: size.url
-        });
-    });
-    container.innerHTML = html;
+    html += renderTemplate('tmpl_share_item', { label: `原始 (${realWidth}px)`, url: isOriginal ? getAbs(originalImgSrc) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid)) });
+    document.getElementById('share-links-container').innerHTML = html;
 }
 
 function copyToClipboard(btn, text) {
     navigator.clipboard.writeText(text).then(() => {
-        const originalText = btn.innerText;
-        btn.innerText = "已複製!";
-        setTimeout(() => {
-            btn.innerText = originalText;
-        }, 2000);
+        const old = btn.innerText; btn.innerText = "已複製!";
+        setTimeout(() => btn.innerText = old, 2000);
     });
 }
