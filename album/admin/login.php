@@ -33,6 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="../album.html" class="text-decoration-none small text-secondary">&larr; 回到相簿首頁</a>
         </div>
         <h3 class="text-center mb-4 fw-bold">Album Admin</h3>
+        <?php if (file_exists(__DIR__ . '/../install.php')): ?>
+            <div class="alert alert-warning py-2 small fw-bold">
+                ⚠️ 安全警告：install.php 檔案仍然存在！請在安裝完成後立即刪除它，以防止系統被他人惡意重新安裝。
+            </div>
+        <?php endif; ?>
         <?php if ($error): ?>
             <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>

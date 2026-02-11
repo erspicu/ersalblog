@@ -5,6 +5,11 @@
 (function() {
     console.log("[Theme] Win11 (Blazor Native) Plugin Initializing...");
 
+    // 【協議實作】通知核心停止父層預設渲染，節省資源
+    if (typeof AppState !== 'undefined') {
+        AppState.uiTakeover = true;
+    }
+
     function injectBlazorApp() {
         // 1. 隱藏原有的 Header/Footer/Main
         const styles = `
@@ -20,18 +25,17 @@
         document.head.appendChild(styleSheet);
 
         // 2. 建立全屏 Iframe 載入 Blazor
-        // 注意：這裡路徑指向我們剛發佈的 dist/wwwroot/index.html
         const iframe = document.createElement('iframe');
         iframe.id = 'blazor-theme-container';
         
-        // 獲取目前 static 的路徑 (考慮到可能有不同的部署環境)
+        // 獲取目前 static 的路徑
         const staticPath = typeof APP_STATIC_PATH !== 'undefined' ? APP_STATIC_PATH : 'static/';
         iframe.src = staticPath + 'themes/album-win11/dist/wwwroot/index.html';
         
         document.body.appendChild(iframe);
     }
 
-    // 監聽 DOM 準備好就執行，不需要等待全部 load 完成以提升速度
+    // 監聽 DOM 準備好就執行
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectBlazorApp);
     } else {

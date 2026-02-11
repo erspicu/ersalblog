@@ -35,6 +35,15 @@ if (is_dir($collectionDir)) {
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
+        <?php if (file_exists(__DIR__ . '/../install.php')): ?>
+            <div class="alert alert-danger shadow-sm mb-4 d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>高風險安全警告：</strong> 偵測到 <code>album/install.php</code> 仍然存在於伺服器上。
+                    為了您的資安，請立即手動刪除此檔案，或將其更名。
+                </div>
+            </div>
+        <?php endif; ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">歡迎回來，<?php echo htmlspecialchars($_SESSION['album_admin_user']); ?>！</h2>
         </div>

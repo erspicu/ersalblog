@@ -108,7 +108,8 @@ const AppState = {
     homeData: null,
     apiType: (typeof albumConfig !== 'undefined' && albumConfig.api_type) ? albumConfig.api_type : 'json',
     compressionConfig: null,
-    modeToId: {} // 存放 mode -> id 對照表
+    modeToId: {}, // 存放 mode -> id 對照表
+    uiTakeover: false // 【協議】是否由主題完全接管 UI 渲染
 };
 
 /**
@@ -166,6 +167,12 @@ window.addEventListener("hashchange", () => handleRoute());
 function initRouter() { handleRoute(); }
 
 function handleRoute() {
+    // 【協議檢查】如果主題已接管，則停止父層的預設渲染
+    if (AppState.uiTakeover) {
+        console.log("[Core] UI Takeover active, skipping default rendering.");
+        return;
+    }
+
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1)); 
     const album = params.get('album');

@@ -56,7 +56,8 @@
                                     @if (!string.IsNullOrEmpty(album.Cover))
                                     {
                                         <div class="folder-content-wrapper">
-                                            <img src="../../../../../@album.Cover" class="folder-content-img" />
+                                            @* 使用 data-managed-src 讓父視窗管理員接管 *@
+                                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-managed-src="../../../../../@album.Cover" class="folder-content-img" />
                                         </div>
                                     }
                                     <div class="folder-front">
@@ -76,7 +77,7 @@
                         {
                             <div class="explorer-item" @onclick="() => ViewPhoto(photo)" @onclick:stopPropagation>
                                 <div class="explorer-item-photo-wrapper mb-1 border">
-                                    <img src="../../../../../@photo.Thumb" />
+                                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-managed-src="../../../../../@(photo.GetSizeUrl("S") ?? photo.Src)" />
                                 </div>
                                 <div class="explorer-item-name">@photo.Filename</div>
                             </div>
@@ -115,7 +116,7 @@
                 <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden;"
                      @onmousedown="HandleSlideshowMouseClick"
                      @oncontextmenu:preventDefault="isSlideshowActive">
-                    <img src="../../../../../@selectedPhoto.Src" 
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-managed-src="../../../../../@(selectedPhoto.GetSizeUrl("2XL") ?? selectedPhoto.Src)" 
                          style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(@(photoRotation)deg);" />
                 </div>
                 
@@ -256,7 +257,7 @@
 
                             <!-- Section 2: Code Implementation -->
                             <section class="mb-5">
-                                <h3 class="border-bottom pb-2 mb-3"><i class="fa-solid fa-code me-2"></i>2. 專業代碼實作：依賴注入與異步通訊</h3>
+                                <h3 class="border-bottom pb-2 mb-3"><i class="fa-solid fa-code me-2 text-success"></i>2. 專業代碼實作：依賴注入與異步通訊</h3>
                                 <p>我們在 WASM 內部實作了完整的服務層架構，利用 <strong>Dependency Injection (DI)</strong> 來管理資料生命週期：</p>
                                 
                                 <div class="code-block bg-dark text-light p-3 rounded mb-4 shadow-sm" style="font-family: 'Consolas', monospace; font-size: 12px; overflow-x: auto;">
@@ -420,6 +421,21 @@ builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, 
     .browser-content-area { background: #fff; flex-direction: column; overflow-y: auto; }
     .webpage-container { max-width: 800px; margin: 0 auto; line-height: 1.6; }
     .code-block { border-left: 4px solid #0078d4; }
+
+    /* Windows Activation Style Watermark */
+    .activation-watermark {
+        position: fixed;
+        right: 30px;
+        bottom: 60px;
+        color: rgba(255, 255, 255, 0.3);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        pointer-events: none;
+        user-select: none;
+        z-index: 99999;
+        text-align: left;
+    }
+    .activation-watermark .line-1 { font-size: 1.8rem; margin-bottom: 2px; }
+    .activation-watermark .line-2 { font-size: 0.95rem; }
 </style>
 
 @code {
@@ -488,11 +504,11 @@ builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, 
     
     private string GetInfoStyle()
     {
-        var zIndex = activeWindow == "info" ? 2000 : 150;
-        if (infoX != 0 || infoY != 0) return $"top: {infoY}px; left: {infoX}px; z-index: {zIndex}; transform: none; border-radius: 8px;";
-        return $"z-index: {zIndex}; border-radius: 8px;";
+        if (infoX != 0 || infoY != 0) return $"top: {infoY}px; left: {infoX}px; z-index: {infoZ}; transform: none; border-radius: 8px;";
+        return $"z-index: {infoZ}; border-radius: 8px;";
     }
 
+    [JSInvokable] public void UpdateWindowPos(int x, int y) { /* Unified callback for drag system */ }
     [JSInvokable] public void UpdateExplorerPos(int x, int y) { explorerX = x; explorerY = y; FocusWindow("explorer"); }
     [JSInvokable] public void UpdateViewerPos(int x, int y) { viewerX = x; viewerY = y; FocusWindow("viewer"); }
     [JSInvokable] public void UpdateInfoPos(int x, int y) { infoX = x; infoY = y; FocusWindow("info"); }
@@ -595,7 +611,15 @@ builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, 
     public class AlbumIndex { public List<AlbumItem> Items { get; set; } = new(); }
     public class AlbumItem { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public int Count { get; set; } public string Cover { get; set; } = ""; }
     public class AlbumDetail { public string Name { get; set; } = ""; public string Desc { get; set; } = ""; public List<PhotoItem> Photos { get; set; } = new(); }
-    public class PhotoItem { [JsonPropertyName("filename")] public string Filename { get; set; } = ""; [JsonPropertyName("thumb")] public string Thumb { get; set; } = ""; [JsonPropertyName("src")] public string Src { get; set; } = ""; [JsonPropertyName("exif")] public ExifData? Exif { get; set; } }
+    public class PhotoItem { 
+        [JsonPropertyName("filename")] public string Filename { get; set; } = ""; 
+        [JsonPropertyName("src")] public string Src { get; set; } = ""; 
+        [JsonPropertyName("sizes")] public Dictionary<string, string> Sizes { get; set; } = new();
+        [JsonPropertyName("exif")] public ExifData? Exif { get; set; } 
+        [JsonPropertyName("shortIdStart")] public int ShortIdStart { get; set; }
+
+        public string? GetSizeUrl(string sizeId) => Sizes.ContainsKey(sizeId) ? Sizes[sizeId] : null;
+    }
     public class ExifData { [JsonPropertyName("model")] public string Model { get; set; } = ""; [JsonPropertyName("aperture")] public string Aperture { get; set; } = ""; [JsonPropertyName("shutter")] public string Shutter { get; set; } = ""; [JsonPropertyName("iso")] public object Iso { get; set; } = 0; [JsonPropertyName("focal")] public string Focal { get; set; } = ""; [JsonPropertyName("date")] public string Date { get; set; } = ""; [JsonPropertyName("gps")] public GpsData? Gps { get; set; } }
     public class GpsData { [JsonPropertyName("lat")] public double Lat { get; set; } [JsonPropertyName("lng")] public double Lng { get; set; } }
 }
