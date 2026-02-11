@@ -1,0 +1,191 @@
+:root {
+    --wpf-window-bg: #f3f3f3;
+    --wpf-titlebar-bg: #ffffff;
+    --wpf-border-color: #d1d1d1;
+    --wpf-accent-color: #0078d4;
+    --desktop-bg: #004d8c;
+}
+
+/* 隱藏原生 SPA 的 UI */
+.header-bar, .footer, .breadcrumb, .btn-outline {
+    display: none !important;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--desktop-bg);
+}
+
+.desktop {
+    width: 100vw;
+    height: 100vh;
+    background: var(--desktop-bg);
+    background-image: linear-gradient(135deg, #004d8c 0%, #003366 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Windows Activation Watermark */
+.activation-watermark {
+    position: fixed;
+    right: 30px;
+    bottom: 60px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 1.2rem;
+    pointer-events: none;
+    user-select: none;
+    z-index: 9999;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.activation-watermark .line-1 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.activation-watermark .line-2 {
+    font-size: 0.9rem;
+}
+
+/* WinForms/WPF Window Style */
+.wpf-window {
+    position: absolute;
+    width: 90%;
+    height: 80%;
+    top: 50px;
+    left: 5%;
+    background: var(--wpf-window-bg);
+    border: 1px solid var(--wpf-border-color);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.wpf-titlebar {
+    height: 32px;
+    background: var(--wpf-titlebar-bg);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border-bottom: 1px solid var(--wpf-border-color);
+    user-select: none;
+    cursor: default;
+}
+
+.wpf-title {
+    flex-grow: 1;
+    font-size: 12px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.wpf-controls {
+    display: flex;
+}
+
+.wpf-control-btn {
+    width: 46px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.wpf-control-btn:hover {
+    background: #e5e5e5;
+}
+
+.wpf-control-btn.close:hover {
+    background: #e81123;
+    color: white;
+}
+
+.wpf-content-host {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: white;
+    padding: 20px;
+}
+
+/* 調整相簿內容在視窗內的樣式 */
+.main-content {
+    position: relative;
+    z-index: 101;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+}
+
+/* Taskbar */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Win11 style centered */
+    padding: 0 10px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.start-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #0078d4;
+    font-size: 20px;
+    transition: background 0.2s;
+}
+
+.start-btn:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+/* Explorer Grid Adjustments */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 20px !important;
+}
+
+.card {
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: background 0.2s;
+}
+
+.card:hover {
+    background: rgba(0, 120, 212, 0.1) !important;
+    border: 1px solid rgba(0, 120, 212, 0.3) !important;
+}
+
+.card-title {
+    font-size: 0.9rem !important;
+    color: #333 !important;
+}

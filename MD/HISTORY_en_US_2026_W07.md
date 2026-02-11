@@ -38,3 +38,7 @@
 - **Environment**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.
 - **Blazor Fix**: Cleaned up deeply nested directories in `BlazorAlbumExplorer` caused by recursive publishing and updated `.gitignore` with .NET ignore patterns.
 - **Path Optimization**: Fixed resource loading paths for Blazor Explorer in Apache subdirectory environments (changed `../../../` to `../../`), resolving issues with missing images and JSON data.
+- **Album Service: Win11 Theme Migrated**: Successfully ported the WPF/Modern UI from the Blazor project back to the Album Service (`album-win11`).
+    - **Simulated Window**: Implemented a draggable window system, Windows 11 desktop, and taskbar.
+    - **Activation Watermark**: Added a "Activate Experimental Project" watermark in the bottom-right corner, mimicking the Windows non-activated state to indicate its experimental status.
+    - **SPA Integration**: Theme JS automatically wraps SPA content into the simulated window environment.
