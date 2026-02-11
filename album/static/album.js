@@ -45,7 +45,7 @@ class DownloadManager {
 
         try {
             const response = await fetch(url);
-            if (!response.ok && response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             
@@ -54,9 +54,9 @@ class DownloadManager {
                 imgElement.classList.add('loaded');
                 imgElement._blobUrl = blobUrl;
                 
-                // 【核心修正】觸發自訂事件，通知 EXIF 等模組圖片已就緒
+                // 【核心修正】將 blob 物件一併傳遞，提升 EXIF 解析穩定性
                 imgElement.dispatchEvent(new CustomEvent('managed-image-loaded', { 
-                    detail: { url, blobUrl } 
+                    detail: { url, blobUrl, blob } 
                 }));
                 
                 resolve(blobUrl);
@@ -305,29 +305,39 @@ async function loadPhotoView(albumName, photoName) {
         shortIdStart: photo.shortIdStart || '0',
         photoTitle: photo.title || photo.filename,
         photoDesc: photo.desc || '',
-        exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small">正在載入技術資訊...</div>'
+        exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small" id="exif-loading-text">正在載入技術資訊...</div>'
     }));
 
+    // 【核心修正】先設置 EXIF 偵測監聽器 (確保不會錯過 DownloadManager 的事件)
+    if (!photo.exif || Object.keys(photo.exif).length === 0) {
+        tryFetchExifClientSide();
+    }
+
+    // 啟動圖片下載
     const mainImg = document.getElementById('photo-main-viewer');
     if(mainImg) {
         mainImg.setAttribute('data-managed-src', photo.thumbL || photo.src);
         managedLoadImages();
     }
     document.title = `${photo.filename} - ${data.name}`;
-    if (!photo.exif || Object.keys(photo.exif).length === 0) tryFetchExifClientSide();
 }
 
 /**
- * 【核心修正】所有主題通用的 EXIF 偵測，現在監聽 DownloadManager 的事件
+ * 所有主題通用的 EXIF 偵測，監聽 DownloadManager 的事件並優先使用 Blob
  */
 function tryFetchExifClientSide() {
     const img = document.getElementById('photo-main-viewer');
     const container = document.getElementById('exif-info-container');
     if (!img || !container || typeof EXIF === 'undefined') return;
 
-    const runExif = function() {
-        if (img.src.startsWith('data:image/gif;base64')) return;
-        EXIF.getData(img, function() {
+    const runExif = function(e) {
+        // 如果是透過管理員事件觸發，直接拿 blob 解析，這最準確且無視 URL 格式
+        const sourceData = (e && e.detail && e.detail.blob) ? e.detail.blob : img;
+        
+        // 確保不是在跑佔位圖
+        if (img.src.startsWith('data:image/gif;base64') && !e) return;
+
+        EXIF.getData(sourceData, function() {
             const all = EXIF.getAllTags(this);
             if (!all || Object.keys(all).length === 0) return;
             const exif = {
@@ -352,8 +362,13 @@ function tryFetchExifClientSide() {
         });
     };
 
-    img.addEventListener('managed-image-loaded', runExif);
-    if (img.complete && !img.src.startsWith('data:image/gif;base64')) runExif();
+    // 監聽管理員載入事件
+    img.addEventListener('managed-image-loaded', runExif, { once: true });
+    
+    // 同步檢查：如果圖片已經載入完成（快取）
+    if (img.classList.contains('loaded') && !img.src.startsWith('data:image/gif;base64')) {
+        runExif();
+    }
 }
 
 function formatExifHtml(exif, source) {

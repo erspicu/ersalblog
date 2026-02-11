@@ -171,6 +171,8 @@ Listed below are key directories and file rules in the Git repository:
     *   提供多樣化視覺主題，包含 `album-matrix` (具備數位雨特效) 與 `album-y2k` (復古 2000 年代風格)。
     *   **實驗性 Blazor 總管**: 使用 Blazor WebAssembly 實作的高擬真 Windows 11 / WPF 風格檔案總管，提供沉浸式的相簿瀏覽體驗。
     *   特定主題整合 YouTube IFrame API 提供背景音樂功能。
+    *   **資源管理**: 於 `album.js` 實作全域 `DownloadManager`，具備併發控制（同時最多 3 個任務），優化頻寬分配與瀏覽器載入效能。
+    *   **主題瀏覽**: 提供 `ThemeSelect.html` 與專用 `api/api_themes.php`，支援動態偵測並預覽相簿風格。
 
 *   **初始化與健康檢查**:
     *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。
