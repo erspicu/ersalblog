@@ -35,3 +35,4 @@
 - **Album Service: Removed Win11 Theme**: Completely removed the `album-win11` theme from the project, including CSS styles, JavaScript plugins, and related assets.
 - **Frontend Configuration**: Restored the default theme in `config.js` to the standard `album` theme.
 - **Code Cleanup**: Cleaned up residual Win11-related tags and CSS classes within `BlazorAlbumExplorer`.
+- **Environment**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.

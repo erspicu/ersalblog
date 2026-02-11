@@ -35,3 +35,4 @@
 - **相簿服務：移除 Win11 主題**：從專案中完全移除了 `album-win11` 主題，包括 CSS 樣式、JavaScript 插件及相關素材。
 - **前端設定**：將 `config.js` 的預設主題恢復為標準版 `album`。
 - **代碼清理**：同步清理了 `BlazorAlbumExplorer` 中殘留的 Win11 相關標記與 CSS 類別。
+- **環境清理**：移除了專案目錄下的暫存檔 `(backup)config.php` 與測試用的截圖 (`qa1.png`, `qa3.png`)。
