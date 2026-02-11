@@ -56,7 +56,7 @@
                                     @if (!string.IsNullOrEmpty(album.Cover))
                                     {
                                         <div class="folder-content-wrapper">
-                                            <img src="../../../@album.Cover" class="folder-content-img" />
+                                            <img src="../../../../../@album.Cover" class="folder-content-img" />
                                         </div>
                                     }
                                     <div class="folder-front">
@@ -76,7 +76,7 @@
                         {
                             <div class="explorer-item" @onclick="() => ViewPhoto(photo)" @onclick:stopPropagation>
                                 <div class="explorer-item-photo-wrapper mb-1 border">
-                                    <img src="../../../@photo.Thumb" />
+                                    <img src="../../../../../@photo.Thumb" />
                                 </div>
                                 <div class="explorer-item-name">@photo.Filename</div>
                             </div>
@@ -115,7 +115,7 @@
                 <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 100%; overflow: hidden;"
                      @onmousedown="HandleSlideshowMouseClick"
                      @oncontextmenu:preventDefault="isSlideshowActive">
-                    <img src="../../../@selectedPhoto.Src" 
+                    <img src="../../../../../@selectedPhoto.Src" 
                          style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(@(photoRotation)deg);" />
                 </div>
                 
@@ -182,7 +182,171 @@
                     <div class="fs-6 text-dark">放一些 Blog 用到的素材照片</div>
                 </div>
                 <div class="mt-auto text-end">
+                    <button class="btn btn-outline-primary px-3 shadow-sm me-2" @onclick="OpenBrowser">更多資訊</button>
                     <button class="btn btn-light border px-4 shadow-sm" style="min-width: 80px;" @onclick="ToggleAlbumInfo">OK</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Edge Browser Window *@
+    @if (showBrowser)
+    {
+        <div @ref="browserRef" class="wpf-window shadow-lg browser-window" 
+             style="@GetBrowserStyle()" 
+             @onmousedown="@(() => FocusWindow("browser"))">
+            <div @ref="browserHandle" class="wpf-titlebar edge-titlebar" @ondblclick="ToggleBrowserMaximize">
+                <div class="edge-tabs">
+                    <div class="edge-tab active">
+                        <i class="fa-solid fa-microchip me-2 text-primary"></i>
+                        <span>Tech Specs</span>
+                        <i class="fa-solid fa-xmark ms-2 small-close"></i>
+                    </div>
+                    <div class="edge-tab-add"><i class="fa-solid fa-plus"></i></div>
+                </div>
+                <div class="wpf-controls ms-auto">
+                    <div class="wpf-control-btn" @onclick="MinimizeBrowser"><i class="fa-solid fa-minus"></i></div>
+                    <div class="wpf-control-btn" @onclick="ToggleBrowserMaximize"><i class="fa-regular @(isBrowserMaximized ? "fa-copy" : "fa-square")"></i></div>
+                    <div class="wpf-control-btn close" @onclick="CloseBrowser"><i class="fa-solid fa-xmark"></i></div>
+                </div>
+            </div>
+            <div class="edge-toolbar">
+                <div class="edge-nav-btns me-2">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <i class="fa-solid fa-rotate-right"></i>
+                </div>
+                <div class="edge-address-bar flex-grow-1">
+                    <i class="fa-solid fa-lock small me-2 text-success"></i>
+                    <input type="text" value="https://baxermux.internal/experimental/blazor-wasm" readonly />
+                    <i class="fa-regular fa-star ms-2"></i>
+                </div>
+                <div class="edge-profile-btns ms-2">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </div>
+            </div>
+            <div class="wpf-content browser-content-area">
+                <div class="webpage-container p-5">
+                    <div class="web-hero mb-5 text-center">
+                        <h1 class="display-4 fw-bold text-primary">Blazor WASM 深度整合技術白皮書</h1>
+                        <p class="lead text-muted">探討 .NET 8 在高效能 Web 影像管理系統中的實踐與未來潛力</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <span class="badge bg-secondary">v1.0.4</span>
+                            <span class="badge bg-success">Runtime: .NET 8.0</span>
+                            <span class="badge bg-info">Architecture: WASM</span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Section 1: Architecture -->
+                            <section class="mb-5">
+                                <h3 class="border-bottom pb-2 mb-3"><i class="fa-solid fa-microchip me-2 text-primary"></i>1. 核心引擎與架構</h3>
+                                <p>本專案採用 <strong>Blazor WebAssembly (WASM)</strong> 模式，這意味著當您載入此頁面時，瀏覽器實際上正在執行一個輕量化的 <strong>.NET Runtime</strong>。不同於傳統 JavaScript，C# 代碼被編譯為二進位指令集，直接由瀏覽器底層執行。</p>
+                                
+                                <div class="p-3 bg-light border-start border-4 border-primary rounded mb-3">
+                                    <h6 class="fw-bold">為什麼選擇 WASM？</h6>
+                                    <ul class="small mb-0">
+                                        <li><strong>運算效能:</strong> 處理大量 EXIF 數據與複雜視窗層級運算時，C# 具備更高的穩定性。</li>
+                                        <li><strong>程式碼共用:</strong> 未來可與後端 API 或傳統桌面應用程式 (WPF/MAUI) 共用相同的數據模型定義。</li>
+                                        <li><strong>強型別安全:</strong> 透過編譯時期的型別檢查，杜絕 90% 以上的運行時邏輯錯誤。</li>
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <!-- Section 2: Code Implementation -->
+                            <section class="mb-5">
+                                <h3 class="border-bottom pb-2 mb-3"><i class="fa-solid fa-code me-2"></i>2. 專業代碼實作：依賴注入與異步通訊</h3>
+                                <p>我們在 WASM 內部實作了完整的服務層架構，利用 <strong>Dependency Injection (DI)</strong> 來管理資料生命週期：</p>
+                                
+                                <div class="code-block bg-dark text-light p-3 rounded mb-4 shadow-sm" style="font-family: 'Consolas', monospace; font-size: 12px; overflow-x: auto;">
+<pre class="mb-0">
+<span class="text-secondary">// 在 Program.cs 中註冊具備生命週期管理的資料服務</span>
+builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, <span class="text-success">CdnDataProvider</span>&gt;();
+
+<span class="text-secondary">// 在組件中直接注入使用</span>
+<span class="text-warning">[Inject]</span> <span class="text-warning">public</span> <span class="text-success">IAlbumProvider</span> AlbumService { <span class="text-success">get</span>; <span class="text-success">set</span>; }
+
+<span class="text-warning">protected override async Task</span> OnInitializedAsync() {
+    <span class="text-info">// 使用 Linq 語法對相簿進行複雜過濾與排序</span>
+    albums = (await AlbumService.FetchAllAsync())
+             .Where(a =&gt; a.IsPublic)
+             .OrderByDescending(a =&gt; a.CreateTime)
+             .ToList();
+}
+</pre>
+                                </div>
+
+                                <p>針對高頻率的視窗拖拽，我們採用了 <strong>JS-To-C# 雙向互操作</strong>，透過引用傳遞來減少記憶體分配壓力：</p>
+                                <div class="code-block bg-dark text-light p-3 rounded mb-3 shadow-sm" style="font-family: 'Consolas', monospace; font-size: 12px; overflow-x: auto;">
+<pre class="mb-0">
+<span class="text-warning">[JSInvokable]</span>
+<span class="text-warning">public void</span> UpdateWindowPosition(<span class="text-success">int</span> x, <span class="text-success">int</span> y) {
+    <span class="text-info">// 觸發 UI 重新渲染，並自動計算 Z-Index 層級</span>
+    this.WindowX = x;
+    this.WindowY = y;
+    this.ZIndex = WindowManager.GetNextTop();
+    StateHasChanged();
+}
+</pre>
+                                </div>
+                            </section>
+
+                            <!-- Section 3: Future Vision -->
+                            <section class="mb-5">
+                                <h3 class="border-bottom pb-2 mb-3"><i class="fa-solid fa-rocket me-2 text-danger"></i>3. 未來擴展與專業化願景</h3>
+                                <p>Blazor WASM 的引入僅僅是開始，未來本系統將可擴展至以下專業領域：</p>
+                                
+                                <div class="list-group">
+                                    <div class="list-group-item list-group-item-action flex-column align-items-start border-start border-4 border-info">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 fw-bold text-info">邊緣影像處理 (Edge Image Processing)</h6>
+                                        </div>
+                                        <p class="mb-1 small text-muted">利用 <strong>SkiaSharp</strong> 引擎，在不將圖片上傳至伺服器的情況下，直接在瀏覽器進行批次 RAW 檔解析、色彩校正與高效能浮水印添加。</p>
+                                    </div>
+                                    <div class="list-group-item list-group-item-action flex-column align-items-start border-start border-4 border-warning">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 fw-bold text-warning">零信任加密容器 (Zero-Knowledge Containers)</h6>
+                                        </div>
+                                        <p class="mb-1 small text-muted">整合 .NET 原生加密套件，實作客戶端專屬的加密相簿。所有的加解密行為皆在 WASM 內部發生，伺服器端永遠無法窺探照片內容。</p>
+                                    </div>
+                                    <div class="list-group-item list-group-item-action flex-column align-items-start border-start border-4 border-success">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 fw-bold text-success">離線 OS 協作 (Offline Workspace)</h6>
+                                        </div>
+                                        <p class="mb-1 small text-muted">結合 PWA 與 WASM，讓整個相簿後台轉化為離線作業系統。即使斷網，攝影師仍能進行資料標註與分類，並在連線後自動同步。</p>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- Sidebar Info -->
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm mb-4 bg-light">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>安全性報告</h6>
+                                    <p class="small text-muted">相較於純 JS，WASM 代碼以二進位封裝，能顯著提升反編譯難度，保護核心商業邏輯與 API 密鑰。</p>
+                                    <hr>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-sm btn-primary">下載技術規格書 (PDF)</button>
+                                        <button class="btn btn-sm btn-outline-secondary">聯繫架構師</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm bg-dark text-white p-3">
+                                <h6 class="fw-bold"><i class="fa-solid fa-circle-nodes me-2 text-info"></i>實時監控</h6>
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between small mb-1"><span>CPU Usage:</span> <span class="text-success">2.4%</span></div>
+                                    <div class="progress" style="height: 4px;"><div class="progress-bar bg-success" style="width: 25%"></div></div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between small mb-1"><span>WASM Memory:</span> <span class="text-info">42 MB</span></div>
+                                    <div class="progress" style="height: 4px;"><div class="progress-bar bg-info" style="width: 15%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -201,6 +365,12 @@
                     <i class="fa-solid fa-image me-2 text-info"></i> Photos
                 </div>
             }
+            @if (showBrowser)
+            {
+                <div class="px-3 border-bottom border-3 taskbar-item @(isBrowserMinimized ? "" : "border-primary active-task") @(activeWindow == "browser" ? "focused-task" : "")" @onclick="ToggleBrowserTask">
+                    <i class="fa-brands fa-edge me-2 text-primary"></i> Edge
+                </div>
+            }
         </div>
         <div class="system-tray">
             <div class="clock">
@@ -213,8 +383,8 @@
 
 <style>
     .wpf-window { transition: z-index 0s; pointer-events: auto; }
-    .win-info-centered { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%); }
-    .win-messagebox { width: 400px !important; height: 180px !important; border: 1px solid #999; resize: none !important; }
+    .win-info-centered { position: fixed !important; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .win-messagebox { width: 400px !important; height: 180px !important; border: 1px solid #999; resize: none; }
     .taskbar-item { background: rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; min-width: 120px; display: flex; align-items: center; }
     .active-task { background: rgba(255,255,255,0.4); }
     .focused-task { background: rgba(255,255,255,0.7); border-bottom-width: 4px !important; }
@@ -235,6 +405,21 @@
     .info-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; background: rgba(30,30,30,0.95); color: #ddd; padding: 20px; border-left: 1px solid #444; font-size: 13px; z-index: 90; overflow-y: auto; }
     .clock { text-align: right; font-size: 11px; line-height: 1.1; }
     .win-title { flex-grow: 1; font-size: 12px; color: #333; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Edge Browser Specific Styles */
+    .edge-titlebar { background: #dee1e6 !important; height: 40px !important; padding: 0 !important; }
+    .edge-tabs { display: flex; align-items: flex-end; height: 100%; padding-left: 8px; }
+    .edge-tab { background: #f1f3f4; height: 32px; min-width: 160px; border-radius: 8px 8px 0 0; display: flex; align-items: center; padding: 0 12px; font-size: 12px; margin-right: 4px; border: 1px solid #ccc; border-bottom: none; }
+    .edge-tab.active { background: white; height: 34px; z-index: 2; border-color: #aaa; }
+    .edge-tab-add { padding: 5px 10px; cursor: pointer; color: #5f6368; }
+    .edge-toolbar { background: white; height: 44px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #dee1e6; }
+    .edge-nav-btns { display: flex; gap: 15px; color: #5f6368; font-size: 14px; margin-right: 10px; }
+    .edge-address-bar { background: #f1f3f4; height: 28px; border-radius: 20px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; border: 1px solid transparent; }
+    .edge-address-bar:focus-within { background: white; border-color: #0078d4; box-shadow: 0 0 0 2px rgba(0,120,212,0.2); }
+    .edge-address-bar input { background: transparent; border: none; width: 100%; outline: none; color: #3c4043; }
+    .browser-content-area { background: #fff; flex-direction: column; overflow-y: auto; }
+    .webpage-container { max-width: 800px; margin: 0 auto; line-height: 1.6; }
+    .code-block { border-left: 4px solid #0078d4; }
 </style>
 
 @code {
@@ -246,20 +431,26 @@
     private ElementReference explorerRef, explorerHandle;
     private ElementReference viewerRef, viewerHandle;
     private ElementReference infoRef, infoHandle;
+    private ElementReference browserRef, browserHandle;
     
     private bool isExplorerMaximized = false;
     private bool isExplorerMinimized = false;
     private bool isViewerMaximized = false;
     private bool isViewerMinimized = false;
+    private bool isBrowserMaximized = false;
+    private bool isBrowserMinimized = false;
+    private bool showBrowser = false;
     
     private int explorerX = 60, explorerY = 40;
     private int viewerX = 120, viewerY = 80;
     private int infoX = 0, infoY = 0; 
+    private int browserX = 180, browserY = 120;
 
     private int nextZIndex = 1000;
     private int explorerZ = 100;
     private int viewerZ = 101;
     private int infoZ = 102;
+    private int browserZ = 103;
     private string activeWindow = "explorer";
 
     private void FocusWindow(string name) 
@@ -269,6 +460,7 @@
         if (name == "explorer") explorerZ = nextZIndex;
         else if (name == "viewer") viewerZ = nextZIndex;
         else if (name == "info") infoZ = nextZIndex;
+        else if (name == "browser") browserZ = nextZIndex;
         StateHasChanged(); 
     }
 
@@ -286,6 +478,13 @@
         var radius = isViewerMaximized ? "0" : "8px";
         return (isViewerMaximized ? "top: 0; left: 0; width: 100vw; height: calc(100vh - 40px);" : $"top: {viewerY}px; left: {viewerX}px; width: 750px; height: 500px;") + $" z-index: {viewerZ}; border-radius: {radius};";
     }
+
+    private string GetBrowserStyle() 
+    {
+        if (isBrowserMinimized) return "display: none;";
+        var radius = isBrowserMaximized ? "0" : "8px";
+        return (isBrowserMaximized ? "top: 0; left: 0; width: 100vw; height: calc(100vh - 40px);" : $"top: {browserY}px; left: {browserX}px; width: 900px; height: 600px;") + $" z-index: {browserZ}; border-radius: {radius};";
+    }
     
     private string GetInfoStyle()
     {
@@ -297,6 +496,7 @@
     [JSInvokable] public void UpdateExplorerPos(int x, int y) { explorerX = x; explorerY = y; FocusWindow("explorer"); }
     [JSInvokable] public void UpdateViewerPos(int x, int y) { viewerX = x; viewerY = y; FocusWindow("viewer"); }
     [JSInvokable] public void UpdateInfoPos(int x, int y) { infoX = x; infoY = y; FocusWindow("info"); }
+    [JSInvokable] public void UpdateBrowserPos(int x, int y) { browserX = x; browserY = y; FocusWindow("browser"); }
 
     [JSInvokable]
     public void OnKeyPress(string key) 
@@ -309,10 +509,13 @@
 
     private void MinimizeExplorer() { isExplorerMinimized = true; }
     private void MinimizeViewer() { isViewerMinimized = true; }
+    private void MinimizeBrowser() { isBrowserMinimized = true; }
     private void ToggleExplorerTask() { isExplorerMinimized = !isExplorerMinimized; if (!isExplorerMinimized) FocusWindow("explorer"); }
     private void ToggleViewerTask() { isViewerMinimized = !isViewerMinimized; if (!isViewerMinimized) FocusWindow("viewer"); }
+    private void ToggleBrowserTask() { isBrowserMinimized = !isBrowserMinimized; if (!isBrowserMinimized) FocusWindow("browser"); }
     private void ToggleExplorerMaximize() { isExplorerMaximized = !isExplorerMaximized; FocusWindow("explorer"); }
     private async Task ToggleViewerMaximize() { if (isSlideshowActive) return; isViewerMaximized = !isViewerMaximized; FocusWindow("viewer"); StateHasChanged(); if (!isViewerMaximized && !isViewerMinimized) await InitDrag(viewerRef, viewerHandle, "UpdateViewerPos"); }
+    private async Task ToggleBrowserMaximize() { isBrowserMaximized = !isBrowserMaximized; FocusWindow("browser"); StateHasChanged(); if (!isBrowserMaximized && !isBrowserMinimized) await InitDrag(browserRef, browserHandle, "UpdateBrowserPos"); }
     
     private async Task ToggleAlbumInfo() 
     { 
@@ -325,6 +528,19 @@
             await InitDrag(infoRef, infoHandle, "UpdateInfoPos");
         }
     }
+
+    private async Task OpenBrowser()
+    {
+        showAlbumInfo = false;
+        showBrowser = true;
+        isBrowserMinimized = false;
+        FocusWindow("browser");
+        StateHasChanged();
+        await Task.Delay(100);
+        await InitDrag(browserRef, browserHandle, "UpdateBrowserPos");
+    }
+
+    private void CloseBrowser() { showBrowser = false; FocusWindow("explorer"); }
 
     private bool showInfoPanel = false;
     private bool showAlbumInfo = false; 
@@ -356,12 +572,12 @@
 
     protected override async Task OnInitializedAsync() => await LoadAlbums();
     private bool isLoading = true;
-    private async Task LoadAlbums() { isLoading = true; try { albums = (await Http.GetFromJsonAsync<AlbumIndex>("../../../api/json/index.json"))?.Items ?? new(); } catch { } finally { isLoading = false; } }
+    private async Task LoadAlbums() { isLoading = true; try { albums = (await Http.GetFromJsonAsync<AlbumIndex>("../../../../../api/json/index.json"))?.Items ?? new(); } catch { } finally { isLoading = false; } }
 
     private async Task OpenAlbum(AlbumItem album)
     {
         isLoading = true; FocusWindow("explorer"); currentPath = $@"C:\Users\Admin\Pictures\Albums\{album.Name}";
-        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
+        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
     }
 
     private async Task ViewPhoto(PhotoItem photo)
