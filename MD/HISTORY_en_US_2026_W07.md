@@ -42,3 +42,7 @@
     - **Native Integration**: Published the Blazor project to the `dist/` folder and used `theme.js` for automatic full-page replacement.
     - **Built-in Watermark**: Implemented the "Activate Experimental Project" watermark directly in Razor Layout, explicitly mentioning the Blazor WASM technology.
     - **Path Resolution**: Fixed internal path depths to ensure consistent resource loading for JSON and images within the subdirectory structure.
+- **Global Download Manager (`DownloadManager`)**: Implemented a downloader with concurrency control in `album.js`, restricting simultaneous downloads to a maximum of 3.
+- **Album Service: Theme Selector (`ThemeSelect.html`)**: Created a dedicated theme preview page to dynamically showcase all available album styles.
+- **Theme List API**: Implemented `api/api_themes.php` to automatically scan theme directories and return a JSON list.
+- **Environment Update**: Updated version to `v2026.02.11.23.10`.

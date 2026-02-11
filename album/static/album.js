@@ -3,6 +3,69 @@
  */
 
 /* =========================================
+   Download & Concurrency Manager
+   ========================================= */
+class DownloadManager {
+    constructor(maxConcurrent = 3) {
+        this.maxConcurrent = maxConcurrent;
+        this.currentConcurrent = 0;
+        this.queue = [];
+    }
+
+    /**
+     * 將下載任務加入佇列
+     * @param {string} url 圖片網址
+     * @param {string} filename 儲存檔名
+     * @returns {Promise}
+     */
+    async download(url, filename) {
+        return new Promise((resolve, reject) => {
+            this.queue.push({ url, filename, resolve, reject });
+            this.processQueue();
+        });
+    }
+
+    async processQueue() {
+        if (this.currentConcurrent >= this.maxConcurrent || this.queue.length === 0) {
+            return;
+        }
+
+        this.currentConcurrent++;
+        const { url, filename, resolve, reject } = this.queue.shift();
+
+        console.log(`[DownloadManager] Starting: ${filename} (Active: ${this.currentConcurrent})`);
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = await response.blob();
+            
+            // 觸發瀏覽器下載
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(blobUrl);
+            document.body.removeChild(a);
+
+            resolve(filename);
+        } catch (error) {
+            console.error(`[DownloadManager] Failed: ${filename}`, error);
+            reject(error);
+        } finally {
+            this.currentConcurrent--;
+            console.log(`[DownloadManager] Finished: ${filename} (Active: ${this.currentConcurrent})`);
+            this.processQueue();
+        }
+    }
+}
+
+// 全域共享實例
+window.albumDownloadManager = new DownloadManager(3);
+
+/* =========================================
    Global State & Config
    ========================================= */
 const AppState = {
