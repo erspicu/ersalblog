@@ -25,5 +25,6 @@ return array(
     'api_json' => '靜態 JSON 模式 (推薦)',
     'api_php' => '動態 PHP API 模式',
     'admin_settings' => '後台管理設定',
-    'frontend_settings' => '前端顯示設定'
+    'frontend_settings' => '前端顯示設定',
+    'timezone' => '系統時區'
 );

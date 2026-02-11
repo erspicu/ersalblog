@@ -25,5 +25,6 @@ return array(
     'api_json' => 'Static JSON Mode (Recommended)',
     'api_php' => 'Dynamic PHP API Mode',
     'admin_settings' => 'Admin Settings',
-    'frontend_settings' => 'Frontend Display Settings'
+    'frontend_settings' => 'Frontend Display Settings',
+    'timezone' => 'System Timezone'
 );

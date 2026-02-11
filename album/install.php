@@ -19,6 +19,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'install') {
     $user = $_POST['user'];
     $pass = $_POST['pass'];
     $title = $_POST['title'];
+    $tz = $_POST['timezone'];
     $theme = $_POST['theme'];
     $api_type = $_POST['api_type'];
     $ipp = (int)$_POST['items_per_page'];
@@ -32,7 +33,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'install') {
         }
 
         // 2. 產生 config.php (後台設定)
-        $configPhp = "<?php\n/**\n * Baxermux Album Service Admin Configuration\n */\n\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($pass) . "',\n    'site_title' => '" . addslashes($title) . "'\n);\n?>";
+        $configPhp = "<?php\n/**\n * Baxermux Album Service Admin Configuration\n */\n\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($pass) . "',\n    'site_title' => '" . addslashes($title) . "',\n    'timezone' => '" . addslashes($tz) . "'\n);\n?>";
         file_put_contents(__DIR__ . '/config/config.php', $configPhp);
 
         // 3. 產生 config.js (前端設定)
@@ -147,6 +148,16 @@ $themes = getThemes();
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo _t('admin_pass'); ?></label>
                                 <input type="password" name="pass" class="form-control" placeholder="******" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><?php echo _t('timezone'); ?></label>
+                                <select name="timezone" class="form-select">
+                                    <option value="Asia/Taipei" selected>Asia/Taipei (UTC+8)</option>
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">America/New_York</option>
+                                    <option value="Europe/London">London</option>
+                                    <option value="Asia/Tokyo">Tokyo (UTC+9)</option>
+                                </select>
                             </div>
                         </div>
 

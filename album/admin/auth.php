@@ -17,6 +17,13 @@ if (!file_exists($configFile)) {
 }
 require_once $configFile;
 
+// 設定時區
+if (isset($albumAdminConfig['timezone'])) {
+    date_default_timezone_set($albumAdminConfig['timezone']);
+} else {
+    date_default_timezone_set('Asia/Taipei');
+}
+
 // --- CSRF 防禦機制 ---
 
 function getCSRFToken() {
