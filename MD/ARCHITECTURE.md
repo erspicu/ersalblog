@@ -40,7 +40,9 @@ The system supports two operating modes:
 *   **Theming System**:
     *   Configurable via `config.js` (`theme_file` option).
     *   Supports multiple CSS themes: `blog.css` (Standard), `blog-dark.css` (Dark Mode), `blog-pink.css` (Soft Pink), and `blog-matrix.css` (Hacker Style).
-    *   **Frontend Theme Plugins**: Dynamic loading of `{theme}.js` for theme-specific logic (e.g., custom animations, interaction, or media players).
+    *   **Frontend Theme Plugins**: Dynamic loading of `{theme}.js` for theme-specific logic.
+    *   **Theme Takeover Protocol**: Implements `uiTakeover` flag in `AppState`. Specific themes (like Win11) can take full control of UI rendering, bypassing default SPA logic to save resources.
+    *   **Cross-Frame Resource Bridge**: Allows embedded Iframe apps (like Blazor) to utilize the parent window's `DownloadManager` for unified concurrency control.
 
 *   **Album Service**:
     *   Located in the `/album` directory as an independent service.
@@ -164,7 +166,9 @@ Listed below are key directories and file rules in the Git repository:
 ### 1.3 設定與環境 (Configuration)
 *   **敏感資料分離**: `config.php` 與 `config.js` 已被 Git 忽略。
 *   **主題系統 (Theming)**: 支援多重 CSS 主題，包括標準版、深色模式 (`blog-dark`)、粉柔風格 (`blog-pink`) 與駭客任務風格 (`blog-matrix`)，前端根據設定動態載入。
-    *   **前端主題插件**: 支援動態載入 `{theme}.js`，用於實作特定主題的專屬邏輯（如：自訂動畫、互動特效或媒體播放器）。
+    *   **前端主題插件**: 支援動態載入 `{theme}.js`，用於實作特定主題的專屬邏輯。
+    *   **主題接管協議 (Theme Takeover Protocol)**: 於 `AppState` 實作 `uiTakeover` 機制，允許特定主題（如 Win11）完全接管 UI 渲染，停止父層冗餘載入以優化效能。
+    *   **跨框架資源橋接**: 支援嵌入式應用（如 Blazor Iframe）與父層 `DownloadManager` 通訊，達成全域統一的併發控制。
 
 *   **相簿服務 (Album Service)**:
     *   位於 `/album` 目錄下的獨立服務，具備專屬的 SSG 與 SPA 架構。

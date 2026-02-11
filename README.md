@@ -76,9 +76,9 @@ Configurable in `config.js` via `theme_file`. Supports:
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.11.23.34` (UTC+8)
+Version: `v2026.02.12.01.06` (UTC+8)
 CLI Version: `0.28.0`
-Model: `gemini-2.0-flash-thinking-exp-01-21`
+Model: `gemini-3-flash-preview`
 
 ---
 
@@ -132,6 +132,6 @@ Model: `gemini-2.0-flash-thinking-exp-01-21`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.11.23.34` (UTC+8)
+版本號: `v2026.02.12.01.06` (UTC+8)
 CLI 版本: `0.28.0`
-模型名稱: `gemini-2.0-flash-thinking-exp-01-21`
+模型名稱: `gemini-3-flash-preview`
