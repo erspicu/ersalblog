@@ -13,14 +13,13 @@ class DownloadManager {
     }
 
     /**
-     * 將下載任務加入佇列
+     * 接管 <img> 標籤的載入，確保有序呈現
      * @param {string} url 圖片網址
-     * @param {string} filename 儲存檔名
-     * @returns {Promise}
+     * @param {HTMLImageElement} imgElement 圖片元素
      */
-    async download(url, filename) {
+    async loadImage(url, imgElement) {
         return new Promise((resolve, reject) => {
-            this.queue.push({ url, filename, resolve, reject });
+            this.queue.push({ url, imgElement, type: 'display', resolve, reject });
             this.processQueue();
         });
     }
@@ -31,32 +30,43 @@ class DownloadManager {
         }
 
         this.currentConcurrent++;
-        const { url, filename, resolve, reject } = this.queue.shift();
+        const task = this.queue.shift();
+        const { url, filename, imgElement, type, resolve, reject } = task;
 
-        console.log(`[DownloadManager] Starting: ${filename} (Active: ${this.currentConcurrent})`);
+        console.log(`[DownloadManager] ${type === 'display' ? 'Loading' : 'Downloading'}: ${url} (Active: ${this.currentConcurrent})`);
 
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const blob = await response.blob();
-            
-            // 觸發瀏覽器下載
             const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(blobUrl);
-            document.body.removeChild(a);
-
-            resolve(filename);
+            
+            if (type === 'display' && imgElement) {
+                imgElement.src = blobUrl;
+                imgElement.classList.add('loaded');
+                // 圖片載入後不立即釋放 blobUrl，否則圖片會消失
+                // 我們存在元素上以便後續清理
+                imgElement._blobUrl = blobUrl;
+                resolve(blobUrl);
+            } else {
+                // 觸發瀏覽器下載
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename || url.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                }, 100);
+                resolve(filename);
+            }
         } catch (error) {
-            console.error(`[DownloadManager] Failed: ${filename}`, error);
+            console.error(`[DownloadManager] Failed: ${url}`, error);
+            if (imgElement) imgElement.alt = "載入失敗";
             reject(error);
         } finally {
             this.currentConcurrent--;
-            console.log(`[DownloadManager] Finished: ${filename} (Active: ${this.currentConcurrent})`);
             this.processQueue();
         }
     }
@@ -64,6 +74,18 @@ class DownloadManager {
 
 // 全域共享實例
 window.albumDownloadManager = new DownloadManager(3);
+
+/**
+ * 掃描頁面中具備 data-src 的圖片並交由管理員載入
+ */
+function managedLoadImages() {
+    const images = document.querySelectorAll('img[data-managed-src]:not(.managed-init)');
+    images.forEach(img => {
+        img.classList.add('managed-init');
+        const url = img.getAttribute('data-managed-src');
+        albumDownloadManager.loadImage(url, img);
+    });
+}
 
 /* =========================================
    Global State & Config
@@ -265,7 +287,7 @@ async function loadHomeView(page = 1) {
     pagedItems.forEach(album => {
         listHtml += renderTemplate('tmpl_index_album_item', {
             link: `#album=${encodeURIComponent(album.id || album.name)}`,
-            cover: album.cover,
+            cover: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
             name: album.name,
             count: album.count,
             desc: album.desc || "&nbsp;"
@@ -274,6 +296,16 @@ async function loadHomeView(page = 1) {
     listHtml += '</div>';
 
     setContent(listHtml);
+    
+    // 手動注入真正的圖片網址供管理員載入
+    const cards = document.querySelectorAll('#album-list-container .card-img');
+    pagedItems.forEach((album, idx) => {
+        if(cards[idx]) {
+            cards[idx].setAttribute('data-managed-src', album.cover);
+        }
+    });
+    managedLoadImages();
+
     renderPaginationUI(pagination, '#');
     document.title = "相簿首頁 - Baxermux的相簿";
     window.scrollTo(0, 0);
@@ -322,7 +354,7 @@ async function loadAlbumView(albumName, page = 1) {
             
             gridHtml += renderTemplate('tmpl_album_photo_item', {
                 photoPageLink: photoLink,
-                imgSrc: imgSrc,
+                imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
                 filename: photo.filename,
                 photoDesc: photo.title || photo.filename
             });
@@ -333,6 +365,16 @@ async function loadAlbumView(albumName, page = 1) {
     gridHtml += '</div>';
 
     setContent(controlsHtml + gridHtml);
+
+    // 注入真實路徑
+    const imgs = document.querySelectorAll('.album-grid .card-img');
+    pagedPhotos.forEach((photo, idx) => {
+        if(imgs[idx]) {
+            imgs[idx].setAttribute('data-managed-src', photo.thumb || photo.src);
+        }
+    });
+    managedLoadImages();
+
     renderPaginationUI(pagination, `#album=${encodeURIComponent(albumName)}`);
     document.title = `${data.name} - Baxermux的相簿`;
     window.scrollTo(0, 0);
@@ -385,7 +427,7 @@ async function loadPhotoView(albumName, photoName) {
         filename: photo.filename,
         prevLink: prevLink,
         nextLink: nextLink,
-        imgSrc: thumbL,
+        imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', // placeholder
         imgSrcXL: thumbXL,
         imgSrcOriginal: original,
         shortIdStart: photo.shortIdStart || '0',
@@ -395,6 +437,13 @@ async function loadPhotoView(albumName, photoName) {
     });
 
     setContent(viewHtml);
+
+    // 注入主要照片
+    const mainImg = document.getElementById('photo-main-viewer');
+    if(mainImg) {
+        mainImg.setAttribute('data-managed-src', thumbL);
+        managedLoadImages();
+    }
 
     document.title = `${photo.filename} - ${data.name}`;
     window.scrollTo(0, 0);
