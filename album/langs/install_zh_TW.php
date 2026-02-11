@@ -18,5 +18,12 @@ return array(
     'install_error' => '安裝過程中發生錯誤：',
     'delete_install' => '為了安全起見，請在安裝完成後刪除 install.php 檔案。',
     'goto_admin' => '前往管理後台',
-    'goto_album' => '開啟相簿首頁'
+    'goto_album' => '開啟相簿首頁',
+    'theme_select' => '預設主題',
+    'api_type' => '資料讀取模式',
+    'items_per_page' => '每頁顯示項目數',
+    'api_json' => '靜態 JSON 模式 (推薦)',
+    'api_php' => '動態 PHP API 模式',
+    'admin_settings' => '後台管理設定',
+    'frontend_settings' => '前端顯示設定'
 );

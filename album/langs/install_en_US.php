@@ -18,5 +18,12 @@ return array(
     'install_error' => 'Installation error:',
     'delete_install' => 'For security reasons, please delete install.php after completion.',
     'goto_admin' => 'Go to Admin Panel',
-    'goto_album' => 'Open Album'
+    'goto_album' => 'Open Album',
+    'theme_select' => 'Default Theme',
+    'api_type' => 'Data Reading Mode',
+    'items_per_page' => 'Items Per Page',
+    'api_json' => 'Static JSON Mode (Recommended)',
+    'api_php' => 'Dynamic PHP API Mode',
+    'admin_settings' => 'Admin Settings',
+    'frontend_settings' => 'Frontend Display Settings'
 );

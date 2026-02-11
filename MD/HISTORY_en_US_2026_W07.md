@@ -18,8 +18,8 @@
 - **Path Resolution**: Fixed internal path depths for Blazor in Apache subdirectory environments (adjusted from 3 levels to 5 levels) to ensure JSON and images load correctly.
 - **Environment Cleanup**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.
 - **Album Service: Configuration Centralization**: Created `album/config/` directory to group `config.php` and `config.js` for better organization, updating all internal loading paths.
-- **Album Service: Installation Wizard (`install.php`)**: Implemented a standalone installation wizard modeled after the Blog system, supporting multi-language, environment checks, and automated directory initialization.
-- **Environment Update**: Updated version to `v2026.02.12.00.07`.
+- **Album Service: Advanced Installation Wizard (v2)**: Significantly upgraded the installer to support full parameter configuration for `config.php` and `config.js` (Admin creds, Theme, API mode, Pagination).
+- **Environment Update**: Updated version to `v2026.02.12.00.11`.
 
 ## [2026-02-10]
 ### Added
