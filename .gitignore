@@ -66,6 +66,11 @@ test/
 *.sqlite3-journal
 *.db
 
+# .NET / Blazor
+[Bb]in/
+[Oo]bj/
+publish/
+
 # Backup artifacts
 /backup/*.zip
 /admin/attempts.log

@@ -36,3 +36,4 @@
 - **Frontend Configuration**: Restored the default theme in `config.js` to the standard `album` theme.
 - **Code Cleanup**: Cleaned up residual Win11-related tags and CSS classes within `BlazorAlbumExplorer`.
 - **Environment**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.
+- **Blazor Fix**: Cleaned up deeply nested directories in `BlazorAlbumExplorer` caused by recursive publishing and updated `.gitignore` with .NET ignore patterns.
