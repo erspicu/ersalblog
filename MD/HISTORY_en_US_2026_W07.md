@@ -2,25 +2,22 @@
 
 ## [2026-02-12]
 ### Added
-- **Album Service: Timezone Configuration**: Added timezone selection to the installer, automatically applied to the backend environment.
-- **Security Hardening**: Implemented `install.php` presence detection on login and dashboard pages with high-risk warnings.
-- **Theme Takeover Protocol**: Introduced `uiTakeover` mechanism, allowing full-screen themes to bypass redundant parent rendering for peak performance.
-- **Cross-Frame Resource Bridge**: Established communication between Iframes and parent window to bring Blazor projects under global `DownloadManager` control.
+- **Album Service: Win11 Theme (AOT Optimized)**: Successfully implemented **AOT (Ahead-of-Time)** compilation, translating C# directly into native WebAssembly instructions for peak performance.
+- **Virtual Edge Browser Upgrade**: Added a dedicated **AOT Compilation Chapter** to the technical whitepaper, featuring project configuration snippets and performance metrics.
+- **Immersive Slideshow Mode**: Enabled automatic taskbar hiding during slideshow playback to achieve true 100% screen coverage.
+- **Security Hardening**: Implemented `install.php` presence detection on admin pages.
+- **Album Service: Timezone Config**: Added timezone selection to the installer.
+
+### Fixed
+- **Window System Optimization**:
+    - **Unified Stacking**: Refactored `z-index` management to resolve window layering conflicts.
+    - **Drag Stability**: Implemented relative displacement logic to eliminate window jumping caused by Blazor re-renders.
+- **Path Resolution**: Fixed 5-level deep resource path issues for subdirectory deployments.
+- **Config Centralization**: Unified management of `config.php` and `config.js` into `album/config/`.
 
 ## [2026-02-11]
 ### Added
-- **Album Service: Win11 Theme (Native Blazor Migration)**: Integrated compiled Blazor WASM engine via full-screen embedding.
-    - **Technical Integration**: Built-in **Edge browser simulator** to showcase the technical whitepaper.
-    - **Native Watermark**: Implemented "Activate Experimental Project" watermark directly in Razor Layout.
-- **Album Service: Theme Selector (`ThemeSelect.html`)**: Modern card-based UI for dynamic style previewing.
-- **Compression Config System**: Created `config/compression.json` for multi-spec (3XL~XS) dynamic thumbnail generation and smart selection.
-- **Global Download Manager (`DownloadManager`)**: Implemented resource manager with a 3-concurrency limit for all downloads and displays.
-
-### Fixed
-- **Path Resolution**: Fixed 5-level deep path issues for Blazor in Apache subdirectory environments.
-- **Config Centralization**: Created `album/config/` to unify management of `config.php` and `config.js`.
-- **Environment Cleanup**: Removed legacy nested directories and temporary test files.
-
-## [2026-02-10]
-### Added
-- **Blazor WASM Album Explorer (Experimental)**: Created project to simulate Windows 11 desktop experience.
+- **Album Service: Win11 Theme (Native Blazor Migration)**: Full-screen embedding of the Blazor WASM engine.
+- **Album Service: Theme Selector (`ThemeSelect.html`)**: Modern card-based style explorer.
+- **Compression Config System**: Dynamic multi-spec (3XL~XS) thumbnail generation.
+- **Global Download Manager (`DownloadManager`)**: Resource manager with a 3-concurrency limit.

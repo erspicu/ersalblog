@@ -1,35 +1,50 @@
 /**
- * Blazor Album Explorer - Window Manager & Parent Bridge
+ * Blazor Album Explorer - Window Manager & Parent Bridge (Ultra Robust Drag)
  */
 
 window.dragElement = (element, handle, dotNetHelper, callbackName) => {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let startX = 0, startY = 0, initialX = 0, initialY = 0;
+    
     handle.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
         e = e || window.event;
         if (e.target.closest('.wpf-control-btn')) return;
+        
         e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
+        // 記錄滑鼠起點
+        startX = e.clientX;
+        startY = e.clientY;
+        // 記錄視窗起點 (無視 Blazor 當前的 style，直接抓實體座標)
+        initialX = element.offsetLeft;
+        initialY = element.offsetTop;
+
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
+        
+        // 通知 Blazor 開始拖動 (可選)
+        element.classList.add('is-dragging');
     }
 
     function elementDrag(e) {
         e = e || window.event;
         e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        element.style.top = (element.offsetTop - pos2) + "px";
-        element.style.left = (element.offsetLeft - pos1) + "px";
+        
+        // 計算總位移量
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        // 直接設定新位置 (基於初始位置 + 位移，不依賴每幀的 offsetTop)
+        element.style.left = (initialX + deltaX) + "px";
+        element.style.top = (initialY + deltaY) + "px";
     }
 
     function closeDragElement() {
         document.onmouseup = null;
         document.onmousemove = null;
+        element.classList.remove('is-dragging');
+
+        // 拖動結束後，一次性回報最終座標給 Blazor 存檔
         if (dotNetHelper && callbackName) {
             dotNetHelper.invokeMethodAsync(callbackName, element.offsetLeft, element.offsetTop);
         }
@@ -37,11 +52,13 @@ window.dragElement = (element, handle, dotNetHelper, callbackName) => {
 };
 
 window.registerGlobalKeyboardHandler = (dotNetHelper) => {
-    document.addEventListener('keydown', (e) => {
+    if (window._keyHandler) document.removeEventListener('keydown', window._keyHandler);
+    window._keyHandler = (e) => {
         if (e.key === 'Escape') dotNetHelper.invokeMethodAsync('OnKeyPress', 'Escape');
         else if (e.key === 'ArrowLeft') dotNetHelper.invokeMethodAsync('OnKeyPress', 'ArrowLeft');
         else if (e.key === 'ArrowRight') dotNetHelper.invokeMethodAsync('OnKeyPress', 'ArrowRight');
-    });
+    };
+    document.addEventListener('keydown', window._keyHandler);
 };
 
 /* =========================================
@@ -49,30 +66,25 @@ window.registerGlobalKeyboardHandler = (dotNetHelper) => {
    ========================================= */
 (function() {
     function scanAndManagedLoad() {
-        // 尋找父視窗的管理員
         const manager = window.parent.albumDownloadManager;
         if (!manager) return;
-
         const images = document.querySelectorAll('img[data-managed-src]:not(.managed-init)');
         images.forEach(img => {
             img.classList.add('managed-init');
-            const relUrl = img.getAttribute('data-managed-src');
-            // 【關鍵修正】將相對路徑轉換為絕對 URL，避免父子視窗路徑深度不一致的問題
-            const absUrl = new URL(relUrl, window.location.href).href;
+            const absUrl = new URL(img.getAttribute('data-managed-src'), window.location.href).href;
             manager.loadImage(absUrl, img);
         });
     }
-
-    // 監聽 DOM 變化 (適配 Blazor 的動態渲染)
-    const observer = new MutationObserver(() => scanAndManagedLoad());
-    
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(m => {
+            if (m.type === 'attributes' && m.attributeName === 'data-managed-src') {
+                m.target.classList.remove('managed-init');
+            }
+        });
+        scanAndManagedLoad();
+    });
     window.addEventListener('load', () => {
         scanAndManagedLoad();
-        observer.observe(document.body, { 
-            childList: true, 
-            subtree: true, 
-            attributes: true, 
-            attributeFilter: ['data-managed-src'] 
-        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-managed-src'] });
     });
 })();
