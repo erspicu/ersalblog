@@ -37,3 +37,4 @@
 - **代碼清理**：同步清理了 `BlazorAlbumExplorer` 中殘留的 Win11 相關標記與 CSS 類別。
 - **環境清理**：移除了專案目錄下的暫存檔 `(backup)config.php` 與測試用的截圖 (`qa1.png`, `qa3.png`)。
 - **Blazor 修正**：清理了 `BlazorAlbumExplorer` 因遞迴發佈產生的極深嵌套目錄 (`bin`, `obj`, `publish`)，並在 `.gitignore` 中加入相關忽略規則以防再次發生。
+- **路徑優化**：修正了 Blazor 總管在 Apache 子目錄環境下的資源讀取路徑（從 `../../../` 修正為 `../../`），解決圖片與 JSON 無法載入的問題。

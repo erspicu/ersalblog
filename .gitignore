@@ -87,6 +87,7 @@ publish/
 /album/shorturl.txt
 /album/album.html
 /album/view/
+/album/view_blazor/
 /album/Collection/**/*.jpg
 /album/Collection/**/Thumbnail/
 /album/static/*_example.html

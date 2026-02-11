@@ -46,6 +46,7 @@ The system supports two operating modes:
     *   Located in the `/album` directory as an independent service.
     *   Features a dedicated SSG and SPA architecture.
     *   Supports diverse visual themes including `album-matrix` (with Digital Rain) and `album-y2k` (Retro 2000s style).
+    *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly, providing an alternative immersive browsing experience.
     *   Integrates YouTube IFrame API for background music in specific themes.
 
 *   **Initialization and Health Check**:
@@ -168,6 +169,7 @@ Listed below are key directories and file rules in the Git repository:
 *   **相簿服務 (Album Service)**:
     *   位於 `/album` 目錄下的獨立服務，具備專屬的 SSG 與 SPA 架構。
     *   提供多樣化視覺主題，包含 `album-matrix` (具備數位雨特效) 與 `album-y2k` (復古 2000 年代風格)。
+    *   **實驗性 Blazor 總管**: 使用 Blazor WebAssembly 實作的高擬真 Windows 11 / WPF 風格檔案總管，提供沉浸式的相簿瀏覽體驗。
     *   特定主題整合 YouTube IFrame API 提供背景音樂功能。
 
 *   **初始化與健康檢查**:

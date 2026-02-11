@@ -37,3 +37,4 @@
 - **Code Cleanup**: Cleaned up residual Win11-related tags and CSS classes within `BlazorAlbumExplorer`.
 - **Environment**: Removed temporary file `(backup)config.php` and test screenshots (`qa1.png`, `qa3.png`) from the project root.
 - **Blazor Fix**: Cleaned up deeply nested directories in `BlazorAlbumExplorer` caused by recursive publishing and updated `.gitignore` with .NET ignore patterns.
+- **Path Optimization**: Fixed resource loading paths for Blazor Explorer in Apache subdirectory environments (changed `../../../` to `../../`), resolving issues with missing images and JSON data.
