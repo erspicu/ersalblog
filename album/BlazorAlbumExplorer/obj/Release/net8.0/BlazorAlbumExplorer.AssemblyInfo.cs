@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BlazorAlbumExplorer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+05f45eab8da2facab2f712da3c2862eb8c97355f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+26467a4c0fc92490c77942f70affb5b6f194ab5c")]
 [assembly: System.Reflection.AssemblyProductAttribute("BlazorAlbumExplorer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BlazorAlbumExplorer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

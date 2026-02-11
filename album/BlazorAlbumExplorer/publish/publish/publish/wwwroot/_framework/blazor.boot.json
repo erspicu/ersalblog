@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "BlazorAlbumExplorer",
   "resources": {
-    "hash": "sha256-DQIbOOdGINBvpg6IfQFR1bR1BWOtOxy98qlZSKe/Sj4=",
+    "hash": "sha256-ramxST5gJKo1+lAy2UV7l1fSRnAza0sCyg93U5v2p6w=",
     "jsModuleNative": {
       "dotnet.native.8.0.23.tu59r5pkik.js": "sha256-NljIbpK/1KCj0+knpX8U77Rbl5kTtfFIuFjK7AuczEw="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "BlazorAlbumExplorer.wasm": "sha256-QAqKr6OnkoRKB3UleA05xfbkuleLE8PuVm2UHIHKPBM=",
+      "BlazorAlbumExplorer.wasm": "sha256-Rt7adSRJYCuywaLgVTc4xbjy7WTp8uaKI+pjtXsFZI8=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-8C88MPc9156e3XvCySBTVkLUBJ+DkQO9LOrkoPPpcHE=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-tU5FvzyO+fy9AZPr3JNYtbsRVE49lHSuU6JP5uFNNIY=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-F0i6VBOoCCiDt9ZZD2aAFy3AghfWLxyE5NVQ67IJPKE=",

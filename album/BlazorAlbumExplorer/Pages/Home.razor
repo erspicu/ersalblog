@@ -12,7 +12,7 @@
          style="@GetExplorerStyle()" 
          @onmousedown="@(() => FocusWindow("explorer"))">
         <div @ref="explorerHandle" class="wpf-titlebar" @ondblclick="ToggleExplorerMaximize">
-            <div class="wpf-title">
+            <div class="win-title ms-2">
                 <i class="fa-solid fa-folder-open wpf-title-icon" style="color: #F0C243;"></i>
                 Album Explorer - @(currentAlbum?.Name ?? "Baxermux 的相簿")
             </div>
@@ -36,7 +36,7 @@
 
         <div class="wpf-content">
             <div class="explorer-sidebar">
-                <div class="fw-bold mb-2">This PC</div>
+                <div class="fw-bold mb-2 small text-uppercase text-muted" style="font-size: 9px; letter-spacing: 1px;">This PC</div>
                 <div class="ps-2 mb-1 fw-bold text-primary" @onclick="GoHome" style="cursor: pointer;"><i class="fa-solid fa-images me-2"></i>Pictures</div>
                 <div class="ps-4 mb-1 border-start ms-3 @(currentAlbum == null ? "fw-bold" : "")" @onclick="GoHome" style="cursor: pointer;">Albums</div>
             </div>
@@ -51,7 +51,18 @@
                         @foreach (var album in albums)
                         {
                             <div class="explorer-item" @onclick="() => OpenAlbum(album)">
-                                <div class="win11-folder"><div class="folder-back"></div>@if(!string.IsNullOrEmpty(album.Cover)){<div class="folder-content-wrapper"><img src="../../../@album.Cover" class="folder-content-img" /></div>}<div class="folder-front"><div class="folder-front-lip"></div></div></div>
+                                <div class="album-folder">
+                                    <div class="folder-back"></div>
+                                    @if (!string.IsNullOrEmpty(album.Cover))
+                                    {
+                                        <div class="folder-content-wrapper">
+                                            <img src="../../../@album.Cover" class="folder-content-img" />
+                                        </div>
+                                    }
+                                    <div class="folder-front">
+                                        <div class="folder-front-lip"></div>
+                                    </div>
+                                </div>
                                 <div class="explorer-item-name">@album.Name</div>
                                 <div class="text-muted small">@album.Count Photos</div>
                             </div>
@@ -64,7 +75,9 @@
                         @foreach (var photo in currentAlbum.Photos)
                         {
                             <div class="explorer-item" @onclick="() => ViewPhoto(photo)" @onclick:stopPropagation>
-                                <div class="explorer-item-photo-wrapper mb-1 border"><img src="../../../@photo.Thumb" /></div>
+                                <div class="explorer-item-photo-wrapper mb-1 border">
+                                    <img src="../../../@photo.Thumb" />
+                                </div>
                                 <div class="explorer-item-name">@photo.Filename</div>
                             </div>
                         }
@@ -84,9 +97,9 @@
             @if (!isSlideshowActive) 
             {
                 <div @ref="viewerHandle" class="wpf-titlebar" style="background: #222; color: white;" @ondblclick="ToggleViewerMaximize">
-                    <div class="wpf-title">
-                        <i class="fa-solid fa-image wpf-title-icon text-info"></i>
-                        <span class="ms-2 small" style="color: #aaa;">@selectedPhoto.Src</span>
+                    <div class="win-title ms-2 small">
+                        <i class="fa-solid fa-image text-info me-2"></i>
+                        Photos - @selectedPhoto.Filename
                     </div>
                     <div class="wpf-controls" @onmousedown:stopPropagation>
                         <div class="wpf-control-btn text-white" @onclick="MinimizeViewer"><i class="fa-solid fa-minus"></i></div>
@@ -113,7 +126,7 @@
                         <div class="mb-2"><small class="text-secondary">Filename</small><br/>@selectedPhoto.Filename</div>
                         @if (selectedPhoto.Exif != null)
                         {
-                            <h6 class="text-info mt-3 border-bottom pb-1">Camera Details</h6>
+                            <h6 class="text-info mt-3 border-bottom pb-1 small text-uppercase">Camera Details</h6>
                             <div class="mb-1"><small class="text-secondary">Model:</small> @selectedPhoto.Exif.Model</div>
                             <div class="mb-1"><small class="text-secondary">Aperture:</small> @selectedPhoto.Exif.Aperture</div>
                             <div class="mb-1"><small class="text-secondary">Shutter:</small> @selectedPhoto.Exif.Shutter</div>
@@ -160,7 +173,7 @@
              style="@GetInfoStyle()" 
              @onmousedown="@(() => FocusWindow("info"))">
             <div @ref="infoHandle" class="wpf-titlebar" style="border-radius: 8px 8px 0 0;">
-                <div class="wpf-title">Baxermux 的相簿</div>
+                <div class="win-title ms-2">Baxermux 的相簿</div>
                 <div class="wpf-controls"><div class="wpf-control-btn close" @onclick="ToggleAlbumInfo"><i class="fa-solid fa-xmark"></i></div></div>
             </div>
             <div class="wpf-content p-4" style="flex-direction: column; overflow: hidden; background: #f0f0f0; border-radius: 0 0 8px 8px;">
@@ -208,7 +221,7 @@
     .explorer-item-name { width: 100px; font-size: 11px; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; line-height: 1.2; height: 2.4em; }
     .explorer-item-photo-wrapper { width: 100px; height: 80px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #eee; }
     .explorer-item-photo-wrapper img { max-width: 100%; max-height: 100%; object-fit: cover; }
-    .win11-folder { width: 90px; height: 75px; position: relative; margin: 0 auto 5px auto; }
+    .album-folder { width: 90px; height: 75px; position: relative; margin: 0 auto 5px auto; }
     .folder-back { position: absolute; top: 10px; left: 0; width: 100%; height: 65px; background: #F0C243; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .folder-tab { position: absolute; top: -6px; left: 0; width: 42px; height: 12px; background: #F0C243; border-radius: 6px 6px 0 0; }
     .folder-content-wrapper { position: absolute; top: 12px; left: 6px; right: 6px; bottom: 12px; z-index: 2; display: flex; align-items: flex-end; overflow: hidden; }
@@ -221,6 +234,7 @@
     .slideshow-controls:hover { opacity: 1; background: rgba(0,0,0,0.7); }
     .info-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; background: rgba(30,30,30,0.95); color: #ddd; padding: 20px; border-left: 1px solid #444; font-size: 13px; z-index: 90; overflow-y: auto; }
     .clock { text-align: right; font-size: 11px; line-height: 1.1; }
+    .win-title { flex-grow: 1; font-size: 12px; color: #333; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 
 @code {
@@ -275,8 +289,9 @@
     
     private string GetInfoStyle()
     {
-        if (infoX != 0 || infoY != 0) return $"top: {infoY}px; left: {infoX}px; z-index: {infoZ}; transform: none; border-radius: 8px;";
-        return $"z-index: {infoZ}; border-radius: 8px;";
+        var zIndex = activeWindow == "info" ? 2000 : 150;
+        if (infoX != 0 || infoY != 0) return $"top: {infoY}px; left: {infoX}px; z-index: {zIndex}; transform: none; border-radius: 8px;";
+        return $"z-index: {zIndex}; border-radius: 8px;";
     }
 
     [JSInvokable] public void UpdateExplorerPos(int x, int y) { explorerX = x; explorerY = y; FocusWindow("explorer"); }
@@ -346,7 +361,7 @@
     private async Task OpenAlbum(AlbumItem album)
     {
         isLoading = true; FocusWindow("explorer"); currentPath = $@"C:\Users\Admin\Pictures\Albums\{album.Name}";
-        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>($"../../../api/json/{album.Id}.json"); } catch { } finally { isLoading = false; }
+        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
     }
 
     private async Task ViewPhoto(PhotoItem photo)
