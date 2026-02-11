@@ -50,7 +50,7 @@ The system supports two operating modes:
     *   Integrates YouTube IFrame API for background music in specific themes.
 
 *   **Initialization and Health Check**:
-    *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system and check environment compatibility.
+    *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system and check environment compatibility. Dedicated installation wizard for Album Service is also available at `album/install.php`.
     *   **Login Check**: `admin/login.php` integrates `admin/health_check.php` to automatically verify database connection and file system integrity.
 *   **Backup & Recovery System**:
     *   **Multi-mode Backup**: `admin/tool_backup.php` creates ZIP archives for File, MySQL, or SQLite modes.
@@ -175,7 +175,7 @@ Listed below are key directories and file rules in the Git repository:
     *   **主題瀏覽**: 提供 `ThemeSelect.html` 與專用 `api/api_themes.php`，支援動態偵測並預覽相簿風格。
 
 *   **初始化與健康檢查**:
-    *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。
+    *   **安裝精靈**: `install.php` 協助使用者進行系統初始化與環境檢測。相簿服務亦具備獨立的 `album/install.php` 提供專屬引導。
     *   **登入檢查**: `admin/login.php` 整合 `admin/health_check.php` 自動驗證系統完整性。
 *   **備份與還原系統**: 支援 File/MySQL/SQLite 多模式備份集製作與還原。
 *   **國際化支援 (i18n)**:

@@ -33,14 +33,26 @@ $forceThumbnail = (isset($options['f']) || isset($options['force']));
 $shortUrlList = array();
 $currentShortId = 0; // 全域 ID 計數器
 
-// 縮圖配置 (尺寸由大到小)
-$thumbConfigs = array(
-    'thumbXL' => array('size' => 2048, 'quality' => 95),
-    'thumbL'  => array('size' => 1600, 'quality' => 92),
-    'thumbM'  => array('size' => 1024, 'quality' => 90),
-    'thumb'   => array('size' => 800,  'quality' => 90),
-    'thumbXS'  => array('size' => 320,  'quality' => 85)
-);
+// --- 讀取壓縮配置 ---
+$compressionFile = $baseDir . '/config/compression.json';
+$thumbConfigs = array();
+if (file_exists($compressionFile)) {
+    $thumbConfigs = json_decode(file_get_contents($compressionFile), true);
+} else {
+    // 預設備案 (若 JSON 不存在)
+    $thumbConfigs = array(
+        array('id' => 'thumb', 'width' => 800, 'quality' => 90, 'mode' => 'PreviewIcon')
+    );
+}
+
+// 輔助函式：根據 mode 獲取 ID
+function getConfigIdByMode($configs, $mode) {
+    foreach ($configs as $conf) {
+        if ($conf['mode'] === $mode) return $conf['id'];
+    }
+    return null;
+}
+
 
 // 引入樣板管理器 (用於生成 album.html)
 require_once $baseDir . '/../PHP_LIB/TemplateManager.php';
@@ -338,35 +350,31 @@ if (is_dir($collectionDir)) {
             $photoShortIdStart = $currentShortId; // 記錄此照片起始 ID
             $currentShortId++; 
 
-            // 2. Thumbnails
-            foreach ($thumbConfigs as $prefix => $conf) {
-                $destName = getThumbFilename($filename, $prefix);
+            // 2. Thumbnails (根據動態配置)
+            $sizes = array();
+            foreach ($thumbConfigs as $conf) {
+                $id = $conf['id'];
+                $destName = getThumbFilename($filename, $id);
                 $destPath = $thumbDir . '/' . $destName;
                 
                 if (!$skipThumbnails) {
-                    generateThumbnail($photoPath, $destPath, $conf['size'], $conf['quality']);
+                    generateThumbnail($photoPath, $destPath, $conf['width'], $conf['quality']);
                 }
                 
                 $shortUrlList[] = $albumName . '/Thumbnail/' . $destName;
+                $sizes[$id] = $baseUrl . '/' . $albumName . '/Thumbnail/' . $destName;
                 $currentShortId++;
             }
 
             // EXIF
             $exifData = getExifData($photoPath);
 
-            // 準備 JSON 資料
-            $thumbName = getThumbFilename($filename, 'thumb');
-            $thumbLName = getThumbFilename($filename, 'thumbL');
-            $thumbXLName = getThumbFilename($filename, 'thumbXL');
-
             $albumPhotosJson[] = array(
                 'filename' => $filename,
                 'title' => $meta['title'],
                 'desc' => $meta['desc'],
                 'src' => $baseUrl . '/' . $albumName . '/' . $filename,
-                'thumb' => $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbName,
-                'thumbL' => $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbLName,
-                'thumbXL' => $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbXLName,
+                'sizes' => $sizes, // 存入所有尺寸
                 'exif' => $exifData,
                 'shortIdStart' => $photoShortIdStart
             );
@@ -380,8 +388,11 @@ if (is_dir($collectionDir)) {
         if (!empty($albumCover)) {
             $coverFilename = basename($albumCover);
             $info = pathinfo($coverFilename);
-            $thumbCoverName = $info['filename'] . '_thumb.' . $info['extension'];
-            // 檢查縮圖是否存在 (雖然剛剛應該已經生成了)
+            
+            // 嘗試找到標記為 PreviewIcon 的尺寸
+            $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
+            $thumbCoverName = $previewId ? getThumbFilename($coverFilename, $previewId) : getThumbFilename($coverFilename, $thumbConfigs[0]['id']);
+
             if (file_exists($thumbDir . '/' . $thumbCoverName)) {
                 $finalCoverUrl = $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbCoverName;
             } else {

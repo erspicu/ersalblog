@@ -102,11 +102,46 @@ const AppState = {
     currentAlbum: null,
     currentPhoto: null,
     currentPage: 1,
+    // 從 config.js 讀取設定，預設 24
     itemsPerPage: (typeof albumConfig !== 'undefined' && albumConfig.items_per_page) ? albumConfig.items_per_page : 24,
     albumDataCache: {}, 
     homeData: null,
-    apiType: (typeof albumConfig !== 'undefined' && albumConfig.api_type) ? albumConfig.api_type : 'json'
+    apiType: (typeof albumConfig !== 'undefined' && albumConfig.api_type) ? albumConfig.api_type : 'json',
+    compressionConfig: null,
+    modeToId: {} // 存放 mode -> id 對照表
 };
+
+/**
+ * 根據 mode 獲取照片對應的 URL
+ */
+function getImageUrlByMode(photo, mode) {
+    if (!photo) return '';
+    // 如果有 sizes 物件且對照表有設定
+    if (photo.sizes && AppState.modeToId[mode]) {
+        const id = AppState.modeToId[mode];
+        if (photo.sizes[id]) return photo.sizes[id];
+    }
+    // 備案：如果是 PreviewIcon 且有傳統 thumb 欄位
+    if (mode === 'PreviewIcon' && photo.thumb) return photo.thumb;
+    if (mode === 'PictureShow' && photo.thumbL) return photo.thumbL;
+    if (mode === 'ModalShow' && photo.thumbXL) return photo.thumbXL;
+    
+    return photo.src;
+}
+
+async function initCompressionConfig() {
+    try {
+        const resp = await fetch('config/compression.json');
+        const data = await resp.json();
+        AppState.compressionConfig = data;
+        // 建立對照表
+        data.forEach(item => {
+            if (item.mode) AppState.modeToId[item.mode] = item.id;
+        });
+    } catch (e) {
+        console.warn("Load compression.json failed, using defaults.");
+    }
+}
 
 /* =========================================
    Router & Initialization
@@ -122,7 +157,11 @@ function renderTemplate(templateId, vars = {}) {
     return html;
 }
 
-document.addEventListener("DOMContentLoaded", () => initRouter());
+document.addEventListener("DOMContentLoaded", async () => {
+    await initCompressionConfig();
+    initRouter();
+});
+
 window.addEventListener("hashchange", () => handleRoute());
 function initRouter() { handleRoute(); }
 
@@ -276,7 +315,13 @@ async function loadAlbumView(albumName, page = 1) {
     gridHtml += '</div>';
     setContent(gridHtml);
     const imgs = document.querySelectorAll('.album-grid .card-img');
-    pagedPhotos.forEach((photo, idx) => { if(imgs[idx]) imgs[idx].setAttribute('data-managed-src', photo.thumb || photo.src); });
+    pagedPhotos.forEach((photo, idx) => { 
+        if(imgs[idx]) {
+            // 【核心修正】根據模式獲取縮圖
+            const url = getImageUrlByMode(photo, 'PreviewIcon');
+            imgs[idx].setAttribute('data-managed-src', url); 
+        }
+    });
     managedLoadImages();
     renderPaginationUI({currentPage: page, totalPages: totalPages}, `#album=${encodeURIComponent(albumName)}`);
     document.title = `${data.name} - Baxermux的相簿`;
@@ -292,6 +337,10 @@ async function loadPhotoView(albumName, photoName) {
     const prevPhoto = data.photos[(photoIndex - 1 + data.photos.length) % data.photos.length];
     const nextPhoto = data.photos[(photoIndex + 1) % data.photos.length];
 
+    // 獲取不同模式的 URL
+    const urlPicture = getImageUrlByMode(photo, 'PictureShow');
+    const urlModal = getImageUrlByMode(photo, 'ModalShow');
+
     setContent(renderTemplate('tmpl_photo_detail_view', {
         pathToHome: '#',
         albumName: data.name,
@@ -300,7 +349,7 @@ async function loadPhotoView(albumName, photoName) {
         prevLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(prevPhoto.filename)}`,
         nextLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(nextPhoto.filename)}`,
         imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-        imgSrcXL: photo.thumbXL || photo.src,
+        imgSrcXL: urlModal,
         imgSrcOriginal: photo.src,
         shortIdStart: photo.shortIdStart || '0',
         photoTitle: photo.title || photo.filename,
@@ -308,7 +357,7 @@ async function loadPhotoView(albumName, photoName) {
         exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small" id="exif-loading-text">正在載入技術資訊...</div>'
     }));
 
-    // 【核心修正】先設置 EXIF 偵測監聽器 (確保不會錯過 DownloadManager 的事件)
+    // 先設置 EXIF 偵測監聽器
     if (!photo.exif || Object.keys(photo.exif).length === 0) {
         tryFetchExifClientSide();
     }
@@ -316,7 +365,7 @@ async function loadPhotoView(albumName, photoName) {
     // 啟動圖片下載
     const mainImg = document.getElementById('photo-main-viewer');
     if(mainImg) {
-        mainImg.setAttribute('data-managed-src', photo.thumbL || photo.src);
+        mainImg.setAttribute('data-managed-src', urlPicture);
         managedLoadImages();
     }
     document.title = `${photo.filename} - ${data.name}`;
@@ -331,10 +380,7 @@ function tryFetchExifClientSide() {
     if (!img || !container || typeof EXIF === 'undefined') return;
 
     const runExif = function(e) {
-        // 如果是透過管理員事件觸發，直接拿 blob 解析，這最準確且無視 URL 格式
         const sourceData = (e && e.detail && e.detail.blob) ? e.detail.blob : img;
-        
-        // 確保不是在跑佔位圖
         if (img.src.startsWith('data:image/gif;base64') && !e) return;
 
         EXIF.getData(sourceData, function() {
@@ -362,10 +408,7 @@ function tryFetchExifClientSide() {
         });
     };
 
-    // 監聽管理員載入事件
     img.addEventListener('managed-image-loaded', runExif, { once: true });
-    
-    // 同步檢查：如果圖片已經載入完成（快取）
     if (img.classList.contains('loaded') && !img.src.startsWith('data:image/gif;base64')) {
         runExif();
     }
@@ -412,7 +455,13 @@ function closeModal(modalId) {
     if (m) { m.classList.remove('show'); document.body.style.overflow = ''; }
 }
 document.addEventListener('keydown', (e) => { if (e.key === "Escape") document.querySelectorAll('.modal-overlay.show').forEach(m => closeModal(m.id)); });
-function openPhotoModal(src) { const img = document.getElementById('modal-full-img'); if (img) { img.src = src; openModal('photoModal'); } }
+function openPhotoModal(src) { 
+    const img = document.getElementById('modal-full-img'); 
+    if (img) { 
+        img.src = src; 
+        openModal('photoModal'); 
+    } 
+}
 
 function base62Encode(num) {
     const charset = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

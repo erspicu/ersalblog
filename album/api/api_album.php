@@ -25,6 +25,26 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'list_albums';
 $collectionDir = __DIR__ . '/../Collection';
 $baseUrl = 'Collection'; 
 
+// --- 讀取壓縮配置 ---
+$compressionFile = __DIR__ . '/../config/compression.json';
+$thumbConfigs = [];
+if (file_exists($compressionFile)) {
+    $thumbConfigs = json_decode(file_get_contents($compressionFile), true);
+}
+
+function getConfigIdByMode($configs, $mode) {
+    foreach ($configs as $conf) {
+        if ($conf['mode'] === $mode) return $conf['id'];
+    }
+    return null;
+}
+
+// 輔助函式：產生符合規則的縮圖檔名
+function getThumbFilename($originalFilename, $prefix) {
+    $info = pathinfo($originalFilename);
+    return $info['filename'] . '_' . $prefix . '.' . $info['extension'];
+}
+
 // 輔助函式：將 EXIF 分數格式轉為浮點數
 function exifToFloat($value) {
     $parts = explode('/', $value);
@@ -131,18 +151,22 @@ if ($action === 'list_albums') {
 
                 if (!empty($albumData['cover'])) {
                     $coverFn = basename($albumData['cover']);
-                    $info = pathinfo($coverFn);
                     
-                    // 優先使用標準縮圖 (800px)
-                    $stdThumbName = $info['filename'] . '_thumb.jpg';
+                    // 根據配置動態決定封面路徑
+                    $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
+                    $stdThumbName = getThumbFilename($coverFn, $previewId ?: 'thumb');
+                    
                     if (file_exists($albumPath . '/Thumbnail/' . $stdThumbName)) {
                         $albumData['cover'] = $baseUrl . '/' . $dirUtf8 . '/Thumbnail/' . $stdThumbName;
-                    } elseif (file_exists($albumPath . '/Thumbnail/' . $info['filename'] . '_thumbXS.jpg')) {
-                        // 次之使用 XS 縮圖
-                        $albumData['cover'] = $baseUrl . '/' . $dirUtf8 . '/Thumbnail/' . $info['filename'] . '_thumbXS.jpg';
                     } else {
-                        // 最後使用原圖
-                        $albumData['cover'] = $baseUrl . '/' . $dirUtf8 . '/' . $coverFn;
+                        // 備案：嘗試使用第一個配置的 ID
+                        $fallbackId = !empty($thumbConfigs) ? $thumbConfigs[0]['id'] : 'thumb';
+                        $fallbackName = getThumbFilename($coverFn, $fallbackId);
+                        if (file_exists($albumPath . '/Thumbnail/' . $fallbackName)) {
+                            $albumData['cover'] = $baseUrl . '/' . $dirUtf8 . '/Thumbnail/' . $fallbackName;
+                        } else {
+                            $albumData['cover'] = $baseUrl . '/' . $dirUtf8 . '/' . $coverFn;
+                        }
                     }
                 } else {
                     $albumData['cover'] = 'https://via.placeholder.com/320x200?text=No+Photo';
@@ -206,27 +230,23 @@ if ($action === 'list_albums') {
         $filename = basename($photoPath);
         $meta = isset($photoMeta[$filename]) ? $photoMeta[$filename] : array('title' => $filename, 'desc' => '');
         
-        $thumbName = pathinfo($filename, PATHINFO_FILENAME) . '_thumb.jpg';
-        $thumbXSName = pathinfo($filename, PATHINFO_FILENAME) . '_thumbXS.jpg';
-        $thumbLName = pathinfo($filename, PATHINFO_FILENAME) . '_thumbL.jpg';
-        $thumbXLName = pathinfo($filename, PATHINFO_FILENAME) . '_thumbXL.jpg';
-
-        $hasThumb = file_exists($thumbDir . '/' . $thumbName);
-        $hasThumbXS = file_exists($thumbDir . '/' . $thumbXSName);
-        $hasThumbL = file_exists($thumbDir . '/' . $thumbLName);
-        $hasThumbXL = file_exists($thumbDir . '/' . $thumbXLName);
+        $sizes = array();
+        foreach ($thumbConfigs as $conf) {
+            $id = $conf['id'];
+            $tName = getThumbFilename($filename, $id);
+            if (file_exists($thumbDir . '/' . $tName)) {
+                $sizes[$id] = $baseUrl . '/' . $albumName . '/Thumbnail/' . $tName;
+            }
+        }
 
         $photoList[] = array(
             'filename' => $filename,
             'title' => $meta['title'],
             'desc' => $meta['desc'],
             'src' => $baseUrl . '/' . $albumName . '/' . $filename,
-            'thumb' => $hasThumb ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbName : null,
-            'thumbXS' => $hasThumbXS ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbXSName : null,
-            'thumbL' => $hasThumbL ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbLName : null,
-            'thumbXL' => $hasThumbXL ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbXLName : null,
+            'sizes' => $sizes,
             'exif' => getExifData($photoPath),
-            'shortIdStart' => $index * 6
+            'shortIdStart' => $index * (count($thumbConfigs) + 1)
         );
     }
 
