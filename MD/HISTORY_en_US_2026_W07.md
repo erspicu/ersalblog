@@ -32,12 +32,6 @@
 - **Album Generator**: Updated `make_album.php` output to include the new theme plugin loader.
 ## [2026-02-11]
 ### Changed
-- **Album Service: Removed Win11 Theme**: Completely removed the  theme from the project, including CSS styles, JavaScript plugins, and related assets.
-- **Frontend Configuration**: Restored the default theme in  to the standard  theme.
-- **Code Cleanup**: Cleaned up residual Win11-related tags and CSS classes within .
-
-## [2026-02-11]
-### Changed
 - **Album Service: Removed Win11 Theme**: Completely removed the `album-win11` theme from the project, including CSS styles, JavaScript plugins, and related assets.
 - **Frontend Configuration**: Restored the default theme in `config.js` to the standard `album` theme.
 - **Code Cleanup**: Cleaned up residual Win11-related tags and CSS classes within `BlazorAlbumExplorer`.
