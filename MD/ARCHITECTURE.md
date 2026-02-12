@@ -50,6 +50,10 @@ The system supports two operating modes:
     *   Supports diverse visual themes including `album-matrix` (with Digital Rain) and `album-y2k` (Retro 2000s style).
     *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly, providing an alternative immersive browsing experience.
     *   Integrates YouTube IFrame API for background music in specific themes.
+    *   **Persistent ShortURL IDs**: Implements an ID preservation mechanism in `make_album.php` to ensure shared links remain valid indefinitely.
+    *   **Multi-language Support**: Full internationalization framework for the admin panel and installer via `album/langs/`.
+    *   **Advanced Build Tooling**: `make_album.php` supports incremental caching, atomic file writes, and fine-grained CLI parameters for performance and reliability.
+    *   **Resource Management**: Implements `DownloadManager` with configurable concurrency limits.
 
 *   **Initialization and Health Check**:
     *   **Installation Wizard**: `install.php` provides a user-friendly interface to initialize the system and check environment compatibility. Dedicated installation wizard for Album Service is also available at `album/install.php`.
@@ -175,7 +179,10 @@ Listed below are key directories and file rules in the Git repository:
     *   提供多樣化視覺主題，包含 `album-matrix` (具備數位雨特效) 與 `album-y2k` (復古 2000 年代風格)。
     *   **實驗性 Blazor 總管**: 使用 Blazor WebAssembly 實作的高擬真 Windows 11 / WPF 風格檔案總管，提供沉浸式的相簿瀏覽體驗。
     *   特定主題整合 YouTube IFrame API 提供背景音樂功能。
-    *   **資源管理**: 於 `album.js` 實作全域 `DownloadManager`，具備併發控制（同時最多 3 個任務），優化頻寬分配與瀏覽器載入效能。
+    *   **短網址 ID 持久化**: 於 `make_album.php` 實作 ID 保留機制，確保照片順序變動或相簿重建後，已分享的連結永遠有效。
+    *   **完整多語系支援**: 相簿後台與安裝精靈具備獨立的多語系架構（位於 `album/langs/`）。
+    *   **進階建置工具**: `make_album.php` 支援智慧增量快取、原子化寫入及精細的 CLI 指令參數，大幅提升大型相簿的處理效能與穩定性。
+    *   **資源管理**: 於 `album.js` 實作全域 `DownloadManager`，具備可自定義的併發控制（建議 1-6），優化頻寬分配。
     *   **主題瀏覽**: 提供 `ThemeSelect.html` 與專用 `api/api_themes.php`，支援動態偵測並預覽相簿風格。
 
 *   **初始化與健康檢查**:

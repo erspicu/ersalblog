@@ -21,29 +21,33 @@ if (isset($_GET['action']) && $_GET['action'] === 'install') {
     $title = $_POST['title'];
     $desc = $_POST['description'];
     $intro = $_POST['introduce'];
+    $preview = $_POST['preview'];
+    $site_url = $_POST['site_url'];
     $tz = $_POST['timezone'];
-    $lang_code = $_POST['lang_code']; // 這是 HTML 用的 zh-TW
+    $lang_code = $_POST['lang_code'];
     $theme = $_POST['theme'];
     $api_type = $_POST['api_type'];
     $ipp = (int)$_POST['items_per_page'];
     $cdl = (int)$_POST['concurrent_downloads'];
 
     try {
-        // 1. 建立目錄
+        // ... (目錄建立邏輯維持不變)
         $dirs = array('config', 'Collection', 'api/json', 'static/themes');
         foreach ($dirs as $d) {
             $path = __DIR__ . '/' . $d;
             if (!file_exists($path)) mkdir($path, 0777, true);
         }
 
-        // 2. 產生 config.php (後台與全域設定)
+        $secret = bin2hex(random_bytes(16));
+
+        // 2. 產生 config.php
         $configPhp = "<?php\n/**\n * Baxermux Album Configuration\n */\n";
-        $configPhp .= "\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($pass) . "'\n);\n\n";
+        $configPhp .= "\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($pass) . "',\n    'session_secret' => '" . $secret . "'\n);\n\n";
         $configPhp .= "\$album_title = \"" . addslashes($title) . "\";\n";
         $configPhp .= "\$album_description = \"" . addslashes($desc) . "\";\n";
         $configPhp .= "\$album_introduce = \"" . addslashes($intro) . "\";\n";
-        $configPhp .= "\$album_preview = \"\";\n";
-        $configPhp .= "\$album_site_url = \"\";\n";
+        $configPhp .= "\$album_preview = \"" . addslashes($preview) . "\";\n";
+        $configPhp .= "\$album_site_url = \"" . addslashes($site_url) . "\";\n";
         $configPhp .= "\$album_lang = \"" . addslashes($lang_code) . "\";\n";
         $configPhp .= "\$album_timezone = \"" . addslashes($tz) . "\";\n\n";
         $configPhp .= "date_default_timezone_set(\$album_timezone);\n?>";
@@ -105,14 +109,6 @@ $themes = getThemes();
             <h2 class="mb-0 fw-bold">Baxermux Gallery</h2>
         </div>
         <div class="card-body">
-            <div class="text-end mb-4">
-                <select class="form-select form-select-sm d-inline-block w-auto" onchange="location.href='?lang='+this.value">
-                    <?php foreach($available_langs as $k => $v): ?>
-                        <option value="<?php echo $k; ?>" <?php echo $lang==$k?'selected':''; ?>><?php echo $v; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
             <?php if ($isInstalled): ?>
                 <div class="alert alert-success d-flex align-items-center mb-4">
                     <i class="bi bi-check-circle-fill me-2"></i>
@@ -125,6 +121,13 @@ $themes = getThemes();
                 <p class="text-center text-muted small mt-4"><?php echo _t('delete_install'); ?></p>
             <?php else: ?>
                 <div id="step1">
+                    <div class="text-end mb-4">
+                        <select class="form-select form-select-sm d-inline-block w-auto" onchange="location.href='?lang='+this.value">
+                            <?php foreach($available_langs as $k => $v): ?>
+                                <option value="<?php echo $k; ?>" <?php echo $lang==$k?'selected':''; ?>><?php echo $v; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     <h5 class="section-title"><?php echo _t('step_env'); ?></h5>
                     <div class="row g-3 mb-4">
                         <div class="col-12">
@@ -165,6 +168,14 @@ $themes = getThemes();
                             <div class="col-12">
                                 <label class="form-label"><?php echo _t('album_intro'); ?></label>
                                 <input type="text" name="introduce" class="form-control" value="放一些Blog用到的素材照片." required oninvalid="this.setCustomValidity('<?php echo _t('field_required'); ?>')" oninput="setCustomValidity('')">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><?php echo _t('preview_img'); ?></label>
+                                <input type="text" name="preview" class="form-control" value="https://www.baxermux.org/ersalblog/album/BaxerMuxAlbum.jpg">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><?php echo _t('site_url'); ?></label>
+                                <input type="text" name="site_url" class="form-control" value="https://www.baxermux.org/ersalblog/album/">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo _t('admin_user'); ?></label>

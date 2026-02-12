@@ -1,5 +1,19 @@
 # History Logs - 2026 Week 07 (English)
 
+## [2026-02-13]
+### Added
+- **Admin Multi-language Framework**: Implemented a comprehensive multi-language architecture for the album admin panel, supporting Chinese and English. Added a `langs/` directory for translation files and real-time language preview switching on the login page.
+- **Enhanced Build Tool (make_album.php)**:
+    - **Persistent ID Stability**: Short URL IDs are now stored persistently, ensuring that shared links remain valid even if photo order changes or albums are rebuilt.
+    - **Parameterized Execution**: Supports fine-grained commands like `--only-html`, `--force-json`, `--force-thumb`, and `-s` for various rapid build scenarios.
+    - **Atomic File Writing**: Implemented a secure writing mechanism to prevent JSON or index file corruption during interrupted builds.
+- **Upgraded Installer (install.php)**: Fully supports multi-language interfaces and custom HTML5 form validation. Added initialization for SEO description, album introduction, preview images, and concurrent download limits.
+- **Global Settings Optimization**: The settings interface now uses AJAX for saving and integrates SweetAlert2 notifications. Timezone configuration has been simplified with a dropdown selector.
+
+### Fixed
+- **Template Path Hardcoding**: Hardcoded all static resource paths in `album_template.html` as relative paths to resolve theme CSS parsing issues in certain environments.
+- **EXIF Extraction Restoration**: Fixed missing GPS and technical info extraction logic during the build process, restoring camera parameters and map displays.
+
 ## [2026-02-12]
 ### Added
 - **Backend & SEO Settings Interface**: Added management for `config.php` in the admin panel, allowing customization of site title, SEO description, OG preview image, site language, and system timezone.
