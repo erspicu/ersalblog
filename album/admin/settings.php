@@ -5,7 +5,6 @@ requireAlbumLogin();
 $configFile = __DIR__ . '/../config/config.js';
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 
-// 簡單的 Regex 讀取 JS 物件屬性 (這部分若 config.js 格式太複雜可能需更精確)
 function getConfigValue($content, $key, $default = '') {
     if (preg_match('/' . $key . ':\s*\'([^\']+)\'/', $content, $m)) return $m[1];
     if (preg_match('/' . $key . ':\s*(\d+)/', $content, $m)) return $m[1];
@@ -17,7 +16,6 @@ $currentApiType = getConfigValue($configContent, 'api_type', 'json');
 $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
 $currentConcurrentDownloads = getConfigValue($configContent, 'concurrent_downloads', '3');
 
-// 讀取 config.php 變數
 $album_title = "Baxermux的相簿";
 $album_description = "ersalblog的延伸子專案相簿服務。";
 $album_introduce = "放一些Blog用到的素材照片.";
@@ -36,7 +34,7 @@ if (file_exists($phpConfigFile)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>前端設定 - 相簿後台</title>
+    <title>全域設定 - 相簿後台</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -46,155 +44,150 @@ if (file_exists($phpConfigFile)) {
 
     <div class="main-content flex-grow-1 bg-light">
         <div class="mb-4">
-            <h2>前端設定 (config.js)</h2>
-            <p class="text-muted">這裡調整的設定將直接影響相簿前端 SPA 的行為與樣式。</p>
+            <h2>全域設定 (Global Settings)</h2>
+            <p class="text-muted">在這裡您可以統一調整相簿的前端顯示 (config.js) 與後端環境/SEO 配置 (config.php)。</p>
         </div>
 
-        <div class="card shadow-sm col-md-8 mb-5">
-            <!-- ... 原有的前端設定表單 ... -->
+        <!-- 前端設定 (AJAX) -->
+        <div class="card shadow-sm col-md-8 mb-4">
+            <div class="card-header bg-white fw-bold">前端設定 (JS Config)</div>
             <div class="card-body">
-                <form action="album_actions.php" method="post">
+                <form class="ajax-form" data-action="update_settings">
                     <input type="hidden" name="action" value="update_settings">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
-                    <!-- 此處省略原本的前端設定內容，保持不變 -->
 
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label fw-bold">相簿主題 (Theme)</label>
                         <select name="theme" class="form-select">
                             <?php
                             $themesDir = __DIR__ . '/../static/themes';
                             $themes = [];
                             if (is_dir($themesDir)) {
-                                $scan = scandir($themesDir);
-                                foreach ($scan as $entry) {
+                                foreach (scandir($themesDir) as $entry) {
                                     if ($entry === '.' || $entry === '..') continue;
-                                    $fullPath = $themesDir . '/' . $entry;
-                                    
-                                    // 僅偵測目錄且名稱以 'album' 開頭
-                                    if (is_dir($fullPath) && strpos($entry, 'album') === 0) {
-                                        $displayName = $entry; // 預設顯示目錄名
-                                        $readme = $fullPath . '/readme.txt';
-                                        
+                                    if (is_dir($themesDir . '/' . $entry) && strpos($entry, 'album') === 0) {
+                                        $displayName = $entry;
+                                        $readme = $themesDir . '/' . $entry . '/readme.txt';
                                         if (file_exists($readme)) {
-                                            $lines = file($readme, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                                            foreach ($lines as $line) {
-                                                if (stripos($line, 'Name:') === 0) {
-                                                    $displayName = trim(substr($line, 5));
-                                                    break;
-                                                }
+                                            foreach (file($readme) as $line) {
+                                                if (stripos($line, 'Name:') === 0) { $displayName = trim(substr($line, 5)); break; }
                                             }
                                         }
                                         $themes[$entry] = $displayName;
                                     }
                                 }
                             }
-                            
-                            // 排序 (讓 album 排前面，其他字母順序)
-                            uksort($themes, function($a, $b) {
-                                if ($a === 'album') return -1;
-                                if ($b === 'album') return 1;
-                                return strcmp($a, $b);
-                            });
-                            
+                            uksort($themes, function($a, $b) { return ($a === 'album') ? -1 : (($b === 'album') ? 1 : strcmp($a, $b)); });
                             foreach ($themes as $key => $name) {
                                 $selected = ($currentTheme === $key) ? 'selected' : '';
                                 echo "<option value=\"$key\" $selected>" . htmlspecialchars($name) . "</option>";
                             }
                             ?>
                         </select>
-                        <div class="form-text">切換相簿整體的配色方案 (自動偵測 themes 目錄)。</div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">資料讀取模式 (API Type)</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="api_type" value="json" id="api_json" <?php echo ($currentApiType === 'json') ? 'selected' : ''; ?> <?php echo ($currentApiType === 'json') ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="api_json">
-                                靜態 JSON 模式 (適合純靜態託管，需執行 make_album.php)
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="api_type" value="api_filebase" id="api_file" <?php echo ($currentApiType === 'api_filebase') ? 'selected' : ''; ?> <?php echo ($currentApiType === 'api_filebase') ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="api_file">
-                                動態 PHP API 模式 (即時讀取檔案系統，不需頻繁產生 JSON)
-                            </label>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">資料讀取模式</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="api_type" value="json" id="api_json" <?php echo ($currentApiType === 'json') ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="api_json">靜態 JSON</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="api_type" value="api_filebase" id="api_file" <?php echo ($currentApiType === 'api_filebase') ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="api_file">動態 PHP API</label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">每頁顯示項目數 (Items Per Page)</label>
-                        <input type="number" name="items_per_page" class="form-control" value="<?php echo htmlspecialchars($currentItemsPerPage); ?>" min="1" max="200">
-                        <div class="form-text">設定首頁與相簿內頁一頁要顯示多少張照片/相簿。</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">每頁顯示項目數</label>
+                            <input type="number" name="items_per_page" class="form-control" value="<?php echo htmlspecialchars($currentItemsPerPage); ?>" min="1" max="200">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">並行下載限制</label>
+                            <input type="number" name="concurrent_downloads" class="form-control" value="<?php echo htmlspecialchars($currentConcurrentDownloads); ?>" min="1" max="6">
+                            <div class="form-text">同時下載最大數量 (建議 1-6)。</div>
+                        </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">並行下載限制 (Concurrent Downloads)</label>
-                        <input type="number" name="concurrent_downloads" class="form-control" value="<?php echo htmlspecialchars($currentConcurrentDownloads); ?>" min="1" max="10">
-                        <div class="form-text">同時下載照片資源的最大數量。較小的值可減輕伺服器負擔並增加穩定性。</div>
-                    </div>
-
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-danger small">修改後將直接覆蓋 config.js 檔案。</span>
-                        <button type="submit" class="btn btn-primary px-4">儲存設定</button>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary px-4">儲存前端設定</button>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="mb-4">
-            <h2>後端與 SEO 設定 (config.php)</h2>
-            <p class="text-muted">這裡調整的設定涉及網站標題、SEO 描述以及系統環境配置。</p>
-        </div>
 
+        <!-- 後端設定 (AJAX) -->
         <div class="card shadow-sm col-md-8">
+            <div class="card-header bg-white fw-bold">後端與 SEO 設定 (PHP Config)</div>
             <div class="card-body">
-                <form action="album_actions.php" method="post">
+                <form class="ajax-form" data-action="update_backend_settings">
                     <input type="hidden" name="action" value="update_backend_settings">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿網站標題 (Album Title)</label>
+                        <label class="form-label fw-bold">相簿網站標題</label>
                         <input type="text" name="album_title" class="form-control" value="<?php echo htmlspecialchars($album_title); ?>">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">SEO 描述屬性 (Description)</label>
-                        <textarea name="album_description" class="form-control" rows="2"><?php echo htmlspecialchars($album_description); ?></textarea>
+                        <input type="text" name="album_description" class="form-control" value="<?php echo htmlspecialchars($album_description); ?>">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">相簿簡介 (Introduce)</label>
                         <input type="text" name="album_introduce" class="form-control" value="<?php echo htmlspecialchars($album_introduce); ?>">
-                        <div class="form-text">顯示在頁面頂部的小字簡介。</div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">分享預覽圖 URL (Preview Image)</label>
+                        <label class="form-label fw-bold">分享預覽圖 URL</label>
                         <input type="text" name="album_preview" class="form-control" value="<?php echo htmlspecialchars($album_preview); ?>">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿網站網址 (Site URL)</label>
+                        <label class="form-label fw-bold">相簿網站網址</label>
                         <input type="text" name="album_site_url" class="form-control" value="<?php echo htmlspecialchars($album_site_url); ?>">
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">網站語系 (Language)</label>
+                            <label class="form-label fw-bold">語系</label>
                             <select name="album_lang" class="form-select">
-                                <option value="zh_TW" <?php echo ($album_lang == 'zh_TW' ? 'selected' : ''); ?>>繁體中文 (zh_TW)</option>
-                                <option value="en_US" <?php echo ($album_lang == 'en_US' ? 'selected' : ''); ?>>English (en_US)</option>
+                                <option value="zh_TW" <?php echo ($album_lang == 'zh_TW' ? 'selected' : ''); ?>>繁體中文</option>
+                                <option value="en_US" <?php echo ($album_lang == 'en_US' ? 'selected' : ''); ?>>English</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">系統時區 (Timezone)</label>
-                            <input type="text" name="album_timezone" class="form-control" value="<?php echo htmlspecialchars($album_timezone); ?>">
+                            <label class="form-label fw-bold">系統時區</label>
+                            <select name="album_timezone" class="form-select">
+                                <?php
+                                $timezones = [
+                                    'Asia/Taipei' => '台北 (UTC+8)',
+                                    'Asia/Hong_Kong' => '香港 (UTC+8)',
+                                    'Asia/Shanghai' => '上海 (UTC+8)',
+                                    'Asia/Tokyo' => '東京 (UTC+9)',
+                                    'Asia/Seoul' => '首爾 (UTC+9)',
+                                    'Asia/Singapore' => '新加坡 (UTC+8)',
+                                    'Asia/Bangkok' => '曼谷 (UTC+7)',
+                                    'America/New_York' => '紐約 (EST/EDT)',
+                                    'America/Los_Angeles' => '洛杉磯 (PST/PDT)',
+                                    'Europe/London' => '倫敦 (GMT/BST)',
+                                    'Europe/Paris' => '巴黎 (CET/CEST)',
+                                    'UTC' => 'UTC 標準時間'
+                                ];
+                                foreach ($timezones as $val => $lbl) {
+                                    $sel = ($album_timezone == $val) ? 'selected' : '';
+                                    echo "<option value=\"$val\" $sel>$lbl</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
                     </div>
 
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-danger small">修改後將直接更新 config.php 檔案。</span>
+                    <div class="text-end">
                         <button type="submit" class="btn btn-success px-4">儲存後端設定</button>
                     </div>
                 </form>
@@ -204,5 +197,49 @@ if (file_exists($phpConfigFile)) {
 </div>
 
 <script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/sweetalert2.all.min.js"></script>
+<script>
+document.querySelectorAll('.ajax-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerText;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = '處理中...';
+
+        try {
+            const response = await fetch('album_actions.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            // 檢查回應是否為跳轉 (雖然 AJAX 下不會自動跳轉，但後台原本的 PHP 會回傳 Location header)
+            // 如果後端沒改，這裡會收到帶有跳轉後的 HTML。我們需要修正後端以支援 AJAX JSON 回應。
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '儲存成功',
+                    text: '設定已更新完成！',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                throw new Error('Server returned error');
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: '儲存失敗',
+                text: '發生預期外的錯誤，請稍後再試。'
+            });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalBtnText;
+        }
+    });
+});
+</script>
 </body>
 </html>

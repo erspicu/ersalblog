@@ -113,7 +113,8 @@ switch ($action) {
         $jsContent .= "};\n";
 
         if (file_put_contents($configFile, $jsContent) === false) die("Error writing to config.js");
-        header('Location: settings.php?status=success');
+        echo json_encode(['status' => 'success']);
+        exit;
         break;
 
     case 'update_backend_settings':
@@ -149,7 +150,8 @@ switch ($action) {
         $phpContent .= "?>";
 
         if (file_put_contents($phpFile, $phpContent) === false) die("Error writing to config.php");
-        header('Location: settings.php?status=success');
+        echo json_encode(['status' => 'success']);
+        exit;
         break;
 
     default:

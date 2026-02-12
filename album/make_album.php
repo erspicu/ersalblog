@@ -16,13 +16,14 @@ $templateFile = $staticDir . '/album_template.html';
 if (!file_exists($jsonDir)) mkdir($jsonDir, 0777, true);
 
 // 解析 CLI 參數
-$longopts = array("skip-thumb", "force", "force-json", "force-thumb", "help");
+$longopts = array("skip-thumb", "force", "force-json", "force-thumb", "only-html", "help");
 $options = getopt("sfh", $longopts);
 
 if (isset($options['h']) || isset($options['help'])) {
     echo "Baxermux Album Generator\n";
     echo "Usage: php make_album.php [options]\n\n";
     echo "Options:\n";
+    echo "  --only-html         僅更新 album.html 首頁檔案 (不處理 JSON 與縮圖)\n";
     echo "  -s, --skip-thumb    建立 JSON 就好，完全不處理縮圖 (Skip thumbnails)\n";
     echo "  -f, --force         強制完整重跑：JSON 與 縮圖全部重新產生 (Force all)\n";
     echo "  --force-json        強制重新產生 JSON 資料 (不影響縮圖快取判斷)\n";
@@ -31,6 +32,7 @@ if (isset($options['h']) || isset($options['help'])) {
     exit(0);
 }
 
+$onlyHtml = isset($options['only-html']);
 $skipThumbnails = (isset($options['s']) || isset($options['skip-thumb']));
 $forceAll = (isset($options['f']) || isset($options['force']));
 $forceJson = ($forceAll || isset($options['force-json']));
@@ -96,7 +98,7 @@ function getExifData($file) {
     $model = isset($exif['Model']) ? trim($exif['Model']) : '未知';
     $iso = isset($exif['ISOSpeedRatings']) ? (is_array($exif['ISOSpeedRatings']) ? $exif['ISOSpeedRatings'][0] : $exif['ISOSpeedRatings']) : '未知';
     $date = isset($exif['DateTimeOriginal']) ? $exif['DateTimeOriginal'] : (isset($exif['DateTime']) ? $exif['DateTime'] : '未知');
-    return array('make' => $make, 'model' => $model, 'date' => $date, 'iso' => $iso); // 簡化處理
+    return array('make' => $make, 'model' => $model, 'date' => $date, 'iso' => $iso);
 }
 
 function generateThumbnail($src, $dest, $maxSize, $quality) {
@@ -114,8 +116,7 @@ function generateThumbnail($src, $dest, $maxSize, $quality) {
             echo "Created (IM): " . basename($dest) . "\n"; return;
         } catch (Exception $e) {}
     }
-    // GD Fallback (略)
-    echo "Created (GD/Skipped): " . basename($dest) . "\n";
+    echo "Skipped/Failed (IM): " . basename($dest) . "\n";
 }
 
 // 1. 生成 Shell
@@ -126,7 +127,6 @@ if (file_exists($baseDir . '/../admin/version_config.php')) {
     if (defined('CURRENT_VERSION')) $appVersion = CURRENT_VERSION;
 }
 
-// 讀取相簿後台設定以獲取 Header 變數
 $album_title = "Baxermux的相簿";
 $album_description = "ersalblog的延伸子專案相簿服務。";
 $album_introduce = "放一些Blog用到的素材照片.";
@@ -151,6 +151,12 @@ $indexHtml = $tm->render($tm->getSource(), array(
     'version' => $appVersion
 ));
 file_put_contents($baseDir . '/album.html', $indexHtml);
+echo "Generated: album.html (SPA Shell)\n";
+
+if ($onlyHtml) {
+    echo "Only-HTML mode: Generation complete.\n";
+    exit(0);
+}
 
 // 2. 遍歷相簿
 $allAlbumsList = array();
@@ -181,11 +187,10 @@ if (is_dir($collectionDir)) {
                 foreach ($thumbConfigs as $idx => $conf) {
                     $tRel = $albumName . '/Thumbnail/' . getThumbFilename($p['filename'], $conf['id']);
                     $shortUrlList[$sid + $idx + 1] = $tRel;
-                    // 即使 JSON 快取，只要不 skip-thumb，就要檢查縮圖
                     if (!$skipThumbnails) generateThumbnail($albumPath . '/' . $p['filename'], $baseDir . '/Collection/' . $tRel, $conf['width'], $conf['quality']);
                 }
             }
-            $allAlbumsList[] = array('name' => $data['name'], 'id' => $albumName, 'desc' => $data['desc'], 'cover' => '', 'count' => count($data['photos']), 'date' => '', 'link' => '#album='.urlencode($albumName));
+            $allAlbumsList[] = array('name' => $data['name'], 'id' => $albumName, 'desc' => isset($data['desc']) ? $data['desc'] : '', 'cover' => '', 'count' => count($data['photos']), 'date' => '', 'link' => '#album='.urlencode($albumName));
             continue;
         }
 
@@ -217,7 +222,6 @@ if (is_dir($collectionDir)) {
     }
 }
 
-// 3. 清理與存檔
 safe_file_put_contents($jsonDir . '/index.json', json_encode(array('items' => $allAlbumsList), JSON_UNESCAPED_UNICODE));
 ksort($shortUrlList);
 $shortUrlContent = "";

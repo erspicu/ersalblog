@@ -46,7 +46,7 @@ function is_active($page, $current) {
         </li>
         <li>
             <a href="settings.php" class="<?php echo is_active('settings.php', $current_page); ?>">
-                前端設定 (Settings)
+                全域設定 (Settings)
             </a>
         </li>
     </ul>

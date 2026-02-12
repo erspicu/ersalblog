@@ -43,6 +43,12 @@ php make_album.php
 php make_album.php --force-thumb
 ```
 
+### 7. 僅更新 album.html 首頁 (不處理任何相簿資料)
+當您修改了 `config.php` 中的網站標題、SEO 描述或簡介，且希望立即反映到網頁上，但不想花時間掃描照片時使用。
+```bash
+php make_album.php --only-html
+```
+
 ## 參數說明表
 
 | 參數 | 說明 |
@@ -51,4 +57,5 @@ php make_album.php --force-thumb
 | `-s`, `--skip-thumb` | 跳過縮圖處理流程（僅處理 JSON 與索引）。 |
 | `--force-json` | 強制重新產生 JSON 檔案。 |
 | `--force-thumb` | 強制重新產生縮圖檔案。 |
+| `--only-html` | 僅產生/更新 `album.html` 入口檔案後立即結束。 |
 | `-h`, `--help` | 顯示參數輔助說明。 |
