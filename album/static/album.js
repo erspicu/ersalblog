@@ -83,7 +83,7 @@ class DownloadManager {
     }
 }
 
-window.albumDownloadManager = new DownloadManager(3);
+window.albumDownloadManager = new DownloadManager((typeof albumConfig !== 'undefined' && albumConfig.concurrent_downloads) ? albumConfig.concurrent_downloads : 3);
 
 function managedLoadImages() {
     const images = document.querySelectorAll('img[data-managed-src]:not(.managed-init)');

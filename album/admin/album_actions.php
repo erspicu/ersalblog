@@ -98,6 +98,7 @@ switch ($action) {
         $theme = isset($_POST['theme']) ? trim($_POST['theme']) : 'album';
         $apiType = isset($_POST['api_type']) ? trim($_POST['api_type']) : 'json';
         $itemsPerPage = isset($_POST['items_per_page']) ? (int)$_POST['items_per_page'] : 24;
+        $concurrentDownloads = isset($_POST['concurrent_downloads']) ? (int)$_POST['concurrent_downloads'] : 3;
 
         // Use realpath to ensure we are targeting the correct file
         $configFile = realpath(__DIR__ . '/../config/config.js');
@@ -109,7 +110,8 @@ switch ($action) {
         $jsContent .= "const albumConfig = {\n";
         $jsContent .= "    theme: '" . addslashes($theme) . "',\n";
         $jsContent .= "    api_type: '" . addslashes($apiType) . "',\n";
-        $jsContent .= "    items_per_page: " . $itemsPerPage . "\n";
+        $jsContent .= "    items_per_page: " . $itemsPerPage . ",\n";
+        $jsContent .= "    concurrent_downloads: " . $concurrentDownloads . "\n";
         $jsContent .= "};\n";
 
         if (file_put_contents($configFile, $jsContent) === false) {

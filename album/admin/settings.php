@@ -15,6 +15,7 @@ function getConfigValue($content, $key, $default = '') {
 $currentTheme = getConfigValue($configContent, 'theme', 'album');
 $currentApiType = getConfigValue($configContent, 'api_type', 'json');
 $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
+$currentConcurrentDownloads = getConfigValue($configContent, 'concurrent_downloads', '3');
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -108,6 +109,12 @@ $currentItemsPerPage = getConfigValue($configContent, 'items_per_page', '24');
                         <label class="form-label fw-bold">每頁顯示項目數 (Items Per Page)</label>
                         <input type="number" name="items_per_page" class="form-control" value="<?php echo htmlspecialchars($currentItemsPerPage); ?>" min="1" max="200">
                         <div class="form-text">設定首頁與相簿內頁一頁要顯示多少張照片/相簿。</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">並行下載限制 (Concurrent Downloads)</label>
+                        <input type="number" name="concurrent_downloads" class="form-control" value="<?php echo htmlspecialchars($currentConcurrentDownloads); ?>" min="1" max="10">
+                        <div class="form-text">同時下載照片資源的最大數量。較小的值可減輕伺服器負擔並增加穩定性。</div>
                     </div>
 
                     <hr>

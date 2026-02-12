@@ -2,7 +2,8 @@
 
 ## [2026-02-12]
 ### Added
-- **Dashboard Disk Information**: Added real-time disk space monitoring to the admin dashboard, showing system total/free space, usage percentage, and actual storage size of the photo collection.
+- **Concurrent Downloads Setting**: Added "Concurrent Downloads" parameter to the frontend settings in the admin panel, allowing customization of the maximum number of simultaneous photo downloads to optimize loading stability and server load.
+- **Dashboard Disk Information**: 	 Added real-time disk space monitoring to the admin dashboard, showing system total/free space, usage percentage, and actual storage size of the photo collection.
 - **Album Data Caching**: 	 `make_album.php` now includes JSON generation caching. If the album content, metadata, and compression settings remain unchanged, the system reuses existing JSON files, significantly speeding up the build process for large collections.
 - **Thumbnail Caching Mechanism**: `make_album.php` now checks file modification times; if a thumbnail is newer than the original, regeneration is skipped unless forced, significantly improving build speeds.
 - **Orphaned Thumbnail Cleanup**: Automatically detects and removes thumbnail files in the `Thumbnail` directory that no longer have a corresponding original image.
