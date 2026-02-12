@@ -259,8 +259,18 @@ if (is_dir($collectionDir)) {
         echo "Album: $albumName (Processing...)\n";
         $thumbDir = $albumPath . '/Thumbnail'; if (!is_dir($thumbDir)) mkdir($thumbDir, 0777, true);
         $photos = glob($albumPath . '/*.jpg');
-        $albumPhotosJson = array();
         
+        $displayAlbumName = $albumName; $albumDesc = ''; $albumCover = ''; $albumDate = '';
+        if (file_exists($commentAlbumFile)) {
+            $parts = explode('|', file_get_contents($commentAlbumFile));
+            if (isset($parts[0]) && !empty($parts[0])) $displayAlbumName = trim($parts[0]);
+            if (isset($parts[1])) $albumDesc = trim($parts[1]);
+            if (isset($parts[2]) && !empty($parts[2])) $albumCover = trim($parts[2]);
+            if (isset($parts[3])) $albumDate = trim($parts[3]);
+        }
+        if (empty($albumDate)) $albumDate = date('Ymd', filemtime($albumPath));
+
+        $albumPhotosJson = array();
         foreach ($photos as $photoPath) {
             $filename = basename($photoPath);
             $rel = $albumName . '/' . $filename;
@@ -275,7 +285,15 @@ if (is_dir($collectionDir)) {
                 $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . $tName;
                 $sizes[$conf['id']] = 'Collection/' . $albumName . '/Thumbnail/' . $tName;
             }
-            $albumPhotosJson[] = array('filename' => $filename, 'src' => 'Collection/'.$rel, 'sizes' => $sizes, 'shortIdStart' => $sid, 'title' => $filename, 'desc' => '');
+            $albumPhotosJson[] = array(
+                'filename' => $filename,
+                'src' => 'Collection/'.$rel,
+                'sizes' => $sizes,
+                'shortIdStart' => $sid,
+                'title' => $filename,
+                'desc' => '',
+                'exif' => getExifData($photoPath)
+            );
         }
 
         $singleData = array('name' => $displayAlbumName, 'desc' => $albumDesc, 'photos' => $albumPhotosJson);

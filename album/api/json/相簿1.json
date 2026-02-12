@@ -1,6 +1,6 @@
 {
-    "name": null,
-    "desc": null,
+    "name": "東京三日遊",
+    "desc": "相簿內容詳細描述",
     "photos": [
         {
             "filename": "IMG_20251021_150129.jpg",
@@ -16,7 +16,20 @@
             },
             "shortIdStart": 664,
             "title": "IMG_20251021_150129.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/100s",
+                "iso": 640,
+                "focal": "25.1mm",
+                "date": "2025:10:21 15:01:29",
+                "gps": {
+                    "lat": 35.680378,
+                    "lng": 139.762063
+                }
+            }
         },
         {
             "filename": "IMG_20251021_150135.jpg",
@@ -32,7 +45,20 @@
             },
             "shortIdStart": 672,
             "title": "IMG_20251021_150135.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/100s",
+                "iso": 800,
+                "focal": "25.1mm",
+                "date": "2025:10:21 15:01:35",
+                "gps": {
+                    "lat": 35.680378,
+                    "lng": 139.762063
+                }
+            }
         },
         {
             "filename": "IMG_20251021_152619.jpg",
@@ -48,7 +74,20 @@
             },
             "shortIdStart": 680,
             "title": "IMG_20251021_152619.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/100s",
+                "iso": 400,
+                "focal": "25.1mm",
+                "date": "2025:10:21 15:26:19",
+                "gps": {
+                    "lat": 35.687101,
+                    "lng": 139.761399
+                }
+            }
         },
         {
             "filename": "IMG_20251021_154053.jpg",
@@ -64,7 +103,20 @@
             },
             "shortIdStart": 688,
             "title": "IMG_20251021_154053.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/100s",
+                "iso": 200,
+                "focal": "25.1mm",
+                "date": "2025:10:21 15:40:53",
+                "gps": {
+                    "lat": 35.686917,
+                    "lng": 139.760895
+                }
+            }
         },
         {
             "filename": "IMG_20251021_192937.jpg",
@@ -80,7 +132,20 @@
             },
             "shortIdStart": 696,
             "title": "IMG_20251021_192937.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/25s",
+                "iso": 2000,
+                "focal": "8.7mm",
+                "date": "2025:10:21 19:29:37",
+                "gps": {
+                    "lat": 35.627172,
+                    "lng": 139.771835
+                }
+            }
         },
         {
             "filename": "IMG_20251021_193009.jpg",
@@ -96,7 +161,20 @@
             },
             "shortIdStart": 704,
             "title": "IMG_20251021_193009.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/33s",
+                "iso": 3200,
+                "focal": "11.5mm",
+                "date": "2025:10:21 19:30:10",
+                "gps": {
+                    "lat": 35.62676,
+                    "lng": 139.772409
+                }
+            }
         },
         {
             "filename": "IMG_20251021_193045.jpg",
@@ -112,7 +190,20 @@
             },
             "shortIdStart": 712,
             "title": "IMG_20251021_193045.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/33s",
+                "iso": 3200,
+                "focal": "11.5mm",
+                "date": "2025:10:21 19:30:45",
+                "gps": {
+                    "lat": 35.626775,
+                    "lng": 139.772392
+                }
+            }
         },
         {
             "filename": "IMG_20251021_203001.jpg",
@@ -128,7 +219,20 @@
             },
             "shortIdStart": 720,
             "title": "IMG_20251021_203001.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/25s",
+                "iso": 1600,
+                "focal": "8.7mm",
+                "date": "2025:10:21 20:30:02",
+                "gps": {
+                    "lat": 35.657295,
+                    "lng": 139.745538
+                }
+            }
         },
         {
             "filename": "IMG_20251021_203355.jpg",
@@ -144,7 +248,20 @@
             },
             "shortIdStart": 728,
             "title": "IMG_20251021_203355.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.2",
+                "shutter": "1\/20s",
+                "iso": 1000,
+                "focal": "2.1mm",
+                "date": "2025:10:21 20:33:55",
+                "gps": {
+                    "lat": 35.658709,
+                    "lng": 139.746339
+                }
+            }
         },
         {
             "filename": "IMG_20251021_204714.jpg",
@@ -160,7 +277,20 @@
             },
             "shortIdStart": 736,
             "title": "IMG_20251021_204714.jpg",
-            "desc": ""
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/17s",
+                "iso": 2000,
+                "focal": "8.7mm",
+                "date": "2025:10:21 20:47:14",
+                "gps": {
+                    "lat": 35.658564,
+                    "lng": 139.745493
+                }
+            }
         }
     ]
 }
