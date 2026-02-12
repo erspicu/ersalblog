@@ -2,6 +2,7 @@
 
 ## [2026-02-12]
 ### Added
+- **Dynamic Thumbnail Config Loading**: The share modal now dynamically reads definitions from `compression.json` to generate size options, labels (Comments), and short URL IDs, eliminating the need for hard-coded values in JS.
 - **Album Service: Win11 Theme (AOT Optimized)**: Successfully implemented **AOT (Ahead-of-Time)** compilation, translating C# directly into native WebAssembly instructions for peak performance.
 - **Virtual Edge Browser Upgrade**: Added a dedicated **AOT Compilation Chapter** to the technical whitepaper, featuring project configuration snippets and performance metrics.
 - **Immersive Slideshow Mode**: Enabled automatic taskbar hiding during slideshow playback to achieve true 100% screen coverage.

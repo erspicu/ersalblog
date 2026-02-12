@@ -1,9 +1,9 @@
 [
-  { "id": "3XL", "width": 2048, "quality": 90, "mode": "ModalShow" },
-  { "id": "2XL", "width": 1600, "quality": 90, "mode": "PictureShow" },
-  { "id": "XL",  "width": 1024, "quality": 90, "mode": "" },
-  { "id": "L",   "width": 800,  "quality": 90, "mode": "" },
-  { "id": "M",   "width": 640,  "quality": 90, "mode": "" },
-  { "id": "S",   "width": 320,  "quality": 80, "mode": "PreviewIcon" },
-  { "id": "XS",  "width": 160,  "quality": 70, "mode": "ManageIcon" }
+ {"id":"3XL","width":2048,"quality":90,"mode":"ModalShow","comment":"超特大型"},
+ {"id":"2XL","width":1600,"quality":90,"mode":"PictureShow","comment":"超大型"},
+ {"id":"XL","width":1024,"quality":90,"mode":"","comment":"大型"},
+ {"id":"L","width":800,"quality":90,"mode":"","comment":"中型"},
+ {"id":"M","width":640,"quality":90,"mode":"","comment":"中小型"},
+ {"id":"S","width":320,"quality":80,"mode":"PreviewIcon","comment":"小型"},
+ {"id":"XS","width":160,"quality":70,"mode":"ManageIcon","comment":"超小型"}
 ]

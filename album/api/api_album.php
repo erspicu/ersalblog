@@ -254,6 +254,7 @@ if ($action === 'list_albums') {
     echo json_encode(array(
         'name' => $displayAlbumName,
         'desc' => $albumDesc,
-        'photos' => $photoList
+        'photos' => $photoList,
+        'thumbConfigs' => $thumbConfigs
     ));
 }

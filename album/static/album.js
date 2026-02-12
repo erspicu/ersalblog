@@ -504,13 +504,28 @@ function updateShareLinks() {
     const sid = parseInt(shortIdStart);
 
     let html = "";
-    [{l:'超大 (2048px)',s:'_3XL',o:1,w:1601},{l:'大型 (1600px)',s:'_2XL',o:2,w:1025},{l:'中型 (1024px)',s:'_XL',o:3,w:801},{l:'預覽 (800px)',s:'_L',o:4,w:641},{l:'小型 (640px)',s:'_M',o:5,w:321},{l:'極小 (320px)',s:'_S',o:6,w:0}]
-    .forEach(s => {
-        if (realWidth >= s.w) {
+    if (AppState.compressionConfig && Array.isArray(AppState.compressionConfig)) {
+        AppState.compressionConfig.forEach((conf, index) => {
+            // 計算短網址偏移量 (根據 make_album.php: 原圖是 sid, 縮圖是 sid + 1, +2...)
+            const offset = index + 1;
+            // 判斷是否顯示該選項 (如果原圖寬度夠大)
+            // 這裡我們稍微放寬顯示標準，或者是根據配置的寬度來判斷
+            // 舊版是 hardcode 寬度門檻，現在我們改用 (實體寬度 >= 配置寬度 * 0.8) 或其他邏輯，
+            // 這裡為了保持行為一致，我們先用實體寬度 >= 配置寬度
+            if (realWidth >= (conf.width || 0)) {
+                const url = isOriginal ? getAbs(thumbPath + name + '_' + conf.id + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + offset));
+                const label = `${conf.comment || conf.id} (${conf.width}px)`;
+                html += renderTemplate('tmpl_share_item', { label: label, url: url });
+            }
+        });
+    } else {
+        // Fallback (萬一沒載入成功)
+        [{l:'預覽 (800px)',s:'_L',o:4,w:0}]
+        .forEach(s => {
             const url = isOriginal ? getAbs(thumbPath + name + s.s + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + s.o));
             html += renderTemplate('tmpl_share_item', { label: s.l, url: url });
-        }
-    });
+        });
+    }
     html += renderTemplate('tmpl_share_item', { label: `原始 (${realWidth}px)`, url: isOriginal ? getAbs(originalImgSrc) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid)) });
     document.getElementById('share-links-container').innerHTML = html;
 }
