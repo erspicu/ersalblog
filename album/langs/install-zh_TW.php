@@ -25,5 +25,6 @@ return [
     'btn_start' => '開始安裝',
     'btn_back' => '返回',
     'installing' => '正在安裝...',
-    'error_network' => '網路錯誤，請稍後再試。'
+    'error_network' => '網路錯誤，請稍後再試。',
+    'field_required' => '請填寫此欄位。'
 ];

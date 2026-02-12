@@ -25,5 +25,6 @@ return [
     'btn_start' => 'Start Installation',
     'btn_back' => 'Back',
     'installing' => 'Installing...',
-    'error_network' => 'Network Error, please try again later.'
+    'error_network' => 'Network Error, please try again later.',
+    'field_required' => 'Please fill out this field.'
 ];
