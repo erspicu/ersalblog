@@ -156,7 +156,13 @@ function parseExifArray($exif) {
 // ==========================================
 function generateThumbnail($src, $dest, $maxSize, $quality) {
     global $forceThumbnail;
-    if (file_exists($dest) && !$forceThumbnail) return;
+    
+    // 快取邏輯：如果縮圖已存在，且修改時間晚於原圖，且非強制產生，則跳過
+    if (file_exists($dest) && !$forceThumbnail) {
+        if (filemtime($dest) >= filemtime($src)) {
+            return;
+        }
+    }
 
     // 嘗試使用 ImageMagick
     if (extension_loaded('imagick')) {
@@ -378,6 +384,36 @@ if (is_dir($collectionDir)) {
                 'exif' => $exifData,
                 'shortIdStart' => $photoShortIdStart
             );
+        }
+
+        // --- 清理孤立縮圖 ---
+        // 檢查 Thumbnail 資料夾，若縮圖對應的原圖已不存在，則刪除
+        if (is_dir($thumbDir)) {
+            $existingThumbs = glob($thumbDir . '/*.jpg');
+            $activePhotoNames = array();
+            foreach ($photos as $p) { $activePhotoNames[] = basename($p); }
+
+            foreach ($existingThumbs as $thumbPath) {
+                $tName = basename($thumbPath);
+                $foundOriginal = false;
+                
+                // 嘗試從縮圖檔名還原原圖檔名 (根據目前的 thumbConfigs)
+                foreach ($thumbConfigs as $conf) {
+                    $suffix = '_' . $conf['id'] . '.jpg';
+                    if (strpos($tName, $suffix) !== false) {
+                        $potentialOriginal = str_replace($suffix, '.jpg', $tName);
+                        if (in_array($potentialOriginal, $activePhotoNames)) {
+                            $foundOriginal = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!$foundOriginal) {
+                    unlink($thumbPath);
+                    echo "Removed orphaned thumbnail: $tName\n";
+                }
+            }
         }
 
         // 決定封面圖

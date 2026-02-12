@@ -2,6 +2,8 @@
 
 ## [2026-02-12]
 ### Added
+- **Thumbnail Caching Mechanism**: `make_album.php` now checks file modification times; if a thumbnail is newer than the original, regeneration is skipped unless forced, significantly improving build speeds.
+- **Orphaned Thumbnail Cleanup**: Automatically detects and removes thumbnail files in the `Thumbnail` directory that no longer have a corresponding original image.
 - **Dynamic Thumbnail Config Loading**: The share modal now dynamically reads definitions from `compression.json` to generate size options, labels (Comments), and short URL IDs, eliminating the need for hard-coded values in JS.
 - **Album Service: Win11 Theme (AOT Optimized)**: Successfully implemented **AOT (Ahead-of-Time)** compilation, translating C# directly into native WebAssembly instructions for peak performance.
 - **Virtual Edge Browser Upgrade**: Added a dedicated **AOT Compilation Chapter** to the technical whitepaper, featuring project configuration snippets and performance metrics.
