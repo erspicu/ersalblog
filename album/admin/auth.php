@@ -17,10 +17,8 @@ if (!file_exists($configFile)) {
 }
 require_once $configFile;
 
-// 設定時區
-if (isset($albumAdminConfig['timezone'])) {
-    date_default_timezone_set($albumAdminConfig['timezone']);
-} else {
+// 如果 config.php 內沒有正確設定時區，則設定預設值
+if (!isset($album_timezone)) {
     date_default_timezone_set('Asia/Taipei');
 }
 

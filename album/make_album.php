@@ -1,12 +1,18 @@
 <?php
-// 設定時區與編碼
-date_default_timezone_set('Asia/Taipei');
+// 定義路徑
+$baseDir = __DIR__;
+
+// 讀取設定 (包含時區)
+$configPhpFile = $baseDir . '/config/config.php';
+if (file_exists($configPhpFile)) {
+    include $configPhpFile;
+} else {
+    date_default_timezone_set('Asia/Taipei');
+}
+
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('UTF-8');
 }
-
-// 定義路徑
-$baseDir = __DIR__;
 $collectionDir = $baseDir . '/Collection';
 $staticDir = $baseDir . '/static';
 $jsonDir = $baseDir . '/api/json';

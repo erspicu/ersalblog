@@ -1,8 +1,13 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-// 設定時區與編碼
-date_default_timezone_set('Asia/Taipei');
+// 讀取設定 (包含時區)
+$phpConfigFile = __DIR__ . '/../config/config.php';
+if (file_exists($phpConfigFile)) {
+    include $phpConfigFile;
+} else {
+    date_default_timezone_set('Asia/Taipei');
+}
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('UTF-8');
 }
