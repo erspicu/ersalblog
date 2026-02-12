@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="{{album_lang}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{page_title}} - Baxermux的相簿</title>
+    <title>{{album_title}}</title>
+    <meta name="description" content="{{album_description}}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{album_title}}">
+    <meta property="og:description" content="{{album_description}}">
+    <meta property="og:image" content="{{album_preview}}">
+    <meta property="og:url" content="{{album_site_url}}">
+    <meta property="og:type" content="website">
+
     <link rel="stylesheet" href="static/base.css">
     <script src="config/config.js"></script>
     <script>
@@ -31,8 +40,8 @@
 <header class="header-bar">
     <div class="header-inner">
         <div class="mb-2">
-            <h1 class="site-title">Baxermux的相簿</h1>
-            <span class="site-desc">| &nbsp; 放一些Blog用到的素材照片</span>
+            <h1 class="site-title">{{album_title}}</h1>
+            <span class="site-desc">| &nbsp; {{album_introduce}}</span>
         </div>
         <hr class="divider">
     </div>

@@ -2,7 +2,9 @@
 
 ## [2026-02-12]
 ### Added
-- **Concurrent Downloads Setting**: Added "Concurrent Downloads" parameter to the frontend settings in the admin panel, allowing customization of the maximum number of simultaneous photo downloads to optimize loading stability and server load.
+- **Backend & SEO Settings Interface**: Added management for `config.php` in the admin panel, allowing customization of site title, SEO description, OG preview image, site language, and system timezone.
+- **Dynamic Template Rendering (SEO)**: `album_template.html` now fully supports dynamic SEO and OG tag injection for better social sharing.
+- **Concurrent Downloads Setting**: 	 Added "Concurrent Downloads" parameter to the frontend settings in the admin panel, allowing customization of the maximum number of simultaneous photo downloads to optimize loading stability and server load.
 - **Dashboard Disk Information**: 	 Added real-time disk space monitoring to the admin dashboard, showing system total/free space, usage percentage, and actual storage size of the photo collection.
 - **Album Data Caching**: 	 `make_album.php` now includes JSON generation caching. If the album content, metadata, and compression settings remain unchanged, the system reuses existing JSON files, significantly speeding up the build process for large collections.
 - **Thumbnail Caching Mechanism**: `make_album.php` now checks file modification times; if a thumbnail is newer than the original, regeneration is skipped unless forced, significantly improving build speeds.

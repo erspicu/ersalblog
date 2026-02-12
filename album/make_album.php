@@ -125,11 +125,29 @@ if (file_exists($baseDir . '/../admin/version_config.php')) {
     include $baseDir . '/../admin/version_config.php';
     if (defined('CURRENT_VERSION')) $appVersion = CURRENT_VERSION;
 }
+
+// 讀取相簿後台設定以獲取 Header 變數
+$album_title = "Baxermux的相簿";
+$album_description = "ersalblog的延伸子專案相簿服務。";
+$album_introduce = "放一些Blog用到的素材照片.";
+$album_preview = "";
+$album_site_url = "";
+$album_lang = "zh_TW";
+$album_timezone = "Asia/Taipei";
+
+$configPhpFile = $baseDir . '/config/config.php';
+if (file_exists($configPhpFile)) {
+    include $configPhpFile;
+}
+
 $indexHtml = $tm->render($tm->getSource(), array(
-    'page_title' => '相簿首頁',
-    'album_header' => '',
+    'album_title' => $album_title,
+    'album_description' => $album_description,
+    'album_introduce' => $album_introduce,
+    'album_preview' => $album_preview,
+    'album_site_url' => $album_site_url,
+    'album_lang' => $album_lang,
     'content_body' => $indexBody,
-    'custom_scripts' => '',
     'version' => $appVersion
 ));
 file_put_contents($baseDir . '/album.html', $indexHtml);
