@@ -123,7 +123,7 @@ switch ($action) {
         $introduce = isset($_POST['album_introduce']) ? trim($_POST['album_introduce']) : '';
         $preview = isset($_POST['album_preview']) ? trim($_POST['album_preview']) : '';
         $siteUrl = isset($_POST['album_site_url']) ? trim($_POST['album_site_url']) : '';
-        $lang = isset($_POST['album_lang']) ? trim($_POST['album_lang']) : 'zh_TW';
+        $lang = isset($_POST['album_lang']) ? trim($_POST['album_lang']) : 'zh-TW';
         $timezone = isset($_POST['album_timezone']) ? trim($_POST['album_timezone']) : 'Asia/Taipei';
 
         $phpFile = __DIR__ . '/../config/config.php';

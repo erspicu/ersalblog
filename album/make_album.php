@@ -138,7 +138,7 @@ $album_description = "ersalblog的延伸子專案相簿服務。";
 $album_introduce = "放一些Blog用到的素材照片.";
 $album_preview = "";
 $album_site_url = "";
-$album_lang = "zh_TW";
+$album_lang = "zh-TW";
 $album_timezone = "Asia/Taipei";
 
 $configPhpFile = $baseDir . '/config/config.php';

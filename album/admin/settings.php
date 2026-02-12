@@ -156,8 +156,8 @@ if (file_exists($phpConfigFile)) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">語系</label>
                             <select name="album_lang" class="form-select">
-                                <option value="zh_TW" <?php echo ($album_lang == 'zh_TW' ? 'selected' : ''); ?>>繁體中文</option>
-                                <option value="en_US" <?php echo ($album_lang == 'en_US' ? 'selected' : ''); ?>>English</option>
+                                <option value="zh-TW" <?php echo ($album_lang == 'zh-TW' ? 'selected' : ''); ?>>繁體中文 (台灣)</option>
+                                <option value="en-US" <?php echo ($album_lang == 'en-US' ? 'selected' : ''); ?>>English</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
