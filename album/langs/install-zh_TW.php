@@ -1,0 +1,29 @@
+<?php
+// album/langs/install-zh_TW.php
+return [
+    'install_title' => '相簿服務安裝精靈',
+    'install_success' => '恭喜！相簿服務已安裝完成。',
+    'goto_album' => '前往相簿首頁',
+    'goto_admin' => '進入管理後台',
+    'delete_install' => '為了安全起見，請在完成後手動刪除 <code>install.php</code>。',
+    'step_env' => '步驟 1: 環境檢查',
+    'php_version' => 'PHP 版本',
+    'ext_exif' => 'EXIF 擴充元件',
+    'ext_gd' => 'GD 繪圖庫',
+    'btn_next' => '下一步：設定系統',
+    'admin_settings' => '後台管理設定 (config.php)',
+    'site_name' => '相簿網站名稱',
+    'admin_user' => '管理員帳號',
+    'admin_pass' => '管理員密碼',
+    'timezone' => '系統時區',
+    'frontend_settings' => '前端介面設定 (config.js)',
+    'theme_select' => '預設相簿主題',
+    'api_type' => '資料讀取模式',
+    'api_json' => '靜態 JSON 模式',
+    'api_php' => '動態 PHP API 模式',
+    'items_per_page' => '每頁顯示數量',
+    'btn_start' => '開始安裝',
+    'btn_back' => '返回',
+    'installing' => '正在安裝...',
+    'error_network' => '網路錯誤，請稍後再試。'
+];

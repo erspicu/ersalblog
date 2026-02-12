@@ -8,7 +8,7 @@ $lang = isset($_GET['lang']) ? $_GET['lang'] : (isset($_COOKIE['album_lang']) ? 
 if (!isset($available_langs[$lang])) $lang = 'zh_TW';
 setcookie('album_lang', $lang, time() + 86400 * 30, "/");
 
-$lang_file = __DIR__ . "/langs/install_{$lang}.php";
+$lang_file = __DIR__ . "/langs/install-{$lang}.php";
 $t = file_exists($lang_file) ? include $lang_file : array();
 function _t($key) { global $t; return isset($t[$key]) ? $t[$key] : $key; }
 
@@ -186,7 +186,7 @@ $themes = getThemes();
                         </div>
 
                         <div class="mt-5 d-flex gap-3">
-                            <button type="button" class="btn btn-light border px-4" onclick="document.getElementById('step2').style.display='none'; document.getElementById('step1').style.display='block';">Back</button>
+                            <button type="button" class="btn btn-light border px-4" onclick="document.getElementById('step2').style.display='none'; document.getElementById('step1').style.display='block';"><?php echo _t('btn_back'); ?></button>
                             <button type="submit" class="btn btn-success btn-lg flex-grow-1 shadow-sm"><?php echo _t('btn_start'); ?></button>
                         </div>
                     </div>
@@ -202,7 +202,7 @@ document.getElementById('installForm')?.addEventListener('submit', async (e) => 
     const btn = e.target.querySelector('button[type="submit"]');
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Installing...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span><?php echo _t('installing'); ?>';
 
     const formData = new FormData(e.target);
     try {
@@ -216,7 +216,7 @@ document.getElementById('installForm')?.addEventListener('submit', async (e) => 
             btn.innerHTML = orig;
         }
     } catch (err) {
-        alert('Network Error');
+        alert('<?php echo _t('error_network'); ?>');
         btn.disabled = false;
         btn.innerHTML = orig;
     }
