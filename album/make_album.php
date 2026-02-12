@@ -153,7 +153,9 @@ $indexHtml = $tm->render($tm->getSource(), array(
     'album_preview' => $album_preview,
     'album_site_url' => $album_site_url,
     'album_lang' => $album_lang,
+    'album_header' => '',
     'content_body' => $indexBody,
+    'custom_scripts' => '',
     'version' => $appVersion
 ));
 file_put_contents($baseDir . '/album.html', $indexHtml);
@@ -196,7 +198,13 @@ if (is_dir($collectionDir)) {
                     if (!$skipThumbnails) generateThumbnail($albumPath . '/' . $p['filename'], $baseDir . '/Collection/' . $tRel, $conf['width'], $conf['quality']);
                 }
             }
-            $allAlbumsList[] = array('name' => $data['name'], 'id' => $albumName, 'desc' => isset($data['desc']) ? $data['desc'] : '', 'cover' => '', 'count' => count($data['photos']), 'date' => '', 'link' => '#album='.urlencode($albumName));
+            $finalCoverUrl = '';
+            if (!empty($data['photos'])) {
+                $firstPhoto = $data['photos'][0];
+                $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
+                $finalCoverUrl = ($previewId && isset($firstPhoto['sizes'][$previewId])) ? $firstPhoto['sizes'][$previewId] : $firstPhoto['src'];
+            }
+            $allAlbumsList[] = array('name' => $data['name'], 'id' => $albumName, 'desc' => isset($data['desc']) ? $data['desc'] : '', 'cover' => $finalCoverUrl, 'count' => count($data['photos']), 'date' => '', 'link' => '#album='.urlencode($albumName));
             continue;
         }
 
@@ -222,9 +230,28 @@ if (is_dir($collectionDir)) {
             $albumPhotosJson[] = array('filename' => $filename, 'src' => 'Collection/'.$rel, 'sizes' => $sizes, 'shortIdStart' => $sid, 'title' => $filename, 'desc' => '');
         }
 
-        $singleData = array('name' => $albumName, 'desc' => '', 'photos' => $albumPhotosJson);
-        safe_file_put_contents($jsonFile, json_encode($singleData, JSON_UNESCAPED_UNICODE));
-        $allAlbumsList[] = array('name' => $albumName, 'id' => $albumName, 'desc' => '', 'cover' => '', 'count' => count($photos), 'date' => date('Ymd'), 'link' => '#album='.urlencode($albumName));
+        $singleData = array('name' => $displayAlbumName, 'desc' => $albumDesc, 'photos' => $albumPhotosJson);
+        safe_file_put_contents($jsonFile, json_encode($singleData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+        // 決定封面圖
+        if (empty($albumCover) && !empty($photos)) $albumCover = basename($photos[0]);
+        $finalCoverUrl = '';
+        if (!empty($albumCover)) {
+            $coverFn = basename($albumCover);
+            $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
+            $tName = $previewId ? getThumbFilename($coverFn, $previewId) : getThumbFilename($coverFn, $thumbConfigs[0]['id']);
+            $finalCoverUrl = file_exists($thumbDir . '/' . $tName) ? 'Collection/' . $albumName . '/Thumbnail/' . $tName : 'Collection/' . $albumName . '/' . $coverFn;
+        }
+
+        $allAlbumsList[] = array(
+            'name' => $displayAlbumName, 
+            'id' => $albumName, 
+            'desc' => $albumDesc, 
+            'cover' => $finalCoverUrl, 
+            'count' => count($photos), 
+            'date' => $albumDate, 
+            'link' => '#album='.urlencode($albumName)
+        );
     }
 }
 
