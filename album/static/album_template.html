@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{page_title}} - Baxermux的相簿</title>
-    <link rel="stylesheet" href="{{path_to_static}}base.css">
-    <script src="{{path_to_config}}config.js"></script>
+    <link rel="stylesheet" href="static/base.css">
+    <script src="config/config.js"></script>
     <script>
         (function() {
             // 從 Hash 中獲取 style 參數
@@ -237,10 +237,10 @@
     </div>
 </div>
 
-<script src="{{path_to_static}}exif.js"></script>
+<script src="static/exif.js"></script>
 <script>
     // 主程式載入 (帶版本號避免快取)
-    document.write('<script src="{{path_to_static}}album.js?v=' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime()) + '"><\/script>');
+    document.write('<script src="static/album.js?v=' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime()) + '"><\/script>');
 
     // --- 前端主題插件載入機制 ---
     (function() {
@@ -249,7 +249,7 @@
         
         if(themeName && themeName !== 'album') {
             const script = document.createElement('script');
-            script.src = '{{path_to_static}}themes/' + themeName + '/theme.js';
+            script.src = 'static/themes/' + themeName + '/theme.js';
             script.id = 'theme-plugin-js';
             script.onload = function() {
                 console.log('[Theme] Plugin loaded: ' + themeName);

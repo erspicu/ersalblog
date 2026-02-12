@@ -120,7 +120,18 @@ function generateThumbnail($src, $dest, $maxSize, $quality) {
 
 // 1. 生成 Shell
 $indexBody = $tm->getSubTemplate('tmpl_app_container');
-$indexHtml = $tm->render($tm->getSource(), array('path_to_static' => 'static/', 'path_to_config' => 'config/', 'page_title' => '相簿首頁', 'album_header' => '', 'content_body' => $indexBody, 'custom_scripts' => '', 'version' => 'v1'));
+$appVersion = 'v1.0.0';
+if (file_exists($baseDir . '/../admin/version_config.php')) {
+    include $baseDir . '/../admin/version_config.php';
+    if (defined('CURRENT_VERSION')) $appVersion = CURRENT_VERSION;
+}
+$indexHtml = $tm->render($tm->getSource(), array(
+    'page_title' => '相簿首頁',
+    'album_header' => '',
+    'content_body' => $indexBody,
+    'custom_scripts' => '',
+    'version' => $appVersion
+));
 file_put_contents($baseDir . '/album.html', $indexHtml);
 
 // 2. 遍歷相簿
