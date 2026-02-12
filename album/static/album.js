@@ -504,7 +504,7 @@ function updateShareLinks() {
     const sid = parseInt(shortIdStart);
 
     let html = "";
-    [{l:'超大 (2048px)',s:'_thumbXL',o:1,w:1601},{l:'大型 (1600px)',s:'_thumbL',o:2,w:1025},{l:'中型 (1024px)',s:'_thumbM',o:3,w:801},{l:'預覽 (800px)',s:'_thumb',o:4,w:321},{l:'極小 (320px)',s:'_thumbXS',o:5,w:0}]
+    [{l:'超大 (2048px)',s:'_3XL',o:1,w:1601},{l:'大型 (1600px)',s:'_2XL',o:2,w:1025},{l:'中型 (1024px)',s:'_XL',o:3,w:801},{l:'預覽 (800px)',s:'_L',o:4,w:641},{l:'小型 (640px)',s:'_M',o:5,w:321},{l:'極小 (320px)',s:'_S',o:6,w:0}]
     .forEach(s => {
         if (realWidth >= s.w) {
             const url = isOriginal ? getAbs(thumbPath + name + s.s + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + s.o));

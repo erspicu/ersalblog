@@ -130,10 +130,14 @@ class AlbumSelector {
             }
 
             photos.forEach(photo => {
-                const thumb = photo.thumbXS || photo.thumb || photo.src;
+                const sizes = photo.sizes || {};
+                const thumb = sizes['S'] || sizes['M'] || photo.src;
+                const thumbL = sizes['2XL'] || sizes['XL'] || photo.src;
+                const thumbM = sizes['L'] || sizes['M'] || photo.src;
+
                 html += `
                 <div class="col-3 col-md-2 col-lg-1-5">
-                    <div class="card h-100 photo-pick-card border-0 shadow-sm" style="cursor:pointer" onclick="window.albumPicker.showSizeOptions(this, '${photo.filename}', '${photo.src}', '${photo.thumbL}', '${photo.thumb}')">
+                    <div class="card h-100 photo-pick-card border-0 shadow-sm" style="cursor:pointer" onclick="window.albumPicker.showSizeOptions(this, '${photo.filename}', '${photo.src}', '${thumbL}', '${thumbM}')">
                         <div class="ratio ratio-1x1 bg-light">
                             <img src="${this.baseDir}${thumb}" style="object-fit:contain">
                         </div>

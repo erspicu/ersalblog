@@ -39,11 +39,9 @@ function getDeobfuscatedId($slug) {
     $n = $n ^ $MASK;
 
     // 3. 解除擴散: (N * InvPrime) % Mod
-    // 使用 bcmath 或 float 確保運算過程中不溢位 (雖然 2^31 在 64bit int 沒問題，但保險起見)
-    // 這裡我們假設 PHP 運行在 64-bit 環境，或者數值在 32-bit 有符號整數範圍內會自動轉 float
-    // 為了精確的模運算，我們使用 fmod
-    
-    $res = fmod((float)$n * $INV_PRIME, $MOD);
+    // 在 64 位元環境下，可以直接使用整數運算避免精度損失
+    // $n * $INV_PRIME 最大約 1.2e17，遠小於 64 位元整數最大值 9.2e18
+    $res = ($n * $INV_PRIME) % $MOD;
     return (int)$res;
 }
 

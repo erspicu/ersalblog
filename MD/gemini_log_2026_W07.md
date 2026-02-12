@@ -2,3 +2,4 @@
   - 修改 config.js 將主題設為 'album'
   - 刪除 static/themes/album-win11/ 目錄
   - 清理 BlazorAlbumExplorer 中的 win11 相關字眼與類別
+- [2026-02-12 22:17:46] 修正相簿 shorturl.php 精度問題與前端分享連結配置不一致問題

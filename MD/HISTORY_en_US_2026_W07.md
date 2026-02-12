@@ -9,6 +9,8 @@
 - **Album Service: Timezone Config**: Added timezone selection to the installer.
 
 ### Fixed
+- **ShortURL Service Precision Fix**: Fixed precision loss in `shorturl.php` caused by `fmod` on large numbers, resolving the issue where sharing links always redirected to original images.
+- **Share Link Config Sync**: Synchronized `album.js` and `admin/assets/js/album_selector.js` with the latest `compression.json` suffixes and offsets.
 - **Window System Optimization**:
     - **Unified Stacking**: Refactored `z-index` management to resolve window layering conflicts.
     - **Drag Stability**: Implemented relative displacement logic to eliminate window jumping caused by Blazor re-renders.
