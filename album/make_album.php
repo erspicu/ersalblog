@@ -100,11 +100,59 @@ function getExifData($file) {
     if (!function_exists('exif_read_data')) return null;
     $exif = @exif_read_data($file);
     if (!$exif) return null;
+
     $make = isset($exif['Make']) ? trim($exif['Make']) : '未知';
     $model = isset($exif['Model']) ? trim($exif['Model']) : '未知';
     $iso = isset($exif['ISOSpeedRatings']) ? (is_array($exif['ISOSpeedRatings']) ? $exif['ISOSpeedRatings'][0] : $exif['ISOSpeedRatings']) : '未知';
     $date = isset($exif['DateTimeOriginal']) ? $exif['DateTimeOriginal'] : (isset($exif['DateTime']) ? $exif['DateTime'] : '未知');
-    return array('make' => $make, 'model' => $model, 'date' => $date, 'iso' => $iso);
+
+    $aperture = '未知';
+    if (isset($exif['FNumber'])) {
+        $p = explode('/', $exif['FNumber']);
+        $val = (count($p) == 2 && $p[1] != 0) ? $p[0] / $p[1] : $exif['FNumber'];
+        $aperture = 'f/' . round((float)$val, 1);
+    }
+
+    $shutter = '未知';
+    if (isset($exif['ExposureTime'])) {
+        $p = explode('/', $exif['ExposureTime']);
+        if (count($p) == 2 && $p[0] != 0 && $p[1] != 0) {
+            $val = $p[0] / $p[1];
+            $shutter = ($val >= 1) ? $val . 's' : '1/' . round($p[1] / $p[0]) . 's';
+        } else {
+            $shutter = $exif['ExposureTime'] . 's';
+        }
+    }
+
+    $focal = '未知';
+    if (isset($exif['FocalLength'])) {
+        $p = explode('/', $exif['FocalLength']);
+        $val = (count($p) == 2 && $p[1] != 0) ? $p[0] / $p[1] : $exif['FocalLength'];
+        $focal = round((float)$val, 1) . 'mm';
+    }
+
+    // GPS 處理
+    $gps = null;
+    if (isset($exif['GPSLatitude']) && isset($exif['GPSLongitude']) && isset($exif['GPSLatitudeRef']) && isset($exif['GPSLongitudeRef'])) {
+        $lat = exifToFloat($exif['GPSLatitude'][0]) + (exifToFloat($exif['GPSLatitude'][1]) / 60) + (exifToFloat($exif['GPSLatitude'][2]) / 3600);
+        $lng = exifToFloat($exif['GPSLongitude'][0]) + (exifToFloat($exif['GPSLongitude'][1]) / 60) + (exifToFloat($exif['GPSLongitude'][2]) / 3600);
+        if ($exif['GPSLatitudeRef'] == 'S') $lat = -$lat;
+        if ($exif['GPSLongitudeRef'] == 'W') $lng = -$lng;
+        $gps = array('lat' => round($lat, 6), 'lng' => round($lng, 6));
+    }
+
+    return array(
+        'make' => $make, 'model' => $model, 'aperture' => $aperture,
+        'shutter' => $shutter, 'iso' => $iso, 'focal' => $focal, 'date' => $date,
+        'gps' => $gps
+    );
+}
+
+function exifToFloat($value) {
+    $parts = explode('/', $value);
+    if (count($parts) <= 0) return 0;
+    if (count($parts) == 1) return (float)$parts[0];
+    return (float)$parts[0] / (float)$parts[1];
 }
 
 function generateThumbnail($src, $dest, $maxSize, $quality) {
