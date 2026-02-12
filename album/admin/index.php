@@ -18,6 +18,33 @@ if (is_dir($collectionDir)) {
         }
     }
 }
+
+// 磁碟空間資訊
+$diskTotal = disk_total_space("/");
+$diskFree = disk_free_space("/");
+$diskUsed = $diskTotal - $diskFree;
+$diskUsagePercent = round(($diskUsed / $diskTotal) * 100, 2);
+
+// 計算 Collection 目錄大小 (使用 Linux 指令較快)
+$collectionSizeStr = "未知";
+if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+    $io = popen("du -sh " . escapeshellarg($collectionDir) . " 2>&1", "r");
+    $res = fread($io, 256);
+    pclose($io);
+    if ($res !== false) {
+        $parts = explode("\t", $res);
+        $collectionSizeStr = $parts[0];
+    }
+}
+
+function formatBytes($bytes, $precision = 2) {
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
+    $bytes /= pow(1024, $pow);
+    return round($bytes, $precision) . ' ' . $units[$pow];
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -62,6 +89,32 @@ if (is_dir($collectionDir)) {
                     <div class="card-body">
                         <h5 class="card-title">照片總數</h5>
                         <h2 class="display-4"><?php echo $photoCount; ?></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">磁碟空間資訊</h5>
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <p class="mb-1 text-muted">照片庫佔用 (Collection)</p>
+                                <h4 class="mb-0 text-primary"><?php echo $collectionSizeStr; ?></h4>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small text-muted">系統磁碟使用率: <?php echo formatBytes($diskUsed); ?> / <?php echo formatBytes($diskTotal); ?></span>
+                                    <span class="small fw-bold"><?php echo $diskUsagePercent; ?>%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar <?php echo $diskUsagePercent > 90 ? 'bg-danger' : ($diskUsagePercent > 70 ? 'bg-warning' : 'bg-info'); ?>" role="progressbar" style="width: <?php echo $diskUsagePercent; ?>%"></div>
+                                </div>
+                                <p class="small text-muted mt-1 mb-0">可用空間: <?php echo formatBytes($diskFree); ?></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

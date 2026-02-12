@@ -2,7 +2,8 @@
 
 ## [2026-02-12]
 ### Added
-- **Album Data Caching**: `make_album.php` now includes JSON generation caching. If the album content, metadata, and compression settings remain unchanged, the system reuses existing JSON files, significantly speeding up the build process for large collections.
+- **Dashboard Disk Information**: Added real-time disk space monitoring to the admin dashboard, showing system total/free space, usage percentage, and actual storage size of the photo collection.
+- **Album Data Caching**: 	 `make_album.php` now includes JSON generation caching. If the album content, metadata, and compression settings remain unchanged, the system reuses existing JSON files, significantly speeding up the build process for large collections.
 - **Thumbnail Caching Mechanism**: `make_album.php` now checks file modification times; if a thumbnail is newer than the original, regeneration is skipped unless forced, significantly improving build speeds.
 - **Orphaned Thumbnail Cleanup**: Automatically detects and removes thumbnail files in the `Thumbnail` directory that no longer have a corresponding original image.
 - **Dynamic Thumbnail Config Loading**: The share modal now dynamically reads definitions from `compression.json` to generate size options, labels (Comments), and short URL IDs, eliminating the need for hard-coded values in JS.
