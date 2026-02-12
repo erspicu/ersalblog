@@ -29,20 +29,44 @@ if (isset($options['h']) || isset($options['help'])) {
 $skipThumbnails = (isset($options['s']) || isset($options['skip-thumb']));
 $forceThumbnail = (isset($options['f']) || isset($options['force']));
 
-// 用於記錄 shorturl 的清單
-$shortUrlList = array();
-$currentShortId = 0; // 全域 ID 計數器
-
 // --- 讀取壓縮配置 ---
 $compressionFile = $baseDir . '/config/compression.json';
 $thumbConfigs = array();
+$configMtime = 0;
 if (file_exists($compressionFile)) {
     $thumbConfigs = json_decode(file_get_contents($compressionFile), true);
+    $configMtime = filemtime($compressionFile);
 } else {
-    // 預設備案 (若 JSON 不存在)
-    $thumbConfigs = array(
-        array('id' => 'thumb', 'width' => 800, 'quality' => 90, 'mode' => 'PreviewIcon')
-    );
+    $thumbConfigs = array(array('id' => 'thumb', 'width' => 800, 'quality' => 90, 'mode' => 'PreviewIcon'));
+}
+
+// --- 讀取現有 ShortURL 以維持 ID 穩定性 ---
+$existingShortUrls = array();
+$maxShortId = -1;
+$shortUrlFile = $baseDir . '/shorturl.txt';
+if (file_exists($shortUrlFile)) {
+    $lines = file($shortUrlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $parts = explode('|', $line);
+        if (count($parts) >= 2) {
+            $id = (int)$parts[0];
+            $path = $parts[1];
+            $existingShortUrls[$path] = $id;
+            if ($id > $maxShortId) $maxShortId = $id;
+        }
+    }
+}
+$nextAvailableId = $maxShortId + 1;
+$shortUrlList = array();
+
+// 輔助函式：原子化寫入檔案
+function safe_file_put_contents($path, $content) {
+    $tmp = $path . '.tmp.' . uniqid();
+    if (file_put_contents($tmp, $content) !== false) {
+        if (rename($tmp, $path)) return true;
+    }
+    if (file_exists($tmp)) @unlink($tmp);
+    return false;
 }
 
 // 輔助函式：根據 mode 獲取 ID
@@ -53,41 +77,26 @@ function getConfigIdByMode($configs, $mode) {
     return null;
 }
 
-
-// 引入樣板管理器 (用於生成 album.html)
+// 引入樣板管理器
 require_once $baseDir . '/../PHP_LIB/TemplateManager.php';
 $tm = new TemplateManager();
-if (!file_exists($templateFile)) {
-    die("Template file not found: $templateFile");
-}
+if (!file_exists($templateFile)) die("Template file not found: $templateFile");
 $tm->load($templateFile);
 
-// ==========================================
 // 輔助函式：產生符合規則的縮圖檔名
-// ==========================================
 function getThumbFilename($originalFilename, $prefix) {
     $info = pathinfo($originalFilename);
     return $info['filename'] . '_' . $prefix . '.' . $info['extension'];
 }
 
-// ==========================================
-// 輔助函式：EXIF 讀取 (回傳陣列)
-// ==========================================
+// 輔助函式：EXIF 讀取
 function getExifData($file) {
-    if (!function_exists('exif_read_data')) {
-        return null;
-    }
+    if (!function_exists('exif_read_data')) return null;
     $exif = @exif_read_data($file);
-    if (!$exif) {
-        return null;
-    }
-
+    if (!$exif) return null;
     return parseExifArray($exif);
 }
 
-// ==========================================
-// 輔助函式：將 EXIF 分數格式轉為浮點數
-// ==========================================
 function exifToFloat($value) {
     $parts = explode('/', $value);
     if (count($parts) <= 0) return 0;
@@ -95,9 +104,6 @@ function exifToFloat($value) {
     return (float)$parts[0] / (float)$parts[1];
 }
 
-// ==========================================
-// 輔助函式：解析 EXIF 陣列為統一格式
-// ==========================================
 function parseExifArray($exif) {
     $make = isset($exif['Make']) ? trim($exif['Make']) : '未知';
     $model = isset($exif['Model']) ? trim($exif['Model']) : '未知';
@@ -129,7 +135,6 @@ function parseExifArray($exif) {
         $focal = round((float)$val, 1) . 'mm';
     }
 
-    // GPS 處理
     $gps = null;
     if (isset($exif['GPSLatitude']) && isset($exif['GPSLongitude']) && isset($exif['GPSLatitudeRef']) && isset($exif['GPSLongitudeRef'])) {
         $lat = exifToFloat($exif['GPSLatitude'][0]) + (exifToFloat($exif['GPSLatitude'][1]) / 60) + (exifToFloat($exif['GPSLatitude'][2]) / 3600);
@@ -139,96 +144,40 @@ function parseExifArray($exif) {
         $gps = array('lat' => round($lat, 6), 'lng' => round($lng, 6));
     }
 
-    return array(
-        'make' => $make,
-        'model' => $model,
-        'aperture' => $aperture,
-        'shutter' => $shutter,
-        'iso' => $iso,
-        'focal' => $focal,
-        'date' => $date,
-        'gps' => $gps
-    );
+    return array('make' => $make, 'model' => $model, 'aperture' => $aperture, 'shutter' => $shutter, 'iso' => $iso, 'focal' => $focal, 'date' => $date, 'gps' => $gps);
 }
 
-// ==========================================
-// 輔助函式：生成單一縮圖 (ImageMagick 優先，GD 為備案)
-// ==========================================
+// 生成縮圖
 function generateThumbnail($src, $dest, $maxSize, $quality) {
-    global $forceThumbnail;
-    
-    // 快取邏輯：如果縮圖已存在，且修改時間晚於原圖，且非強制產生，則跳過
+    global $forceThumbnail, $configMtime;
     if (file_exists($dest) && !$forceThumbnail) {
-        if (filemtime($dest) >= filemtime($src)) {
-            return;
-        }
+        $thumbMtime = filemtime($dest);
+        if ($thumbMtime >= filemtime($src) && $thumbMtime >= $configMtime) return;
     }
 
-    // 嘗試使用 ImageMagick
     if (extension_loaded('imagick')) {
         try {
             $image = new Imagick($src);
             $image->setImageCompressionQuality($quality);
-            
-            // 保留 EXIF (Profiles)
-            // 注意：某些縮圖可能不需要太大的 Profile，但要求保留則保留
-            // $image->stripImage(); // 移除所有 Profile (若要極致瘦身可開)
-
-            // 取得原始尺寸
-            $width = $image->getImageWidth();
-            $height = $image->getImageHeight();
-
-            // 如果原始圖小於目標尺寸，則直接複製 (或不處理)
+            $width = $image->getImageWidth(); $height = $image->getImageHeight();
             if ($width <= $maxSize && $height <= $maxSize) {
-                // 如果需要轉檔或壓縮，還是走下面流程，這裡簡單起見直接 copy
-                copy($src, $dest);
-                echo "Copied (Small Original IM): " . basename($dest) . "\n";
-                $image->clear();
-                return;
+                copy($src, $dest); $image->clear(); return;
             }
-
-            // 計算新尺寸 (保持比例)
             $ratio = $width / $height;
-            if ($width > $height) {
-                $newWidth = $maxSize;
-                $newHeight = $maxSize / $ratio;
-            } else {
-                $newHeight = $maxSize;
-                $newWidth = $maxSize * $ratio;
-            }
-
-            // 縮放 (使用 Lanczos 濾鏡獲得最佳品質)
+            if ($width > $height) { $newWidth = $maxSize; $newHeight = $maxSize / $ratio; }
+            else { $newHeight = $maxSize; $newWidth = $maxSize * $ratio; }
             $image->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
-            
-            // 寫入檔案
-            $image->writeImage($dest);
-            $image->clear();
+            $image->writeImage($dest); $image->clear();
             echo "Created thumbnail (Imagick): " . basename($dest) . "\n";
             return;
-
-        } catch (Exception $e) {
-            echo "Imagick failed: " . $e->getMessage() . ". Falling back to GD.\n";
-        }
+        } catch (Exception $e) {}
     }
 
-    // GD Fallback
     list($width, $height, $type) = getimagesize($src);
-    
-    if ($width <= $maxSize && $height <= $maxSize) {
-        copy($src, $dest);
-        echo "Copied (Small Original GD): " . basename($dest) . "\n";
-        return;
-    }
-
+    if ($width <= $maxSize && $height <= $maxSize) { copy($src, $dest); return; }
     $ratio = $width / $height;
-    if ($width > $height) {
-        $newWidth = $maxSize;
-        $newHeight = $maxSize / $ratio;
-    } else {
-        $newHeight = $maxSize;
-        $newWidth = $maxSize * $ratio;
-    }
-
+    if ($width > $height) { $newWidth = $maxSize; $newHeight = $maxSize / $ratio; }
+    else { $newHeight = $maxSize; $newWidth = $maxSize * $ratio; }
     $thumb = imagecreatetruecolor($newWidth, $newHeight);
     switch ($type) {
         case IMAGETYPE_JPEG: $source = imagecreatefromjpeg($src); break;
@@ -236,52 +185,27 @@ function generateThumbnail($src, $dest, $maxSize, $quality) {
         case IMAGETYPE_GIF: $source = imagecreatefromgif($src); break;
         default: return;
     }
-
-    // GD: 保留 EXIF 需要額外處理 (copy exif data)，GD 本身 resize 會丟失 EXIF。
-    // 若必須保留 EXIF 且 ImageMagick 不可用，需使用 pel 或 exif_read_data + iptcembed 等複雜操作。
-    // 這裡 GD 版本暫時維持不保留 EXIF (這是 GD 的限制，除非引入額外函式庫)。
-    
     imagecopyresampled($thumb, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
     imagejpeg($thumb, $dest, $quality);
-    imagedestroy($thumb);
-    imagedestroy($source);
+    imagedestroy($thumb); imagedestroy($source);
     echo "Created thumbnail (GD): " . basename($dest) . "\n";
 }
 
 // ==========================================
-// 1. 生成相簿首頁 (album.html) - SPA Shell
+// 1. 生成相簿首頁
 // ==========================================
-// 內容容器，從樣板讀取
 $indexBody = $tm->getSubTemplate('tmpl_app_container');
-
-// 不再需要在這裡寫 loadAlbumList，改由 album.js 的 Router 處理
-$indexScript = '';
-
-// 引入版本資訊
 $appVersion = 'v1.0.0';
 if (file_exists($baseDir . '/../admin/version_config.php')) {
     include $baseDir . '/../admin/version_config.php';
-    if (defined('APP_VERSION')) $appVersion = APP_VERSION;
+    if (defined('CURRENT_VERSION')) $appVersion = CURRENT_VERSION;
 }
-
-$indexHtml = $tm->render($tm->getSource(), array(
-    'path_to_static' => 'static/',
-    'path_to_config' => 'config/',
-    'page_title' => '相簿首頁',
-    'album_header' => '',
-    'content_body' => $indexBody,
-    'custom_scripts' => $indexScript,
-    'version' => $appVersion
-));
-// 移除多餘的 template 標籤
-// $indexHtml = $tm->removeTags($indexHtml, 'template'); // Keep templates for SPA
-
+$indexHtml = $tm->render($tm->getSource(), array('path_to_static' => 'static/', 'path_to_config' => 'config/', 'page_title' => '相簿首頁', 'album_header' => '', 'content_body' => $indexBody, 'custom_scripts' => '', 'version' => $appVersion));
 file_put_contents($baseDir . '/album.html', $indexHtml);
 echo "Generated: album.html (SPA Shell)\n";
 
-
 // ==========================================
-// 2. 遍歷相簿生成 JSON 資料與縮圖
+// 2. 遍歷相簿
 // ==========================================
 $allAlbumsList = array();
 $baseUrl = 'Collection'; 
@@ -293,201 +217,147 @@ if (is_dir($collectionDir)) {
         $albumPath = $collectionDir . '/' . $albumName;
         if (!is_dir($albumPath)) continue;
 
+        $jsonFile = $jsonDir . '/' . $albumName . '.json';
+        $commentAlbumFile = $albumPath . '/comment_album.txt';
+        $picCommentFile = $albumPath . '/comment_pic.txt';
+        
+        // 快取判斷
+        $cacheValid = false;
+        if (file_exists($jsonFile) && !$forceThumbnail) {
+            $jsonMtime = filemtime($jsonFile);
+            $sourceMtime = filemtime($albumPath);
+            if (file_exists($commentAlbumFile)) $sourceMtime = max($sourceMtime, filemtime($commentAlbumFile));
+            if (file_exists($picCommentFile)) $sourceMtime = max($sourceMtime, filemtime($picCommentFile));
+            if ($jsonMtime >= $sourceMtime && $jsonMtime >= $configMtime) $cacheValid = true;
+        }
+
+        if ($cacheValid) {
+            echo "Processing Album: $albumName... (Cache Valid)\n";
+            $cachedData = json_decode(file_get_contents($jsonFile), true);
+            foreach ($cachedData['photos'] as $p) {
+                $sid = $p['shortIdStart'];
+                $shortUrlList[$sid] = $albumName . '/' . $p['filename'];
+                foreach ($thumbConfigs as $idx => $conf) {
+                    $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . getThumbFilename($p['filename'], $conf['id']);
+                }
+            }
+            $photoCount = count($cachedData['photos']);
+            $albumDate = ''; 
+            if (file_exists($commentAlbumFile)) {
+                $parts = explode('|', file_get_contents($commentAlbumFile));
+                if (isset($parts[3])) $albumDate = trim($parts[3]);
+            }
+            if (empty($albumDate)) $albumDate = date('Ymd', filemtime($albumPath));
+            $finalCoverUrl = '';
+            if (!empty($cachedData['photos'])) {
+                $firstPhoto = $cachedData['photos'][0];
+                $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
+                $finalCoverUrl = ($previewId && isset($firstPhoto['sizes'][$previewId])) ? $firstPhoto['sizes'][$previewId] : $firstPhoto['src'];
+            }
+            $allAlbumsList[] = array('name' => $cachedData['name'], 'id' => $albumName, 'desc' => $cachedData['desc'], 'cover' => $finalCoverUrl, 'count' => $photoCount, 'date' => $albumDate, 'link' => '#album=' . urlencode($albumName));
+            continue;
+        }
+
         echo "Processing Album: $albumName...\n";
         $thumbDir = $albumPath . '/Thumbnail';
         if (!is_dir($thumbDir)) mkdir($thumbDir, 0777, true);
-
         $photos = glob($albumPath . '/*.jpg');
         $photoCount = count($photos);
         
-        // 讀取相簿資訊 (comment_album.txt)
-        $displayAlbumName = $albumName;
-        $albumDesc = '';
-        $albumCover = '';
-        $albumDate = '';
-
-        $commentAlbumFile = $albumPath . '/comment_album.txt';
+        $displayAlbumName = $albumName; $albumDesc = ''; $albumCover = ''; $albumDate = '';
         if (file_exists($commentAlbumFile)) {
-            $content = file_get_contents($commentAlbumFile);
-            $parts = explode('|', $content);
+            $parts = explode('|', file_get_contents($commentAlbumFile));
             if (isset($parts[0]) && !empty($parts[0])) $displayAlbumName = trim($parts[0]);
             if (isset($parts[1])) $albumDesc = trim($parts[1]);
             if (isset($parts[2]) && !empty($parts[2])) $albumCover = trim($parts[2]);
             if (isset($parts[3])) $albumDate = trim($parts[3]);
         }
+        if (empty($albumDate)) $albumDate = date('Ymd', filemtime($albumPath));
+        $albumDescHtml = !empty($albumDesc) ? $tm->render($tm->getSubTemplate('tmpl_album_desc_inline'), array('desc' => $albumDesc)) : '';
 
-        if (empty($albumDate)) {
-            $albumDate = date('Ymd', filemtime($albumPath));
-        }
-
-        // 渲染相簿描述 HTML (SPA 使用)
-        $albumDescHtml = '';
-        if (!empty($albumDesc)) {
-            $albumDescHtml = $tm->render($tm->getSubTemplate('tmpl_album_desc_inline'), array('desc' => $albumDesc));
-        }
-
-        // 讀取照片註解
         $photoMeta = array(); 
-        $picCommentFile = $albumPath . '/comment_pic.txt';
         if (file_exists($picCommentFile)) {
             $lines = file($picCommentFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 $p = explode('|', $line);
-                if (count($p) >= 1) {
-                    $fn = trim($p[0]);
-                    $photoMeta[$fn] = array(
-                        'title' => isset($p[1]) && !empty($p[1]) ? trim($p[1]) : $fn,
-                        'desc' => isset($p[2]) ? trim($p[2]) : ''
-                    );
-                }
+                if (count($p) >= 1) $photoMeta[trim($p[0])] = array('title' => isset($p[1]) && !empty($p[1]) ? trim($p[1]) : trim($p[0]), 'desc' => isset($p[2]) ? trim($p[2]) : '');
             }
         }
 
-        // 處理照片與縮圖
         $albumPhotosJson = array();
-        
         foreach ($photos as $photoPath) {
             $filename = basename($photoPath);
             $meta = isset($photoMeta[$filename]) ? $photoMeta[$filename] : array('title' => $filename, 'desc' => '');
-            
-            // --- ShortURL ID 計算 ---
-            // 1. Original
-            $shortUrlList[] = $albumName . '/' . $filename;
-            $photoShortIdStart = $currentShortId; // 記錄此照片起始 ID
-            $currentShortId++; 
-
-            // 2. Thumbnails (根據動態配置)
-            $sizes = array();
-            foreach ($thumbConfigs as $conf) {
-                $id = $conf['id'];
-                $destName = getThumbFilename($filename, $id);
-                $destPath = $thumbDir . '/' . $destName;
-                
-                if (!$skipThumbnails) {
-                    generateThumbnail($photoPath, $destPath, $conf['width'], $conf['quality']);
-                }
-                
-                $shortUrlList[] = $albumName . '/Thumbnail/' . $destName;
-                $sizes[$id] = $baseUrl . '/' . $albumName . '/Thumbnail/' . $destName;
-                $currentShortId++;
+            $originalRelPath = $albumName . '/' . $filename;
+            if (isset($existingShortUrls[$originalRelPath])) {
+                $photoShortIdStart = $existingShortUrls[$originalRelPath];
+            } else {
+                $photoShortIdStart = $nextAvailableId;
+                $nextAvailableId += (count($thumbConfigs) + 1);
             }
-
-            // EXIF
-            $exifData = getExifData($photoPath);
-
-            $albumPhotosJson[] = array(
-                'filename' => $filename,
-                'title' => $meta['title'],
-                'desc' => $meta['desc'],
-                'src' => $baseUrl . '/' . $albumName . '/' . $filename,
-                'sizes' => $sizes, // 存入所有尺寸
-                'exif' => $exifData,
-                'shortIdStart' => $photoShortIdStart
-            );
+            $shortUrlList[$photoShortIdStart] = $originalRelPath;
+            $sizes = array();
+            foreach ($thumbConfigs as $idx => $conf) {
+                $destName = getThumbFilename($filename, $conf['id']);
+                $destPath = $thumbDir . '/' . $destName;
+                if (!$skipThumbnails) generateThumbnail($photoPath, $destPath, $conf['width'], $conf['quality']);
+                $tRelPath = $albumName . '/Thumbnail/' . $destName;
+                $shortUrlList[$photoShortIdStart + $idx + 1] = $tRelPath;
+                $sizes[$conf['id']] = $baseUrl . '/' . $tRelPath;
+            }
+            $albumPhotosJson[] = array('filename' => $filename, 'title' => $meta['title'], 'desc' => $meta['desc'], 'src' => $baseUrl . '/' . $originalRelPath, 'sizes' => $sizes, 'exif' => getExifData($photoPath), 'shortIdStart' => $photoShortIdStart);
         }
 
-        // --- 清理孤立縮圖 ---
-        // 檢查 Thumbnail 資料夾，若縮圖對應的原圖已不存在，則刪除
+        // 清理孤立縮圖
         if (is_dir($thumbDir)) {
             $existingThumbs = glob($thumbDir . '/*.jpg');
-            $activePhotoNames = array();
-            foreach ($photos as $p) { $activePhotoNames[] = basename($p); }
-
+            $activePhotoNames = array(); foreach ($photos as $p) { $activePhotoNames[] = basename($p); }
             foreach ($existingThumbs as $thumbPath) {
-                $tName = basename($thumbPath);
-                $foundOriginal = false;
-                
-                // 嘗試從縮圖檔名還原原圖檔名 (根據目前的 thumbConfigs)
+                $tName = basename($thumbPath); $foundOriginal = false;
                 foreach ($thumbConfigs as $conf) {
                     $suffix = '_' . $conf['id'] . '.jpg';
                     if (strpos($tName, $suffix) !== false) {
                         $potentialOriginal = str_replace($suffix, '.jpg', $tName);
-                        if (in_array($potentialOriginal, $activePhotoNames)) {
-                            $foundOriginal = true;
-                            break;
-                        }
+                        if (in_array($potentialOriginal, $activePhotoNames)) { $foundOriginal = true; break; }
                     }
                 }
-                
-                if (!$foundOriginal) {
-                    unlink($thumbPath);
-                    echo "Removed orphaned thumbnail: $tName\n";
-                }
+                if (!$foundOriginal) { unlink($thumbPath); echo "Removed orphaned thumbnail: $tName\n"; }
             }
         }
 
-        // 決定封面圖
-        if (empty($albumCover) && !empty($photos)) {
-            $albumCover = basename($photos[0]);
-        }
+        if (empty($albumCover) && !empty($photos)) $albumCover = basename($photos[0]);
         $finalCoverUrl = '';
         if (!empty($albumCover)) {
             $coverFilename = basename($albumCover);
-            $info = pathinfo($coverFilename);
-            
-            // 嘗試找到標記為 PreviewIcon 的尺寸
             $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
             $thumbCoverName = $previewId ? getThumbFilename($coverFilename, $previewId) : getThumbFilename($coverFilename, $thumbConfigs[0]['id']);
-
-            if (file_exists($thumbDir . '/' . $thumbCoverName)) {
-                $finalCoverUrl = $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbCoverName;
-            } else {
-                $finalCoverUrl = $baseUrl . '/' . $albumName . '/' . $coverFilename;
-            }
+            $finalCoverUrl = file_exists($thumbDir . '/' . $thumbCoverName) ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbCoverName : $baseUrl . '/' . $albumName . '/' . $coverFilename;
         }
 
-        // 產生單一相簿 JSON
-        $singleAlbumData = array(
-            'name' => $displayAlbumName,
-            'desc' => $albumDesc,
-            'desc_html' => $albumDescHtml,
-            'photos' => $albumPhotosJson
-        );
-        file_put_contents($jsonDir . '/' . $albumName . '.json', json_encode($singleAlbumData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-
-        // 加入總表
-        $allAlbumsList[] = array(
-            'name' => $displayAlbumName, // Display Name
-            'id' => $albumName, // Directory Name (used for ID/Hash)
-            'desc' => $albumDesc,
-            'cover' => $finalCoverUrl,
-            'count' => $photoCount,
-            'date' => $albumDate,
-            'link' => '#album=' . urlencode($albumName)
-        );
+        $singleAlbumData = array('name' => $displayAlbumName, 'desc' => $albumDesc, 'desc_html' => $albumDescHtml, 'photos' => $albumPhotosJson);
+        safe_file_put_contents($jsonFile, json_encode($singleAlbumData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        $allAlbumsList[] = array('name' => $displayAlbumName, 'id' => $albumName, 'desc' => $albumDesc, 'cover' => $finalCoverUrl, 'count' => $photoCount, 'date' => $albumDate, 'link' => '#album=' . urlencode($albumName));
     }
 }
 
-// 排序總表
-usort($allAlbumsList, function($a, $b) {
-    return strcmp($b['date'], $a['date']);
-});
+// 清理孤立 JSON
+if (is_dir($jsonDir)) {
+    foreach (glob($jsonDir . '/*.json') as $jsonPath) {
+        $jName = basename($jsonPath, '.json');
+        if ($jName !== 'index' && !is_dir($collectionDir . '/' . $jName)) { unlink($jsonPath); echo "Removed orphaned JSON: $jName.json\n"; }
+    }
+}
 
-// 生成 index.json
-// 模擬 API 格式
-$indexJson = array(
-    'items' => $allAlbumsList,
-    'pagination' => array(
-        'currentPage' => 1,
-        'totalPages' => 1,
-        'totalItems' => count($allAlbumsList),
-        'itemsPerPage' => count($allAlbumsList) // Client side handle pagination or show all
-    )
-);
-
-file_put_contents($jsonDir . '/index.json', json_encode($indexJson, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+usort($allAlbumsList, function($a, $b) { return strcmp($b['date'], $a['date']); });
+$indexJson = array('items' => $allAlbumsList, 'pagination' => array('currentPage' => 1, 'totalPages' => 1, 'totalItems' => count($allAlbumsList), 'itemsPerPage' => count($allAlbumsList)));
+safe_file_put_contents($jsonDir . '/index.json', json_encode($indexJson, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 echo "Generated: api/json/index.json\n";
 
-
-// ==========================================
-// 4. 儲存 ShortURL 紀錄
-// ==========================================
 if (!empty($shortUrlList)) {
+    ksort($shortUrlList);
     $shortUrlContent = "";
-    foreach ($shortUrlList as $index => $path) {
-        $shortUrlContent .= $index . "|" . $path . "\n";
-    }
-    file_put_contents($baseDir . '/shorturl.txt', $shortUrlContent);
+    foreach ($shortUrlList as $id => $path) { $shortUrlContent .= $id . "|" . $path . "\n"; }
+    safe_file_put_contents($shortUrlFile, $shortUrlContent);
     echo "Generated: shorturl.txt (" . count($shortUrlList) . " entries)\n";
 }
 
