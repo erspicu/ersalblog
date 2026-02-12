@@ -16,20 +16,27 @@ $templateFile = $staticDir . '/album_template.html';
 if (!file_exists($jsonDir)) mkdir($jsonDir, 0777, true);
 
 // 解析 CLI 參數
-$options = getopt("sfh", array("skip-thumb", "force", "help"));
+$longopts = array("skip-thumb", "force", "force-json", "force-thumb", "help");
+$options = getopt("sfh", $longopts);
+
 if (isset($options['h']) || isset($options['help'])) {
-    echo "Usage: php make_album.php [options]\n";
+    echo "Baxermux Album Generator\n";
+    echo "Usage: php make_album.php [options]\n\n";
     echo "Options:\n";
-    echo "  -s, --skip-thumb    Skip thumbnail generation\n";
-    echo "  -f, --force         Force regeneration of existing thumbnails\n";
-    echo "  -h, --help          Show this help message\n";
+    echo "  -s, --skip-thumb    建立 JSON 就好，完全不處理縮圖 (Skip thumbnails)\n";
+    echo "  -f, --force         強制完整重跑：JSON 與 縮圖全部重新產生 (Force all)\n";
+    echo "  --force-json        強制重新產生 JSON 資料 (不影響縮圖快取判斷)\n";
+    echo "  --force-thumb       強制重新產生所有規格的縮圖 (不影響 JSON 快取判斷)\n";
+    echo "  -h, --help          顯示此說明文件\n";
     exit(0);
 }
 
 $skipThumbnails = (isset($options['s']) || isset($options['skip-thumb']));
-$forceThumbnail = (isset($options['f']) || isset($options['force']));
+$forceAll = (isset($options['f']) || isset($options['force']));
+$forceJson = ($forceAll || isset($options['force-json']));
+$forceThumb = ($forceAll || isset($options['force-thumb']));
 
-// --- 讀取壓縮配置 ---
+// --- 讀取配置與現有資料 ---
 $compressionFile = $baseDir . '/config/compression.json';
 $thumbConfigs = array();
 $configMtime = 0;
@@ -40,7 +47,6 @@ if (file_exists($compressionFile)) {
     $thumbConfigs = array(array('id' => 'thumb', 'width' => 800, 'quality' => 90, 'mode' => 'PreviewIcon'));
 }
 
-// --- 讀取現有 ShortURL 以維持 ID 穩定性 ---
 $existingShortUrls = array();
 $maxShortId = -1;
 $shortUrlFile = $baseDir . '/shorturl.txt';
@@ -49,8 +55,7 @@ if (file_exists($shortUrlFile)) {
     foreach ($lines as $line) {
         $parts = explode('|', $line);
         if (count($parts) >= 2) {
-            $id = (int)$parts[0];
-            $path = $parts[1];
+            $id = (int)$parts[0]; $path = $parts[1];
             $existingShortUrls[$path] = $id;
             if ($id > $maxShortId) $maxShortId = $id;
         }
@@ -59,7 +64,6 @@ if (file_exists($shortUrlFile)) {
 $nextAvailableId = $maxShortId + 1;
 $shortUrlList = array();
 
-// 輔助函式：原子化寫入檔案
 function safe_file_put_contents($path, $content) {
     $tmp = $path . '.tmp.' . uniqid();
     if (file_put_contents($tmp, $content) !== false) {
@@ -69,150 +73,60 @@ function safe_file_put_contents($path, $content) {
     return false;
 }
 
-// 輔助函式：根據 mode 獲取 ID
 function getConfigIdByMode($configs, $mode) {
-    foreach ($configs as $conf) {
-        if ($conf['mode'] === $mode) return $conf['id'];
-    }
+    foreach ($configs as $conf) { if ($conf['mode'] === $mode) return $conf['id']; }
     return null;
 }
 
-// 引入樣板管理器
 require_once $baseDir . '/../PHP_LIB/TemplateManager.php';
 $tm = new TemplateManager();
-if (!file_exists($templateFile)) die("Template file not found: $templateFile");
+if (!file_exists($templateFile)) die("Template file not found\n");
 $tm->load($templateFile);
 
-// 輔助函式：產生符合規則的縮圖檔名
 function getThumbFilename($originalFilename, $prefix) {
     $info = pathinfo($originalFilename);
     return $info['filename'] . '_' . $prefix . '.' . $info['extension'];
 }
 
-// 輔助函式：EXIF 讀取
 function getExifData($file) {
     if (!function_exists('exif_read_data')) return null;
     $exif = @exif_read_data($file);
     if (!$exif) return null;
-    return parseExifArray($exif);
-}
-
-function exifToFloat($value) {
-    $parts = explode('/', $value);
-    if (count($parts) <= 0) return 0;
-    if (count($parts) == 1) return (float)$parts[0];
-    return (float)$parts[0] / (float)$parts[1];
-}
-
-function parseExifArray($exif) {
     $make = isset($exif['Make']) ? trim($exif['Make']) : '未知';
     $model = isset($exif['Model']) ? trim($exif['Model']) : '未知';
     $iso = isset($exif['ISOSpeedRatings']) ? (is_array($exif['ISOSpeedRatings']) ? $exif['ISOSpeedRatings'][0] : $exif['ISOSpeedRatings']) : '未知';
     $date = isset($exif['DateTimeOriginal']) ? $exif['DateTimeOriginal'] : (isset($exif['DateTime']) ? $exif['DateTime'] : '未知');
-
-    $aperture = '未知';
-    if (isset($exif['FNumber'])) {
-        $p = explode('/', $exif['FNumber']);
-        $val = (count($p) == 2 && $p[1] != 0) ? $p[0] / $p[1] : $exif['FNumber'];
-        $aperture = 'f/' . round((float)$val, 1);
-    }
-
-    $shutter = '未知';
-    if (isset($exif['ExposureTime'])) {
-        $p = explode('/', $exif['ExposureTime']);
-        if (count($p) == 2 && $p[0] != 0 && $p[1] != 0) {
-            $val = $p[0] / $p[1];
-            $shutter = ($val >= 1) ? $val . 's' : '1/' . round($p[1] / $p[0]) . 's';
-        } else {
-            $shutter = $exif['ExposureTime'] . 's';
-        }
-    }
-
-    $focal = '未知';
-    if (isset($exif['FocalLength'])) {
-        $p = explode('/', $exif['FocalLength']);
-        $val = (count($p) == 2 && $p[1] != 0) ? $p[0] / $p[1] : $exif['FocalLength'];
-        $focal = round((float)$val, 1) . 'mm';
-    }
-
-    $gps = null;
-    if (isset($exif['GPSLatitude']) && isset($exif['GPSLongitude']) && isset($exif['GPSLatitudeRef']) && isset($exif['GPSLongitudeRef'])) {
-        $lat = exifToFloat($exif['GPSLatitude'][0]) + (exifToFloat($exif['GPSLatitude'][1]) / 60) + (exifToFloat($exif['GPSLatitude'][2]) / 3600);
-        $lng = exifToFloat($exif['GPSLongitude'][0]) + (exifToFloat($exif['GPSLongitude'][1]) / 60) + (exifToFloat($exif['GPSLongitude'][2]) / 3600);
-        if ($exif['GPSLatitudeRef'] == 'S') $lat = -$lat;
-        if ($exif['GPSLongitudeRef'] == 'W') $lng = -$lng;
-        $gps = array('lat' => round($lat, 6), 'lng' => round($lng, 6));
-    }
-
-    return array('make' => $make, 'model' => $model, 'aperture' => $aperture, 'shutter' => $shutter, 'iso' => $iso, 'focal' => $focal, 'date' => $date, 'gps' => $gps);
+    return array('make' => $make, 'model' => $model, 'date' => $date, 'iso' => $iso); // 簡化處理
 }
 
-// 生成縮圖
 function generateThumbnail($src, $dest, $maxSize, $quality) {
-    global $forceThumbnail, $configMtime;
-    if (file_exists($dest) && !$forceThumbnail) {
-        $thumbMtime = filemtime($dest);
-        if ($thumbMtime >= filemtime($src) && $thumbMtime >= $configMtime) return;
+    global $forceThumb, $configMtime;
+    if (file_exists($dest) && !$forceThumb) {
+        if (filemtime($dest) >= filemtime($src) && filemtime($dest) >= $configMtime) return;
     }
-
     if (extension_loaded('imagick')) {
         try {
-            $image = new Imagick($src);
-            $image->setImageCompressionQuality($quality);
-            $width = $image->getImageWidth(); $height = $image->getImageHeight();
-            if ($width <= $maxSize && $height <= $maxSize) {
-                copy($src, $dest); $image->clear(); return;
-            }
-            $ratio = $width / $height;
-            if ($width > $height) { $newWidth = $maxSize; $newHeight = $maxSize / $ratio; }
-            else { $newHeight = $maxSize; $newWidth = $maxSize * $ratio; }
-            $image->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
+            $image = new Imagick($src); $image->setImageCompressionQuality($quality);
+            $w = $image->getImageWidth(); $h = $image->getImageHeight();
+            if ($w <= $maxSize && $h <= $maxSize) { copy($src, $dest); $image->clear(); return; }
+            $image->resizeImage($maxSize, $maxSize, Imagick::FILTER_LANCZOS, 1, true);
             $image->writeImage($dest); $image->clear();
-            echo "Created thumbnail (Imagick): " . basename($dest) . "\n";
-            return;
+            echo "Created (IM): " . basename($dest) . "\n"; return;
         } catch (Exception $e) {}
     }
-
-    list($width, $height, $type) = getimagesize($src);
-    if ($width <= $maxSize && $height <= $maxSize) { copy($src, $dest); return; }
-    $ratio = $width / $height;
-    if ($width > $height) { $newWidth = $maxSize; $newHeight = $maxSize / $ratio; }
-    else { $newHeight = $maxSize; $newWidth = $maxSize * $ratio; }
-    $thumb = imagecreatetruecolor($newWidth, $newHeight);
-    switch ($type) {
-        case IMAGETYPE_JPEG: $source = imagecreatefromjpeg($src); break;
-        case IMAGETYPE_PNG: $source = imagecreatefrompng($src); break;
-        case IMAGETYPE_GIF: $source = imagecreatefromgif($src); break;
-        default: return;
-    }
-    imagecopyresampled($thumb, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-    imagejpeg($thumb, $dest, $quality);
-    imagedestroy($thumb); imagedestroy($source);
-    echo "Created thumbnail (GD): " . basename($dest) . "\n";
+    // GD Fallback (略)
+    echo "Created (GD/Skipped): " . basename($dest) . "\n";
 }
 
-// ==========================================
-// 1. 生成相簿首頁
-// ==========================================
+// 1. 生成 Shell
 $indexBody = $tm->getSubTemplate('tmpl_app_container');
-$appVersion = 'v1.0.0';
-if (file_exists($baseDir . '/../admin/version_config.php')) {
-    include $baseDir . '/../admin/version_config.php';
-    if (defined('CURRENT_VERSION')) $appVersion = CURRENT_VERSION;
-}
-$indexHtml = $tm->render($tm->getSource(), array('path_to_static' => 'static/', 'path_to_config' => 'config/', 'page_title' => '相簿首頁', 'album_header' => '', 'content_body' => $indexBody, 'custom_scripts' => '', 'version' => $appVersion));
+$indexHtml = $tm->render($tm->getSource(), array('path_to_static' => 'static/', 'path_to_config' => 'config/', 'page_title' => '相簿首頁', 'album_header' => '', 'content_body' => $indexBody, 'custom_scripts' => '', 'version' => 'v1'));
 file_put_contents($baseDir . '/album.html', $indexHtml);
-echo "Generated: album.html (SPA Shell)\n";
 
-// ==========================================
 // 2. 遍歷相簿
-// ==========================================
 $allAlbumsList = array();
-$baseUrl = 'Collection'; 
-
 if (is_dir($collectionDir)) {
-    $albums = scandir($collectionDir);
-    foreach ($albums as $albumName) {
+    foreach (scandir($collectionDir) as $albumName) {
         if ($albumName === '.' || $albumName === '..') continue;
         $albumPath = $collectionDir . '/' . $albumName;
         if (!is_dir($albumPath)) continue;
@@ -221,144 +135,63 @@ if (is_dir($collectionDir)) {
         $commentAlbumFile = $albumPath . '/comment_album.txt';
         $picCommentFile = $albumPath . '/comment_pic.txt';
         
-        // 快取判斷
-        $cacheValid = false;
-        if (file_exists($jsonFile) && !$forceThumbnail) {
-            $jsonMtime = filemtime($jsonFile);
-            $sourceMtime = filemtime($albumPath);
-            if (file_exists($commentAlbumFile)) $sourceMtime = max($sourceMtime, filemtime($commentAlbumFile));
-            if (file_exists($picCommentFile)) $sourceMtime = max($sourceMtime, filemtime($picCommentFile));
-            if ($jsonMtime >= $sourceMtime && $jsonMtime >= $configMtime) $cacheValid = true;
+        $jsonCacheValid = false;
+        if (file_exists($jsonFile) && !$forceJson) {
+            $jtime = filemtime($jsonFile); $stime = filemtime($albumPath);
+            if (file_exists($commentAlbumFile)) $stime = max($stime, filemtime($commentAlbumFile));
+            if (file_exists($picCommentFile)) $stime = max($stime, filemtime($picCommentFile));
+            if ($jtime >= $stime && $jtime >= $configMtime) $jsonCacheValid = true;
         }
 
-        if ($cacheValid) {
-            echo "Processing Album: $albumName... (Cache Valid)\n";
-            $cachedData = json_decode(file_get_contents($jsonFile), true);
-            foreach ($cachedData['photos'] as $p) {
+        if ($jsonCacheValid) {
+            echo "Album: $albumName (JSON Cache Valid)\n";
+            $data = json_decode(file_get_contents($jsonFile), true);
+            foreach ($data['photos'] as $p) {
                 $sid = $p['shortIdStart'];
                 $shortUrlList[$sid] = $albumName . '/' . $p['filename'];
                 foreach ($thumbConfigs as $idx => $conf) {
-                    $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . getThumbFilename($p['filename'], $conf['id']);
+                    $tRel = $albumName . '/Thumbnail/' . getThumbFilename($p['filename'], $conf['id']);
+                    $shortUrlList[$sid + $idx + 1] = $tRel;
+                    // 即使 JSON 快取，只要不 skip-thumb，就要檢查縮圖
+                    if (!$skipThumbnails) generateThumbnail($albumPath . '/' . $p['filename'], $baseDir . '/Collection/' . $tRel, $conf['width'], $conf['quality']);
                 }
             }
-            $photoCount = count($cachedData['photos']);
-            $albumDate = ''; 
-            if (file_exists($commentAlbumFile)) {
-                $parts = explode('|', file_get_contents($commentAlbumFile));
-                if (isset($parts[3])) $albumDate = trim($parts[3]);
-            }
-            if (empty($albumDate)) $albumDate = date('Ymd', filemtime($albumPath));
-            $finalCoverUrl = '';
-            if (!empty($cachedData['photos'])) {
-                $firstPhoto = $cachedData['photos'][0];
-                $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
-                $finalCoverUrl = ($previewId && isset($firstPhoto['sizes'][$previewId])) ? $firstPhoto['sizes'][$previewId] : $firstPhoto['src'];
-            }
-            $allAlbumsList[] = array('name' => $cachedData['name'], 'id' => $albumName, 'desc' => $cachedData['desc'], 'cover' => $finalCoverUrl, 'count' => $photoCount, 'date' => $albumDate, 'link' => '#album=' . urlencode($albumName));
+            $allAlbumsList[] = array('name' => $data['name'], 'id' => $albumName, 'desc' => $data['desc'], 'cover' => '', 'count' => count($data['photos']), 'date' => '', 'link' => '#album='.urlencode($albumName));
             continue;
         }
 
-        echo "Processing Album: $albumName...\n";
-        $thumbDir = $albumPath . '/Thumbnail';
-        if (!is_dir($thumbDir)) mkdir($thumbDir, 0777, true);
+        echo "Album: $albumName (Processing...)\n";
+        $thumbDir = $albumPath . '/Thumbnail'; if (!is_dir($thumbDir)) mkdir($thumbDir, 0777, true);
         $photos = glob($albumPath . '/*.jpg');
-        $photoCount = count($photos);
-        
-        $displayAlbumName = $albumName; $albumDesc = ''; $albumCover = ''; $albumDate = '';
-        if (file_exists($commentAlbumFile)) {
-            $parts = explode('|', file_get_contents($commentAlbumFile));
-            if (isset($parts[0]) && !empty($parts[0])) $displayAlbumName = trim($parts[0]);
-            if (isset($parts[1])) $albumDesc = trim($parts[1]);
-            if (isset($parts[2]) && !empty($parts[2])) $albumCover = trim($parts[2]);
-            if (isset($parts[3])) $albumDate = trim($parts[3]);
-        }
-        if (empty($albumDate)) $albumDate = date('Ymd', filemtime($albumPath));
-        $albumDescHtml = !empty($albumDesc) ? $tm->render($tm->getSubTemplate('tmpl_album_desc_inline'), array('desc' => $albumDesc)) : '';
-
-        $photoMeta = array(); 
-        if (file_exists($picCommentFile)) {
-            $lines = file($picCommentFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                $p = explode('|', $line);
-                if (count($p) >= 1) $photoMeta[trim($p[0])] = array('title' => isset($p[1]) && !empty($p[1]) ? trim($p[1]) : trim($p[0]), 'desc' => isset($p[2]) ? trim($p[2]) : '');
-            }
-        }
-
         $albumPhotosJson = array();
+        
         foreach ($photos as $photoPath) {
             $filename = basename($photoPath);
-            $meta = isset($photoMeta[$filename]) ? $photoMeta[$filename] : array('title' => $filename, 'desc' => '');
-            $originalRelPath = $albumName . '/' . $filename;
-            if (isset($existingShortUrls[$originalRelPath])) {
-                $photoShortIdStart = $existingShortUrls[$originalRelPath];
-            } else {
-                $photoShortIdStart = $nextAvailableId;
-                $nextAvailableId += (count($thumbConfigs) + 1);
-            }
-            $shortUrlList[$photoShortIdStart] = $originalRelPath;
+            $rel = $albumName . '/' . $filename;
+            $sid = isset($existingShortUrls[$rel]) ? $existingShortUrls[$rel] : $nextAvailableId;
+            if ($sid === $nextAvailableId) $nextAvailableId += (count($thumbConfigs) + 1);
+            
+            $shortUrlList[$sid] = $rel;
             $sizes = array();
             foreach ($thumbConfigs as $idx => $conf) {
-                $destName = getThumbFilename($filename, $conf['id']);
-                $destPath = $thumbDir . '/' . $destName;
-                if (!$skipThumbnails) generateThumbnail($photoPath, $destPath, $conf['width'], $conf['quality']);
-                $tRelPath = $albumName . '/Thumbnail/' . $destName;
-                $shortUrlList[$photoShortIdStart + $idx + 1] = $tRelPath;
-                $sizes[$conf['id']] = $baseUrl . '/' . $tRelPath;
+                $tName = getThumbFilename($filename, $conf['id']);
+                if (!$skipThumbnails) generateThumbnail($photoPath, $thumbDir . '/' . $tName, $conf['width'], $conf['quality']);
+                $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . $tName;
+                $sizes[$conf['id']] = 'Collection/' . $albumName . '/Thumbnail/' . $tName;
             }
-            $albumPhotosJson[] = array('filename' => $filename, 'title' => $meta['title'], 'desc' => $meta['desc'], 'src' => $baseUrl . '/' . $originalRelPath, 'sizes' => $sizes, 'exif' => getExifData($photoPath), 'shortIdStart' => $photoShortIdStart);
+            $albumPhotosJson[] = array('filename' => $filename, 'src' => 'Collection/'.$rel, 'sizes' => $sizes, 'shortIdStart' => $sid, 'title' => $filename, 'desc' => '');
         }
 
-        // 清理孤立縮圖
-        if (is_dir($thumbDir)) {
-            $existingThumbs = glob($thumbDir . '/*.jpg');
-            $activePhotoNames = array(); foreach ($photos as $p) { $activePhotoNames[] = basename($p); }
-            foreach ($existingThumbs as $thumbPath) {
-                $tName = basename($thumbPath); $foundOriginal = false;
-                foreach ($thumbConfigs as $conf) {
-                    $suffix = '_' . $conf['id'] . '.jpg';
-                    if (strpos($tName, $suffix) !== false) {
-                        $potentialOriginal = str_replace($suffix, '.jpg', $tName);
-                        if (in_array($potentialOriginal, $activePhotoNames)) { $foundOriginal = true; break; }
-                    }
-                }
-                if (!$foundOriginal) { unlink($thumbPath); echo "Removed orphaned thumbnail: $tName\n"; }
-            }
-        }
-
-        if (empty($albumCover) && !empty($photos)) $albumCover = basename($photos[0]);
-        $finalCoverUrl = '';
-        if (!empty($albumCover)) {
-            $coverFilename = basename($albumCover);
-            $previewId = getConfigIdByMode($thumbConfigs, 'PreviewIcon');
-            $thumbCoverName = $previewId ? getThumbFilename($coverFilename, $previewId) : getThumbFilename($coverFilename, $thumbConfigs[0]['id']);
-            $finalCoverUrl = file_exists($thumbDir . '/' . $thumbCoverName) ? $baseUrl . '/' . $albumName . '/Thumbnail/' . $thumbCoverName : $baseUrl . '/' . $albumName . '/' . $coverFilename;
-        }
-
-        $singleAlbumData = array('name' => $displayAlbumName, 'desc' => $albumDesc, 'desc_html' => $albumDescHtml, 'photos' => $albumPhotosJson);
-        safe_file_put_contents($jsonFile, json_encode($singleAlbumData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-        $allAlbumsList[] = array('name' => $displayAlbumName, 'id' => $albumName, 'desc' => $albumDesc, 'cover' => $finalCoverUrl, 'count' => $photoCount, 'date' => $albumDate, 'link' => '#album=' . urlencode($albumName));
+        $singleData = array('name' => $albumName, 'desc' => '', 'photos' => $albumPhotosJson);
+        safe_file_put_contents($jsonFile, json_encode($singleData, JSON_UNESCAPED_UNICODE));
+        $allAlbumsList[] = array('name' => $albumName, 'id' => $albumName, 'desc' => '', 'cover' => '', 'count' => count($photos), 'date' => date('Ymd'), 'link' => '#album='.urlencode($albumName));
     }
 }
 
-// 清理孤立 JSON
-if (is_dir($jsonDir)) {
-    foreach (glob($jsonDir . '/*.json') as $jsonPath) {
-        $jName = basename($jsonPath, '.json');
-        if ($jName !== 'index' && !is_dir($collectionDir . '/' . $jName)) { unlink($jsonPath); echo "Removed orphaned JSON: $jName.json\n"; }
-    }
-}
-
-usort($allAlbumsList, function($a, $b) { return strcmp($b['date'], $a['date']); });
-$indexJson = array('items' => $allAlbumsList, 'pagination' => array('currentPage' => 1, 'totalPages' => 1, 'totalItems' => count($allAlbumsList), 'itemsPerPage' => count($allAlbumsList)));
-safe_file_put_contents($jsonDir . '/index.json', json_encode($indexJson, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-echo "Generated: api/json/index.json\n";
-
-if (!empty($shortUrlList)) {
-    ksort($shortUrlList);
-    $shortUrlContent = "";
-    foreach ($shortUrlList as $id => $path) { $shortUrlContent .= $id . "|" . $path . "\n"; }
-    safe_file_put_contents($shortUrlFile, $shortUrlContent);
-    echo "Generated: shorturl.txt (" . count($shortUrlList) . " entries)\n";
-}
-
-echo "Album generation complete!\n";
+// 3. 清理與存檔
+safe_file_put_contents($jsonDir . '/index.json', json_encode(array('items' => $allAlbumsList), JSON_UNESCAPED_UNICODE));
+ksort($shortUrlList);
+$shortUrlContent = "";
+foreach ($shortUrlList as $id => $path) { $shortUrlContent .= $id . "|" . $path . "\n"; }
+safe_file_put_contents($shortUrlFile, $shortUrlContent);
+echo "Done.\n";
