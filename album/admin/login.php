@@ -53,8 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
                 <label class="form-label"><?php echo __('language'); ?></label>
                 <select name="lang" id="lang-selector" class="form-select">
-                    <option value="zh_TW" <?php echo ($currentLang == 'zh_TW' ? 'selected' : ''); ?>>繁體中文 (zh_TW)</option>
-                    <option value="en_US" <?php echo ($currentLang == 'en_US' ? 'selected' : ''); ?>>English (en_US)</option>
+                    <?php 
+                    $adminLangs = getAvailableLangs('admin-');
+                    foreach ($adminLangs as $code => $name): 
+                    ?>
+                        <option value="<?php echo $code; ?>" <?php echo ($currentLang == $code ? 'selected' : ''); ?>><?php echo $name; ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary w-100"><?php echo __('login_btn'); ?></button>

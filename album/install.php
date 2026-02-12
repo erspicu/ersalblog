@@ -3,9 +3,20 @@
  * Baxermux Album Service Installation Wizard (v2 - Advanced Config)
  */
 
-$available_langs = array('zh_TW' => '繁體中文', 'en_US' => 'English');
+// 動態偵測可用語系
+$available_langs = array();
+$langDir = __DIR__ . '/langs';
+if (is_dir($langDir)) {
+    foreach (glob($langDir . '/install-*.php') as $file) {
+        $langCode = str_replace(['install-', '.php'], '', basename($file));
+        $names = array('zh_TW' => '繁體中文', 'en_US' => 'English');
+        $available_langs[$langCode] = isset($names[$langCode]) ? $names[$langCode] : $langCode;
+    }
+}
+if (empty($available_langs)) $available_langs = array('zh_TW' => '繁體中文');
+
 $lang = isset($_GET['lang']) ? $_GET['lang'] : (isset($_COOKIE['album_lang']) ? $_COOKIE['album_lang'] : 'zh_TW');
-if (!isset($available_langs[$lang])) $lang = 'zh_TW';
+if (!isset($available_langs[$lang])) $lang = array_keys($available_langs)[0];
 setcookie('album_lang', $lang, time() + 86400 * 30, "/");
 
 $lang_file = __DIR__ . "/langs/install-{$lang}.php";
@@ -188,8 +199,9 @@ $themes = getThemes();
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo _t('language'); ?></label>
                                 <select name="lang_code" class="form-select">
-                                    <option value="zh-TW" <?php echo $lang=='zh_TW'?'selected':''; ?>>繁體中文 (zh-TW)</option>
-                                    <option value="en-US" <?php echo $lang=='en_US'?'selected':''; ?>>English (en-US)</option>
+                                    <?php foreach($available_langs as $k => $v): ?>
+                                        <option value="<?php echo str_replace('_', '-', $k); ?>" <?php echo $lang==$k?'selected':''; ?>><?php echo $v; ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">

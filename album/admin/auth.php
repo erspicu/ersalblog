@@ -43,6 +43,29 @@ function __($key, $default = '') {
     return isset($L[$key]) ? $L[$key] : ($default ? $default : $key);
 }
 
+/**
+ * 動態獲取可用語系
+ * @param string $prefix 檔案前綴 (例如 'admin-' 或 'install-')
+ */
+function getAvailableLangs($prefix) {
+    $langs = [];
+    $langDir = __DIR__ . '/../langs';
+    if (is_dir($langDir)) {
+        foreach (glob($langDir . '/' . $prefix . '*.php') as $file) {
+            $langCode = str_replace([$prefix, '.php'], '', basename($file));
+            // 簡單對應顯示名稱 (以後可以從語系檔內讀取一個特定 key)
+            $names = [
+                'zh_TW' => '繁體中文 (zh_TW)',
+                'en_US' => 'English (en_US)',
+                'zh-TW' => '繁體中文 (zh-TW)',
+                'en-US' => 'English (en-US)'
+            ];
+            $langs[$langCode] = isset($names[$langCode]) ? $names[$langCode] : $langCode;
+        }
+    }
+    return $langs;
+}
+
 // 如果 config.php 內沒有正確設定時區，則設定預設值
 if (!isset($album_timezone)) {
     date_default_timezone_set('Asia/Taipei');

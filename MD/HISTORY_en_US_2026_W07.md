@@ -2,6 +2,8 @@
 
 ## [2026-02-13]
 ### Added
+- **Automatic Language Detection**: `install.php` and `login.php` now dynamically scan the `langs/` directory to generate available language options, allowing for easier expansion without code changes.
+- **Config Structure Sync**: Updated `config.example.php` to include full SEO, preview image, and global variable settings, matching the output format of the installation wizard.
 - **Admin Multi-language Framework**: Implemented a comprehensive multi-language architecture for the album admin panel, supporting Chinese and English. Added a `langs/` directory for translation files and real-time language preview switching on the login page.
 - **Enhanced Build Tool (make_album.php)**:
     - **Persistent ID Stability**: Short URL IDs are now stored persistently, ensuring that shared links remain valid even if photo order changes or albums are rebuilt.

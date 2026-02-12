@@ -1,6 +1,6 @@
 <?php
 /**
- * Album Admin Configuration Example
+ * Baxermux Album Configuration Example
  * Copy this file to config.php and modify settings.
  */
 
@@ -11,6 +11,19 @@ $albumAdminConfig = array(
     'session_secret' => 'CHANGE_ME_TO_RANDOM_STRING_ALBUM'
 );
 
-//設定時區
-date_default_timezone_set('Asia/Taipei');
+// --- 全域相簿設定 (SEO 與 Header 使用) ---
+$album_title = "Baxermux的相簿";
+$album_description = "ersalblog的延伸子專案相簿服務。";
+$album_introduce = "放一些Blog用到的素材照片.";
+$album_preview = "https://www.baxermux.org/ersalblog/album/BaxerMuxAlbum.jpg"; 
+$album_site_url = "https://www.baxermux.org/ersalblog/album/"; 
+
+// 網站語言 (對外 HTML 標籤使用，建議格式: zh-TW, en-US)
+$album_lang = "zh-TW";
+
+// 系統時區 (對內 PHP 運算使用)
+$album_timezone = "Asia/Taipei";
+
+// 設定系統時區
+date_default_timezone_set($album_timezone);
 ?>
