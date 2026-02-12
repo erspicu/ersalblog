@@ -25,16 +25,33 @@ $diskFree = disk_free_space("/");
 $diskUsed = $diskTotal - $diskFree;
 $diskUsagePercent = round(($diskUsed / $diskTotal) * 100, 2);
 
-// 計算 Collection 目錄大小 (使用 Linux 指令較快)
-$collectionSizeStr = "未知";
-if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+// 計算 Collection 目錄大小
+$collectionSizeStr = "計算中...";
+$success = false;
+
+if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' && function_exists('popen')) {
     $io = popen("du -sh " . escapeshellarg($collectionDir) . " 2>&1", "r");
-    $res = fread($io, 256);
-    pclose($io);
-    if ($res !== false) {
-        $parts = explode("\t", $res);
-        $collectionSizeStr = $parts[0];
+    if ($io) {
+        $res = stream_get_contents($io);
+        pclose($io);
+        if ($res) {
+            $res = trim($res);
+            $parts = explode("\t", $res);
+            if (!empty($parts[0])) {
+                $collectionSizeStr = $parts[0];
+                $success = true;
+            }
+        }
     }
+}
+
+// Fallback: 如果 du 失敗，使用 PHP 遞迴計算 (效能較低但保險)
+if (!$success) {
+    $size = 0;
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($collectionDir, RecursiveDirectoryIterator::SKIP_DOTS)) as $file) {
+        $size += $file->getSize();
+    }
+    $collectionSizeStr = formatBytes($size);
 }
 
 function formatBytes($bytes, $precision = 2) {
