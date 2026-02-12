@@ -21,7 +21,7 @@ $album_description = "ersalblog的延伸子專案相簿服務。";
 $album_introduce = "放一些Blog用到的素材照片.";
 $album_preview = "";
 $album_site_url = "";
-$album_lang = "zh_TW";
+$album_lang = "zh-TW";
 $album_timezone = "Asia/Taipei";
 
 $phpConfigFile = __DIR__ . '/../config/config.php';
@@ -34,7 +34,7 @@ if (file_exists($phpConfigFile)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全域設定 - 相簿後台</title>
+    <title><?php echo __('global_settings'); ?> - 相簿後台</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -44,20 +44,20 @@ if (file_exists($phpConfigFile)) {
 
     <div class="main-content flex-grow-1 bg-light">
         <div class="mb-4">
-            <h2>全域設定 (Global Settings)</h2>
-            <p class="text-muted">在這裡您可以統一調整相簿的前端顯示 (config.js) 與後端環境/SEO 配置 (config.php)。</p>
+            <h2><?php echo __('global_settings'); ?></h2>
+            <p class="text-muted"><?php echo __('settings_desc'); ?></p>
         </div>
 
         <!-- 前端設定 (AJAX) -->
         <div class="card shadow-sm col-md-8 mb-4">
-            <div class="card-header bg-white fw-bold">前端設定 (JS Config)</div>
+            <div class="card-header bg-white fw-bold"><?php echo __('frontend_settings'); ?></div>
             <div class="card-body">
                 <form class="ajax-form" data-action="update_settings">
                     <input type="hidden" name="action" value="update_settings">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿主題 (Theme)</label>
+                        <label class="form-label fw-bold"><?php echo __('theme'); ?></label>
                         <select name="theme" class="form-select">
                             <?php
                             $themesDir = __DIR__ . '/../static/themes';
@@ -87,33 +87,33 @@ if (file_exists($phpConfigFile)) {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">資料讀取模式</label>
+                        <label class="form-label fw-bold"><?php echo __('api_mode'); ?></label>
                         <div class="d-flex gap-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="api_type" value="json" id="api_json" <?php echo ($currentApiType === 'json') ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="api_json">靜態 JSON</label>
+                                <label class="form-check-label" for="api_json"><?php echo __('api_static'); ?></label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="api_type" value="api_filebase" id="api_file" <?php echo ($currentApiType === 'api_filebase') ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="api_file">動態 PHP API</label>
+                                <label class="form-check-label" for="api_file"><?php echo __('api_dynamic'); ?></label>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">每頁顯示項目數</label>
+                            <label class="form-label fw-bold"><?php echo __('items_per_page'); ?></label>
                             <input type="number" name="items_per_page" class="form-control" value="<?php echo htmlspecialchars($currentItemsPerPage); ?>" min="1" max="200">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">並行下載限制</label>
+                            <label class="form-label fw-bold"><?php echo __('concurrent_downloads'); ?></label>
                             <input type="number" name="concurrent_downloads" class="form-control" value="<?php echo htmlspecialchars($currentConcurrentDownloads); ?>" min="1" max="6">
-                            <div class="form-text">同時下載最大數量 (建議 1-6)。</div>
+                            <div class="form-text"><?php echo __('concurrent_desc'); ?></div>
                         </div>
                     </div>
 
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary px-4">儲存前端設定</button>
+                        <button type="submit" class="btn btn-primary px-4"><?php echo __('save_frontend'); ?></button>
                     </div>
                 </form>
             </div>
@@ -121,47 +121,48 @@ if (file_exists($phpConfigFile)) {
 
         <!-- 後端設定 (AJAX) -->
         <div class="card shadow-sm col-md-8">
-            <div class="card-header bg-white fw-bold">後端與 SEO 設定 (PHP Config)</div>
+            <div class="card-header bg-white fw-bold"><?php echo __('backend_settings'); ?></div>
             <div class="card-body">
                 <form class="ajax-form" data-action="update_backend_settings">
                     <input type="hidden" name="action" value="update_backend_settings">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿網站標題</label>
+                        <label class="form-label fw-bold"><?php echo __('album_title'); ?></label>
                         <input type="text" name="album_title" class="form-control" value="<?php echo htmlspecialchars($album_title); ?>">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">SEO 描述屬性 (Description)</label>
+                        <label class="form-label fw-bold"><?php echo __('seo_desc'); ?></label>
                         <input type="text" name="album_description" class="form-control" value="<?php echo htmlspecialchars($album_description); ?>">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿簡介 (Introduce)</label>
+                        <label class="form-label fw-bold"><?php echo __('album_intro'); ?></label>
                         <input type="text" name="album_introduce" class="form-control" value="<?php echo htmlspecialchars($album_introduce); ?>">
+                        <div class="form-text"><?php echo __('album_intro_desc'); ?></div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">分享預覽圖 URL</label>
+                        <label class="form-label fw-bold"><?php echo __('preview_img'); ?></label>
                         <input type="text" name="album_preview" class="form-control" value="<?php echo htmlspecialchars($album_preview); ?>">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">相簿網站網址</label>
+                        <label class="form-label fw-bold"><?php echo __('site_url'); ?></label>
                         <input type="text" name="album_site_url" class="form-control" value="<?php echo htmlspecialchars($album_site_url); ?>">
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">語系</label>
+                            <label class="form-label fw-bold"><?php echo __('language'); ?></label>
                             <select name="album_lang" class="form-select">
-                                <option value="zh-TW" <?php echo ($album_lang == 'zh-TW' ? 'selected' : ''); ?>>繁體中文 (台灣)</option>
-                                <option value="en-US" <?php echo ($album_lang == 'en-US' ? 'selected' : ''); ?>>English</option>
+                                <option value="zh-TW" <?php echo ($album_lang == 'zh-TW' ? 'selected' : ''); ?>>繁體中文 (zh-TW)</option>
+                                <option value="en-US" <?php echo ($album_lang == 'en-US' ? 'selected' : ''); ?>>English (en-US)</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">系統時區</label>
+                            <label class="form-label fw-bold"><?php echo __('timezone'); ?></label>
                             <select name="album_timezone" class="form-select">
                                 <?php
                                 $timezones = [
@@ -188,7 +189,7 @@ if (file_exists($phpConfigFile)) {
                     </div>
 
                     <div class="text-end">
-                        <button type="submit" class="btn btn-success px-4">儲存後端設定</button>
+                        <button type="submit" class="btn btn-success px-4"><?php echo __('save_backend'); ?></button>
                     </div>
                 </form>
             </div>
@@ -207,7 +208,7 @@ document.querySelectorAll('.ajax-form').forEach(form => {
         const originalBtnText = submitBtn.innerText;
 
         submitBtn.disabled = true;
-        submitBtn.innerText = '處理中...';
+        submitBtn.innerText = '<?php echo __('processing'); ?>';
 
         try {
             const response = await fetch('album_actions.php', {
@@ -215,13 +216,10 @@ document.querySelectorAll('.ajax-form').forEach(form => {
                 body: formData
             });
 
-            // 檢查回應是否為跳轉 (雖然 AJAX 下不會自動跳轉，但後台原本的 PHP 會回傳 Location header)
-            // 如果後端沒改，這裡會收到帶有跳轉後的 HTML。我們需要修正後端以支援 AJAX JSON 回應。
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',
-                    title: '儲存成功',
-                    text: '設定已更新完成！',
+                    title: '<?php echo __('success_save'); ?>',
                     timer: 1500,
                     showConfirmButton: false
                 });
@@ -231,8 +229,8 @@ document.querySelectorAll('.ajax-form').forEach(form => {
         } catch (error) {
             Swal.fire({
                 icon: 'error',
-                title: '儲存失敗',
-                text: '發生預期外的錯誤，請稍後再試。'
+                title: 'Error',
+                text: 'System Error'
             });
         } finally {
             submitBtn.disabled = false;

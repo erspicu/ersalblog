@@ -5,12 +5,13 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
+    // 語系已透過 auth.php 的 GET 或之前的 Session 設定
 
     if (albumLogin($username, $password)) {
         header('Location: index.php');
         exit;
     } else {
-        $error = '帳號或密碼錯誤';
+        $error = __('error_login');
     }
 }
 ?>
@@ -19,8 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>相簿後台登入</title>
-    <!-- 使用與 Blog Admin 相同的 Bootstrap -->
+    <title><?php echo __('login_title'); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
@@ -30,12 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-card">
         <div class="mb-3">
-            <a href="../album.html" class="text-decoration-none small text-secondary">&larr; 回到相簿首頁</a>
+            <a href="../album.html" class="text-decoration-none small text-secondary">&larr; <?php echo __('back_to_home'); ?></a>
         </div>
         <h3 class="text-center mb-4 fw-bold">Album Admin</h3>
         <?php if (file_exists(__DIR__ . '/../install.php')): ?>
             <div class="alert alert-warning py-2 small fw-bold">
-                ⚠️ 安全警告：install.php 檔案仍然存在！請在安裝完成後立即刪除它，以防止系統被他人惡意重新安裝。
+                ⚠️ <?php echo __('security_warning'); ?> <?php echo __('install_exists'); ?>
             </div>
         <?php endif; ?>
         <?php if ($error): ?>
@@ -43,18 +43,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         <form method="post">
             <div class="mb-3">
-                <label class="form-label">帳號</label>
+                <label class="form-label"><?php echo __('username'); ?></label>
                 <input type="text" name="username" class="form-control" required autofocus>
             </div>
             <div class="mb-3">
-                <label class="form-label">密碼</label>
+                <label class="form-label"><?php echo __('password'); ?></label>
                 <input type="password" name="password" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">登入</button>
+            <div class="mb-3">
+                <label class="form-label"><?php echo __('language'); ?></label>
+                <select name="lang" id="lang-selector" class="form-select">
+                    <option value="zh_TW" <?php echo ($currentLang == 'zh_TW' ? 'selected' : ''); ?>>繁體中文 (zh_TW)</option>
+                    <option value="en_US" <?php echo ($currentLang == 'en_US' ? 'selected' : ''); ?>>English (en_US)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><?php echo __('login_btn'); ?></button>
         </form>
         <div class="text-center mt-3">
-            <a href="../../admin/login.php" class="text-muted small">前往 Blog 後台</a>
+            <a href="../../admin/login.php" class="text-muted small"><?php echo __('go_to_blog'); ?></a>
         </div>
     </div>
+
+    <script>
+    document.getElementById('lang-selector').addEventListener('change', function() {
+        const lang = this.value;
+        window.location.href = '?lang=' + lang;
+    });
+    </script>
 </body>
 </html>

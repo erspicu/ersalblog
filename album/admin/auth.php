@@ -17,6 +17,32 @@ if (!file_exists($configFile)) {
 }
 require_once $configFile;
 
+// --- 多語系支援框架 ---
+
+// 1. 決定目前語系
+// 優先權: GET 參數 (切換) > Session (登入後) > Config (全域預設) > 預設繁中
+if (isset($_GET['lang'])) {
+    $currentLang = $_GET['lang'];
+    $_SESSION['album_admin_lang'] = $currentLang;
+} else {
+    $currentLang = isset($_SESSION['album_admin_lang']) ? $_SESSION['album_admin_lang'] : (isset($album_lang) ? str_replace('-', '_', $album_lang) : 'zh_TW');
+}
+
+// 2. 載入對應翻譯檔 (Prefix: admin-)
+$langFile = __DIR__ . '/../langs/admin-' . $currentLang . '.php';
+if (!file_exists($langFile)) {
+    $langFile = __DIR__ . '/../langs/admin-zh_TW.php'; // Fallback
+}
+$L = include $langFile;
+
+/**
+ * 翻譯輔助函式
+ */
+function __($key, $default = '') {
+    global $L;
+    return isset($L[$key]) ? $L[$key] : ($default ? $default : $key);
+}
+
 // 如果 config.php 內沒有正確設定時區，則設定預設值
 if (!isset($album_timezone)) {
     date_default_timezone_set('Asia/Taipei');

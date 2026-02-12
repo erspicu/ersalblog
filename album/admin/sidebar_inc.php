@@ -36,23 +36,23 @@ function is_active($page, $current) {
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
             <a href="index.php" class="<?php echo is_active('index.php', $current_page); ?>">
-                儀表板 (Dashboard)
+                <?php echo __('dashboard'); ?> (Dashboard)
             </a>
         </li>
         <li>
             <a href="albums.php" class="<?php echo is_active('albums.php', $current_page); ?>">
-                相簿管理 (Albums)
+                <?php echo __('albums'); ?> (Albums)
             </a>
         </li>
         <li>
             <a href="settings.php" class="<?php echo is_active('settings.php', $current_page); ?>">
-                全域設定 (Settings)
+                <?php echo __('settings'); ?> (Settings)
             </a>
         </li>
     </ul>
     <hr>
     <div class="dropdown">
-        <a href="../album.html" target="_blank">預覽相簿首頁</a>
-        <a href="logout.php" class="text-danger mt-2">登出</a>
+        <a href="../album.html" target="_blank"><?php echo __('preview_site'); ?></a>
+        <a href="logout.php" class="text-danger mt-2"><?php echo __('logout_btn'); ?></a>
     </div>
 </div>

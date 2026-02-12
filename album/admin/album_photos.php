@@ -58,19 +58,13 @@ foreach ($pagedPhotos as $path) {
     // Check thumb
     $thumbUrl = $baseUrl . '/Thumbnail/' . pathinfo($fn, PATHINFO_FILENAME) . '_thumbXS.jpg';
     if (!file_exists($targetDir . '/Thumbnail/' . pathinfo($fn, PATHINFO_FILENAME) . '_thumbXS.jpg')) {
-        // fallback to standard thumb
         $thumbUrl = $baseUrl . '/Thumbnail/' . pathinfo($fn, PATHINFO_FILENAME) . '_thumb.jpg';
         if (!file_exists($targetDir . '/Thumbnail/' . pathinfo($fn, PATHINFO_FILENAME) . '_thumb.jpg')) {
-            $thumbUrl = $baseUrl . '/' . $fn; // final fallback
+            $thumbUrl = $baseUrl . '/' . $fn;
         }
     }
 
-    $photoList[] = array(
-        'filename' => $fn,
-        'title' => $meta['title'],
-        'desc' => $meta['desc'],
-        'url' => $thumbUrl
-    );
+    $photoList[] = array('filename' => $fn, 'title' => $meta['title'], 'desc' => $meta['desc'], 'url' => $thumbUrl);
 }
 ?>
 <!DOCTYPE html>
@@ -78,23 +72,15 @@ foreach ($pagedPhotos as $path) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>照片管理 - <?php echo htmlspecialchars($displayName); ?></title>
+    <title><?php echo __('manage_photos'); ?> - <?php echo htmlspecialchars($displayName); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .photo-card img { 
-            width: 100%; 
-            height: 150px; 
-            object-fit: contain; 
-            background-color: #f0f0f0; /* 淺灰背景以便看清照片邊界 */
-        }
+        .photo-card img { width: 100%; height: 150px; object-fit: contain; background-color: #f0f0f0; }
         .photo-card { transition: all 0.2s; }
         .photo-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
         .is-cover { border: 3px solid #198754; }
-        /* 自定義 8 欄位佈局 */
-        @media (min-width: 1400px) {
-            .col-custom-8 { flex: 0 0 auto; width: 12.5%; }
-        }
+        @media (min-width: 1400px) { .col-custom-8 { flex: 0 0 auto; width: 12.5%; } }
     </style>
 </head>
 <body>
@@ -105,15 +91,15 @@ foreach ($pagedPhotos as $path) {
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <a href="albums.php" class="text-decoration-none">&larr; 返回列表</a>
-                <h2 class="mt-2"><?php echo htmlspecialchars($displayName); ?> <small class="text-muted fs-6">(共 <?php echo $totalPhotos; ?> 張)</small></h2>
+                <a href="albums.php" class="text-decoration-none">&larr; <?php echo __('back_to_list'); ?></a>
+                <h2 class="mt-2"><?php echo htmlspecialchars($displayName); ?> <small class="text-muted fs-6">(<?php echo sprintf(__('total_count'), $totalPhotos); ?>)</small></h2>
             </div>
             <div>
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                    <i class="bi bi-cloud-upload"></i> 上傳照片
+                    <i class="bi bi-cloud-upload"></i> <?php echo __('upload_photos'); ?>
                 </button>
-                <a href="../make_album.php?force=1" target="_blank" class="btn btn-outline-secondary" title="手動觸發生成 (Debug)">
-                    <i class="bi bi-gear-wide-connected"></i> 重新生成縮圖/JSON
+                <a href="../make_album.php?force-thumb=1" target="_blank" class="btn btn-outline-secondary">
+                    <i class="bi bi-gear-wide-connected"></i> <?php echo __('rebuild_thumbs'); ?>
                 </a>
             </div>
         </div>
@@ -130,19 +116,19 @@ foreach ($pagedPhotos as $path) {
                             <?php echo htmlspecialchars($photo['filename']); ?>
                         </h6>
                         <p class="card-text small text-muted text-truncate mb-2" style="font-size: 0.75rem;">
-                            <?php echo $photo['title'] ? htmlspecialchars($photo['title']) : '(無標題)'; ?>
+                            <?php echo $photo['title'] ? htmlspecialchars($photo['title']) : '(No Title)'; ?>
                         </p>
                         
                         <div class="btn-group w-100">
                             <button class="btn btn-sm btn-outline-primary" onclick="editPhoto('<?php echo $photo['filename']; ?>', '<?php echo addslashes($photo['title']); ?>', '<?php echo addslashes($photo['desc']); ?>')">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <form action="photo_actions.php" method="post" class="d-inline" onsubmit="return confirm('設為封面？');">
+                            <form action="photo_actions.php" method="post" class="d-inline" onsubmit="return confirm('<?php echo __('set_cover'); ?>?');">
                                 <input type="hidden" name="action" value="set_cover">
                                 <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
                                 <input type="hidden" name="filename" value="<?php echo htmlspecialchars($photo['filename']); ?>">
                                 <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="設為封面">
+                                <button type="submit" class="btn btn-sm btn-outline-success">
                                     <i class="bi bi-star<?php echo $isCover ? '-fill' : ''; ?>"></i>
                                 </button>
                             </form>
@@ -154,9 +140,6 @@ foreach ($pagedPhotos as $path) {
                 </div>
             </div>
             <?php endforeach; ?>
-            <?php if (empty($photoList)): ?>
-            <div class="col-12 text-center py-5 text-muted">此相簿目前沒有照片</div>
-            <?php endif; ?>
         </div>
 
         <?php if ($totalPages > 1): ?>
@@ -187,17 +170,17 @@ foreach ($pagedPhotos as $path) {
             <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
             <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <div class="modal-header">
-                <h5 class="modal-title">上傳照片</h5>
+                <h5 class="modal-title"><?php echo __('upload_photos'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">選擇照片 (支援多檔, JPG only)</label>
+                    <label class="form-label"><?php echo __('photo_filename'); ?> (支援多檔, JPG only)</label>
                     <input type="file" name="photos[]" class="form-control" multiple accept="image/jpeg" required>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">開始上傳</button>
+                <button type="submit" class="btn btn-primary"><?php echo __('upload_photos'); ?></button>
             </div>
         </form>
     </div>
@@ -211,33 +194,31 @@ foreach ($pagedPhotos as $path) {
             <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
             <input type="hidden" name="original_filename" id="editOriginalFilename">
             <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
-            
             <div class="modal-header">
-                <h5 class="modal-title">編輯照片資訊</h5>
+                <h5 class="modal-title"><?php echo __('edit_photo'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">檔案名稱 (可更名, 需含 .jpg)</label>
+                    <label class="form-label"><?php echo __('photo_filename'); ?></label>
                     <input type="text" name="new_filename" id="editFilename" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">標題</label>
+                    <label class="form-label"><?php echo __('photo_title'); ?></label>
                     <input type="text" name="title" id="editTitle" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">描述</label>
+                    <label class="form-label"><?php echo __('photo_desc'); ?></label>
                     <textarea name="description" id="editDesc" class="form-control" rows="3"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">儲存</button>
+                <button type="submit" class="btn btn-primary"><?php echo __('save_changes'); ?></button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Delete Form -->
 <form id="deletePhotoForm" action="photo_actions.php" method="post" style="display:none;">
     <input type="hidden" name="action" value="delete_photo">
     <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
@@ -248,7 +229,6 @@ foreach ($pagedPhotos as $path) {
 <script src="assets/js/bootstrap.bundle.min.js"></script>
 <script>
 var editModal = new bootstrap.Modal(document.getElementById('editPhotoModal'));
-
 function editPhoto(filename, title, desc) {
     document.getElementById('editOriginalFilename').value = filename;
     document.getElementById('editFilename').value = filename;
@@ -256,9 +236,8 @@ function editPhoto(filename, title, desc) {
     document.getElementById('editDesc').value = desc;
     editModal.show();
 }
-
 function deletePhoto(filename) {
-    if(confirm('確定要刪除 ' + filename + ' 嗎？')) {
+    if(confirm('<?php echo __('confirm_delete'); ?> ' + filename)) {
         document.getElementById('deleteFilename').value = filename;
         document.getElementById('deletePhotoForm').submit();
     }

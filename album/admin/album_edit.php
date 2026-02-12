@@ -10,19 +10,18 @@ if (empty($id) || !is_dir($targetDir)) {
     die("Album not found.");
 }
 
+// Load current data
 $displayName = $id;
 $desc = '';
-$cover = '';
-$date = '';
+$date = date('Ymd', filemtime($targetDir));
 
-$metaFile = $targetDir . '/comment_album.txt';
-if (file_exists($metaFile)) {
-    $content = file_get_contents($metaFile);
+$commentFile = $targetDir . '/comment_album.txt';
+if (file_exists($commentFile)) {
+    $content = file_get_contents($commentFile);
     $parts = explode('|', $content);
     if (isset($parts[0])) $displayName = $parts[0];
     if (isset($parts[1])) $desc = $parts[1];
-    if (isset($parts[2])) $cover = $parts[2];
-    if (isset($parts[3])) $date = $parts[3];
+    if (isset($parts[3]) && !empty(trim($parts[3]))) $date = trim($parts[3]);
 }
 ?>
 <!DOCTYPE html>
@@ -30,7 +29,7 @@ if (file_exists($metaFile)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>編輯相簿 - <?php echo htmlspecialchars($id); ?></title>
+    <title><?php echo __('edit_album'); ?> - <?php echo htmlspecialchars($id); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -40,8 +39,8 @@ if (file_exists($metaFile)) {
 
     <div class="main-content flex-grow-1 bg-light">
         <div class="mb-4">
-            <a href="albums.php" class="text-decoration-none">&larr; 返回列表</a>
-            <h2 class="mt-2">編輯相簿：<?php echo htmlspecialchars($displayName); ?></h2>
+            <a href="albums.php" class="text-decoration-none">&larr; <?php echo __('back_to_list'); ?></a>
+            <h2 class="mt-2"><?php echo __('edit_album'); ?>: <?php echo htmlspecialchars($id); ?></h2>
         </div>
 
         <div class="card shadow-sm col-md-8">
@@ -52,30 +51,24 @@ if (file_exists($metaFile)) {
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
 
                     <div class="mb-3">
-                        <label class="form-label">目錄名稱 (ID)</label>
-                        <input type="text" name="new_dir_name" class="form-control" value="<?php echo htmlspecialchars($id); ?>" required pattern="[A-Za-z0-9_-]+" title="僅限英數字">
-                        <div class="form-text text-danger">修改此欄位將會重新命名資料夾，請謹慎操作。</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">顯示標題</label>
+                        <label class="form-label fw-bold"><?php echo __('display_title'); ?></label>
                         <input type="text" name="display_name" class="form-control" value="<?php echo htmlspecialchars($displayName); ?>" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">描述</label>
-                        <textarea name="description" class="form-control" rows="5"><?php echo htmlspecialchars($desc); ?></textarea>
+                        <label class="form-label fw-bold"><?php echo __('album_desc'); ?></label>
+                        <textarea name="description" class="form-control" rows="4"><?php echo htmlspecialchars($desc); ?></textarea>
                     </div>
-                    
+
                     <div class="mb-3">
-                        <label class="form-label">建立日期 (格式: YYYYMMDD)</label>
-                        <input type="text" name="date" class="form-control" value="<?php echo htmlspecialchars($date); ?>" placeholder="例如: 20260208">
-                        <div class="form-text">若留空，列表將自動顯示目錄的檔案系統時間。</div>
+                        <label class="form-label fw-bold"><?php echo __('album_date'); ?></label>
+                        <input type="text" name="date" class="form-control" value="<?php echo htmlspecialchars($date); ?>" pattern="[0-9]{8}" title="YYYYMMDD 格式">
                     </div>
 
                     <hr>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">儲存變更</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()"><?php echo __('cancel'); ?></button>
+                        <button type="submit" class="btn btn-primary px-4"><?php echo __('update_btn'); ?></button>
                     </div>
                 </form>
             </div>
