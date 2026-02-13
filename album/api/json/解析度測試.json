@@ -1,0 +1,209 @@
+{
+    "name": "解析度測試",
+    "desc": "",
+    "photos": [
+        {
+            "filename": "1000.jpg",
+            "src": "Collection\/解析度測試\/1000.jpg",
+            "sizes": {
+                "L": "Collection\/解析度測試\/Thumbnail\/1000_L.jpg",
+                "M": "Collection\/解析度測試\/Thumbnail\/1000_M.jpg",
+                "S": "Collection\/解析度測試\/Thumbnail\/1000_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/1000_XS.jpg"
+            },
+            "shortIdStart": 744,
+            "title": "1000.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "150.jpg",
+            "src": "Collection\/解析度測試\/150.jpg",
+            "sizes": {},
+            "shortIdStart": 752,
+            "title": "150.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "1500.jpg",
+            "src": "Collection\/解析度測試\/1500.jpg",
+            "sizes": {
+                "XL": "Collection\/解析度測試\/Thumbnail\/1500_XL.jpg",
+                "L": "Collection\/解析度測試\/Thumbnail\/1500_L.jpg",
+                "M": "Collection\/解析度測試\/Thumbnail\/1500_M.jpg",
+                "S": "Collection\/解析度測試\/Thumbnail\/1500_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/1500_XS.jpg"
+            },
+            "shortIdStart": 760,
+            "title": "1500.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "1920.jpg",
+            "src": "Collection\/解析度測試\/1920.jpg",
+            "sizes": {
+                "2XL": "Collection\/解析度測試\/Thumbnail\/1920_2XL.jpg",
+                "XL": "Collection\/解析度測試\/Thumbnail\/1920_XL.jpg",
+                "L": "Collection\/解析度測試\/Thumbnail\/1920_L.jpg",
+                "M": "Collection\/解析度測試\/Thumbnail\/1920_M.jpg",
+                "S": "Collection\/解析度測試\/Thumbnail\/1920_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/1920_XS.jpg"
+            },
+            "shortIdStart": 768,
+            "title": "1920.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "300.jpg",
+            "src": "Collection\/解析度測試\/300.jpg",
+            "sizes": {
+                "XS": "Collection\/解析度測試\/Thumbnail\/300_XS.jpg"
+            },
+            "shortIdStart": 776,
+            "title": "300.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "600.jpg",
+            "src": "Collection\/解析度測試\/600.jpg",
+            "sizes": {
+                "S": "Collection\/解析度測試\/Thumbnail\/600_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/600_XS.jpg"
+            },
+            "shortIdStart": 784,
+            "title": "600.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "700.jpg",
+            "src": "Collection\/解析度測試\/700.jpg",
+            "sizes": {
+                "M": "Collection\/解析度測試\/Thumbnail\/700_M.jpg",
+                "S": "Collection\/解析度測試\/Thumbnail\/700_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/700_XS.jpg"
+            },
+            "shortIdStart": 792,
+            "title": "700.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        },
+        {
+            "filename": "IMG_20250712_155948.jpg",
+            "src": "Collection\/解析度測試\/IMG_20250712_155948.jpg",
+            "sizes": {
+                "3XL": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_3XL.jpg",
+                "2XL": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_2XL.jpg",
+                "XL": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_XL.jpg",
+                "L": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_L.jpg",
+                "M": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_M.jpg",
+                "S": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_S.jpg",
+                "XS": "Collection\/解析度測試\/Thumbnail\/IMG_20250712_155948_XS.jpg"
+            },
+            "shortIdStart": 800,
+            "title": "IMG_20250712_155948.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/243s",
+                "iso": 50,
+                "focal": "11.5mm",
+                "date": "2025:07:12 15:59:48",
+                "gps": {
+                    "lat": 22.652482,
+                    "lng": 120.349898
+                }
+            }
+        }
+    ]
+}

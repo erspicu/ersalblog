@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿- [2026-02-11 21:55:00] 移除 album 的 win11 主題
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿- [2026-02-11 21:55:00] 移除 album 的 win11 主題
   - 修改 config.js 將主題設為 'album'
   - 刪除 static/themes/album-win11/ 目錄
   - 清理 BlazorAlbumExplorer 中的 win11 相關字眼與類別
@@ -49,3 +49,5 @@
 - [2026-02-14 01:45:32] 清理 Blazor 專案建置暫存檔
   - 移除 album/BlazorAlbumExplorer/ 下的 bin/, obj/ 與 publish/ 目錄。
   - 釋放約 370MB 磁碟空間，保持專案原始碼目錄整潔。
+- [2026-02-14 01:50:32] 新增 Win11 主題自動化重建腳本
+  - 建立 album/rebuild_win11.sh，整合環境偵測、wasm-tools 安裝、AOT 編譯與產出物瘦身功能。

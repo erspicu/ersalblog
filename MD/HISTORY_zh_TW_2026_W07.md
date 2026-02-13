@@ -14,8 +14,15 @@
   - 強制同步 JSON 資料結構：修正空 `sizes` 欄位為 Object `{}` 而非 Array `[]`，解決強型別語言解析錯誤。
 - **Win11 主題極致優化 (Win11 Theme AOT)**:
   - 啟用 Blazor WASM 的 **AOT (Ahead-of-Time)** 編譯模式，將 C# 代碼編譯為原生 WebAssembly 指令。
+  - 新增自動化維護腳本 `album/rebuild_win11.sh`，一鍵完成環境偵測、編譯、部署與檔案瘦身。
   - 執行發佈目錄清理，移除不必要的 `.gz`, `.br` 與偵錯符號，將體積縮減 40% (28MB -> 17MB)。
   - 顯著提升虛擬視窗拖拽、縮放與影像處理的流暢度。
+
+### 系統維護 (System Maintenance)
+- **Git 版本庫瘦身**: 
+  - 更新 `.gitignore` 並執行 `git rm --cached`，停止追蹤生成的 JSON 快取與 Win11 主題編譯產物 (WASM/DLL)，大幅減輕版本庫體積。
+  - 清理 Blazor 專案下的開發暫存目錄 (`bin/`, `obj/`, `publish/`)，釋放約 370MB 磁碟空間。
+  - 移除過時的舊版發佈目錄 `album/view_blazor/`。
 
 ### 錯誤修復 (Bug Fixes)
 - **中文路徑支援**: 修正 Blazor `HttpClient` 請求邏輯，加入 `Uri.EscapeDataString` 以正確處理包含中文字元的相簿路徑。
