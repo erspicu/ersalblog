@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "BlazorAlbumExplorer",
   "resources": {
-    "hash": "sha256-njB7hZVFdpAnWHgWtaKVNTEQ2LSR/N1Tnl0rHnttURE=",
+    "hash": "sha256-k1uYpAxrzirHzXeOnOvfb68yG3vL9d6mpR9Q9eSU8vw=",
     "jsModuleNative": {
       "dotnet.native.8.0.24.e7n6pqrp3h.js": "sha256-vohhcVkUn4QwdDqV+7Be7PkdsE2K1jvsoZXZT3bR5Ck="
     },
@@ -9,7 +9,7 @@
       "dotnet.runtime.8.0.24.8yhymntmwf.js": "sha256-ZDVyGEZEz4QOmKAwlgqf4qB6Psobwb9hIqMw9YpIo4I="
     },
     "wasmNative": {
-      "dotnet.native.wasm": "sha256-Af++hcs18BA+mRjHWzoX8e8KLGz+DSI8E2grtBPsuFQ="
+      "dotnet.native.wasm": "sha256-tpRFTiMyWfqokP7IzwGvgivM7/LvjdSbQ9Ojt5wWz3Q="
     },
     "icu": {
       "icudt_CJK.dat": "sha256-SZLtQnRc0JkwqHab0VUVP7T3uBPSeYzxzDnpxPpUnHk=",
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "BlazorAlbumExplorer.wasm": "sha256-bHZ9UEEajcIDhm3j9t9fBqwpUp22QJ4+p1YXRSgV6fA=",
+      "BlazorAlbumExplorer.wasm": "sha256-WuD/eJJjurYhn0QyWUW7uJB1nXZvDkC5e6kik9BSqWY=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-8C88MPc9156e3XvCySBTVkLUBJ+DkQO9LOrkoPPpcHE=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-tU5FvzyO+fy9AZPr3JNYtbsRVE49lHSuU6JP5uFNNIY=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-F0i6VBOoCCiDt9ZZD2aAFy3AghfWLxyE5NVQ67IJPKE=",
@@ -43,7 +43,7 @@
       "System.Net.Http.wasm": "sha256-wV9wHgH6XeARrR4+9Fq9kgqUou5gIDMbHfHpz/YOGR8=",
       "System.Net.Primitives.wasm": "sha256-yAXa4/w0lMt+lrwJvL5c5x+E1uV2QBgK5G0iFvnEpLY=",
       "System.Private.CoreLib.wasm": "sha256-tdcFDoWOKq6T0vSoF2zOujAus56zhTj8ieFS8piuFjQ=",
-      "System.Private.Uri.wasm": "sha256-alKMUkYlLlRyX0LoMswKPr7+6Y/aTvQruLvx2UPTbdg=",
+      "System.Private.Uri.wasm": "sha256-6KaVUoqS3hsVd8qidVjXoXjfzoqyh/qhKq4/UcW4LUg=",
       "System.Runtime.InteropServices.JavaScript.wasm": "sha256-fYg6C+3/Q2smvZe5TkdWTWvmfN27ha1x1UqL9lbgOj8=",
       "System.Runtime.wasm": "sha256-0SFsXfzImslGsq8r8EqvLWf19ElkwRtRQHqA+dz3RjI=",
       "System.Text.Encodings.Web.wasm": "sha256-pqXwA2O7G+0/7HP2OVbIZzUlxw2irJutDcuYCAXZsSE=",

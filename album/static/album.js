@@ -158,10 +158,16 @@ function renderTemplate(templateId, vars = {}) {
     return html;
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function initApp() {
     await initCompressionConfig();
     initRouter();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initApp);
+} else {
+    initApp();
+}
 
 window.addEventListener("hashchange", () => handleRoute());
 function initRouter() { handleRoute(); }
@@ -245,7 +251,7 @@ function renderPaginationUI(pagination, baseUrlHash) {
 
     itemsHtml += renderTemplate('tmpl_pagination_item', {
         link: (cur > 1) ? `${baseUrlHash}&page=${cur - 1}` : '#',
-        text: '<i class="bi bi-chevron-left"></i>',
+        text: renderTemplate('tmpl_icon_prev'),
         activeClass: '',
         disabledClass: (cur > 1) ? '' : 'disabled'
     });
@@ -261,7 +267,7 @@ function renderPaginationUI(pagination, baseUrlHash) {
 
     itemsHtml += renderTemplate('tmpl_pagination_item', {
         link: (cur < total) ? `${baseUrlHash}&page=${cur + 1}` : '#',
-        text: '<i class="bi bi-chevron-right"></i>',
+        text: renderTemplate('tmpl_icon_next'),
         activeClass: '',
         disabledClass: (cur < total) ? '' : 'disabled'
     });
@@ -271,7 +277,7 @@ function renderPaginationUI(pagination, baseUrlHash) {
 async function loadHomeView(page = 1) {
     AppState.currentView = 'home';
     setHeader(''); 
-    setContent('<div class="text-center py-5">載入相簿列表中...</div>');
+    setContent(renderTemplate('tmpl_status_loading', { message: ALBUM_LANG.loading_album_list }));
     const data = await fetchHomeData();
     let rawItems = data.items || [];
     const totalItems = rawItems.length;
@@ -279,9 +285,9 @@ async function loadHomeView(page = 1) {
     const start = (page - 1) * AppState.itemsPerPage;
     const pagedItems = rawItems.slice(start, start + AppState.itemsPerPage);
 
-    let listHtml = '<div class="album-grid" id="album-list-container">';
+    let itemsHtml = '';
     pagedItems.forEach(album => {
-        listHtml += renderTemplate('tmpl_index_album_item', {
+        itemsHtml += renderTemplate('tmpl_index_album_item', {
             link: `#album=${encodeURIComponent(album.id || album.name)}`,
             cover: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
             name: album.name,
@@ -289,8 +295,7 @@ async function loadHomeView(page = 1) {
             desc: album.desc || "&nbsp;"
         });
     });
-    listHtml += '</div>';
-    setContent(listHtml);
+    setContent(renderTemplate('tmpl_album_grid_container', { id: 'album-list-container', items: itemsHtml }));
     const cards = document.querySelectorAll('#album-list-container .card-img');
     pagedItems.forEach((album, idx) => { if(cards[idx]) cards[idx].setAttribute('data-managed-src', album.cover); });
     managedLoadImages();
@@ -300,9 +305,9 @@ async function loadHomeView(page = 1) {
 
 async function loadAlbumView(albumName, page = 1) {
     AppState.currentView = 'album';
-    setContent('<div class="text-center py-5">載入照片中...</div>');
+    setContent(renderTemplate('tmpl_status_loading', { message: ALBUM_LANG.loading_photos }));
     const data = await fetchAlbumData(albumName);
-    if (!data) { setContent('<div class="text-center text-danger py-5">找不到相簿</div>'); return; }
+    if (!data) { setContent(renderTemplate('tmpl_status_error', { message: ALBUM_LANG.album_not_found })); return; }
     let rawPhotos = data.photos || [];
     const totalItems = rawPhotos.length;
     const totalPages = Math.ceil(totalItems / AppState.itemsPerPage);
@@ -310,17 +315,21 @@ async function loadAlbumView(albumName, page = 1) {
     const pagedPhotos = rawPhotos.slice(start, start + AppState.itemsPerPage);
 
     setHeader(renderTemplate('tmpl_album_header', { name: data.name, desc_html: data.desc_html || '' }));
-    let gridHtml = renderTemplate('tmpl_album_controls', { name: data.name, total: totalItems }) + '<div class="album-grid">';
+    
+    let itemsHtml = '';
     pagedPhotos.forEach(photo => {
-        gridHtml += renderTemplate('tmpl_album_photo_item', {
+        itemsHtml += renderTemplate('tmpl_album_photo_item', {
             photoPageLink: `#album=${encodeURIComponent(albumName)}&photo=${encodeURIComponent(photo.filename)}`,
             imgSrc: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
             filename: photo.filename,
             photoDesc: photo.title || photo.filename
         });
     });
-    gridHtml += '</div>';
-    setContent(gridHtml);
+
+    const gridHeader = renderTemplate('tmpl_album_controls', { name: data.name, total: totalItems });
+    const gridContent = renderTemplate('tmpl_album_grid_container', { id: 'photo-list-container', items: itemsHtml });
+    
+    setContent(gridHeader + gridContent);
     const imgs = document.querySelectorAll('.album-grid .card-img');
     pagedPhotos.forEach((photo, idx) => { 
         if(imgs[idx]) {
@@ -339,7 +348,7 @@ async function loadPhotoView(albumName, photoName) {
     setHeader(''); 
     const data = await fetchAlbumData(albumName);
     const photoIndex = data?.photos?.findIndex(p => p.filename === photoName) ?? -1;
-    if (photoIndex === -1) { setContent('<div class="text-center text-danger py-5">找不到照片</div>'); return; }
+    if (photoIndex === -1) { setContent(renderTemplate('tmpl_status_error', { message: ALBUM_LANG.photo_not_found })); return; }
     const photo = data.photos[photoIndex];
     const prevPhoto = data.photos[(photoIndex - 1 + data.photos.length) % data.photos.length];
     const nextPhoto = data.photos[(photoIndex + 1) % data.photos.length];
@@ -361,7 +370,7 @@ async function loadPhotoView(albumName, photoName) {
         shortIdStart: photo.shortIdStart || '0',
         photoTitle: photo.title || photo.filename,
         photoDesc: photo.desc || '',
-        exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : '<div class="col-12 text-muted small" id="exif-loading-text">正在載入技術資訊...</div>'
+        exif_info: (photo.exif && Object.keys(photo.exif).length > 0) ? formatExifHtml(photo.exif, 'PHP') : renderTemplate('tmpl_status_loading_small', { message: ALBUM_LANG.loading_exif })
     }));
 
     // 先設置 EXIF 偵測監聽器
@@ -422,19 +431,19 @@ function tryFetchExifClientSide() {
 }
 
 function formatExifHtml(exif, source) {
-    if (!exif) return '<div class="col-12 text-muted small">無 EXIF 資訊</div>';
+    if (!exif) return renderTemplate('tmpl_status_empty_small', { message: ALBUM_LANG.no_exif });
     let sourceHtml = source ? renderTemplate('tmpl_exif_source_label', {
-        label: source === 'PHP' ? '後端 (PHP)' : '前端 (JS)',
+        label: source === 'PHP' ? ALBUM_LANG.source_php : ALBUM_LANG.source_js,
         color: source === 'PHP' ? '#2e7d32' : '#ef6c00',
         bg: source === 'PHP' ? '#e8f5e9' : '#fff3e0'
     }) : '';
     const fields = [
-        { label: '相機機型', value: `${exif.make || ''} ${exif.model || ''}`.trim() || '未知' },
-        { label: '快門速度', value: exif.shutter || '未知' },
-        { label: '焦距', value: exif.focal || '未知' },
-        { label: '光圈值', value: exif.aperture || '未知' },
-        { label: '感光度', value: `ISO ${exif.iso || '未知'}` },
-        { label: '拍攝日期', value: exif.date || '未知' }
+        { label: ALBUM_LANG.exif_make_model, value: `${exif.make || ''} ${exif.model || ''}`.trim() || ALBUM_LANG.unknown },
+        { label: ALBUM_LANG.exif_shutter, value: exif.shutter || ALBUM_LANG.unknown },
+        { label: ALBUM_LANG.exif_focal, value: exif.focal || ALBUM_LANG.unknown },
+        { label: ALBUM_LANG.exif_aperture, value: exif.aperture || ALBUM_LANG.unknown },
+        { label: ALBUM_LANG.exif_iso, value: `ISO ${exif.iso || ALBUM_LANG.unknown}` },
+        { label: ALBUM_LANG.exif_date, value: exif.date || ALBUM_LANG.unknown }
     ];
     let itemsHtml = '';
     fields.forEach(f => { itemsHtml += renderTemplate('tmpl_exif_item', f); });
@@ -484,7 +493,7 @@ function getObfuscatedSlug(id) {
 let currentShareData = null;
 function openShareModal(filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart) {
     const container = document.getElementById('share-links-container');
-    container.innerHTML = '<div class="text-center py-3 text-muted">分析中...</div>';
+    container.innerHTML = renderTemplate('tmpl_status_loading_small', { message: ALBUM_LANG.analyzing });
     openModal('shareModal');
     const temp = new Image(); temp.src = originalImgSrc;
     temp.onload = () => { currentShareData = { filename, currentImgSrc, xlImgSrc, originalImgSrc, shortIdStart, realWidth: temp.naturalWidth }; updateShareLinks(); };
@@ -512,27 +521,31 @@ function updateShareLinks() {
             // 這裡我們稍微放寬顯示標準，或者是根據配置的寬度來判斷
             // 舊版是 hardcode 寬度門檻，現在我們改用 (實體寬度 >= 配置寬度 * 0.8) 或其他邏輯，
             // 這裡為了保持行為一致，我們先用實體寬度 >= 配置寬度
+            // 優先讀取多語系註解
+            const langKey = `comment-${window.ALBUM_CURRENT_LANG || 'zh_TW'}`;
+            const displayComment = conf[langKey] || conf.comment || conf.id;
+
             if (realWidth >= (conf.width || 0)) {
                 const url = isOriginal ? getAbs(thumbPath + name + '_' + conf.id + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + offset));
-                const label = `${conf.comment || conf.id} (${conf.width}px)`;
+                const label = `${displayComment} (${conf.width}px)`;
                 html += renderTemplate('tmpl_share_item', { label: label, url: url });
             }
         });
     } else {
         // Fallback (萬一沒載入成功)
-        [{l:'預覽 (800px)',s:'_L',o:4,w:0}]
+        [{l:`${ALBUM_LANG.preview} (800px)`,s:'_L',o:4,w:0}]
         .forEach(s => {
             const url = isOriginal ? getAbs(thumbPath + name + s.s + ext) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid + s.o));
             html += renderTemplate('tmpl_share_item', { label: s.l, url: url });
         });
     }
-    html += renderTemplate('tmpl_share_item', { label: `原始 (${realWidth}px)`, url: isOriginal ? getAbs(originalImgSrc) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid)) });
+    html += renderTemplate('tmpl_share_item', { label: `${ALBUM_LANG.original} (${realWidth}px)`, url: isOriginal ? getAbs(originalImgSrc) : (baseHref + 'shorturl.php?i=' + getObfuscatedSlug(sid)) });
     document.getElementById('share-links-container').innerHTML = html;
 }
 
 function copyToClipboard(btn, text) {
     navigator.clipboard.writeText(text).then(() => {
-        const old = btn.innerText; btn.innerText = "已複製!";
+        const old = btn.innerText; btn.innerText = ALBUM_LANG.copied;
         setTimeout(() => btn.innerText = old, 2000);
     });
 }

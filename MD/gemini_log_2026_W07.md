@@ -1,4 +1,4 @@
-﻿- [2026-02-11 21:55:00] 移除 album 的 win11 主題
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿- [2026-02-11 21:55:00] 移除 album 的 win11 主題
   - 修改 config.js 將主題設為 'album'
   - 刪除 static/themes/album-win11/ 目錄
   - 清理 BlazorAlbumExplorer 中的 win11 相關字眼與類別
@@ -10,3 +10,37 @@
 - [2026-02-12 23:05:00] 修復儀表板照片庫大小顯示為未知的問題
 - [2026-02-12 23:06:18] 設定系統新增並行下載限制參數 (concurrent_downloads)
 - [2026-02-12 23:58:54] 實作後端與 SEO 設定介面 (config.php) 並整合進樣板渲染流程
+- [2026-02-13 23:48:32] 建立過的縮圖就不要再建立
+  執行 album/make_album.php 重建縮圖快取，自動跳過已有快取之相簿並完成新相簿縮圖生成。
+- [2026-02-13 23:55:12] 優化縮圖生成與回退邏輯
+  - 修改 album/make_album.php：僅在原圖解析度大於規格時才產生縮圖，並實作冗餘檔案清理。
+  - 確認 album/static/album.js：實作智慧回退機制，若無縮圖則自動使用原圖。
+  - 已執行 --force-json 完成全站相簿資料同步與冗餘縮圖清理。
+- [2026-02-14 00:15:30] 修復 win11 主題無法進入中文名稱相簿的問題
+  - 修改 album/BlazorAlbumExplorer/Pages/Home.razor：使用 Uri.EscapeDataString 對相簿 ID 進行 URL 編碼。
+  - 為 AlbumIndex/AlbumItem 屬性補上 [JsonPropertyName] 確保 JSON 解析正確。
+  - 重新編譯 Blazor 專案並同步至 win11 主題的 dist 目錄。
+- [2026-02-14 00:20:15] 修正 Blazor JSON 解析錯誤 (Array vs Object)
+  - 修改 album/make_album.php：確保 sizes 欄位即便為空也輸出為 {} 而非 []。
+  - 執行 --force-json 更新所有相簿資料，解決解析度不足時導致的 JSON 格式不相容問題。
+- [2026-02-14 00:35:12] 重構前端樣板機制，移除 album.js 中的 Hardcoded HTML
+  - 修改 album/static/album_template.html：新增狀態顯示（Loading/Error/Empty）與容器樣板。
+  - 修改 album/static/album.js：全面替換硬編碼字串為 renderTemplate 呼叫，實現 UI 與邏輯徹底分離。
+- [2026-02-14 00:45:12] 實作相簿服務多語系架構
+  - 建立 album/langs/ 語系定義檔 (zh_TW, en_US)。
+  - 重構 album_template.html 與 album.js：移除所有寫死的中文字串，改由語系變數控制。
+  - 串接 make_album.php：支援根據設定自動切換並渲染對應語系之 album.html。
+- [2026-02-14 00:55:12] 修正初次載入時語系標籤未代換的問題
+  - 修改 make_album.php：讓後端在產出 HTML 前，先對內容骨架 (indexBody) 進行預渲染代換。
+  - 確保使用者在 JS 執行前看到的 Loading 提示已是正確的語言文字。
+- [2026-02-14 01:15:12] 重構前端語系載入機制 (JS Language Packs)
+  - 建立 album/langs/ 專屬 JS 語系包 (zh_TW.js, en_US.js)。
+  - 修改樣板：實作自動偵測 <html lang> 並動態載入對應語系 JS 的機制。
+  - 修改 album.js：確保在語言包載入後才初始化，實現前後端語系檔完全分離。
+- [2026-02-14 01:30:12] 開啟 Win11 主題 AOT 極致優化編譯
+  - 修改 BlazorAlbumExplorer.csproj：啟用 <RunAOTCompilation>。
+  - 執行 dotnet publish 完成 AOT 原生機器碼編譯。
+  - 更新主題 dist 目錄，顯著提升虛擬桌面與影像處理之執行效能。
+- [2026-02-14 01:35:12] 清理 Win11 主題發佈目錄的冗餘檔案
+  - 刪除 _framework 下所有的 *.gz, *.br 預壓縮檔與 *.pdb 偵錯符號。
+  - 目錄體積從 28MB 減至 17MB，優化磁碟空間佔用。

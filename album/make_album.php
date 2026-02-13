@@ -186,7 +186,7 @@ $album_description = "ersalblog的延伸子專案相簿服務。";
 $album_introduce = "放一些Blog用到的素材照片.";
 $album_preview = "";
 $album_site_url = "";
-$album_lang = "zh-TW";
+$album_lang = "zh_TW"; // 預設語系
 $album_timezone = "Asia/Taipei";
 
 $configPhpFile = $baseDir . '/config/config.php';
@@ -194,18 +194,29 @@ if (file_exists($configPhpFile)) {
     include $configPhpFile;
 }
 
-$indexHtml = $tm->render($tm->getSource(), array(
+// 載入語系檔案
+$album_lang_code = str_replace('-', '_', $album_lang);
+$langFile = $baseDir . "/langs/template-{$album_lang_code}.php";
+if (!file_exists($langFile)) $langFile = $baseDir . "/langs/template-zh_TW.php";
+$langVars = file_exists($langFile) ? require $langFile : array();
+
+// 先將 content_body 內部的語系標籤渲染掉 (用於 Loading 畫面等骨架)
+$indexBody = $tm->render($tm->getSubTemplate('tmpl_app_container'), $langVars);
+
+$renderVars = array_merge($langVars, array(
     'album_title' => $album_title,
     'album_description' => $album_description,
     'album_introduce' => $album_introduce,
     'album_preview' => $album_preview,
     'album_site_url' => $album_site_url,
-    'album_lang' => $album_lang,
+    'album_lang' => str_replace('_', '-', $album_lang_code), // 輸出至 <html lang="zh-TW">
     'album_header' => '',
     'content_body' => $indexBody,
     'custom_scripts' => '',
     'version' => $appVersion
 ));
+
+$indexHtml = $tm->render($tm->getSource(), $renderVars);
 file_put_contents($baseDir . '/album.html', $indexHtml);
 echo "Generated: album.html (SPA Shell)\n";
 
@@ -238,12 +249,36 @@ if (is_dir($collectionDir)) {
             echo "Album: $albumName (JSON Cache Valid)\n";
             $data = json_decode(file_get_contents($jsonFile), true);
             foreach ($data['photos'] as $p) {
+                $photoPath = $albumPath . '/' . $p['filename'];
                 $sid = $p['shortIdStart'];
                 $shortUrlList[$sid] = $albumName . '/' . $p['filename'];
+                
+                // 取得原圖尺寸以進行判斷
+                $maxOrig = 0;
+                if (extension_loaded('imagick')) {
+                    $imgObj = new Imagick($photoPath);
+                    $maxOrig = max($imgObj->getImageWidth(), $imgObj->getImageHeight());
+                    $imgObj->clear();
+                } else {
+                    $info = @getimagesize($photoPath);
+                    if ($info) $maxOrig = max($info[0], $info[1]);
+                }
+
                 foreach ($thumbConfigs as $idx => $conf) {
-                    $tRel = $albumName . '/Thumbnail/' . getThumbFilename($p['filename'], $conf['id']);
-                    $shortUrlList[$sid + $idx + 1] = $tRel;
-                    if (!$skipThumbnails) generateThumbnail($albumPath . '/' . $p['filename'], $baseDir . '/Collection/' . $tRel, $conf['width'], $conf['quality']);
+                    $tName = getThumbFilename($p['filename'], $conf['id']);
+                    $tRel = $albumName . '/Thumbnail/' . $tName;
+                    $tPath = $baseDir . '/Collection/' . $tRel;
+                    
+                    if ($maxOrig > $conf['width']) {
+                        $shortUrlList[$sid + $idx + 1] = $tRel;
+                        if (!$skipThumbnails) generateThumbnail($photoPath, $tPath, $conf['width'], $conf['quality']);
+                    } else {
+                        // 刪除多餘縮圖
+                        if (file_exists($tPath)) {
+                            @unlink($tPath);
+                            echo "Removed redundant (cached): $tName\n";
+                        }
+                    }
                 }
             }
             $finalCoverUrl = '';
@@ -279,16 +314,39 @@ if (is_dir($collectionDir)) {
             
             $shortUrlList[$sid] = $rel;
             $sizes = array();
+            
+            // 取得原圖尺寸
+            $maxOrig = 0;
+            if (extension_loaded('imagick')) {
+                $imgObj = new Imagick($photoPath);
+                $maxOrig = max($imgObj->getImageWidth(), $imgObj->getImageHeight());
+                $imgObj->clear();
+            } else {
+                $info = @getimagesize($photoPath);
+                if ($info) $maxOrig = max($info[0], $info[1]);
+            }
+
             foreach ($thumbConfigs as $idx => $conf) {
                 $tName = getThumbFilename($filename, $conf['id']);
-                if (!$skipThumbnails) generateThumbnail($photoPath, $thumbDir . '/' . $tName, $conf['width'], $conf['quality']);
-                $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . $tName;
-                $sizes[$conf['id']] = 'Collection/' . $albumName . '/Thumbnail/' . $tName;
+                $tPath = $thumbDir . '/' . $tName;
+                
+                // 只有原圖長邊 > 規格寬度才產生縮圖
+                if ($maxOrig > $conf['width']) {
+                    if (!$skipThumbnails) generateThumbnail($photoPath, $tPath, $conf['width'], $conf['quality']);
+                    $shortUrlList[$sid + $idx + 1] = $albumName . '/Thumbnail/' . $tName;
+                    $sizes[$conf['id']] = 'Collection/' . $albumName . '/Thumbnail/' . $tName;
+                } else {
+                    // 如果原圖不夠大，但磁碟上存有舊的縮圖，則刪除它
+                    if (file_exists($tPath)) {
+                        @unlink($tPath);
+                        echo "Removed redundant: $tName (Original is smaller or equal)\n";
+                    }
+                }
             }
             $albumPhotosJson[] = array(
                 'filename' => $filename,
                 'src' => 'Collection/'.$rel,
-                'sizes' => $sizes,
+                'sizes' => (object)$sizes,
                 'shortIdStart' => $sid,
                 'title' => $filename,
                 'desc' => '',

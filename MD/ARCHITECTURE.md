@@ -47,11 +47,10 @@ The system supports two operating modes:
 *   **Album Service**:
     *   Located in the `/album` directory as an independent service.
     *   Features a dedicated SSG and SPA architecture.
-    *   Supports diverse visual themes including `album-matrix` (with Digital Rain) and `album-y2k` (Retro 2000s style).
-    *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly, providing an alternative immersive browsing experience.
-    *   Integrates YouTube IFrame API for background music in specific themes.
+    *   **Smart Multi-language Architecture**: Decoupled i18n implementation. Backend PHP handles static page generation with pre-rendered language, while Frontend JS uses dedicated language packs (`album/langs/*.js`) for dynamic content.
+    *   **Smart Thumbnail Generation**: `make_album.php` implements an intelligent logic that only generates thumbnails if the original image is larger than the target spec, automatically cleaning up redundant files.
+    *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly. Now optimized with **AOT (Ahead-of-Time)** compilation for native-like performance.
     *   **Persistent ShortURL IDs**: Implements an ID preservation mechanism in `make_album.php` to ensure shared links remain valid indefinitely.
-    *   **Multi-language Support**: Full internationalization framework for the admin panel and installer via `album/langs/`.
     *   **Advanced Build Tooling**: `make_album.php` supports incremental caching, atomic file writes, and fine-grained CLI parameters for performance and reliability.
     *   **Resource Management**: Implements `DownloadManager` with configurable concurrency limits.
 
@@ -150,7 +149,7 @@ Listed below are key directories and file rules in the Git repository:
 本系統支援兩種運作模式：
 1.  **動態 SPA 模式 (`blog.html`)**: 
     *   使用者存取 `blog.html`。
-    *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php` (或 SQLite/MySQL 版本)。
+    *   `static/blog.js` 透過 AJAX 呼叫 `api/api_filebase.php` (or SQLite/MySQL 版本)。
     *   **統一 API 邏輯**: 所有 API 端點 (`api_*.php`) 共享統一的 `get_data` 核心邏輯，確保 File、SQLite 與 MySQL 模式間的行為一致性。
     *   **混合式分頁**: 實作 PHP 模式下的伺服器端切割（減少 IO 負擔）與靜態 JSON 模式下的客戶端切割，並使用統一的 `pagination` 元數據結構。
     *   後端讀取資料並回傳 JSON。
@@ -176,9 +175,9 @@ Listed below are key directories and file rules in the Git repository:
 
 *   **相簿服務 (Album Service)**:
     *   位於 `/album` 目錄下的獨立服務，具備專屬的 SSG 與 SPA 架構。
-    *   提供多樣化視覺主題，包含 `album-matrix` (具備數位雨特效) 與 `album-y2k` (復古 2000 年代風格)。
-    *   **實驗性 Blazor 總管**: 使用 Blazor WebAssembly 實作的高擬真 Windows 11 / WPF 風格檔案總管，提供沉浸式的相簿瀏覽體驗。
-    *   特定主題整合 YouTube IFrame API 提供背景音樂功能。
+    *   **智慧多語系架構**: 實作前後端解耦的 i18n 機制。後端 PHP 負責靜態頁面與 Loading 骨架的預渲染，前端 JS 則透過 `album/langs/*.js` 語言包處理動態內容。
+    *   **智慧縮圖生成**: `make_album.php` 實作自動判斷邏輯，僅在原圖解析度大於目標規格時才建立縮圖，並自動清理冗餘檔案。
+    *   **實驗性 Blazor 總管**: 使用 Blazor WebAssembly 實作的高擬真 Windows 11 / WPF 風格檔案總管，現已啟用 **AOT (Ahead-of-Time)** 編譯，具備原生級執行效能。
     *   **短網址 ID 持久化**: 於 `make_album.php` 實作 ID 保留機制，確保照片順序變動或相簿重建後，已分享的連結永遠有效。
     *   **完整多語系支援**: 相簿後台與安裝精靈具備獨立的多語系架構（位於 `album/langs/`）。
     *   **進階建置工具**: `make_album.php` 支援智慧增量快取、原子化寫入及精細的 CLI 指令參數，大幅提升大型相簿的處理效能與穩定性。

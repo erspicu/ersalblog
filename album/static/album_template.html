@@ -55,15 +55,58 @@
     <div id="pagination-container"></div>
 </main>
 
-<footer class="footer"><p>&copy; 2026 Baxermux. All rights reserved.</p></footer>
+<footer class="footer"><p>&copy; 2026 Baxermux. {{lang_footer_rights}}</p></footer>
 
 <!-- Templates -->
 <template id="tmpl_app_container">
     <div id="app-container">
         <div class="text-center py-5">
-            <p class="text-muted">正在載入相簿應用程式...</p>
+            <p class="text-muted">{{lang_loading_app}}</p>
         </div>
     </div>
+</template>
+
+<template id="tmpl_status_loading">
+    <div class="text-center py-5">
+        <div class="spinner mb-2"></div>
+        <div class="text-muted">{{message}}</div>
+    </div>
+</template>
+
+<template id="tmpl_status_error">
+    <div class="text-center py-5 text-danger">
+        <i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>
+        {{message}}
+    </div>
+</template>
+
+<template id="tmpl_status_empty">
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        {{message}}
+    </div>
+</template>
+
+<template id="tmpl_status_loading_small">
+    <div class="col-12 text-muted small">
+        <span class="spinner-sm me-1"></span> {{message}}
+    </div>
+</template>
+
+<template id="tmpl_status_empty_small">
+    <div class="col-12 text-muted small">{{message}}</div>
+</template>
+
+<template id="tmpl_album_grid_container">
+    <div class="album-grid" id="{{id}}">{{items}}</div>
+</template>
+
+<template id="tmpl_icon_prev">
+    <i class="bi bi-chevron-left"></i>
+</template>
+
+<template id="tmpl_icon_next">
+    <i class="bi bi-chevron-right"></i>
 </template>
 
 <template id="tmpl_pagination">
@@ -103,12 +146,12 @@
 <template id="tmpl_album_controls">
     <div class="d-flex align-center justify-between mb-4">
         <nav class="breadcrumb">
-            <div class="breadcrumb-item"><a href="#">首頁</a></div>
+            <div class="breadcrumb-item"><a href="#">{{lang_home}}</a></div>
             <div class="breadcrumb-item active">{{name}}</div>
         </nav>
         <div class="d-flex align-center gap-2">
-            <span class="badge"><i class="bi bi-image"></i> {{total}} 張相片</span>
-            <a href="#" class="btn btn-outline"><i class="bi bi-house-door"></i> 返回首頁</a>
+            <span class="badge"><i class="bi bi-image"></i> {{total}} {{lang_photos_count}}</span>
+            <a href="#" class="btn btn-outline"><i class="bi bi-house-door"></i> {{lang_back_to_home}}</a>
         </div>
     </div>
 </template>
@@ -127,11 +170,11 @@
 <template id="tmpl_photo_detail_view">
     <div class="d-flex align-center justify-between" style="margin-bottom: 20px;">
         <nav class="breadcrumb">
-            <div class="breadcrumb-item"><a href="{{pathToHome}}album.html">首頁</a></div>
+            <div class="breadcrumb-item"><a href="{{pathToHome}}album.html">{{lang_home}}</a></div>
             <div class="breadcrumb-item"><a href="{{albumLink}}">{{albumName}}</a></div>
             <div class="breadcrumb-item active">{{filename}}</div>
         </nav>
-        <a href="{{albumLink}}" class="btn btn-outline"><i class="bi bi-grid-3x3-gap"></i> 返回列表</a>
+        <a href="{{albumLink}}" class="btn btn-outline"><i class="bi bi-grid-3x3-gap"></i> {{lang_back_to_list}}</a>
     </div>
 
     <div class="photo-viewer-container">
@@ -144,23 +187,23 @@
             <div class="photo-meta-grid">
                 <!-- Info Column -->
                 <div class="info-card">
-                    <h6 class="fw-bold mb-2">照片資訊</h6>
+                    <h6 class="fw-bold mb-2">{{lang_photo_info}}</h6>
                     <p class="fw-bold" style="font-size:1.1rem; margin-bottom: 5px;">{{photoTitle}}</p>
                     <p class="text-muted small" style="margin-bottom: 15px;">{{photoDesc}}</p>
                     <hr class="divider" style="margin-bottom: 15px;">
-                    <p class="text-muted small" style="margin-bottom: 15px;">檔案名稱: {{filename}}</p>
+                    <p class="text-muted small" style="margin-bottom: 15px;">{{lang_filename}}: {{filename}}</p>
                     
                     <a href="{{imgSrcOriginal}}" download="{{filename}}" class="btn btn-primary w-100 mb-2">
-                        <i class="bi bi-download"></i> 下載原始圖檔
+                        <i class="bi bi-download"></i> {{lang_download_original}}
                     </a>
                     <button class="btn btn-outline w-100" onclick="openShareModal('{{filename}}', '{{imgSrc}}', '{{imgSrcXL}}', '{{imgSrcOriginal}}', '{{shortIdStart}}')">
-                        <i class="bi bi-share"></i> 分享照片連結
+                        <i class="bi bi-share"></i> {{lang_share_photo}}
                     </button>
                 </div>
                 
                 <!-- EXIF Column -->
                 <div class="exif-card">
-                    <h6 class="fw-bold mb-2">技術資訊 (EXIF)</h6>
+                    <h6 class="fw-bold mb-2">{{lang_exif_info}}</h6>
                     <div id="exif-info-container">
                         {{exif_info}}
                     </div>
@@ -172,7 +215,7 @@
 
 <template id="tmpl_exif_source_label">
     <div class="mb-2">
-        <span style="font-size:0.65rem; padding:2px 8px; border-radius:12px; background:{{bg}}; color:{{color}}; font-weight:bold; display:inline-block;">來源: {{label}}</span>
+        <span style="font-size:0.65rem; padding:2px 8px; border-radius:12px; background:{{bg}}; color:{{color}}; font-weight:bold; display:inline-block;">{{lang_source}}: {{label}}</span>
     </div>
 </template>
 
@@ -197,13 +240,13 @@
 
 <template id="tmpl_gps_block">
     <div class="exif-item">
-        <span class="text-muted small">GPS 座標 </span>
-        <strong>緯度: {{lat}}, 經度: {{lng}}</strong>
+        <span class="text-muted small">{{lang_gps_coords}} </span>
+        <strong>{{lang_latitude}}: {{lat}}, {{lang_longitude}}: {{lng}}</strong>
         
         <div class="map-preview-box mt-2" style="position:relative; height:360px; border-radius:8px; overflow:hidden; border:1px solid #ddd;">
             <iframe width="100%" height="100%" src="{{embedUrl}}" frameborder="0" style="border:0;" allowfullscreen></iframe>
             <a href="{{mapLink}}" target="_blank" class="map-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.05); z-index:10; display:flex; align-items:center; justify-content:center; text-decoration:none; opacity:0; transition:opacity 0.3s;">
-                <span class="badge bg-primary text-white shadow"><i class="bi bi-box-arrow-up-right"></i> 開啟地圖</span>
+                <span class="badge bg-primary text-white shadow"><i class="bi bi-box-arrow-up-right"></i> {{lang_open_map}}</span>
             </a>
         </div>
     </div>
@@ -214,7 +257,7 @@
         <label class="small fw-bold" style="display:block; margin-bottom:4px;">{{label}}</label>
         <div class="input-group">
             <input type="text" value="{{url}}" readonly>
-            <button class="btn btn-primary" onclick="copyToClipboard(this, '{{url}}')">複製</button>
+            <button class="btn btn-primary" onclick="copyToClipboard(this, '{{url}}')">{{lang_copy}}</button>
         </div>
     </div>
 </template>
@@ -229,14 +272,14 @@
 <div id="shareModal" class="modal-overlay" onclick="closeModal('shareModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h5 class="fw-bold">分享照片連結</h5>
+            <h5 class="fw-bold">{{lang_share_photo}}</h5>
             <button class="close-btn" onclick="closeModal('shareModal')"><i class="bi bi-x-lg"></i></button>
         </div>
         <div class="modal-body">
             <div class="d-flex justify-between align-center mb-3">
-                <p class="text-muted small mb-0">選擇分享尺寸：</p>
+                <p class="text-muted small mb-0">{{lang_select_share_size}}</p>
                 <label class="small fw-bold" style="cursor:pointer">
-                    <input type="checkbox" id="toggle-original-url" onchange="updateShareLinks()" style="vertical-align: middle;"> 顯示原始路徑
+                    <input type="checkbox" id="toggle-original-url" onchange="updateShareLinks()" style="vertical-align: middle;"> {{lang_show_original_path}}
                 </label>
             </div>
             <div id="share-links-container">
@@ -248,28 +291,49 @@
 
 <script src="static/exif.js"></script>
 <script>
-    // 主程式載入 (帶版本號避免快取)
-    document.write('<script src="static/album.js?v=' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime()) + '"><\/script>');
-
-    // --- 前端主題插件載入機制 ---
     (function() {
-        // 優先使用由 head 區塊確定的主題
-        const themeName = window.currentActiveTheme || (typeof albumConfig !== 'undefined' ? albumConfig.theme : 'album');
+        // 根據 <html lang> 決定語系檔名
+        var langCode = document.documentElement.lang.replace('-', '_') || 'zh_TW';
+        var version = (typeof APP_VERSION !== 'undefined' ? APP_VERSION : new Date().getTime());
         
-        if(themeName && themeName !== 'album') {
-            const script = document.createElement('script');
-            script.src = 'static/themes/' + themeName + '/theme.js';
-            script.id = 'theme-plugin-js';
-            script.onload = function() {
-                console.log('[Theme] Plugin loaded: ' + themeName);
-                window.dispatchEvent(new CustomEvent('themePluginReady', { detail: { theme: themeName } }));
-            };
-            script.onerror = function() {
-                // 如果檔案不存在，安靜地失敗
-                console.warn('[Theme] No JS plugin (theme.js) found for: ' + themeName);
-            };
-            document.head.appendChild(script);
+        function loadScript(src, id) {
+            return new Promise((resolve, reject) => {
+                var s = document.createElement('script');
+                s.src = src;
+                if (id) s.id = id;
+                s.onload = () => resolve();
+                s.onerror = () => reject(new Error('Script load error: ' + src));
+                document.body.appendChild(s);
+            });
         }
+
+        async function init() {
+            try {
+                // 1. 載入 JS 語言包
+                await loadScript('langs/' + langCode + '.js?v=' + version);
+                console.log('[Core] Language pack loaded: ' + langCode);
+
+                // 2. 載入主程式 album.js
+                await loadScript('static/album.js?v=' + version);
+                console.log('[Core] Main script loaded');
+
+                // 3. 載入主題插件
+                const themeName = window.currentActiveTheme || (typeof albumConfig !== 'undefined' ? albumConfig.theme : 'album');
+                if(themeName && themeName !== 'album') {
+                    try {
+                        await loadScript('static/themes/' + themeName + '/theme.js', 'theme-plugin-js');
+                        console.log('[Theme] Plugin loaded: ' + themeName);
+                        window.dispatchEvent(new CustomEvent('themePluginReady', { detail: { theme: themeName } }));
+                    } catch(e) {
+                        console.warn('[Theme] Optional JS plugin (theme.js) not found for: ' + themeName);
+                    }
+                }
+            } catch (e) {
+                console.error('[Fatal] App initialization failed:', e);
+            }
+        }
+
+        init();
     })();
 </script>
 {{custom_scripts}}

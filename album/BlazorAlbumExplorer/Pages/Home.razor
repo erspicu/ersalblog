@@ -598,7 +598,11 @@ builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, 
     private async Task OpenAlbum(AlbumItem album)
     {
         isLoading = true; FocusWindow("explorer"); currentPath = $@"C:\Users\Admin\Pictures\Albums\{album.Name}";
-        try { currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../../../api/json/" + album.Id + ".json"); } catch { } finally { isLoading = false; }
+        try { 
+            // 使用 Uri.EscapeDataString 處理中文 ID 路徑
+            var escapedId = Uri.EscapeDataString(album.Id);
+            currentAlbum = await Http.GetFromJsonAsync<AlbumDetail>("../../../../../api/json/" + escapedId + ".json"); 
+        } catch { } finally { isLoading = false; }
     }
 
     private async Task ViewPhoto(PhotoItem photo)
@@ -613,9 +617,18 @@ builder.Services.AddScoped&lt;<span class="text-success">IAlbumProvider</span>, 
 
     public void Dispose() => dotNetHelper?.Dispose();
 
-    public class AlbumIndex { public List<AlbumItem> Items { get; set; } = new(); }
-    public class AlbumItem { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public int Count { get; set; } public string Cover { get; set; } = ""; }
-    public class AlbumDetail { public string Name { get; set; } = ""; public string Desc { get; set; } = ""; public List<PhotoItem> Photos { get; set; } = new(); }
+    public class AlbumIndex { [JsonPropertyName("items")] public List<AlbumItem> Items { get; set; } = new(); }
+    public class AlbumItem { 
+        [JsonPropertyName("id")] public string Id { get; set; } = ""; 
+        [JsonPropertyName("name")] public string Name { get; set; } = ""; 
+        [JsonPropertyName("count")] public int Count { get; set; } 
+        [JsonPropertyName("cover")] public string Cover { get; set; } = ""; 
+    }
+    public class AlbumDetail { 
+        [JsonPropertyName("name")] public string Name { get; set; } = ""; 
+        [JsonPropertyName("desc")] public string Desc { get; set; } = ""; 
+        [JsonPropertyName("photos")] public List<PhotoItem> Photos { get; set; } = new(); 
+    }
     public class PhotoItem { 
         [JsonPropertyName("filename")] public string Filename { get; set; } = ""; 
         [JsonPropertyName("src")] public string Src { get; set; } = ""; 
