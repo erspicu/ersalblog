@@ -20,7 +20,7 @@ This week's development focused on **Album Service refactoring and Web Admin int
 - **Favicon Customization**: Parameterized the site favicon path with a new configuration field in the admin settings.
 
 ### 4. Information Architecture (IA) Study
-- **Research Document**: Created `MD/STUDY_IA_CATEGORIES_TAGS.md`, analyzing the design differences between "Categories" and "Tags" in Blog and Album systems, along with platform characteristics and optimization strategies.
+- **Research Document**: Created and expanded `MD/STUDY_IA_CATEGORIES_TAGS.md`, analyzing design differences between "Categories" and "Tags". Added **Flickr Management Philosophy** (Three-tier hierarchy, Groups, CC licensing) as a blueprint for professional photography systems.
 
 ---
 
