@@ -78,9 +78,9 @@ Configurable in `config.js` via `theme_file`. Supports:
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.14.15.27` (UTC+8)
-CLI Version: `Gemini CLI`
-Model: `Gemini CLI`
+Version: `v2026.02.14.22.34` (UTC+8)
+CLI Version: `0.28.2`
+Model: `gemini-3-pro-preview`
 
 ---
 
@@ -135,6 +135,6 @@ Model: `Gemini CLI`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.14.15.27` (UTC+8)
-CLI 版本: `Gemini CLI`
-模型名稱: `Gemini CLI`
+版本號: `v2026.02.14.22.34` (UTC+8)
+CLI 版本: `0.28.2`
+模型名稱: `gemini-3-pro-preview`
