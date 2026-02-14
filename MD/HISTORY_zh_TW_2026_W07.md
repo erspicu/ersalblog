@@ -66,3 +66,4 @@
 - 優化 StaticGenerator 資源映射，自動校正子目錄網頁的 album/ 與 pic/ 路徑。
 - 移除全站未使用的 session_secret 設定與相關安裝欄位。
 - 修正相簿刪除後首頁 index.json 未同步更新導致殘留連結的問題。
+- Optimized and ran mini.py: expanded ignore list and fixed subprocess calls for better performance in WSL2.
