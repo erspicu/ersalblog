@@ -1,30 +1,23 @@
-# 2026 W07 (2026-02-09 ~ 2026-02-15)
+# HISTORY (2026_W07)
 
-### Major Architecture Updates
-- **Album Service Multi-language Architecture**:
-  - Implemented a decoupled multi-language mechanism: PHP backend for static rendering, JS frontend for dynamic translation.
-  - Created dedicated JS language packs (`zh_TW.js`, `en_US.js`) in `album/langs/`, auto-loaded via `<html lang>`.
-  - Refactored `album.js` and `album_template.html` to remove all hardcoded HTML/text, achieving full UI/Logic separation.
-  - Added multi-language comment support in `compression.json` (`comment-en_US`), enabling localized share menus.
+## Weekly Summary
+This week focused on deepening the functionality of the "Album Service," logic refactoring, and admin panel integration. By establishing the core processing class `AlbumGenerator`, we successfully integrated the album rebuilding functionality—previously restricted to CLI—into the Web admin interface. We also implemented environment diagnostics and smart fallback mechanisms to ensure stable operation across multiple server environments (WSL2/Windows). Additionally, the compilation and management workflows for the Win11 theme were optimized.
 
-### Performance & Optimization
-- **Smart Thumbnail Generation**:
-  - Updated `make_album.php`: Thumbnails are only generated if the original resolution exceeds the target spec. Redundant files are auto-cleaned.
-  - Frontend `album.js` Smart Fallback: Automatically falls back to the original image if specific thumbnails are missing (due to small original size).
-  - Enforced JSON Consistency: Fixed empty `sizes` fields to output as Object `{}` instead of Array `[]`, resolving parsing errors in strongly-typed languages.
-- **Win11 Theme AOT Optimization**:
-  - Enabled **AOT (Ahead-of-Time)** compilation for Blazor WASM, compiling C# directly to native WebAssembly.
-  - Added automation script `album/rebuild_win11.sh` for one-click environment check, build, deployment, and cleanup.
-  - Cleaned up publication artifacts (`.gz`, `.br`, `.pdb`), reducing size by 40% (28MB -> 17MB).
-  - Significantly improved window dragging, resizing, and image processing performance.
-
-### System Maintenance
-- **Git Repository Slimming**:
-  - Updated `.gitignore` and ran `git rm --cached` to stop tracking generated JSON caches and Win11 build artifacts (WASM/DLL), significantly reducing repo size.
-  - Cleaned up Blazor project temporary directories (`bin/`, `obj/`, `publish/`), freeing up ~370MB disk space.
-  - Removed the obsolete legacy release directory `album/view_blazor/`.
-
-### Bug Fixes
-- **Chinese Path Support**: Fixed Blazor `HttpClient` logic by adding `Uri.EscapeDataString` to correctly handle album paths with Chinese characters.
-- **Dashboard**: Fixed an issue where the photo library size was displayed as unknown.
-- **Initial Loading State**: Fixed `album.js` startup logic to correctly detect `document.readyState` during dynamic script loading.
+## Detailed Changes
+- **Album Service Core Refactoring**:
+  - Created `album/PHP_LIB/AlbumGenerator.php`: Encapsulated scanning, Exif parsing, thumbnail generation, and JSON maintenance for CLI/Web reuse.
+  - Implemented "Environment Diagnostics": Automatically detects Imagick/GD/Exif support before tasks.
+  - Implemented "Smart Fallback": Switches to GD library for thumbnail processing if Imagick is missing.
+- **Admin Panel Integration**:
+  - Created "System Maintenance" page: Supports visual selection of rebuild parameters (force JSON, thumbnails, templates).
+  - Album Management Optimization: Added "Single Album Refresh" to list and photo management pages for incremental updates.
+  - Created "System Diagnostics" page: Provides universal server configuration checks and directory permission diagnostics.
+  - Fixed CSRF Token validation, output buffer clearing, and AJAX issues caused by missing JS files.
+- **Theme & Tool Automation**:
+  - Enabled extreme AOT compilation for Win11 theme and implemented output slimming (removing pdb and pre-compressed files).
+  - Established `album/toolshell/` toolkit: Provides cross-platform management scripts (rebuild, remove, clean) for Bash, PowerShell, and Batch.
+  - Optimized `make_album.php`: Added specific album update parameter (`-a`) and refactored to call the core class.
+- **Frontend Optimization**:
+  - Refactored SPA template rendering mechanism, removing hardcoded HTML from `album.js`.
+  - Implemented full multi-language architecture for the album service (supporting zh_TW, en_US).
+  - Fixed album loading failures caused by URL encoding of Chinese paths.

@@ -74,6 +74,7 @@ foreach ($pagedPhotos as $path) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('manage_photos'); ?> - <?php echo htmlspecialchars($displayName); ?></title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/js/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .photo-card img { width: 100%; height: 150px; object-fit: contain; background-color: #f0f0f0; }
@@ -98,9 +99,18 @@ foreach ($pagedPhotos as $path) {
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                     <i class="bi bi-cloud-upload"></i> <?php echo __('upload_photos'); ?>
                 </button>
-                <a href="../make_album.php?force-thumb=1" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-gear-wide-connected"></i> <?php echo __('rebuild_thumbs'); ?>
-                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-wide-connected"></i> <?php echo __('rebuild_album'); ?>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="#" onclick="rebuildThisAlbum('quick')"><?php echo __('opt_quick_refresh'); ?> (Quick)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="rebuildThisAlbum('force_json')"><?php echo __('opt_force_json'); ?></a></li>
+                        <li><a class="dropdown-item" href="#" onclick="rebuildThisAlbum('force_thumb')"><?php echo __('opt_force_thumb'); ?></a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="rebuildThisAlbum('force_all')"><?php echo __('f_rebuild_all'); ?> (Force All)</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -241,6 +251,45 @@ function deletePhoto(filename) {
         document.getElementById('deleteFilename').value = filename;
         document.getElementById('deletePhotoForm').submit();
     }
+}
+
+function rebuildThisAlbum(mode) {
+    Swal.fire({
+        title: 'Processing...',
+        text: '正在執行相簿維護任務，請稍候...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    const formData = new FormData();
+    formData.append('action', 'rebuild_album');
+    formData.append('album_id', '<?php echo addslashes($id); ?>');
+    formData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+
+    if (mode === 'force_json') formData.append('forceJson', 'on');
+    if (mode === 'force_thumb') formData.append('forceThumb', 'on');
+    if (mode === 'force_all') {
+        formData.append('forceJson', 'on');
+        formData.append('forceThumb', 'on');
+    }
+
+    fetch('album_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Success', data.message, 'success').then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire('Error', data.message || '更新失敗', 'error');
+        }
+    })
+    .catch(error => {
+        Swal.fire('Error', '網路錯誤或伺服器異常', 'error');
+    });
 }
 </script>
 </body>

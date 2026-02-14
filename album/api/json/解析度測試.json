@@ -14,19 +14,7 @@
             "shortIdStart": 744,
             "title": "1000.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "150.jpg",
@@ -35,19 +23,7 @@
             "shortIdStart": 752,
             "title": "150.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "1500.jpg",
@@ -62,19 +38,7 @@
             "shortIdStart": 760,
             "title": "1500.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "1920.jpg",
@@ -90,19 +54,7 @@
             "shortIdStart": 768,
             "title": "1920.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "300.jpg",
@@ -113,19 +65,7 @@
             "shortIdStart": 776,
             "title": "300.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "600.jpg",
@@ -137,19 +77,7 @@
             "shortIdStart": 784,
             "title": "600.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "700.jpg",
@@ -162,19 +90,7 @@
             "shortIdStart": 792,
             "title": "700.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         },
         {
             "filename": "IMG_20250712_155948.jpg",
@@ -191,19 +107,8 @@
             "shortIdStart": 800,
             "title": "IMG_20250712_155948.jpg",
             "desc": "",
-            "exif": {
-                "make": "Xiaomi",
-                "model": "Xiaomi 15 Ultra",
-                "aperture": "f\/1.8",
-                "shutter": "1\/243s",
-                "iso": 50,
-                "focal": "11.5mm",
-                "date": "2025:07:12 15:59:48",
-                "gps": {
-                    "lat": 22.652482,
-                    "lng": 120.349898
-                }
-            }
+            "exif": null
         }
-    ]
+    ],
+    "date": "20260213"
 }

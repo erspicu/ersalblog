@@ -9,8 +9,8 @@ cd "$SCRIPT_DIR"
 
 set -e
 
-BLAZOR_DIR="./BlazorAlbumExplorer"
-DIST_DIR="./static/themes/album-win11/dist/wwwroot"
+BLAZOR_DIR="../BlazorAlbumExplorer"
+DIST_DIR="../static/themes/album-win11/dist/wwwroot"
 
 echo "=================================================="
 echo "🚀 Starting Win11 Theme Rebuild Process"

@@ -51,6 +51,7 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('manage_albums'); ?> - 相簿列表</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/js/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .album-card img { width: 100%; height: 150px; object-fit: contain; background-color: #f0f0f0; }
@@ -85,6 +86,7 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
                         <div class="btn-group w-100 mt-auto">
                             <a href="album_photos.php?id=<?php echo urlencode($album['id']); ?>" class="btn btn-sm btn-outline-primary" title="<?php echo __('manage_photos'); ?>"><i class="bi bi-images"></i></a>
                             <a href="album_edit.php?id=<?php echo urlencode($album['id']); ?>" class="btn btn-sm btn-outline-secondary" title="<?php echo __('edit_info'); ?>"><i class="bi bi-pencil"></i></a>
+                            <button class="btn btn-sm btn-outline-warning" onclick="rebuildAlbum('<?php echo htmlspecialchars($album['id']); ?>')" title="<?php echo __('rebuild_album'); ?>"><i class="bi bi-arrow-clockwise"></i></button>
                             <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('<?php echo htmlspecialchars($album['id']); ?>')"><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
@@ -129,6 +131,38 @@ function confirmDelete(id) {
         document.getElementById('deleteAlbumId').value = id;
         document.getElementById('deleteForm').submit();
     }
+}
+
+function rebuildAlbum(id) {
+    Swal.fire({
+        title: 'Processing...',
+        text: '正在更新相簿 JSON 與縮圖快取...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    const formData = new FormData();
+    formData.append('action', 'rebuild_album');
+    formData.append('album_id', id);
+    formData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+
+    fetch('album_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Success', data.message, 'success').then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire('Error', data.message || '更新失敗', 'error');
+        }
+    })
+    .catch(error => {
+        Swal.fire('Error', '網路錯誤或伺服器異常', 'error');
+    });
 }
 </script>
 </body>

@@ -41,12 +41,22 @@ function is_active($page, $current) {
         </li>
         <li>
             <a href="albums.php" class="<?php echo is_active('albums.php', $current_page); ?>">
-                <?php echo __('albums'); ?> (Albums)
+                <?php echo __('manage_albums'); ?> (Albums)
             </a>
         </li>
         <li>
             <a href="settings.php" class="<?php echo is_active('settings.php', $current_page); ?>">
                 <?php echo __('settings'); ?> (Settings)
+            </a>
+        </li>
+        <li>
+            <a href="maintenance.php" class="<?php echo is_active('maintenance.php', $current_page); ?> text-warning">
+                <i class="bi bi-tools"></i> <?php echo __('rebuild_all'); ?> (Maintenance)
+            </a>
+        </li>
+        <li>
+            <a href="health_check.php" class="<?php echo is_active('health_check.php', $current_page); ?>">
+                <i class="bi bi-heart-pulse"></i> 環境檢查 (Health)
             </a>
         </li>
     </ul>

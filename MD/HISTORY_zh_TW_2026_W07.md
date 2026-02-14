@@ -1,30 +1,23 @@
-# 2026 W07 (2026-02-09 ~ 2026-02-15)
+# 歷史紀錄 (2026_W07)
 
-### 重大架構更新 (Major Architecture Updates)
-- **相簿服務多語系架構 (Album Service Multi-language)**: 
-  - 實作前後端分離的多語系機制：後端 PHP 負責靜態頁面渲染，前端 JS 負責動態訊息翻譯。
-  - 建立 `album/langs/` 下的 JS 專屬語系包 (`zh_TW.js`, `en_US.js`)，並透過 `<html lang>` 屬性自動載入。
-  - 重構 `album.js` 與 `album_template.html`，移除所有硬編碼 HTML 與文字，實現 UI 與邏輯徹底解耦。
-  - `compression.json` 支援多語系註解 (`comment-zh_TW`, `comment-en_US`)，讓分享選單也能隨語系切換。
+## 本週更新摘要
+本週重點在於「相簿服務」的功能深化、邏輯重構與後台管理整合。透過建立核心處理類別 `AlbumGenerator`，成功將原本僅限 CLI 執行的相簿重建功能整合進 Web 後台，並實作了環境診斷與智慧回退機制，確保在多種伺服器環境（WSL2/Windows）下均能穩定運作。此外，亦優化了 Win11 主題的編譯與管理流程。
 
-### 效能與優化 (Performance & Optimization)
-- **智慧縮圖生成 (Smart Thumbnails)**: 
-  - 修改 `make_album.php`：僅在原圖解析度大於規格時才產生縮圖，並自動清理磁碟上的冗餘舊檔。
-  - 前端 `album.js` 實作智慧回退機制：若指定規格縮圖不存在（因原圖過小），自動回退顯示原圖。
-  - 強制同步 JSON 資料結構：修正空 `sizes` 欄位為 Object `{}` 而非 Array `[]`，解決強型別語言解析錯誤。
-- **Win11 主題極致優化 (Win11 Theme AOT)**:
-  - 啟用 Blazor WASM 的 **AOT (Ahead-of-Time)** 編譯模式，將 C# 代碼編譯為原生 WebAssembly 指令。
-  - 新增自動化維護腳本 `album/rebuild_win11.sh`，一鍵完成環境偵測、編譯、部署與檔案瘦身。
-  - 執行發佈目錄清理，移除不必要的 `.gz`, `.br` 與偵錯符號，將體積縮減 40% (28MB -> 17MB)。
-  - 顯著提升虛擬視窗拖拽、縮放與影像處理的流暢度。
-
-### 系統維護 (System Maintenance)
-- **Git 版本庫瘦身**: 
-  - 更新 `.gitignore` 並執行 `git rm --cached`，停止追蹤生成的 JSON 快取與 Win11 主題編譯產物 (WASM/DLL)，大幅減輕版本庫體積。
-  - 清理 Blazor 專案下的開發暫存目錄 (`bin/`, `obj/`, `publish/`)，釋放約 370MB 磁碟空間。
-  - 移除過時的舊版發佈目錄 `album/view_blazor/`。
-
-### 錯誤修復 (Bug Fixes)
-- **中文路徑支援**: 修正 Blazor `HttpClient` 請求邏輯，加入 `Uri.EscapeDataString` 以正確處理包含中文字元的相簿路徑。
-- **儀表板顯示**: 修復儀表板照片庫大小顯示為未知的問題。
-- **初始載入狀態**: 修正 `album.js` 啟動邏輯，確保在動態載入腳本時能正確偵測 `document.readyState`。
+## 詳細更新項目
+- **相簿服務核心重構**:
+  - 建立 `album/PHP_LIB/AlbumGenerator.php`：封裝相簿掃描、Exif 解析、縮圖生成與 JSON 維護邏輯，達成 CLI 與 Web 共用。
+  - 實作「環境診斷」功能：在執行任務前自動偵測 Imagick/GD/Exif 支援度。
+  - 實作「智慧回退」機制：缺少 Imagick 時自動切換至 GD 函式庫執行縮圖處理。
+- **後台管理整合**:
+  - 建立「系統維護」頁面：支援視覺化勾選重建參數（強制更新 JSON、縮圖、樣板等）。
+  - 相簿管理優化：於列表頁面與照片管理頁面新增「單一相簿重新整理」功能，支援增量更新。
+  - 實作「系統環境診斷」頁面：提供通用的伺服器配置檢查與目錄權限診斷。
+  - 修復 CSRF Token 驗證機制、輸出緩衝區清理與 JS 遺漏導致的 AJAX 卡死問題。
+- **主題與工具自動化**:
+  - 開啟 Win11 主題 AOT 極致編譯優化並實作產出物瘦身（移除 pdb 與預壓縮檔）。
+  - 建立 `album/toolshell/` 工具包：提供支援 Bash, PowerShell 與 Batch 的跨平台管理腳本（重建、移除、清理）。
+  - 優化 `make_album.php`：新增指定相簿更新參數 (`-a`) 並改為呼叫核心類別。
+- **前端優化**:
+  - 重構 SPA 樣板渲染機制，移除 `album.js` 中的硬編碼 HTML。
+  - 實作相簿服務全站多語系架構（支援 zh_TW, en_US）。
+  - 修復中文路徑 URL 編碼導致的相簿載入失敗問題。

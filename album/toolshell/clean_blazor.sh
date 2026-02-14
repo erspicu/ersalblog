@@ -6,7 +6,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-BLAZOR_DIR="./BlazorAlbumExplorer"
+BLAZOR_DIR="../BlazorAlbumExplorer"
 
 echo "=================================================="
 echo "🧹 Cleaning BlazorAlbumExplorer Build Artifacts"

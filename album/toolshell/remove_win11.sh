@@ -6,7 +6,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-THEME_DIR="./static/themes/album-win11"
+THEME_DIR="../static/themes/album-win11"
 
 echo "=================================================="
 echo "🗑️  Removing Win11 Theme"

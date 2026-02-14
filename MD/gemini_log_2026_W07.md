@@ -1,4 +1,4 @@
-- [2026-02-11 21:55:00] 移除 album 的 win11 主題
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿- [2026-02-11 21:55:00] 移除 album 的 win11 主題
   - 修改 config.js 將主題設為 'album'
   - 刪除 static/themes/album-win11/ 目錄
   - 清理 BlazorAlbumExplorer 中的 win11 相關字眼與類別
@@ -12,7 +12,7 @@
 - [2026-02-12 23:58:54] 實作後端與 SEO 設定介面 (config.php) 並整合進樣板渲染流程
 - [2026-02-13 23:48:32] 建立過的縮圖就不要再建立
   執行 album/make_album.php 重建縮圖快取，自動跳過已有快取之相簿並完成新相簿縮圖生成。
-- [2026-02-13 23:55:12] 優化縮圖生成與回退邏輯
+- [2026-02-13 23:55:12] 優化縮thumbnail生成與回退邏輯
   - 修改 album/make_album.php：僅在原圖解析度大於規格時才產生縮圖，並實作冗餘檔案清理。
   - 確認 album/static/album.js：實作智慧回退機制，若無縮圖則自動使用原圖。
   - 已執行 --force-json 完成全站相簿資料同步與冗餘縮圖清理。
@@ -27,14 +27,14 @@
   - 修改 album/static/album_template.html：新增狀態顯示（Loading/Error/Empty）與容器樣板。
   - 修改 album/static/album.js：全面替換硬編碼字串為 renderTemplate 呼叫，實現 UI 與邏輯徹底分離。
 - [2026-02-14 00:45:12] 實作相簿服務多語系架構
-  - 建立 album/langs/ 語系定義檔 (zh_TW, en_US)。
+  - 建立 album/langs/語系定義檔 (zh_TW, en_US)。
   - 重構 album_template.html 與 album.js：移除所有寫死的中文字串，改由語系變數控制。
   - 串接 make_album.php：支援根據設定自動切換並渲染對應語系之 album.html。
 - [2026-02-14 00:55:12] 修正初次載入時語系標籤未代換的問題
   - 修改 make_album.php：讓後端在產出 HTML 前，先對內容骨架 (indexBody) 進行預渲染代換。
   - 確保使用者在 JS 執行前看到的 Loading 提示已是正確的語言文字。
 - [2026-02-14 01:15:12] 重構前端語系載入機制 (JS Language Packs)
-  - 建立 album/langs/ 專屬 JS 語系包 (zh_TW.js, en_US.js)。
+  - 建立 album/langs/專屬 JS 語系包 (zh_TW.js, en_US.js)。
   - 修改樣板：實作自動偵測 <html lang> 並動態載入對應語系 JS 的機制。
   - 修改 album.js：確保在語言包載入後才初始化，實現前後端語系檔完全分離。
 - [2026-02-14 01:30:12] 開啟 Win11 主題 AOT 極致優化編譯
@@ -42,7 +42,7 @@
   - 執行 dotnet publish 完成 AOT 原生機器碼編譯。
   - 更新主題 dist 目錄，顯著提升虛擬桌面與影像處理之執行效能。
 - [2026-02-14 01:35:12] 清理 Win11 主題發佈目錄的冗餘檔案
-  - 刪除 _framework 下所有的 *.gz, *.br 預壓縮檔與 *.pdb 偵錯符號。
+  - 刪除 _framework 下所有的 *.gz, *.br 預壓縮檔與 *.pdb 偵偵錯符號。
   - 目錄體積從 28MB 減至 17MB，優化磁碟空間佔用。
 - [2026-02-14 01:40:32] 清理過時目錄 album/view_blazor/
   - 經確認該目錄為舊版 Blazor 發佈產物，現已統一由 static/themes/album-win11/dist/ 接管，執行刪除以精簡專案結構。
@@ -52,5 +52,53 @@
 - [2026-02-14 01:50:32] 新增 Win11 主題自動化重建腳本
   - 建立 album/rebuild_win11.sh，整合環境偵測、wasm-tools 安裝、AOT 編譯與產出物瘦身功能。
 - [2026-02-14 11:30:34] 建立 Win11 主題移除與 Blazor 建置清理腳本
-  - 建立 album/remove_win11.sh：用於移除 static/themes/album-win11/ 目錄。
+  - 建立 album/remove_win11.sh：用於移除 static/themes/album-win11/目錄。
   - 建立 album/clean_blazor.sh：用於清理 BlazorAlbumExplorer 的 bin/, obj/ 與 publish/ 暫存檔，優化上傳體積。
+- [2026-02-14 11:35:12] 建立 Windows PowerShell 版本之主題管理與清理腳本
+  - 建立 album/rebuild_win11.ps1：支援 Windows 環境下的環境偵測、WASM 安裝、AOT 編譯與發佈。
+  - 建立 album/remove_win11.ps1：Windows 環境專用的主題移除腳本。
+  - 建立 album/clean_blazor.ps1：Windows 環境專用的 Blazor 暫存檔清理腳本。
+- [2026-02-14 11:45:32] 整理腳本結構並修正路徑
+  - 建立 album/toolshell/ 目錄，並將所有 .sh 與 .ps1 腳本移入。
+  - 修正所有腳本內部的相對路徑（..），確保在子目錄執行時仍能正確指向 album/ 根目錄下的資源。
+- [2026-02-14 11:55:12] 建立 Windows Batch (.bat) 版本之管理與清理腳本
+  - 建立 album/toolshell/rebuild_win11.bat、remove_win11.bat 與 clean_blazor.bat。
+  - 提供傳統 CMD 環境下的跨平臺相容支援，並處理相對路徑與錯誤檢查。
+- [2026-02-14 12:05:12] 強化 Windows 腳本的自動安裝與環境檢查能力
+  - 升級 rebuild_win11.bat：增加 wasm-tools 自動化安裝邏輯與權限提示。
+  - 確認所有版本腳本均具備「環境偵測」、「套件檢查」與「錯誤攔截」功能，確保跨環境部署的一致性。
+- [2026-02-14 12:15:12] 建立工具腳本說明文件 (README.md)
+  - 於 album/toolshell/ 目錄下建立 README.md，包含腳本功能清單、不同環境下的執行指南、權限需求與開發環境要求。
+- [2026-02-14 12:35:12] 實作 make_album.php 指定相簿更新功能
+  - 新增 --album (-a) 參數，支援僅針對單一相簿進行增量更新。
+  - 優化索引整合邏輯：更新單一相簿時自動保留 index.json 與 shorturl.txt 中的現有資料，大幅提升大型相簿庫的維護效率。
+- [2026-02-14 13:00:12] 重構相簿處理邏輯並整合至 Web 後台
+  - 建立 `album/PHP_LIB/AlbumGenerator.php`：將核心掃描、Exif 解析、縮圖生成與 JSON 維護邏輯封裝為類別，達成 CLI 與 Web 共用。
+  - 重構 `make_album.php`：改為呼叫 `AlbumGenerator` 類別，保持原有 CLI 功能不變。
+  - 整合後台 UI：在左側選單加入「重建全站相簿」，並在相簿列表加入「單一相簿重新整理」按鈕，均透過 Ajax 與 SweetAlert2 實現流暢操作體驗。
+- [2026-02-14 13:25:12] 建立獨立系統維護頁面與細部重建選項
+  - 建立 `album/admin/maintenance.php` : 提供視覺化介面供使用者勾選重建參數（強制更新 JSON、縮圖、樣板等）。
+  - 更新導覽架構：左側選單改為跳轉至維護頁面，實作更細緻的全站維護功能管理。
+  - 更新 `album_actions.php`：支援從維護頁面傳遞的複雜參數，並實現樣板 Shell (album.html) 的後台同步更新。
+- [2026-02-14 13:35:12] 修正左側選單文字語意
+  - 將 `sidebar_inc.php` 中的「相簿總數 (Albums)」修正為「管理相簿 (Manage Albums)」，更精確描述選單功能。
+- [2026-02-14 13:45:12] 整合單一相簿之維護操作選單
+  - 修改 `album_photos.php`：將「重建縮圖」按鈕升級為下拉式維護選單，支援快速整理、強制更新 JSON、強制重新產生縮圖等特定相簿操作。
+  - 同步更新 `album_actions.php` 與語系檔，確保單一相簿維護邏輯與全站維護功能一致。
+- [2026-02-14 14:00:12] 修復相簿重建功能卡死與 JS 遺漏問題
+  - 補齊 `album/admin/assets/js/` 目錄下遺漏的 `bootstrap.bundle.min.js` 與 `sweetalert2.all.min.js`，解決下拉選單與提示框卡死問題。
+  - 修正 `AlbumGenerator.php` 與 `album_actions.php` 中的路徑錯誤、邏輯誤判與潛在輸出干擾，提升後台任務執行穩定性。
+- [2026-02-14 14:15:12] 修復 `album_actions.php` 語法錯誤導致的 AJAX 失敗
+  - 修正 `album_actions.php` 中 `rebuild_all` 區塊遺漏的閉合大括號，解決導致伺服器 500 錯誤與前端網路異常的問題。
+  - 經 `php -l` 驗證，所有核心處理檔案目前均無語法錯誤。
+- [2026-02-14 14:30:12] 強化後台 API 輸出純淨度與執行穩定性
+  - 於 `album_actions.php` 實作 `ob_start` 與 `ob_clean` 機制，確保任何 PHP 警告或 Notice 均不會混入 JSON 回傳，徹底解決前端「網路錯誤」異常。
+  - 補全 `AlbumGenerator.php` 中的 Exif 處理與路徑容錯邏輯，並透過 CLI 模擬腳本完成 API 執行路徑驗證。
+- [2026-02-14 14:40:12] 修復後台 AJAX 請求 CSRF 驗證失敗問題
+  - 修正 `maintenance.php`、`album_photos.php` 與 `albums.php` 中 CSRF Token 鍵名不一致問題，統一呼叫 `getCSRFToken()` 以配合 `auth.php` 的安全性檢查機制。
+- [2026-02-14 15:10:12] 通用化環境診斷功能與多語系重構
+  - 將「環境健康檢查」功能升級為通用的「系統環境診斷 (System Diagnostics)」，移除特定環境描述。
+  - 重構 `health_check.php` 並補齊相關多語系字串，使其具備通用的伺服器配置檢查、擴充套件偵測與目錄權限診斷能力。
+- [2026-02-14 15:25:12] 實作重建前置環境診斷與智慧回退機制
+  - 於 `AlbumGenerator.php` 新增 `checkEnvironment` 方法，在執行任務前主動診斷關鍵套件支援度。
+  - 實作縮圖生成智慧回退：當伺服器缺少 Imagick 時，自動切換至 GD 函式庫執行縮圖處理，並於任務完成後主動提示環境警告訊息。
