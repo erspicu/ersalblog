@@ -48,6 +48,7 @@ No external CDNs required for core functionality. TinyMCE, SweetAlert2, and Boot
 *   `contents/`: Your raw blog content (HTML fragments and index).
 *   `post/`: Statically generated pages ready for production.
 *   `static/`: Core frontend assets (JavaScript and Templates).
+*   `MD/`: Technical documentation, historical logs, and architecture studies.
 
 ---
 

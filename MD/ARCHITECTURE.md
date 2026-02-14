@@ -132,7 +132,7 @@ The system supports two operating modes:
 *   **`/PHP_LIB`**: 共用邏輯類別與 `TemplateManager` 微框架。
 *   **`/album`**: 獨立相簿服務，含其專屬 `/admin`, `/api` 與 `/Collection`。
 *   **`/album/toolshell`**: 跨平台自動化維護腳本工具包。
-*   **`/MD`**: 專案技術文件與週歷史紀錄檔。
+*   **`/MD`**: 專案技術文件、週歷史紀錄檔與資訊架構研究報告 (`STUDY_IA_*.md`)。
 
 ---
 

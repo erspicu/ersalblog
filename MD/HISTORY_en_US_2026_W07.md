@@ -19,6 +19,9 @@ This week's development focused on **Album Service refactoring and Web Admin int
 - **SEO Preview Uploads**: Implemented post-level OG Image uploads with automatic processing (1200x630).
 - **Favicon Customization**: Parameterized the site favicon path with a new configuration field in the admin settings.
 
+### 4. Information Architecture (IA) Study
+- **Research Document**: Created `MD/STUDY_IA_CATEGORIES_TAGS.md`, analyzing the design differences between "Categories" and "Tags" in Blog and Album systems, along with platform characteristics and optimization strategies.
+
 ---
 
 ## 🛠 Detailed Changes
