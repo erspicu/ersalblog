@@ -13,5 +13,5 @@ return array(
     'month_suffix' => ' (Month)',
     'day_suffix' => ' (Day)',
     'list_page_title' => 'All Posts',
-    'html_lang' => 'en',
+    'html_lang' => 'en-US',
 );

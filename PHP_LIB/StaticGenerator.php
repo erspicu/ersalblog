@@ -66,6 +66,7 @@ class StaticGenerator {
             'blog_description' => $this->config['blog_description'],
             'blog_introduce'   => $this->config['blog_introduce'],
             'site_url'         => $this->config['site_url'],
+            'blog_favicon'     => isset($this->config['blog_favicon']) ? $this->config['blog_favicon'] : '/static/icon-192.png',
         ));
 
         // Load Data

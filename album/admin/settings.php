@@ -30,7 +30,7 @@ if (file_exists($phpConfigFile)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

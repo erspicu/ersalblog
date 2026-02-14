@@ -13,5 +13,5 @@ return array(
     'month_suffix' => '月',
     'day_suffix' => '日',
     'list_page_title' => '文章總列表',
-    'html_lang' => 'zh-Hant',
+    'html_lang' => 'zh-TW',
 );

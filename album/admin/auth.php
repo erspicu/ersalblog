@@ -22,16 +22,18 @@ require_once $configFile;
 // 1. 決定目前語系
 // 優先權: GET 參數 (切換) > Session (登入後) > Config (全域預設) > 預設繁中
 if (isset($_GET['lang'])) {
-    $currentLang = $_GET['lang'];
+    $currentLang = str_replace('-', '_', $_GET['lang']);
     $_SESSION['album_admin_lang'] = $currentLang;
 } else {
-    $currentLang = isset($_SESSION['album_admin_lang']) ? $_SESSION['album_admin_lang'] : (isset($album_lang) ? str_replace('-', '_', $album_lang) : 'zh_TW');
+    $rawLang = isset($_SESSION['album_admin_lang']) ? $_SESSION['album_admin_lang'] : (isset($album_lang) ? $album_lang : 'zh_TW');
+    $currentLang = str_replace('-', '_', $rawLang);
 }
 
 // 2. 載入對應翻譯檔 (Prefix: admin-)
 $langFile = __DIR__ . '/../langs/admin-' . $currentLang . '.php';
 if (!file_exists($langFile)) {
     $langFile = __DIR__ . '/../langs/admin-zh_TW.php'; // Fallback
+    $currentLang = 'zh_TW';
 }
 $L = include $langFile;
 
@@ -41,6 +43,26 @@ $L = include $langFile;
 function __($key, $default = '') {
     global $L;
     return isset($L[$key]) ? $L[$key] : ($default ? $default : $key);
+}
+
+/**
+ * 獲取網頁顯示用的語系代碼 (例如 zh-TW)
+ */
+function getWebLang() {
+    global $currentLang;
+    return str_replace('_', '-', $currentLang);
+}
+
+/**
+ * 獲取 JS 語系包路徑 (內部固定用底線檔名)
+ */
+function getAdminLangJs() {
+    global $currentLang;
+    $path = "../langs/admin-{$currentLang}.js";
+    if (!file_exists(__DIR__ . '/' . $path)) {
+        $path = "../langs/admin-zh_TW.js";
+    }
+    return $path;
 }
 
 /**
@@ -55,10 +77,8 @@ function getAvailableLangs($prefix) {
             $langCode = str_replace([$prefix, '.php'], '', basename($file));
             // 簡單對應顯示名稱 (以後可以從語系檔內讀取一個特定 key)
             $names = [
-                'zh_TW' => '繁體中文 (zh_TW)',
-                'en_US' => 'English (en_US)',
-                'zh-TW' => '繁體中文 (zh-TW)',
-                'en-US' => 'English (en-US)'
+                'zh_TW' => '繁體中文 (zh-TW)',
+                'en_US' => 'English (en-US)'
             ];
             $langs[$langCode] = isset($names[$langCode]) ? $names[$langCode] : $langCode;
         }

@@ -56,7 +56,7 @@ function is_active($page, $current) {
         </li>
         <li>
             <a href="health_check.php" class="<?php echo is_active('health_check.php', $current_page); ?>">
-                <i class="bi bi-heart-pulse"></i> 環境檢查 (Health)
+                <i class="bi bi-heart-pulse"></i> <?php echo __('health_check'); ?> (Health)
             </a>
         </li>
     </ul>

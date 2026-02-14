@@ -26,7 +26,8 @@ $config = array(
     'blog_description' => $GLOBALS['blog_description'],
     'blog_introduce' => $GLOBALS['blog_introduce'],
     'site_url' => $GLOBALS['site_url'],
-    'blog_preview' => $GLOBALS['blog_preview']
+    'blog_preview' => $GLOBALS['blog_preview'],
+    'blog_favicon' => isset($GLOBALS['blog_favicon']) ? $GLOBALS['blog_favicon'] : '/static/icon-192.png'
 );
 
 // Instantiate Generator

@@ -62,6 +62,65 @@ $filename .= '.html';
 
 $isDraft = isset($_POST['is_draft']) && $_POST['is_draft'] == '1';
 
+// --- SEO Preview Image Processing ---
+if (isset($_FILES['preview_image']) && $_FILES['preview_image']['error'] === UPLOAD_ERR_OK) {
+    $previewDir = dirname(__DIR__) . '/preview';
+    if (!is_dir($previewDir)) mkdir($previewDir, 0755, true);
+    
+    $cleanFn = pathinfo($filename, PATHINFO_FILENAME);
+    $targetPath = $previewDir . '/icon-' . $cleanFn . '.jpg';
+    $tmpPath = $_FILES['preview_image']['tmp_name'];
+    
+    $width = 1200; $height = 630;
+    $processed = false;
+
+    // A. Try Imagick
+    if (extension_loaded('imagick')) {
+        try {
+            $img = new Imagick($tmpPath);
+            $img->setImageFormat('jpg');
+            $img->setImageCompressionQuality(90);
+            $img->cropThumbnailImage($width, $height);
+            $img->writeImage($targetPath);
+            $img->clear();
+            $processed = true;
+        } catch (Exception $e) {}
+    }
+
+    // B. Fallback to GD
+    if (!$processed && function_exists('imagecreatefromjpeg')) {
+        $info = getimagesize($tmpPath);
+        if ($info) {
+            $src = null;
+            switch ($info[2]) {
+                case IMAGETYPE_JPEG: $src = imagecreatefromjpeg($tmpPath); break;
+                case IMAGETYPE_PNG:  $src = imagecreatefrompng($tmpPath); break;
+                case IMAGETYPE_WEBP: $src = imagecreatefromwebp($tmpPath); break;
+            }
+            if ($src) {
+                $dst = imagecreatetruecolor($width, $height);
+                $srcW = imagesx($src); $srcH = imagesy($src);
+                
+                // Calculate crop
+                $ratio = max($width / $srcW, $height / $srcH);
+                $newW = round($srcW * $ratio); $newH = round($srcH * $ratio);
+                $offX = round(($newW - $width) / 2 / $ratio);
+                $offY = round(($newH - $height) / 2 / $ratio);
+                
+                imagecopyresampled($dst, $src, 0, 0, $offX, $offY, $width, $height, round($width / $ratio), round($height / $ratio));
+                imagejpeg($dst, $targetPath, 90);
+                imagedestroy($src); imagedestroy($dst);
+                $processed = true;
+            }
+        }
+    }
+    
+    if (!$processed) {
+        // If all failed, just move original (not ideal but safe)
+        move_uploaded_file($tmpPath, $targetPath);
+    }
+}
+
 try {
     $saveData = array(
         'id' => $id,

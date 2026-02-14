@@ -44,7 +44,7 @@ $exportTarget = isset($_POST['export_target']) ? $_POST['export_target'] : 'file
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

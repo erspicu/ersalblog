@@ -30,8 +30,15 @@ if (is_dir($collectionDir)) {
             if (!empty($cover)) {
                 $coverFn = basename($cover);
                 $info = pathinfo($coverFn);
-                $xsPath = $albumPath . '/Thumbnail/' . $info['filename'] . '_thumbXS.jpg';
-                $coverUrl = file_exists($xsPath) ? $baseUrl . '/' . $dir . '/Thumbnail/' . $info['filename'] . '_thumbXS.jpg' : $baseUrl . '/' . $dir . '/' . $coverFn;
+                $xsName = $info['filename'] . '_XS.' . $info['extension'];
+                $sName = $info['filename'] . '_S.' . $info['extension'];
+                if (file_exists($albumPath . '/Thumbnail/' . $xsName)) {
+                    $coverUrl = $baseUrl . '/' . $dir . '/Thumbnail/' . $xsName;
+                } elseif (file_exists($albumPath . '/Thumbnail/' . $sName)) {
+                    $coverUrl = $baseUrl . '/' . $dir . '/Thumbnail/' . $sName;
+                } else {
+                    $coverUrl = $baseUrl . '/' . $dir . '/' . $coverFn;
+                }
             }
             $albums[] = array('id' => $dir, 'name' => $displayName, 'desc' => $desc, 'date' => $date, 'coverUrl' => $coverUrl);
         }
@@ -45,13 +52,14 @@ $offset = ($page - 1) * $perPage;
 $pagedAlbums = array_slice($albums, $offset, $perPage);
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('manage_albums'); ?> - 相簿列表</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <script src="assets/js/sweetalert2.all.min.js"></script>
+    <script src="<?php echo getAdminLangJs(); ?>"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .album-card img { width: 100%; height: 150px; object-fit: contain; background-color: #f0f0f0; }
@@ -62,18 +70,13 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
     </style>
 </head>
 <body>
-
 <div class="d-flex">
     <?php require 'sidebar_inc.php'; ?>
-
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><?php echo __('manage_albums'); ?> <small class="text-muted fs-6">(<?php echo sprintf(__('total_count'), $totalAlbums); ?>)</small></h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
-                <i class="bi bi-plus-lg"></i> <?php echo __('create_album'); ?>
-            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlbumModal"><i class="bi bi-plus-lg"></i> <?php echo __('create_album'); ?></button>
         </div>
-
         <div class="row g-2 mb-4">
             <?php foreach ($pagedAlbums as $album): ?>
             <div class="col-6 col-md-4 col-lg-3 col-custom-8">
@@ -93,24 +96,14 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
                 </div>
             </div>
             <?php endforeach; ?>
-            <?php if (empty($pagedAlbums)): ?><div class="col-12 text-center py-5 text-muted"><?php echo __('no_albums'); ?></div><?php endif; ?>
         </div>
-
-        <?php if ($totalPages > 1): ?>
-        <nav class="mt-4"><ul class="pagination justify-content-center">
-            <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=<?php echo $page - 1; ?>">&laquo;</a></li>
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?><li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>"><a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li><?php endfor; ?>
-            <li class="page-item <?php echo ($page >= $totalPages) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=<?php echo $page + 1; ?>">&raquo;</a></li>
-        </ul></nav>
-        <?php endif; ?>
     </div>
 </div>
 
 <div class="modal fade" id="createAlbumModal" tabindex="-1">
     <div class="modal-dialog">
         <form action="album_actions.php" method="post" class="modal-content">
-            <input type="hidden" name="action" value="create_album">
-            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+            <input type="hidden" name="action" value="create_album"><input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <div class="modal-header"><h5 class="modal-title"><?php echo __('create_album'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="mb-3"><label class="form-label"><?php echo __('dir_name'); ?></label><input type="text" name="dir_name" class="form-control" required pattern="[A-Za-z0-9_-]+" title="<?php echo __('dir_name_hint'); ?>"><small class="text-muted"><?php echo __('dir_name_hint'); ?></small></div>
@@ -134,34 +127,68 @@ function confirmDelete(id) {
 }
 
 function rebuildAlbum(id) {
+    let pollingInterval = null;
+    const pid = 'album_' + Date.now();
     Swal.fire({
-        title: 'Processing...',
-        text: '正在更新相簿 JSON 與縮圖快取...',
+        title: adminLang.rebuilding_title,
+        html: `
+            <div class="task-list text-start" style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
+                <div style="border-bottom: 1px solid #e9ecef; padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: bold; color: #495057;">${adminLang.task_panel_album}</span>
+                    <span id="panel-album-val" style="color: #0d6efd; font-family: monospace;">-- / --</span>
+                </div>
+                <div style="border-bottom: 1px solid #e9ecef; padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: bold; color: #495057;">${adminLang.task_panel_photo}</span>
+                    <span id="panel-photo-val" style="color: #0d6efd; font-family: monospace;">-- / --</span>
+                </div>
+                <div class="mt-2 small">
+                    <span style="font-weight:bold; color:#495057; display:block; mb-1">${adminLang.task_panel_current}</span>
+                    <div id="swal-progress-text" class="text-muted border-start ps-2" style="min-height: 1.2em;">${adminLang.initializing}</div>
+                </div>
+            </div>
+        `,
         allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            pollingInterval = setInterval(() => {
+                const fd = new FormData();
+                fd.append('action', 'get_rebuild_progress');
+                fd.append('progress_id', pid);
+                fd.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+                fd.append('t', Date.now());
+                fetch('album_actions.php', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(data => {
+                    const albumVal = document.getElementById('panel-album-val');
+                    const photoVal = document.getElementById('panel-photo-val');
+                    const textEl = document.getElementById('swal-progress-text');
+                    if (data.status !== 'waiting') {
+                        if (albumVal) albumVal.innerText = (data.album_current) ? `${data.album_current} / ${data.album_total || 1}` : '-- / --';
+                        if (photoVal) photoVal.innerText = (data.photo_current) ? `${data.photo_current} / ${data.photo_total}` : '-- / --';
+                        if (textEl) textEl.innerText = data.message || adminLang.processing_msg;
+                    }
+                    if (data.status === 'done') clearInterval(pollingInterval);
+                }).catch(e => {});
+            }, 1000);
+        }
     });
 
     const formData = new FormData();
     formData.append('action', 'rebuild_album');
     formData.append('album_id', id);
+    formData.append('progress_id', pid);
     formData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
 
-    fetch('album_actions.php', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('album_actions.php', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
-        if (data.status === 'success') {
-            Swal.fire('Success', data.message, 'success').then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire('Error', data.message || '更新失敗', 'error');
-        }
+        clearInterval(pollingInterval);
+        Swal.fire(data.status === 'success' ? adminLang.success : adminLang.error, data.message, data.status).then(() => location.reload());
     })
     .catch(error => {
-        Swal.fire('Error', '網路錯誤或伺服器異常', 'error');
+        clearInterval(pollingInterval);
+        Swal.fire(adminLang.error, adminLang.error_network, 'error');
     });
 }
 </script>

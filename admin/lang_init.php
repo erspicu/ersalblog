@@ -12,9 +12,8 @@ if (is_dir($langBaseDir)) {
     $scan = scandir($langBaseDir);
     foreach ($scan as $f) {
         if ($f !== '.' && $f !== '..' && pathinfo($f, PATHINFO_EXTENSION) === 'php') {
-            // 過濾掉 install 開頭 (雖然我們只找 admin-，但明確排除也好，不過主要邏輯是只收 admin-)
             if (strpos($f, 'admin-') === 0) {
-                // 移除 admin- 前綴，只保留語系代碼 (如 en_US)
+                // 檔名內部一律使用底線 (如 zh_TW)
                 $code = str_replace('admin-', '', pathinfo($f, PATHINFO_FILENAME));
                 $availableLangs[] = $code;
             }
@@ -23,31 +22,43 @@ if (is_dir($langBaseDir)) {
 }
 
 // 偵測與設定語系 (同時支援 GET 切換與 Cookie 讀取)
-// 如果在登入頁面已經設定 Cookie，這裡會直接讀取
-$currentLang = isset($_COOKIE['admin_lang']) ? $_COOKIE['admin_lang'] : $defaultLang;
+// 外部參數若傳入連字號 (zh-TW)，此處會自動轉為底線 (zh_TW)
+$rawLang = isset($_COOKIE['admin_lang']) ? $_COOKIE['admin_lang'] : $defaultLang;
+if (isset($_GET['lang'])) {
+    $rawLang = $_GET['lang'];
+}
+$currentLang = str_replace('-', '_', $rawLang);
 
-// 如果網址帶有 ?lang=xxx 且該語系有效，則更新 Cookie (支援登入後切換)
-if (isset($_GET['lang']) && in_array($_GET['lang'], $availableLangs)) {
-    $currentLang = $_GET['lang'];
-    // 重新設定 Cookie，確保同步
+// 驗證語系是否有效
+if (!in_array($currentLang, $availableLangs)) {
+    $currentLang = $defaultLang;
+}
+
+// 重新設定 Cookie，確保同步
+if (!isset($_COOKIE['admin_lang']) || $_COOKIE['admin_lang'] !== $currentLang) {
     setcookie('admin_lang', $currentLang, time() + 86400 * 30, '/'); 
 }
 
-// 載入語系檔 (加上 admin- 前綴)
+// 載入語系檔
 $langFile = $langBaseDir . '/admin-' . $currentLang . '.php';
 if (file_exists($langFile)) {
     $lang = require $langFile;
 } else {
-    // Fallback
     $lang = require $langBaseDir . '/admin-' . $defaultLang . '.php';
 }
 
 /**
  * 翻譯函式
- * @param string $key 語系檔中的 Key
- * @return string 翻譯後的文字，若找不到則回傳 Key
  */
 function __($key) {
     global $lang;
     return isset($lang[$key]) ? $lang[$key] : $key;
+}
+
+/**
+ * 獲取網頁顯示用的語系代碼 (例如 zh-TW)
+ */
+function getWebLang() {
+    global $currentLang;
+    return str_replace('_', '-', $currentLang);
 }

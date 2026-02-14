@@ -20,7 +20,7 @@ if (strpos(strtolower(php_uname()), 'microsoft') !== false || strpos(strtolower(
 }
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <title><?php echo __('health_check'); ?> - Album Admin</title>
@@ -85,16 +85,25 @@ if (strpos(strtolower(php_uname()), 'microsoft') !== false || strpos(strtolower(
                         if (extension_loaded('imagick')) {
                             try {
                                 $im = new Imagick();
-                                $formats = $im->queryFormats('JPG');
+                                $allFormats = $im->queryFormats();
+                                $targets = ['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF'];
+                                $supported = [];
+                                foreach ($targets as $t) {
+                                    if (in_array($t, $allFormats)) $supported[] = $t;
+                                }
+                                
                                 echo '<div class="alert alert-success d-flex align-items-center mb-0">';
-                                echo '<i class="bi bi-check-circle-fill me-2 fs-4"></i>';
-                                echo '<div><strong>Success!</strong> Imagick engine is ready. Supported formats: ' . (in_array('JPG', $formats) ? 'JPG ' : '') . (in_array('PNG', $formats) ? 'PNG' : '') . '</div>';
+                                echo '<i class="bi bi-check-circle-fill me-3 fs-3"></i>';
+                                echo '<div>';
+                                echo '<strong>' . __('imagick_ok') . '</strong><br>';
+                                echo '<small>' . __('imagick_supported') . ' ' . implode(', ', $supported) . '</small>';
+                                echo '</div>';
                                 echo '</div>';
                             } catch (Exception $e) {
-                                echo '<div class="alert alert-danger mb-0">❌ Test Failed: ' . $e->getMessage() . '</div>';
+                                echo '<div class="alert alert-danger mb-0"><strong>' . __('imagick_fail') . '</strong> ' . $e->getMessage() . '</div>';
                             }
                         } else {
-                            echo '<div class="alert alert-secondary mb-0">Extension "imagick" is not loaded. Skipping test.</div>';
+                            echo '<div class="alert alert-secondary mb-0">' . __('imagick_not_found') . '</div>';
                         }
                         ?>
                     </div>

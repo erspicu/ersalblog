@@ -244,11 +244,18 @@ if ($action === 'list_albums') {
             }
         }
 
+        // 取得原始解析度
+        $imgInfo = @getimagesize($photoPath);
+        $width = $imgInfo ? $imgInfo[0] : 0;
+        $height = $imgInfo ? $imgInfo[1] : 0;
+
         $photoList[] = array(
             'filename' => $filename,
             'title' => $meta['title'],
             'desc' => $meta['desc'],
             'src' => $baseUrl . '/' . $albumName . '/' . $filename,
+            'width' => $width,
+            'height' => $height,
             'sizes' => $sizes,
             'exif' => getExifData($photoPath),
             'shortIdStart' => $index * (count($thumbConfigs) + 1)

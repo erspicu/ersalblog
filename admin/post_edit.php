@@ -24,22 +24,23 @@ $post = array(
 );
 
 $pageTitle = __('edit_title_new');
+$filename = '';
 
 if ($id) {
     $fetched = $dataManager->getPost($id);
     if ($fetched) {
         $post = $fetched;
         $pageTitle = __('edit_title_edit');
+        $filename = $post['post_filename'];
     } else {
         die(__('post_not_found'));
     }
 }
 
 // Get all categories for checkboxes
-$allCatsData = $dataManager->getAllCategories(); // Returns ['CatName' => Count, ...]
+$allCatsData = $dataManager->getAllCategories(); 
 $allCats = array_keys($allCatsData);
 
-// Current post categories (Handle both string and array just in case)
 $currentCats = $post['post_categories'];
 if (!is_array($currentCats)) {
     $currentCats = explode(',', isset($currentCats) ? $currentCats : '');
@@ -47,73 +48,28 @@ if (!is_array($currentCats)) {
 $currentCats = array_map('trim', $currentCats);
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
-        .sidebar a { color: #cfd2d6; text-decoration: none; padding: 10px 15px; display: block; }
+        .sidebar { min-height: 100vh; background-color: #343a40; color: white; position: fixed; top: 0; left: 0; width: 250px; z-index: 1000; overflow-y: auto; }
+        .sidebar a { color: #adb5bd; text-decoration: none; padding: 10px 15px; display: block; }
         .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
-        .main-content { padding: 20px; }
+        .main-content { margin-left: 250px; width: calc(100% - 250px); min-height: 100vh; padding: 20px; }
+        .breadcrumb-item a { text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column flex-shrink-0 p-3" style="width: 250px;">
-        <a href="index.php" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4"><?php echo __('nav_brand'); ?></span>
-        </a>
-        <hr>
-        <div class="text-center mb-3">
-            <span class="badge <?php echo ($dataManager->getSource() === 'db') ? 'bg-success' : 'bg-warning text-dark'; ?>">
-                <?php echo __('mode_label'); ?>: <?php echo ($dataManager->getSource() === 'db') ? __('mode_db_short') : __('mode_file_short'); ?>
-            </span>
-        </div>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-                <a href="index.php">
-                    <?php echo __('nav_dashboard'); ?>
-                </a>
-            </li>
-            <li>
-                <a href="posts.php" class="active">
-                    <?php echo __('nav_posts'); ?>
-                </a>
-            </li>
-            <li>
-                <a href="categories.php">
-                    <?php echo __('nav_categories'); ?>
-                </a>
-            </li>
-            <?php if ($dataManager->getSource() === 'file'): ?>
-            <li>
-                <a href="tool_migrate.php">
-                    <?php echo __('nav_import'); ?>
-                </a>
-            </li>
-            <?php endif; ?>
-            <li>
-                <a href="settings.php">
-                    <?php echo __('nav_settings'); ?>
-                </a>
-            </li>
-        </ul>
-        <hr>
-        <div class="dropdown">
-            <a href="../blog.html" target="_blank"><?php echo __('nav_preview'); ?></a>
-            <a href="logout.php" class="text-danger mt-2"><?php echo __('nav_logout'); ?></a>
-        </div>
-    </div>
+    <?php require 'sidebar_inc.php'; ?>
 
-    <!-- Main Content -->
     <div class="main-content flex-grow-1 bg-light">
         <div class="d-flex justify-content-between align-items-center mb-3">
-             <!-- 麵包屑導航 (Optional) -->
              <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="posts.php"><?php echo __('breadcrumb_home'); ?></a></li>
@@ -127,11 +83,9 @@ $currentCats = array_map('trim', $currentCats);
                 <h4 class="mb-0"><?php echo $pageTitle; ?></h4>
             </div>
             <div class="card-body">
-        <form action="post_save.php" method="POST">
-            <!-- CSRF Token -->
-            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
-            
-            <input type="hidden" name="old_filename" value="<?php echo htmlspecialchars($filename); ?>">
+                <form action="post_save.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+                    <input type="hidden" name="old_filename" value="<?php echo htmlspecialchars($filename); ?>">
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars(isset($id) ? $id : ''); ?>">
                     
                     <div class="mb-3">
@@ -191,23 +145,35 @@ $currentCats = array_map('trim', $currentCats);
                         <input type="text" name="post_description" class="form-control" value="<?php echo htmlspecialchars($post['post_description']); ?>" placeholder="<?php echo __('ph_desc_seo'); ?>">
                     </div>
 
+                    <!-- SEO Preview Image Upload -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_preview_image'); ?></label>
+                        <div class="form-text mb-1"><?php echo __('hint_preview_image'); ?> (1200x630)</div>
+                        <div class="input-group">
+                            <input type="file" name="preview_image" class="form-control" accept="image/*">
+                            <?php 
+                            $cleanFn = pathinfo($post['post_filename'], PATHINFO_FILENAME);
+                            $previewPath = '../preview/icon-' . $cleanFn . '.jpg';
+                            if (!empty($cleanFn) && file_exists($previewPath)): 
+                            ?>
+                                <span class="input-group-text bg-success text-white">
+                                    <i class="bi bi-check-circle-fill"></i> <?php echo __('msg_preview_exists'); ?>
+                                </span>
+                                <a href="<?php echo $previewPath; ?>?t=<?php echo time(); ?>" target="_blank" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end align-items-center">
                         <div class="form-check me-3">
-                            <input class="form-check-input" type="checkbox" name="auto_build" value="1" id="autoBuildCheck">
-                            <label class="form-check-label" for="autoBuildCheck">
-                                <?php echo __('label_auto_build'); ?>
-                            </label>
+                            <input class="form-check-input" type="checkbox" name="auto_build" value="1" id="autoBuildCheck" checked>
+                            <label class="form-check-label" for="autoBuildCheck"><?php echo __('label_auto_build'); ?></label>
                         </div>
-
                         <a href="posts.php" class="btn btn-outline-secondary me-md-2"><?php echo __('btn_cancel'); ?></a>
-                        
-                        <button type="submit" name="is_draft" value="1" class="btn btn-warning text-dark px-4">
-                            <i class="bi bi-journal-text"></i> <?php echo isset($lang['btn_save_draft']) ? $lang['btn_save_draft'] : '暫存草稿'; ?>
-                        </button>
-                        
-                        <button type="submit" name="is_draft" value="0" class="btn btn-success px-5">
-                            <i class="bi bi-send"></i> <?php echo isset($lang['btn_save_publish']) ? $lang['btn_save_publish'] : '正式發布'; ?>
-                        </button>
+                        <button type="submit" name="is_draft" value="1" class="btn btn-warning text-dark px-4"><i class="bi bi-journal-text"></i> <?php echo __('btn_save_draft'); ?></button>
+                        <button type="submit" name="is_draft" value="0" class="btn btn-success px-5"><i class="bi bi-send"></i> <?php echo __('btn_save_publish'); ?></button>
                     </div>
                 </form>
             </div>
@@ -218,15 +184,7 @@ $currentCats = array_map('trim', $currentCats);
 <?php require 'common_js_inc.php'; ?>
 <script src="assets/js/tinymce/tinymce.min.js"></script>
 <?php if ($album_enabled): ?>
-<?php 
-    // 加入版本號以防快取
-    $jsVer = defined('APP_VERSION') ? APP_VERSION : time();
-?>
-<script src="assets/js/album_selector.js?v=<?php echo $jsVer; ?>"></script>
-<?php endif; ?>
-
-<!-- Album Selector Modal -->
-<?php if ($album_enabled): ?>
+<script src="assets/js/album_selector.js?v=<?php echo time(); ?>"></script>
 <div class="modal fade" id="albumSelectorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
@@ -236,18 +194,11 @@ $currentCats = array_map('trim', $currentCats);
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <button type="button" id="btn-back-to-albums" class="btn btn-sm btn-secondary d-none">
-                        <i class="bi bi-chevron-left"></i> <?php echo __('btn_back_to_albums'); ?>
-                    </button>
-                    <div></div>
+                    <button type="button" id="btn-back-to-albums" class="btn btn-sm btn-secondary d-none"><i class="bi bi-chevron-left"></i> <?php echo __('btn_back_to_albums'); ?></button>
                 </div>
-                <div id="album-picker-container">
-                    <!-- 動態載入內容 -->
-                </div>
+                <div id="album-picker-container"></div>
             </div>
-            <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('btn_cancel'); ?></button>
-            </div>
+            <div class="modal-footer py-2"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('btn_cancel'); ?></button></div>
         </div>
     </div>
 </div>
@@ -255,26 +206,16 @@ $currentCats = array_map('trim', $currentCats);
 
 <script>
     <?php if ($album_enabled): ?>
-    // 初始化相簿挑選器
     window.albumPicker = new AlbumSelector({
         albumPath: '<?php echo $actual_album_path; ?>',
         lang: {
-            loading_albums: '<?php echo __('album_loading'); ?>',
-            loading_photos: '<?php echo __('photo_loading'); ?>',
-            no_albums: '<?php echo __('no_albums_found'); ?>',
-            no_photos: '<?php echo __('no_photos_found'); ?>',
-            album_label: '<?php echo __('label_album_name'); ?>',
-            upload_btn: '<?php echo __('btn_direct_upload'); ?>',
-            uploading_msg: '<?php echo __('uploading_wait'); ?>',
-            selected_msg: '<?php echo __('msg_selected'); ?>',
-            size_original: '<?php echo __('btn_size_original'); ?>',
-            size_large: '<?php echo __('btn_size_large'); ?>',
-            size_medium: '<?php echo __('btn_size_medium'); ?>',
-            cancel_btn: '<?php echo __('btn_cancel'); ?>',
-            close_btn: '<?php echo __('close_btn'); ?>'
+            loading_albums: '<?php echo __('album_loading'); ?>', loading_photos: '<?php echo __('photo_loading'); ?>',
+            no_albums: '<?php echo __('no_albums_found'); ?>', no_photos: '<?php echo __('no_photos_found'); ?>',
+            album_label: '<?php echo __('label_album_name'); ?>', upload_btn: '<?php echo __('btn_direct_upload'); ?>',
+            uploading_msg: '<?php echo __('uploading_wait'); ?>', selected_msg: '<?php echo __('msg_selected'); ?>',
+            size_original: '<?php echo __('btn_size_original'); ?>', cancel_btn: '<?php echo __('btn_cancel'); ?>', close_btn: '<?php echo __('close_btn'); ?>'
         },
         onSelect: function(url, filename) {
-            // 插入圖片到 TinyMCE
             if (tinymce.activeEditor) {
                 tinymce.activeEditor.insertContent(`<img src="${url}" alt="${filename}" style="max-width:100%; height:auto;">`);
             }
@@ -284,33 +225,13 @@ $currentCats = array_map('trim', $currentCats);
 
     document.addEventListener('DOMContentLoaded', function() {
         tinymce.init({
-            selector: 'textarea[name="post_content"]',
-            height: 500,
-            menubar: true,
+            selector: 'textarea[name="post_content"]', height: 500, menubar: true,
             plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
             toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview | image media link anchor codesample | code',
-            toolbar_sticky: true,
-            promotion: false, // 關閉升級提示
-            branding: false,  // 關閉右下角品牌標記
-            
-            // 語系設定
+            toolbar_sticky: true, promotion: false, branding: false,
             <?php echo ($currentLang === 'zh_TW') ? "language: 'zh_TW'," : ""; ?>
-
-            // 關鍵設定：繼續閱讀
-            pagebreak_separator: '<!--more-->',
-            pagebreak_split_block: true,
-            
-            image_advtab: true,
-            valid_elements: '*[*]', // 允許所有 HTML
-            extended_valid_elements: '*[*]',
-            verify_html: false,
-            
-            // 自動同步內容回 textarea
-            setup: function (editor) {
-                editor.on('change', function () {
-                    editor.save();
-                });
-            }
+            pagebreak_separator: '<!--more-->', pagebreak_split_block: true, image_advtab: true, valid_elements: '*[*]', extended_valid_elements: '*[*]', verify_html: false,
+            setup: function (editor) { editor.on('change', function () { editor.save(); }); }
         });
     });
 </script>

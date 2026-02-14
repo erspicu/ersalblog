@@ -13,6 +13,7 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
 *   **Admin Power-ups**:
     *   **Selective SSG Build**: Trigger static page generation directly from the post editor or a dedicated build management interface.
     *   **Visual Editor**: Locally-hosted TinyMCE 6 for a seamless "What You See Is What You Get" writing experience.
+    *   **SEO Optimization**: Support for custom OG Image (1200x630) uploads and dynamically configurable site Favicon.
     *   **Advanced Dashboard**: Real-time system health checks, database statistics, and static file status monitoring.
     *   **Smart Navigation**: Fixed sidebar layout with unified navigation for efficient management.
     *   **Post Pagination**: Server-side pagination (15 posts/page) for fast browsing of large archives.
@@ -20,17 +21,17 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
     *   **Script Protection**: Built-in HTML escaping for `<script>` tags to prevent execution in posts while keeping content readable.
     *   **Rate Limiting & CSRF**: Secure login with IP-based lockout and full CSRF protection for all admin actions.
 *   **Deployment Ready**: Optimized Python minification script for JS/CSS assets and incremental build support.
-*   **Multi-language**: Fully localized admin and frontend (T. Chinese/English).
+*   **Multi-language**: Fully localized admin and frontend (T. Chinese/English) with standardized hyphen/underscore handling.
 
 ---
 
 ### 🚀 Key Features Highlights
 
-#### 1. SSG Pipeline Refactoring
-The core build logic is now encapsulated in `PHPLib\StaticGenerator`, enabling consistent rendering across CLI and Web interfaces. It supports incremental builds based on file modification times.
+#### 1. SEO & Social Sharing
+Upload custom preview images for each post. The system automatically crops them to the social media standard 1200x630 resolution. Manage your site identity with a configurable Favicon path directly from the settings panel.
 
-#### 2. Advanced Post Management
-Manage your content with ease through a paginated list and a visual editor. The system automatically detects missing static files and alerts you on the dashboard.
+#### 2. SSG Pipeline Refactoring
+The core build logic is now encapsulated in `PHPLib\StaticGenerator`, enabling consistent rendering across CLI and Web interfaces. It supports incremental builds based on file modification times.
 
 #### 3. Secure & Private
 No external CDNs required for core functionality. TinyMCE, SweetAlert2, and Bootstrap are all bundled for maximum privacy and performance.
@@ -76,7 +77,7 @@ Configurable in `config.js` via `theme_file`. Supports:
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.14.12.31` (UTC+8)
+Version: `v2026.02.14.15.27` (UTC+8)
 CLI Version: `Gemini CLI`
 Model: `Gemini CLI`
 
@@ -92,6 +93,7 @@ Model: `Gemini CLI`
 *   **無資料庫支援**: 可完全運行於純文字檔案，亦支援 MySQL 與 SQLite 3 提供擴充性。
 *   **統一 API 架構**: 所有儲存模式的資料接口皆由單一核心邏輯驅動，大幅提升系統一致性與維護便利性。
 *   **強大後台**:
+    *   **SEO 優化**: 支援上傳自定義 OG Image (1200x630) 與動態網站圖示 (Favicon) 設定。
     *   **選擇性建置**: 可直接從文章編輯器或專用的建置管理介面觸發靜態網頁生成。
     *   **視覺化編輯器**: 內建 TinyMCE 6，提供所見即所得的流暢寫作體驗。
     *   **進階儀表板**: 即時系統健康檢查、資料庫統計及靜態檔案狀態監測。
@@ -101,17 +103,17 @@ Model: `Gemini CLI`
     *   **腳本防護**: 內建 `<script>` 標籤轉義機制，防止文章內的腳本執行，同時保留技術內容的可讀性。
     *   **安全防禦**: IP 登入鎖定機制與全站 CSRF 防護。
 *   **部署優化**: 內建 Python 壓縮腳本與增量建置支援，顯著縮短部屬時間。
-*   **多語系**: 完整的後台與前台語系支援（繁中/英文）。
+*   **多語系**: 完整的後台與前台語系支援（繁中/英文），並統一檔案與標籤代碼規範。
 
 ---
 
 ### 🚀 重點功能摘要
 
-#### 1. SSG 建置管線重構
-核心建置邏輯封裝於 `PHPLib\StaticGenerator`，確保 CLI 與 Web 介面渲染結果一致，並支援基於檔案修改時間的增量建置。
+#### 1. SEO 與社交分享
+每篇文章皆可上傳專屬預覽圖，系統自動裁切為 1200x630 標準規格。支援透過後端設定網站 Favicon 路徑，提升品牌識別度。
 
-#### 2. 進階文章管理
-透過分頁列表與視覺化編輯器輕鬆管理內容。系統會自動偵測缺失的靜態檔案，並在儀表板即時提醒。
+#### 2. SSG 建置管線重構
+核心建置邏輯封裝於 `PHPLib\StaticGenerator`，確保 CLI 與 Web 介面渲染結果一致，並支援基於檔案修改時間的增量建置。
 
 #### 3. 安全與隱私
 核心功能不依賴外部 CDN。TinyMCE、SweetAlert2 與 Bootstrap 全數內建，確保極致的隱私與連線效能。
@@ -132,6 +134,6 @@ Model: `Gemini CLI`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.14.12.31` (UTC+8)
+版本號: `v2026.02.14.15.27` (UTC+8)
 CLI 版本: `Gemini CLI`
 模型名稱: `Gemini CLI`

@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,8 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php 
                     $adminLangs = getAvailableLangs('admin-');
                     foreach ($adminLangs as $code => $name): 
+                        $webCode = str_replace('_', '-', $code);
                     ?>
-                        <option value="<?php echo $code; ?>" <?php echo ($currentLang == $code ? 'selected' : ''); ?>><?php echo $name; ?></option>
+                        <option value="<?php echo $webCode; ?>" <?php echo ($currentLang == $code ? 'selected' : ''); ?>><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

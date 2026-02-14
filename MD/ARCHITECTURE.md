@@ -33,7 +33,9 @@ The system supports two operating modes:
 ### 1.3 Configuration and Environment
 *   **Sensitive Data Separation**: `config.php` and `config.js` contain database passwords and API settings and are ignored by Git.
 *   **Theming System**: Configurable via `config.js`. Supports multiple CSS themes and dynamic loading of `{theme}.js` for theme-specific logic.
-*   **Theme Takeover Protocol**: Specific themes (like Win11) can take full control of UI rendering, bypassing default SPA logic to save resources.
+*   **Customization**: 
+    *   **Blog Favicon**: Configurable via `admin/settings.php`, allowing users to define custom icon paths stored in `config.php`.
+    *   **SEO Preview (OG Image)**: Automatic processing of uploaded preview images, resized to 1200x630 and stored in `preview/` for social media sharing.
 
 *   **Album Service**:
     *   Located in the `/album` directory as an independent service.
@@ -103,6 +105,9 @@ The system supports two operating modes:
 
 ### 1.3 設定與環境 (Configuration)
 *   **主題系統**: 支援多重 CSS 主題與動態載入的主題插件 (`{theme}.js`)。
+*   **自定義設定**: 
+    *   **網站圖示 (Favicon)**: 可透過 `admin/settings.php` 設定，將路徑儲存於 `config.php` 並動態套用至樣板。
+    *   **SEO 預覽圖 (OG Image)**: 支援文章編輯時上傳預覽圖，自動裁切為 1200x630 並存於 `preview/` 目錄供社群分享抓取。
 *   **相簿服務 (Album Service)**:
     *   位於 `/album` 目錄下的獨立服務，具備專屬架構。
     *   **核心處理引擎**: 由 `AlbumGenerator` 類別驅動，封裝掃描、Exif 解析、縮圖生成與 JSON 維護邏輯，達成 CLI 與 Web 後台邏輯統一。

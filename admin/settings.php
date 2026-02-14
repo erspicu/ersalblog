@@ -29,6 +29,7 @@ $currentConfig['album_path'] = isset($GLOBALS['album_path']) ? $GLOBALS['album_p
 $currentConfig['blog_title'] = isset($GLOBALS['blog_title']) ? $GLOBALS['blog_title'] : '';
 $currentConfig['blog_description'] = isset($GLOBALS['blog_description']) ? $GLOBALS['blog_description'] : '';
 $currentConfig['blog_introduce'] = isset($GLOBALS['blog_introduce']) ? $GLOBALS['blog_introduce'] : '';
+$currentConfig['blog_favicon'] = isset($GLOBALS['blog_favicon']) ? $GLOBALS['blog_favicon'] : '/static/icon-192.png';
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newTitle = isset($_POST['blog_title']) ? $_POST['blog_title'] : '';
         $newDesc = isset($_POST['blog_description']) ? $_POST['blog_description'] : '';
         $newIntro = isset($_POST['blog_introduce']) ? $_POST['blog_introduce'] : '';
+        $newFavicon = isset($_POST['blog_favicon']) ? $_POST['blog_favicon'] : '/static/icon-192.png';
 
         // --- 防呆檢查 ---
         if ($newPerPage <= 0) {
@@ -73,6 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phpContent = preg_replace('/(\$blog_timezone\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newTimezone . '${3}', $phpContent);
             $phpContent = preg_replace('/(\$posts_per_page\s*=\s*)([^;]*)(;)/', '${1}' . $newPerPage . '${3}', $phpContent);
             
+            // Handle Favicon
+            if (strpos($phpContent, '$blog_favicon') !== false) {
+                $phpContent = preg_replace('/(\$blog_favicon\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newFavicon) . '${3}', $phpContent);
+            } else {
+                $phpContent = str_replace('?>', "\$blog_favicon = " . var_export($newFavicon, true) . "; // Blog Favicon路徑\n?>", $phpContent);
+            }
+
             if (strpos($phpContent, '$album_path') !== false) {
                 $phpContent = preg_replace('/(\$album_path\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newAlbumPath . '${3}', $phpContent);
             } else {
@@ -131,7 +140,7 @@ if (empty($themes)) $themes = array('blog');
 
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars(isset($currentLang) ? $currentLang : 'zh_TW'); ?>">
+<html lang="<?php echo getWebLang(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -238,6 +247,12 @@ if (empty($themes)) $themes = array('blog');
                         <label class="form-label fw-bold"><?php echo __('label_posts_per_page'); ?></label>
                         <input type="number" name="posts_per_page" class="form-control" value="<?php echo htmlspecialchars($currentConfig['posts_per_page']); ?>" min="1" max="100">
                         <div class="form-text"><?php echo __('hint_posts_per_page'); ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?php echo __('label_blog_favicon'); ?></label>
+                        <input type="text" name="blog_favicon" class="form-control" value="<?php echo htmlspecialchars($currentConfig['blog_favicon']); ?>" placeholder="/static/icon-192.png">
+                        <div class="form-text"><?php echo __('hint_blog_favicon'); ?></div>
                     </div>
 
                     <div class="text-end">
