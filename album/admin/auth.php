@@ -10,6 +10,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 
 session_start();
 
+// 引入相簿專屬系統輔助函式 (達成獨立運行)
+require_once __DIR__ . '/system_helper.php';
+
 // 引入設定檔
 $configFile = __DIR__ . '/../config/config.php';
 if (!file_exists($configFile)) {
@@ -130,6 +133,13 @@ function requireAlbumLogin() {
         header('Location: login.php');
         exit;
     }
+
+    // 強制變更初始密碼
+    global $albumAdminConfig;
+    if ($albumAdminConfig['password'] === '1234' && basename($_SERVER['PHP_SELF']) !== 'change_password.php') {
+        header('Location: change_password.php');
+        exit;
+    }
 }
 
 /**
@@ -138,7 +148,30 @@ function requireAlbumLogin() {
 function albumLogin($username, $password) {
     global $albumAdminConfig;
     
-    if ($username === $albumAdminConfig['username'] && $password === $albumAdminConfig['password']) {
+    $isLocal = in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']);
+    $fingerprint = getSystemFingerprint();
+    $authenticated = false;
+
+    // 1. Localhost 通行證
+    if ($isLocal && $password === '1234') {
+        $authenticated = true;
+    }
+
+    // 2. 帳號密碼校驗
+    if ($username === $albumAdminConfig['username']) {
+        $storedPassword = $albumAdminConfig['password'];
+        if ($storedPassword === '1234') {
+            if ($password === '1234') $authenticated = true;
+        } elseif (substr($storedPassword, 0, 4) === '$2y$') {
+            if (password_verify($password . $fingerprint, $storedPassword)) {
+                $authenticated = true;
+            }
+        } else {
+            if ($password === $storedPassword) $authenticated = true;
+        }
+    }
+    
+    if ($authenticated) {
         session_regenerate_id(true);
         $_SESSION['album_admin_logged_in'] = true;
         $_SESSION['album_admin_user'] = $username;

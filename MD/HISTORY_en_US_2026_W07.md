@@ -49,3 +49,11 @@ This week's development focused on **Album Service refactoring and Web Admin int
 ---
 **Version**: v2026.02.14.15.27 (UTC+8)
 **Tool**: Gemini CLI
+- Migrated images for post 20250131-20250131235411.html to album service.
+- Implemented environment-aware hashing for admin credentials using system fingerprints (Machine ID).
+- Added forced security initialization for default passwords and localhost (1234) developer bypass.
+- Fully decoupled Album service from Blog core for standalone operation and deployment.
+- Upgraded album upload system: AJAX-based sequential uploads with progress bars and auto-sync.
+- Optimized StaticGenerator resource mapping: automatic path correction for album/ and pic/ in post/*.html.
+- Removed unused session_secret configuration and cleaned up installation scripts.
+- Fixed issue where deleted albums remained in index.json and on the home page.

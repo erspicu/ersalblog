@@ -44,13 +44,12 @@ class AlbumGenerator {
     }
 
     public function setProgressId($id) {
-        $id = preg_replace('/[^A-Za-z0-9]/', '', $id);
+        $id = preg_replace('/[^\p{L}\p{N}]/u', '', $id);
         $this->progressFile = $this->jsonDir . '/rebuild_progress_' . $id . '.json';
     }
 
     private function log($msg) {
-        $logFile = $this->baseDir . '/api/json/generator.log';
-        file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] $msg\n", FILE_APPEND);
+        // Log to generator.log is removed as requested
     }
 
     private function updateProgress($data) {
@@ -232,7 +231,14 @@ class AlbumGenerator {
         $indexJsonFile = $this->jsonDir . '/index.json';
         if (file_exists($indexJsonFile)) {
             $existingIndex = json_decode(file_get_contents($indexJsonFile), true);
-            if (isset($existingIndex['items'])) $allAlbumsList = $existingIndex['items'];
+            if (isset($existingIndex['items'])) {
+                // 檢查目錄是否還在，不在的就過濾掉
+                foreach ($existingIndex['items'] as $item) {
+                    if (is_dir($this->collectionDir . '/' . $item['id'])) {
+                        $allAlbumsList[] = $item;
+                    }
+                }
+            }
         }
 
         if (is_dir($this->collectionDir)) {

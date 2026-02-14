@@ -1,0 +1,181 @@
+{
+    "name": "測試用目錄",
+    "desc": "測試用目錄",
+    "photos": [
+        {
+            "filename": "MVIMG_20251230_173206_1.jpg",
+            "src": "Collection\/test\/MVIMG_20251230_173206_1.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251230_173206_1_XS.jpg"
+            },
+            "shortIdStart": 528,
+            "title": "MVIMG_20251230_173206_1.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.8",
+                "shutter": "1\/40s",
+                "iso": 800,
+                "focal": "11.5mm",
+                "date": "2025:12:30 17:32:06",
+                "gps": {
+                    "lat": 22.752815,
+                    "lng": 121.146979
+                }
+            }
+        },
+        {
+            "filename": "MVIMG_20251231_102925.jpg",
+            "src": "Collection\/test\/MVIMG_20251231_102925.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251231_102925_XS.jpg"
+            },
+            "shortIdStart": 536,
+            "title": "MVIMG_20251231_102925.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/930s",
+                "iso": 50,
+                "focal": "8.7mm",
+                "date": "2025:12:31 10:29:25",
+                "gps": {
+                    "lat": 22.754017,
+                    "lng": 121.154964
+                }
+            }
+        },
+        {
+            "filename": "MVIMG_20251231_103002.jpg",
+            "src": "Collection\/test\/MVIMG_20251231_103002.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251231_103002_XS.jpg"
+            },
+            "shortIdStart": 544,
+            "title": "MVIMG_20251231_103002.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/984s",
+                "iso": 50,
+                "focal": "8.7mm",
+                "date": "2025:12:31 10:30:02",
+                "gps": {
+                    "lat": 22.754002,
+                    "lng": 121.154983
+                }
+            }
+        },
+        {
+            "filename": "MVIMG_20251231_103047.jpg",
+            "src": "Collection\/test\/MVIMG_20251231_103047.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251231_103047_XS.jpg"
+            },
+            "shortIdStart": 552,
+            "title": "MVIMG_20251231_103047.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/1.6",
+                "shutter": "1\/2709s",
+                "iso": 50,
+                "focal": "8.7mm",
+                "date": "2025:12:31 10:30:47",
+                "gps": {
+                    "lat": 22.754021,
+                    "lng": 121.154953
+                }
+            }
+        },
+        {
+            "filename": "MVIMG_20251231_114950.jpg",
+            "src": "Collection\/test\/MVIMG_20251231_114950.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251231_114950_XS.jpg"
+            },
+            "shortIdStart": 560,
+            "title": "MVIMG_20251231_114950.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/357s",
+                "iso": 50,
+                "focal": "25.1mm",
+                "date": "2025:12:31 11:49:50",
+                "gps": {
+                    "lat": 22.74271,
+                    "lng": 121.146517
+                }
+            }
+        },
+        {
+            "filename": "MVIMG_20251231_115012.jpg",
+            "src": "Collection\/test\/MVIMG_20251231_115012.jpg",
+            "sizes": {
+                "3XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_3XL.jpg",
+                "2XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_2XL.jpg",
+                "XL": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_XL.jpg",
+                "L": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_L.jpg",
+                "M": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_M.jpg",
+                "S": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_S.jpg",
+                "XS": "Collection\/test\/Thumbnail\/MVIMG_20251231_115012_XS.jpg"
+            },
+            "shortIdStart": 568,
+            "title": "MVIMG_20251231_115012.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/469s",
+                "iso": 50,
+                "focal": "25.1mm",
+                "date": "2025:12:31 11:50:12",
+                "gps": {
+                    "lat": 22.74271,
+                    "lng": 121.146517
+                }
+            }
+        }
+    ],
+    "date": "20260214"
+}

@@ -48,24 +48,68 @@ function loadPhotoMeta($targetDir) {
 
 switch ($action) {
     case 'upload_photos':
+        $uploadedFiles = array();
+        $errors = array();
+
         if (isset($_FILES['photos'])) {
             $files = $_FILES['photos'];
-            $count = count($files['name']);
             
-            for ($i = 0; $i < $count; $i++) {
-                if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                    $tmpName = $files['tmp_name'][$i];
-                    $name = $files['name'][$i];
-                    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                    
-                    if ($ext === 'jpg' || $ext === 'jpeg') {
-                        // Sanitize filename
-                        $safeName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
-                        move_uploaded_file($tmpName, $targetDir . '/' . $safeName);
+            // Check if it's multiple files or a single file
+            if (is_array($files['name'])) {
+                $count = count($files['name']);
+                for ($i = 0; $i < $count; $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $tmpName = $files['tmp_name'][$i];
+                        $name = $files['name'][$i];
+                        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                        
+                        if ($ext === 'jpg' || $ext === 'jpeg') {
+                            $safeName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
+                            if (move_uploaded_file($tmpName, $targetDir . '/' . $safeName)) {
+                                $uploadedFiles[] = $safeName;
+                            } else {
+                                $errors[] = "Failed to move: $name";
+                            }
+                        } else {
+                            $errors[] = "Invalid extension: $name";
+                        }
+                    } else {
+                        $errors[] = "Upload error code (" . $files['error'][$i] . ") for file index $i";
                     }
+                }
+            } else {
+                // Single file upload handling (often from AJAX FormData)
+                if ($files['error'] === UPLOAD_ERR_OK) {
+                    $tmpName = $files['tmp_name'];
+                    $name = $files['name'];
+                    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                    if ($ext === 'jpg' || $ext === 'jpeg') {
+                        $safeName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
+                        if (move_uploaded_file($tmpName, $targetDir . '/' . $safeName)) {
+                            $uploadedFiles[] = $safeName;
+                        } else {
+                            $errors[] = "Failed to move: $name";
+                        }
+                    } else {
+                        $errors[] = "Invalid extension: $name";
+                    }
+                } else {
+                    $errors[] = "Upload error code (" . $files['error'] . ")";
                 }
             }
         }
+
+        // Return JSON if it's an AJAX request
+        if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+            header('Content-Type: application/json');
+            if (empty($errors)) {
+                echo json_encode(array('status' => 'success', 'files' => $uploadedFiles));
+            } else {
+                echo json_encode(array('status' => 'error', 'message' => implode(', ', $errors), 'files' => $uploadedFiles));
+            }
+            exit;
+        }
+
         header("Location: album_photos.php?id=" . urlencode($albumId));
         break;
 

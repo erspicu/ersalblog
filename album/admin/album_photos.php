@@ -104,8 +104,79 @@ foreach ($pagedPhotos as $path) {
             </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>"><a class="page-link" href="?id=<?php echo urlencode($id); ?>&page=<?php echo $page - 1; ?>">&laquo;</a></li>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>"><a class="page-link" href="?id=<?php echo urlencode($id); ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+                <?php endfor; ?>
+                <li class="page-item <?php echo ($page >= $totalPages) ? 'disabled' : ''; ?>"><a class="page-link" href="?id=<?php echo urlencode($id); ?>&page=<?php echo $page + 1; ?>">&raquo;</a></li>
+            </ul>
+        </nav>
+        <?php endif; ?>
     </div>
 </div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><?php echo __('upload_photos'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal" id="uploadModalClose"></button></div>
+            <div class="modal-body">
+                <div id="uploadInputArea">
+                    <div class="mb-3"><label class="form-label"><?php echo __('select_photos'); ?> (JPG/JPEG)</label><input type="file" id="photoInput" class="form-control" multiple accept=".jpg,.jpeg"></div>
+                    <div class="alert alert-info small"><i class="bi bi-info-circle"></i> 支援多檔案選取，系統將自動逐一上傳以避免伺服器限制。</div>
+                </div>
+                <div id="uploadProgressArea" style="display:none;">
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span id="uploadStatusText">準備中...</span>
+                        <span id="uploadCountText">0 / 0</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div id="totalProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                    <div class="small text-muted mb-1">當前檔案進度:</div>
+                    <div class="progress" style="height: 10px;">
+                        <div id="fileProgressBar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="uploadLog" class="mt-3 small overflow-auto" style="max-height: 150px; background: #f8f9fa; border: 1px solid #eee; padding: 5px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer" id="uploadModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('cancel'); ?></button>
+                <button type="button" class="btn btn-success" onclick="startSequentialUpload()"><?php echo __('upload_btn'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Photo Modal -->
+<div class="modal fade" id="editPhotoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="photo_actions.php" method="post" class="modal-content">
+            <input type="hidden" name="action" value="update_photo_info">
+            <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
+            <input type="hidden" name="original_filename" id="editOriginalFilename">
+            <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+            <div class="modal-header"><h5 class="modal-title"><?php echo __('edit_photo'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="form-label"><?php echo __('photo_filename'); ?></label><input type="text" name="new_filename" id="editNewFilename" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label"><?php echo __('photo_title'); ?></label><input type="text" name="title" id="editPhotoTitle" class="form-control"></div>
+                <div class="mb-3"><label class="form-label"><?php echo __('photo_desc'); ?></label><textarea name="description" id="editPhotoDesc" class="form-control" rows="3"></textarea></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('cancel'); ?></button><button type="submit" class="btn btn-primary"><?php echo __('save_changes'); ?></button></div>
+        </form>
+    </div>
+</div>
+
+<form id="deletePhotoForm" action="photo_actions.php" method="post" style="display:none;">
+    <input type="hidden" name="action" value="delete_photo">
+    <input type="hidden" name="album_id" value="<?php echo htmlspecialchars($id); ?>">
+    <input type="hidden" name="filename" id="deletePhotoFilename">
+    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+</form>
 
 <script src="assets/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -169,6 +240,135 @@ function rebuildThisAlbum(mode) {
         clearInterval(pollingInterval);
         Swal.fire(adminLang.error, adminLang.error_network, 'error');
     });
+}
+
+function editPhoto(filename, title, desc) {
+    document.getElementById('editOriginalFilename').value = filename;
+    document.getElementById('editNewFilename').value = filename;
+    document.getElementById('editPhotoTitle').value = title;
+    document.getElementById('editPhotoDesc').value = desc;
+    new bootstrap.Modal(document.getElementById('editPhotoModal')).show();
+}
+
+function deletePhoto(filename) {
+    if (confirm('<?php echo __('confirm_delete'); ?>')) {
+        document.getElementById('deletePhotoFilename').value = filename;
+        document.getElementById('deletePhotoForm').submit();
+    }
+}
+
+async function startSequentialUpload() {
+    const input = document.getElementById('photoInput');
+    const files = input.files;
+    if (files.length === 0) {
+        Swal.fire(adminLang.error, '請先選擇照片', 'error');
+        return;
+    }
+
+    // UI Initial State
+    document.getElementById('uploadInputArea').style.display = 'none';
+    document.getElementById('uploadProgressArea').style.display = 'block';
+    document.getElementById('uploadModalFooter').style.display = 'none';
+    document.getElementById('uploadModalClose').style.display = 'none';
+    const log = document.getElementById('uploadLog');
+    log.innerHTML = '';
+    
+    const total = files.length;
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < total; i++) {
+        const file = files[i];
+        const currentNum = i + 1;
+        
+        // Update UI for current file
+        document.getElementById('uploadStatusText').innerText = `正在上傳: ${file.name}`;
+        document.getElementById('uploadCountText').innerText = `${currentNum} / ${total}`;
+        document.getElementById('fileProgressBar').style.width = '0%';
+        
+        const formData = new FormData();
+        formData.append('action', 'upload_photos');
+        formData.append('album_id', '<?php echo addslashes($id); ?>');
+        formData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+        formData.append('ajax', '1');
+        formData.append('photos', file); // Use 'photos' name as expected by backend (single file)
+
+        try {
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'photo_actions.php', true);
+                
+                // Track single file upload progress
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        document.getElementById('fileProgressBar').style.width = percent + '%';
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const res = JSON.parse(xhr.responseText);
+                        if (res.status === 'success') {
+                            successCount++;
+                            log.innerHTML += `<div class="text-success">✅ ${file.name} 上傳成功</div>`;
+                        } else {
+                            errorCount++;
+                            log.innerHTML += `<div class="text-danger">❌ ${file.name} 失敗: ${res.message}</div>`;
+                        }
+                    } else {
+                        errorCount++;
+                        log.innerHTML += `<div class="text-danger">❌ ${file.name} HTTP 錯誤: ${xhr.status}</div>`;
+                    }
+                    resolve();
+                };
+
+                xhr.onerror = () => {
+                    errorCount++;
+                    log.innerHTML += `<div class="text-danger">❌ ${file.name} 網路錯誤</div>`;
+                    resolve();
+                };
+
+                xhr.send(formData);
+            });
+        } catch (e) {
+            console.error(e);
+        }
+
+        // Update Total Progress
+        const totalPercent = Math.round((currentNum / total) * 100);
+        const totalBar = document.getElementById('totalProgressBar');
+        totalBar.style.width = totalPercent + '%';
+        totalBar.innerText = totalPercent + '%';
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // Finished
+    document.getElementById('uploadStatusText').innerText = '正在自動更新相簿資料與縮圖...';
+    
+    // 自動觸發重建 (快速模式)
+    if (successCount > 0) {
+        const rebuildData = new FormData();
+        rebuildData.append('action', 'rebuild_album');
+        rebuildData.append('album_id', '<?php echo addslashes($id); ?>');
+        rebuildData.append('csrf_token', '<?php echo getCSRFToken(); ?>');
+        // 不帶 force 參數即為快速模式 (僅處理新增檔案)
+
+        try {
+            const rbRes = await fetch('album_actions.php', { method: 'POST', body: rebuildData });
+            const rbJson = await rbRes.json();
+            console.log('Auto Rebuild:', rbJson.message);
+        } catch (e) {
+            console.error('Auto Rebuild Failed:', e);
+        }
+    }
+
+    document.getElementById('uploadStatusText').innerText = '上傳與更新作業已完成';
+    Swal.fire({
+        title: '上傳完成',
+        text: `成功: ${successCount}, 失敗: ${errorCount}。相簿資料已自動更新。`,
+        icon: successCount > 0 ? 'success' : 'error'
+    }).then(() => location.reload());
 }
 </script>
 </body>

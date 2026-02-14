@@ -55,7 +55,6 @@ return [
     'admin_user' => 'Admin Username',
     'admin_pass' => 'Admin Password',
     'admin_pass_placeholder' => 'Set a strong password',
-    'session_secret' => 'Session Secret Key',
     'session_secret_help' => 'A random string used for session encryption.',
     'btn_gen_secret' => '🎲 Generate Secret',
     'step_4' => '4. Frontend Config',

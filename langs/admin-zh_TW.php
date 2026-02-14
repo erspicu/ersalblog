@@ -322,6 +322,14 @@ return [
     'op_success' => '操作成功',
     'op_error' => '操作失敗',
 
+    // Account settings
+    'label_admin_account' => '管理者帳號設定',
+    'label_new_username' => '新帳號',
+    'label_new_password' => '新密碼',
+    'hint_password_keep' => '若不修改密碼請留空',
+    'btn_save_account' => '更新帳號密碼',
+    'msg_account_updated' => '管理員帳號密碼已成功更新！',
+
     // Build Tool (SSG)
     'nav_build' => '🔨 網站建置',
     'build_title' => '靜態網頁建置 (SSG)',

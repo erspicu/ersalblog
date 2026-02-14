@@ -119,6 +119,34 @@ if (file_exists($phpConfigFile)) {
             </div>
         </div>
 
+        <!-- 管理者帳號設定 (AJAX) -->
+        <div class="card shadow-sm col-md-8 mb-4">
+            <div class="card-header bg-white fw-bold"><?php echo __('account_settings'); ?></div>
+            <div class="card-body">
+                <form class="ajax-form" data-action="update_admin_account">
+                    <input type="hidden" name="action" value="update_admin_account">
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('new_username'); ?></label>
+                            <input type="text" name="new_username" class="form-control" value="<?php echo htmlspecialchars($_SESSION['album_admin_user']); ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('new_password'); ?></label>
+                            <input type="password" name="new_password" class="form-control" placeholder="<?php echo __('password_hint'); ?>">
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-warning px-4" onclick="return confirm('<?php echo __('confirm_update_account'); ?>');">
+                            <i class="bi bi-person-gear"></i> <?php echo __('save_account'); ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- 後端設定 (AJAX) -->
         <div class="card shadow-sm col-md-8">
             <div class="card-header bg-white fw-bold"><?php echo __('backend_settings'); ?></div>

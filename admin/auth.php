@@ -119,6 +119,13 @@ function requireLogin() {
         header('Location: login.php');
         exit;
     }
+    
+    // 如果目前還是初始密碼 1234，且不是在變更密碼頁面，強制跳轉
+    global $adminConfig;
+    if ($adminConfig['password'] === '1234' && basename($_SERVER['PHP_SELF']) !== 'change_password.php') {
+        header('Location: change_password.php');
+        exit;
+    }
 }
 
 /**
@@ -127,15 +134,39 @@ function requireLogin() {
 function login($username, $password, $dataSource = 'db') {
     global $adminConfig;
     
-    // 簡單的明文比對 (建議未來改用 password_verify)
-    if ($username === $adminConfig['username'] && $password === $adminConfig['password']) {
-        // 安全強化：登入成功後重生 Session ID
-        session_regenerate_id(true);
+    $isLocal = in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']);
+    $fingerprint = getSystemFingerprint();
+    $authenticated = false;
+
+    // 1. 檢查是否為 Localhost 強行通行證
+    if ($isLocal && $password === '1234') {
+        $authenticated = true;
+    }
+    
+    // 2. 檢查帳號
+    if ($username === $adminConfig['username']) {
+        $storedPassword = $adminConfig['password'];
         
+        // 3. 檢查密碼模式
+        if ($storedPassword === '1234') {
+            // 初始模式
+            if ($password === '1234') $authenticated = true;
+        } elseif (substr($storedPassword, 0, 4) === '$2y$') {
+            // 已加密模式: 密碼 + 主機特徵碼 比對
+            if (password_verify($password . $fingerprint, $storedPassword)) {
+                $authenticated = true;
+            }
+        } else {
+            // 舊有明文模式 (非 1234)
+            if ($password === $storedPassword) $authenticated = true;
+        }
+    }
+
+    if ($authenticated) {
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_user'] = $username;
         $_SESSION['admin_source'] = $dataSource;
-        // 登入後重置 CSRF Token 以增加安全性
         getCSRFToken(); 
         return true;
     }

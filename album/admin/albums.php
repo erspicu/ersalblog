@@ -106,7 +106,7 @@ $pagedAlbums = array_slice($albums, $offset, $perPage);
             <input type="hidden" name="action" value="create_album"><input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
             <div class="modal-header"><h5 class="modal-title"><?php echo __('create_album'); ?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="mb-3"><label class="form-label"><?php echo __('dir_name'); ?></label><input type="text" name="dir_name" class="form-control" required pattern="[A-Za-z0-9_-]+" title="<?php echo __('dir_name_hint'); ?>"><small class="text-muted"><?php echo __('dir_name_hint'); ?></small></div>
+                <div class="mb-3"><label class="form-label"><?php echo __('dir_name'); ?></label><input type="text" name="dir_name" class="form-control" required title="<?php echo __('dir_name_hint'); ?>"><small class="text-muted"><?php echo __('dir_name_hint'); ?></small></div>
                 <div class="mb-3"><label class="form-label"><?php echo __('display_title'); ?></label><input type="text" name="display_name" class="form-control" required></div>
                 <div class="mb-3"><label class="form-label"><?php echo __('album_desc'); ?></label><textarea name="description" class="form-control" rows="3"></textarea></div>
             </div>

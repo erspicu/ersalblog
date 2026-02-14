@@ -188,7 +188,14 @@ if (isset($_GET['action'])) {
 
         $admin_user = isset($_POST['admin_user']) ? $_POST['admin_user'] : 'admin';
         $admin_pass = isset($_POST['admin_pass']) ? $_POST['admin_pass'] : '';
-        $session_secret = isset($_POST['session_secret']) ? $_POST['session_secret'] : '';
+
+        // --- 安全性處理：若密碼不是 1234，則進行加密寫入 ---
+        $final_admin_pass = $admin_pass;
+        if ($admin_pass !== '1234') {
+            require_once __DIR__ . '/admin/system_helper.php';
+            $fingerprint = getSystemFingerprint();
+            $final_admin_pass = password_hash($admin_pass . $fingerprint, PASSWORD_BCRYPT);
+        }
 
         $cse_id = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
         $theme_file = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
@@ -214,8 +221,7 @@ if (isset($_GET['action'])) {
         $config_php .= ");\n\n";
         $config_php .= "\$adminConfig = array(\n";
         $config_php .= "    'username' => " . var_export($admin_user, true) . ",\n";
-        $config_php .= "    'password' => " . var_export($admin_pass, true) . ",\n";
-        $config_php .= "    'session_secret' => " . var_export($session_secret, true) . "\n";
+        $config_php .= "    'password' => " . var_export($final_admin_pass, true) . "\n";
         $config_php .= ");\n\n";
         $config_php .= "date_default_timezone_set(\$blog_timezone);\n";
         $config_php .= "?>";
@@ -431,10 +437,7 @@ if (isset($_GET['action'])) {
                     <div class="col-md-6"><label class="form-label"><?php echo _t('admin_pass'); ?></label>
                         <div class="input-group"><input type="password" class="form-control" id="admin_pass" name="admin_pass" placeholder="<?php echo _t('admin_pass_placeholder'); ?>" required><button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('admin_pass')">👁️</button></div>
                     </div>
-                    <div class="col-12"><label class="form-label"><?php echo _t('session_secret'); ?></label>
-                        <div class="input-group"><input type="text" class="form-control" id="session_secret" name="session_secret" required><button class="btn btn-outline-secondary" type="button" onclick="generateRandomString()"><?php echo _t('btn_gen_secret'); ?></button></div>
-                        <div class="form-text"><?php echo _t('session_secret_help'); ?></div>
-                    </div>
+                    
                 </div>
             </div>
 

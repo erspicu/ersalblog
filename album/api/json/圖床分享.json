@@ -1,0 +1,36 @@
+{
+    "name": "私人圖床分享",
+    "desc": "社群貼圖用",
+    "photos": [
+        {
+            "filename": "IMG_20250830_172218_1.jpg",
+            "src": "Collection\/圖床分享\/IMG_20250830_172218_1.jpg",
+            "sizes": {
+                "3XL": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_3XL.jpg",
+                "2XL": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_2XL.jpg",
+                "XL": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_XL.jpg",
+                "L": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_L.jpg",
+                "M": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_M.jpg",
+                "S": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_S.jpg",
+                "XS": "Collection\/圖床分享\/Thumbnail\/IMG_20250830_172218_1_XS.jpg"
+            },
+            "shortIdStart": 576,
+            "title": "IMG_20250830_172218_1.jpg",
+            "desc": "",
+            "exif": {
+                "make": "Xiaomi",
+                "model": "Xiaomi 15 Ultra",
+                "aperture": "f\/2.6",
+                "shutter": "1\/100s",
+                "iso": 200,
+                "focal": "25.1mm",
+                "date": "2025:08:30 17:22:18",
+                "gps": {
+                    "lat": 22.664582,
+                    "lng": 120.347334
+                }
+            }
+        }
+    ],
+    "date": "20260214"
+}

@@ -330,6 +330,12 @@ class StaticGenerator {
         $html = str_replace('href="static/', 'href="../static/', $html);
         $html = str_replace('src="static/', 'src="../static/', $html);
         
+        // Fix album and pic paths for post/*.html
+        $html = str_replace('href="album/', 'href="../album/', $html);
+        $html = str_replace('src="album/', 'src="../album/', $html);
+        $html = str_replace('href="pic/', 'href="../pic/', $html);
+        $html = str_replace('src="pic/', 'src="../pic/', $html);
+        
         // Fix album path (if it points to a sibling directory like ../album/)
         if (isset($this->config['album_path']) && strpos($this->config['album_path'], '../') === 0) {
             // If post content contains src="../album/", change to src="../../album/" for post/*.html

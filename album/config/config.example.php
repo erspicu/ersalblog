@@ -7,8 +7,7 @@
 // --- 後台管理員設定 ---
 $albumAdminConfig = array(
     'username' => 'admin',
-    'password' => 'YOUR_PASSWORD_HERE', // 請修改此密碼
-    'session_secret' => 'CHANGE_ME_TO_RANDOM_STRING_ALBUM'
+    'password' => '1234', // 預設密碼。首次登入後系統將強制要求修改，並結合主機特徵進行雜湊加密，加密後此處將存儲雜湊字串而非明文。
 );
 
 // --- 全域相簿設定 (SEO 與 Header 使用) ---

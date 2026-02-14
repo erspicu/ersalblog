@@ -1,8 +1,6 @@
 <?php
-// admin/version_config.php
-return [
-    'version' => 'v2026.02.14.15.44',
-    'last_update' => '2026-02-14 15:44:00 (UTC+8)',
-    'cli_version' => '0.28.2',
-    'model_name' => 'gemini-3-flash-preview'
-];
+// 自動產生的版本設定檔
+define('CURRENT_VERSION', 'v2026.02.14.22.30');
+define('GEMINI_CLI_VERSION', '0.28.2');
+define('AI_MODEL_NAME', 'gemini-3-flash-preview');
+?>

@@ -35,7 +35,7 @@ ob_start();
 switch ($action) {
     case 'get_rebuild_progress':
         if (ob_get_level()) ob_end_clean();
-        $pid = isset($_POST['progress_id']) ? preg_replace('/[^A-Za-z0-9]/', '', $_POST['progress_id']) : '';
+        $pid = isset($_POST['progress_id']) ? preg_replace('/[^\p{L}\p{N}]/u', '', $_POST['progress_id']) : '';
         $file = __DIR__ . '/../api/json/rebuild_progress_' . $pid . '.json';
         header('Content-Type: application/json');
         
@@ -61,9 +61,9 @@ switch ($action) {
         $skipThumb = isset($_POST['skipThumb']) && $_POST['skipThumb'] === 'on';
         $onlyHtml = isset($_POST['onlyHtml']) && $_POST['onlyHtml'] === 'on';
 
-        // 1. 生成樣板 Shell
-        $tmPath = __DIR__ . '/../../PHP_LIB/TemplateManager.php';
-        if (!file_exists($tmPath)) $tmPath = __DIR__ . '/../PHP_LIB/TemplateManager.php'; 
+        // 1. 生成樣板 Shell (優先使用相簿內部的 PHP_LIB)
+        $tmPath = __DIR__ . '/../PHP_LIB/TemplateManager.php';
+        if (!file_exists($tmPath)) $tmPath = __DIR__ . '/../../PHP_LIB/TemplateManager.php'; 
         
         if (file_exists($tmPath)) {
             require_once $tmPath;
@@ -139,7 +139,7 @@ switch ($action) {
         $dirName = isset($_POST['dir_name']) ? trim($_POST['dir_name']) : '';
         $displayName = isset($_POST['display_name']) ? trim($_POST['display_name']) : '';
         $desc = isset($_POST['description']) ? trim($_POST['description']) : '';
-        if (empty($dirName) || !preg_match('/^[A-Za-z0-9_-]+$/', $dirName)) die("Invalid directory name.");
+        if (empty($dirName) || !preg_match('/^[\p{L}\p{N}_-]+$/u', $dirName)) die("Invalid directory name.");
         $targetDir = $collectionDir . '/' . $dirName;
         if (is_dir($targetDir)) die("Album already exists.");
         mkdir($targetDir, 0777, true);
@@ -158,6 +158,28 @@ switch ($action) {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($targetDir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($files as $fileinfo) { $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink'); $todo($fileinfo->getRealPath()); }
             rmdir($targetDir);
+            
+            // 同步移除 shorturl.txt 中的項目
+            $shortUrlFile = __DIR__ . '/../shorturl.txt';
+            if (file_exists($shortUrlFile)) {
+                $lines = file($shortUrlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $newLines = array();
+                $targetPath = 'Collection/' . $id;
+                foreach ($lines as $line) {
+                    $parts = explode('|', $line);
+                    if (count($parts) >= 2 && $parts[1] !== $targetPath) {
+                        $newLines[] = $line;
+                    }
+                }
+                file_put_contents($shortUrlFile, implode("\n", $newLines) . (empty($newLines) ? "" : "\n"));
+            }
+            
+            // 主動觸發一次產生器更新 index.json
+            $gen->run(array('skipThumb' => true));
+            
+            // 刪除該相簿對應的 JSON 檔案
+            $jsonFile = __DIR__ . '/../api/json/' . $id . '.json';
+            if (file_exists($jsonFile)) @unlink($jsonFile);
         }
         header('Location: albums.php');
         break;
@@ -165,19 +187,44 @@ switch ($action) {
     case 'update_album_info':
         ob_end_clean();
         $id = isset($_POST['album_id']) ? trim($_POST['album_id']) : '';
+        $oldId = $id; // 紀錄舊 ID
         $newDirName = isset($_POST['new_dir_name']) ? trim($_POST['new_dir_name']) : ''; 
         $displayName = isset($_POST['display_name']) ? trim($_POST['display_name']) : '';
         $desc = isset($_POST['description']) ? trim($_POST['description']) : '';
         $date = isset($_POST['date']) ? trim($_POST['date']) : '';
         if (empty($id) || !is_dir($collectionDir . '/' . $id)) die("Album not found");
         $targetDir = $collectionDir . '/' . $id;
+        
+        $renamed = false;
         if (!empty($newDirName) && $newDirName !== $id) {
-             if (!preg_match('/^[A-Za-z0-9_-]+$/', $newDirName)) die("Invalid new directory name.");
+             if (!preg_match('/^[\p{L}\p{N}_-]+$/u', $newDirName)) die("Invalid new directory name.");
              $newTargetDir = $collectionDir . '/' . $newDirName;
              if (is_dir($newTargetDir)) die("Target directory name already exists.");
              rename($targetDir, $newTargetDir);
              $targetDir = $newTargetDir; $id = $newDirName;
+             $renamed = true;
         }
+        
+        // 如果有更名，同步更新 shorturl.txt
+        if ($renamed) {
+            $shortUrlFile = __DIR__ . '/../shorturl.txt';
+            if (file_exists($shortUrlFile)) {
+                $lines = file($shortUrlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $newLines = array();
+                $oldPath = 'Collection/' . $oldId;
+                $newPath = 'Collection/' . $id;
+                foreach ($lines as $line) {
+                    $parts = explode('|', $line);
+                    if (count($parts) >= 2 && $parts[1] === $oldPath) {
+                        $newLines[] = $parts[0] . '|' . $newPath;
+                    } else {
+                        $newLines[] = $line;
+                    }
+                }
+                file_put_contents($shortUrlFile, implode("\n", $newLines) . (empty($newLines) ? "" : "\n"));
+            }
+        }
+
         $cover = ''; $metaFile = $targetDir . '/comment_album.txt';
         if (file_exists($metaFile)) {
             $parts = explode('|', file_get_contents($metaFile));
@@ -217,6 +264,57 @@ switch ($action) {
         ob_clean();
         if (file_put_contents($phpFile, $phpContent) === false) die("Error writing to config.php");
         echo json_encode(['status' => 'success']);
+        exit;
+        break;
+
+    case 'update_admin_account':
+        $newUsername = isset($_POST['new_username']) ? trim($_POST['new_username']) : '';
+        $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
+        
+        if (empty($newUsername)) {
+            ob_clean();
+            echo json_encode(['status' => 'error', 'message' => 'Username cannot be empty.']);
+            exit;
+        }
+
+        $phpFile = __DIR__ . '/../config/config.php';
+        $albumAdminConfig = array();
+        if (file_exists($phpFile)) include $phpFile;
+        
+        $albumAdminConfig['username'] = $newUsername;
+        if (!empty($newPassword)) {
+            $fingerprint = getSystemFingerprint();
+            $albumAdminConfig['password'] = password_hash($newPassword . $fingerprint, PASSWORD_BCRYPT);
+        }
+        
+        // 讀取其他現有的 PHP 變數以維持 config.php 完整性
+        $album_title = isset($album_title) ? $album_title : "";
+        $album_description = isset($album_description) ? $album_description : "";
+        $album_introduce = isset($album_introduce) ? $album_introduce : "";
+        $album_preview = isset($album_preview) ? $album_preview : "";
+        $album_site_url = isset($album_site_url) ? $album_site_url : "";
+        $album_lang = isset($album_lang) ? $album_lang : "zh-TW";
+        $album_timezone = isset($album_timezone) ? $album_timezone : "Asia/Taipei";
+
+        $phpContent = "<?php\n" .
+                      "\$albumAdminConfig = " . var_export($albumAdminConfig, true) . ";\n" .
+                      "\$album_title = \"" . addslashes($album_title) . "\";\n" .
+                      "\$album_description = \"" . addslashes($album_description) . "\";\n" .
+                      "\$album_introduce = \"" . addslashes($album_introduce) . "\";\n" .
+                      "\$album_preview = \"" . addslashes($album_preview) . "\";\n" .
+                      "\$album_site_url = \"" . addslashes($album_site_url) . "\";\n" .
+                      "\$album_lang = \"" . addslashes($album_lang) . "\";\n" .
+                      "\$album_timezone = \"" . addslashes($album_timezone) . "\";\n" .
+                      "date_default_timezone_set(\$album_timezone);\n" .
+                      "?>";
+
+        ob_clean();
+        if (file_put_contents($phpFile, $phpContent) === false) {
+            echo json_encode(['status' => 'error', 'message' => 'Error writing to config.php']);
+        } else {
+            $_SESSION['album_admin_user'] = $newUsername;
+            echo json_encode(['status' => 'success', 'message' => __('msg_account_updated')]);
+        }
         exit;
         break;
 

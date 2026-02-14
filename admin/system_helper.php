@@ -119,4 +119,26 @@ function protect_script_tags($html) {
         return htmlspecialchars($m[0], ENT_QUOTES, 'UTF-8');
     }, $html);
 }
+
+/**
+ * 獲取主機唯一識別碼 (Fingerprint)
+ * 用於密碼雜湊的額外鹽值 (Pepper)
+ */
+function getSystemFingerprint() {
+    $info = '';
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        // Windows: 使用電腦名稱與處理器架構
+        $info = getenv('COMPUTERNAME') . getenv('PROCESSOR_IDENTIFIER');
+    } else {
+        // Linux / WSL2: 優先讀取 machine-id
+        if (file_exists('/etc/machine-id')) {
+            $info = file_get_contents('/etc/machine-id');
+        } elseif (file_exists('/var/lib/dbus/machine-id')) {
+            $info = file_get_contents('/var/lib/dbus/machine-id');
+        } else {
+            $info = php_uname('n') . PHP_OS;
+        }
+    }
+    return hash('sha256', 'ersalblog_' . trim($info));
+}
 ?>

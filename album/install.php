@@ -49,11 +49,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'install') {
             if (!file_exists($path)) mkdir($path, 0777, true);
         }
 
-        $secret = bin2hex(random_bytes(16));
+        // --- 安全性處理：若密碼不是 1234，則進行加密寫入 ---
+        $final_pass = $pass;
+        if ($pass !== '1234') {
+            require_once __DIR__ . '/admin/system_helper.php';
+            $fingerprint = getSystemFingerprint();
+            $final_pass = password_hash($pass . $fingerprint, PASSWORD_BCRYPT);
+        }
 
         // 2. 產生 config.php
         $configPhp = "<?php\n/**\n * Baxermux Album Configuration\n */\n";
-        $configPhp .= "\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($pass) . "',\n    'session_secret' => '" . $secret . "'\n);\n\n";
+        $configPhp .= "\$albumAdminConfig = array(\n    'username' => '" . addslashes($user) . "',\n    'password' => '" . addslashes($final_pass) . "'\n);\n\n";
         $configPhp .= "\$album_title = \"" . addslashes($title) . "\";\n";
         $configPhp .= "\$album_description = \"" . addslashes($desc) . "\";\n";
         $configPhp .= "\$album_introduce = \"" . addslashes($intro) . "\";\n";

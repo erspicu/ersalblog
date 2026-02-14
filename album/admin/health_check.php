@@ -42,6 +42,8 @@ if (strpos(strtolower(php_uname()), 'microsoft') !== false || strpos(strtolower(
                         <table class="table table-hover mb-0">
                             <tr><th width="40%"><?php echo __('os_platform'); ?></th><td><?php echo PHP_OS; ?></td></tr>
                             <tr><th><?php echo __('php_version'); ?></th><td><?php echo PHP_VERSION; ?></td></tr>
+                            <tr><th><?php echo __('upload_limit'); ?></th><td><?php echo ini_get('upload_max_filesize'); ?></td></tr>
+                            <tr><th><?php echo __('post_limit'); ?></th><td><?php echo ini_get('post_max_size'); ?></td></tr>
                             <tr><th><?php echo __('run_env'); ?></th><td><?php echo $is_wsl ? '<span class="badge bg-info">WSL2 / Linux</span>' : '<span class="badge bg-primary">Native / Standard</span>'; ?></td></tr>
                             <tr><th>SAPI</th><td><?php echo PHP_SAPI; ?></td></tr>
                         </table>
@@ -71,7 +73,6 @@ if (strpos(strtolower(php_uname()), 'microsoft') !== false || strpos(strtolower(
                             <tr><th width="20%">Collection/</th><td><?php echo check_writable('album/Collection'); ?></td></tr>
                             <tr><th>api/json/</th><td><?php echo check_writable('album/api/json'); ?></td></tr>
                             <tr><th>album.html</th><td><?php echo check_writable('album/album.html'); ?></td></tr>
-                            <tr><th>generator.log</th><td><?php echo check_writable('album/api/json/generator.log'); ?></td></tr>
                         </table>
                     </div>
                 </div>

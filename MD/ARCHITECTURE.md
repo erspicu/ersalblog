@@ -39,15 +39,20 @@ The system supports two operating modes:
 
 *   **Album Service**:
     *   Located in the `/album` directory as an independent service.
+    *   **Independent Architecture**: Completely decoupled from the main blog core, featuring its own `system_helper.php` and local `TemplateManager` prioritization for standalone operation.
     *   **Core Logic Engine**: Powered by `AlbumGenerator` class, encapsulating scanning, Exif parsing, thumbnail generation, and JSON maintenance for both CLI (`make_album.php`) and Web Admin usage.
     *   **Environment Diagnostics**: Features a dedicated "System Diagnostics" system that detects Imagick/GD/Exif support and provides a smart fallback to GD if Imagick is unavailable.
     *   **Admin Integration**: Supports fine-grained maintenance tasks (Full rebuild, incremental updates, template refresh) directly from the admin panel with visual progress tracking.
+    *   **Advanced Upload Queue**: Implements an AJAX-based sequential upload system with real-time per-file and total progress bars, automatically triggering a data rebuild upon completion.
     *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly, optimized with **AOT (Ahead-of-Time)** compilation.
     *   **Build Tooling**: Includes `album/toolshell/` with cross-platform scripts (Bash, PowerShell, Batch) for theme rebuilding and project cleanup.
 
 *   **Initialization and Health Check**:
     *   **System Diagnostics**: `admin/health_check.php` and `album/admin/health_check.php` provide comprehensive environment verification and permission auditing.
 *   **Security Features**:
+    *   **System Fingerprint Hashing**: Passwords are no longer stored in plain text but as Bcrypt hashes combined with a unique host fingerprint (Machine ID or Computer Name), ensuring credentials cannot be easily cracked if moved to a different environment.
+    *   **Forced Security Initialization**: New installations or legacy "1234" passwords trigger a mandatory security setup flow to harden the configuration.
+    *   **Developer Bypass**: Supports a `1234` master bypass specifically for `localhost` environments to ensure developers are never locked out while testing.
     *   **CSRF Protection**: Implements a unified Token validation mechanism across all admin Ajax actions.
     *   **Script Protection**: Automatically neutralizes `<script>` tags in article content to prevent execution.
 
@@ -60,6 +65,7 @@ The system supports two operating modes:
 *   **`/langs`**: Global language packs for Admin and Templates.
 *   **`/PHP_LIB`**: Shared PHP logic and the `TemplateManager` micro-framework.
 *   **`/album`**: Independent album service with its own `/admin`, `/api`, and `/Collection`.
+*   **`/album/admin/system_helper.php`**: Dedicated helper for the independent album service.
 *   **`/album/toolshell`**: Cross-platform automation scripts for album maintenance.
 *   **`/MD`**: Project technical documentation and history logs.
 
@@ -68,6 +74,7 @@ The system supports two operating modes:
 ## 3. Key Technical Features
 
 *   **Photography Features**: Frontend photo metadata parsing via `exif.js` and backend server-side Exif extraction.
+*   **Dynamic Resource Mapping**: `StaticGenerator` now automatically adjusts `album/` and `pic/` relative paths for sub-directory static pages (`post/*.html`), ensuring cross-directory asset availability.
 *   **Performance Optimization**: 
     *   Automatic compression of JS/CSS via Python scripts.
     *   Smart thumbnail generation logic (only creates if original is larger than target).
@@ -110,15 +117,20 @@ The system supports two operating modes:
     *   **SEO 預覽圖 (OG Image)**: 支援文章編輯時上傳預覽圖，自動裁切為 1200x630 並存於 `preview/` 目錄供社群分享抓取。
 *   **相簿服務 (Album Service)**:
     *   位於 `/album` 目錄下的獨立服務，具備專屬架構。
+    *   **獨立運行架構**：已與 Blog 核心完全解耦，擁有專屬 `system_helper.php` 與內部庫優先權，可完全獨立佈署。
     *   **核心處理引擎**: 由 `AlbumGenerator` 類別驅動，封裝掃描、Exif 解析、縮圖生成與 JSON 維護邏輯，達成 CLI 與 Web 後台邏輯統一。
     *   **環境診斷機制**: 內建系統診斷功能，自動偵測 Imagick/GD/Exif 支援度，並實作無縫的 GD 縮圖處理回退機制。
     *   **後台維護整合**: 支援於後台視覺化執行全站重建、增量更新與樣板重新渲染。
+    *   **進階上傳佇列**: 實作基於 AJAX 的多檔逐一上傳系統，具備即時進度條與百分比顯示，上傳完成自動觸發資料重建。
     *   **實驗性 Blazor 總管**: 高擬真 Win11 風格檔案總管，已啟用 **AOT** 編譯優化效能。
     *   **自動化工具**: 提供 `album/toolshell/` 目錄，內含支援 Bash, PowerShell 與 Batch 的跨平台管理腳本。
 
 *   **初始化與健康檢查**:
     *   **系統診斷**: `admin/health_check.php` 與 `album/admin/health_check.php` 提供通用的伺服器配置檢查與權限審核。
 *   **安全性 (Security)**:
+    *   **主機特徵碼雜湊**: 管理密碼不再以明文儲存，而是結合主機唯一識別碼 (Machine ID) 進行 Bcrypt 雜湊，即使設定檔外流也難以在不同環境破解。
+    *   **強制安全性初始化**: 新安裝或仍在使用 "1234" 預設密碼時，系統會強制要求進行安全性設定以加固系統。
+    *   **開發者通行證**: 針對 `localhost` 環境支援 `1234` 強制通行證，確保開發測試期間的便利性。
     *   **CSRF 防禦**: 全面整合 AJAX Token 驗證機制。
     *   **文章腳本保護**: 自動轉義內容中的 `<script>` 標籤，防止意外執行。
 
@@ -131,6 +143,7 @@ The system supports two operating modes:
 *   **`/langs`**: 全域語系包。
 *   **`/PHP_LIB`**: 共用邏輯類別與 `TemplateManager` 微框架。
 *   **`/album`**: 獨立相簿服務，含其專屬 `/admin`, `/api` 與 `/Collection`。
+*   **`/album/admin/system_helper.php`**: 相簿服務專用的獨立輔助函式。
 *   **`/album/toolshell`**: 跨平台自動化維護腳本工具包。
 *   **`/MD`**: 專案技術文件、週歷史紀錄檔與資訊架構研究報告 (`STUDY_IA_*.md`)。
 
@@ -139,6 +152,7 @@ The system supports two operating modes:
 ## 3. 關鍵技術特性
 
 *   **攝影功能**: 前後端協同的 Exif 元數據解析與展示。
+*   **動態資源路徑校正**: `StaticGenerator` 自動為子目錄網頁 (`post/*.html`) 校正 `album/` 與 `pic/` 的相對路徑，確保資源存取無誤。
 *   **效能優化**: 
     *   JS/CSS 自動壓縮。
     *   智慧縮圖生成邏輯（僅在原圖大於規格時建立）。

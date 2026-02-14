@@ -102,6 +102,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+    } elseif (isset($_POST['save_account'])) {
+        // --- Change Admin Account & Password ---
+        $newUsername = isset($_POST['new_username']) ? trim($_POST['new_username']) : '';
+        $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
+
+        if (empty($newUsername)) {
+            $error = "帳號不能為空";
+        } else {
+            $phpFile = __DIR__ . '/../config.php';
+            $phpContent = file_get_contents($phpFile);
+            
+            // 更新帳號
+            $phpContent = preg_replace('/(\'username\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($newUsername) . '${3}', $phpContent);
+            
+            // 更新密碼 (如果有填寫)
+            if (!empty($newPassword)) {
+                $fingerprint = getSystemFingerprint();
+                $hashedPassword = password_hash($newPassword . $fingerprint, PASSWORD_BCRYPT);
+                // 轉義 $ 符號避免 preg_replace 誤認為後向引用
+                $replacement = str_replace('$', '\$', $hashedPassword);
+                $phpContent = preg_replace('/(\'password\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . $replacement . '${3}', $phpContent);
+            }
+
+            if (file_put_contents($phpFile, $phpContent)) {
+                $msg = __('msg_account_updated');
+                $_SESSION['admin_user'] = $newUsername; // 同步更新目前 Session
+            } else {
+                $error = __('error_config_write') . ' (config.php)';
+            }
+        }
+
     } elseif (isset($_POST['save_frontend'])) {
         // --- Save config.js ---
         $newApi = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_filebase';
@@ -258,6 +289,31 @@ if (empty($themes)) $themes = array('blog');
                     <div class="text-end">
                         <button type="submit" name="save_backend" class="btn btn-primary px-4">
                             <i class="bi bi-save"></i> 儲存後端設定
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section: Admin Account Settings -->
+        <div class="card shadow-sm mb-4">
+            <div class="settings-section-title mb-0"><?php echo __('label_admin_account'); ?></div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_new_username'); ?></label>
+                            <input type="text" name="new_username" class="form-control" value="<?php echo htmlspecialchars($_SESSION['admin_user']); ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_new_password'); ?></label>
+                            <input type="password" name="new_password" class="form-control" placeholder="<?php echo __('hint_password_keep'); ?>">
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" name="save_account" class="btn btn-warning px-4" onclick="return confirm('確定要更新管理者帳號密碼嗎？');">
+                            <i class="bi bi-person-gear"></i> <?php echo __('btn_save_account'); ?>
                         </button>
                     </div>
                 </form>

@@ -49,3 +49,20 @@
 ---
 **版本控制**: v2026.02.14.15.27 (UTC+8)
 **開發工具**: Gemini CLI
+- 遷移文章 (20250131-20250131235411.html) 圖片素材至相簿服務 (album/Collection/Panasonic_LUMIX_S9_Unboxing)。
+- Migrated remaining images from pic/20250205-1/ for post 20250131-20250131235411.html.
+- Removed generator.log writing and health check in album service.
+- Synchronized shorturl.txt when an album is deleted or renamed in album service.
+- Updated album upload: automatically trigger album rebuild to update shorturls and generate thumbnails after upload.
+- Fixed deleted albums still appearing on home page: added directory validation in generator and trigger index update on deletion.
+- Added feature to change admin account and password in both Blog and Album admin settings.
+- Implemented security hardening: system fingerprint hashing, forced initial password change, and localhost bypass (1234).
+- Decoupled Album service from Blog core: created local system_helper.php and updated references for independent operation.
+- Removed unused session_secret from Blog and Album configurations and install process.
+- 實作管理者帳號密碼雜湊加密，結合主機特徵碼 (Machine ID) 加固憑證安全。
+- 支援主機環境感知：提供 localhost (1234) 通行證並強制預設密碼安全性初始化。
+- 徹底解耦相簿服務與部落格核心，支援相簿服務獨立運行佈署。
+- 升級相簿照片上傳機制：AJAX 多檔逐一上傳、進度條顯示、上傳後自動觸發資料同步。
+- 優化 StaticGenerator 資源映射，自動校正子目錄網頁的 album/ 與 pic/ 路徑。
+- 移除全站未使用的 session_secret 設定與相關安裝欄位。
+- 修正相簿刪除後首頁 index.json 未同步更新導致殘留連結的問題。

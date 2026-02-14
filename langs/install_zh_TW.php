@@ -55,7 +55,6 @@ return [
     'admin_user' => '管理員帳號',
     'admin_pass' => '管理員密碼',
     'admin_pass_placeholder' => '設定強密碼',
-    'session_secret' => 'Session 加密密鑰',
     'session_secret_help' => '用於加密 Session 的安全字串。',
     'btn_gen_secret' => '🎲 產生隨機密鑰',
     'step_4' => '4. 前端設定 (Frontend Config)',
