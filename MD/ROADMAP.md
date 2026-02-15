@@ -57,9 +57,16 @@ This document organizes the discussions and evaluations regarding future feature
 ### 3.2 Search Enhancement (Priority: Medium)
 *   **Proposal**: Advanced keyword search optimization (currently relying on Google CSE).
 
+### 3.3 MessageBoard Service (Status: COMPLETED ✅)
+*   **Implementation**: 
+    *   **Adapter Pattern**: Hybrid storage supporting Local SQLite (PHP) and Serverless Google Sheets (GAS).
+    *   **Multi-tenant Design**: Dynamic context detection (Site/Page ID) for isolated data storage across multiple sites.
+    *   **Advanced Admin**: Dedicated dashboard for message moderation, pagination (20/page), metadata capture (Page Titles), and security management.
+    *   **Modern UI**: Threaded discussions with "Optimistic UI" loading and dual-theme (Light/Dark) support.
+
 ---
 
-# 部落格專案開發藍圖與功能提案 (v2026.02.09)
+# 部落格專案開發藍圖與功能提案 (v2026.02.16)
 
 ---
 
@@ -74,7 +81,7 @@ This document organizes the discussions and evaluations regarding future feature
     *   **SPA 架構**：建立無需資料庫、JSON 驅動的相簿服務。
     *   **縮圖優化**：整合 **ImageMagick** 高品質縮圖與 EXIF 保留，具備 GD 自動回退機制。
     *   **編輯器整合**：在文章編輯器實作「相簿挑選器」，支援多尺寸插入與 Modal 內即時上傳。
-    *   **獨立後台**：專屬的相簿管理介面 (CRUD、封面設定、前端設定)。
+    *   **獨立後台**：專屬的相簿管理介面 (CRUD、封面設定、設定)。
 
 ### 1.3 SQLite 支援與資料工具 (狀態：已完成 ✅)
 *   **實作**：實作零設定 SQLite 部署、全站 ZIP 備份與雙向資料遷移工具。
@@ -107,11 +114,18 @@ This document organizes the discussions and evaluations regarding future feature
 ### 3.1 照片地圖整合 (狀態：已完成 ✅)
 *   **實作**：
     *   整合 GPS 座標自動解析與前後端雙重備援機制。
-    *   在相簿詳情頁嵌入互動式 Google Maps，並採用響應式分割佈局優化視覺體驗。
+    *   在相簿詳情頁嵌入互動式 Google Maps，並採用響應式分割佈局。
 
 ### 3.2 搜尋功能優化 (優先級：中)
 *   **提案**：改善目前依賴 Google CSE 的現狀，實作更精確的本地端搜尋。
 
+### 3.3 留言板服務 (狀態：已完成 ✅)
+*   **實作**：
+    *   **適配器儲存**：支援本地 SQLite 與 Serverless GAS 雙模式。
+    *   **多租戶設計**：單一插件支援多站點、多頁面獨立資料隔離。
+    *   **進階管理**：具備分頁管理、網頁標題識別與帳號安全性管理。
+    *   **現代化 UI**：話題討論模式、兩套完整主題與樂觀 UI 狀態。
+
 ---
-**Last Updated**: 2026-02-09 (via Linux `date`)
+**Last Updated**: 2026-02-16 (via Linux `date`)
 **Recorded by**: Gemini CLI Discussion

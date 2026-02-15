@@ -1,71 +1,46 @@
 # 部落格架構優化待辦事項 (TODO List)
 
-此文件記錄了關於系統架構的改進建議與待處理任務，主要聚焦於提升系統穩定性、效能與使用者體驗。
+此文件記錄了系統架構的改進建議與任務狀態。
 
 ---
 
-## 1. 核心邏輯優化
-
-### API 全面重構 (API Consolidation)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 重構 `api_filebase.php`, `api_sqlitebase.php`, `api_dbsqlbase.php`。消除 90% 重複代碼，統一採用 `get_data` 核心，支援統一的分頁數據結構。
-
-### 混合式分頁系統 (Hybrid Pagination)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 實作了後端延遲讀取與前端客戶端切割兩種分頁模式，顯著提升載入大數據量文章時的效能。
-
-### 靜態生成器類別化 (SSG Refactoring)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 建立 `PHP_LIB/StaticGenerator.php` 封裝所有建置邏輯，並強化路徑自動修復功能，確保跨目錄資源引用正確。
+## 1. 核心邏輯優化 (Core Logic)
+*   [x] **API Consolidation**: 統一 File/SQLite/MySQL 核心邏輯。
+*   [x] **Hybrid Pagination**: 實作伺服器端與客戶端混合分頁。
+*   [x] **SSG Refactoring**: 類別化靜態生成器與路徑修復。
 
 ---
 
-## 2. 媒體與內容管理
-
-### 獨立相簿服務與媒體庫整合 (Album & Media Manager)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**:
-    *   建立基於檔案系統的獨立相簿服務 (SPA 架構) 與專屬後台。
-    *   **影像優化**: 整合 ImageMagick 實現高品質縮圖與 EXIF 保留，並具備 GD 回退機制。
-    *   **地圖整合**: 實作 GPS 座標解析與 Google Maps 嵌入，支援響應式分割佈局。
-    *   **編輯器整合**: 文章編輯器內建相簿挑選器，支援多尺寸插入與即時上傳。
+## 2. 媒體與社交服務 (Media & Social)
+*   [x] **Album Service**: 獨立相簿服務、影像優化與地圖整合。
+*   [x] **MessageBoard Service**: 
+    *   實作雙模式適配器 (SQLite/GAS)。
+    *   開發獨立管理後台與多語系支援。
+    *   完成分頁、標題捕捉與帳號安全管理。
 
 ---
 
-## 3. 安全性與穩定性
-
-### 設定管理重構 (Settings Refactor)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 重構 `admin/settings.php`，分區管理前後端設定，實作資料夾選擇器與防呆寫入保護。
-
-### 文章內容腳本保護 (Script Tag Protection)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 實作 `protect_script_tags` 函式，防止文章內 `<script>` 被瀏覽器執行。
-
-### 備份工具強化 (Backup Fixes)
-*   **狀態**: **已完成 (COMPLETED)** ✅
-*   **成果**: 修復了備份工具的 CSRF 驗證錯誤與類別引用路徑問題。
+## 3. 安全性與管理 (Security & Admin)
+*   [x] **Settings Refactor**: 分區管理配置與資料夾選擇器。
+*   [x] **Script Protection**: 文章 Script 標籤轉義保護。
+*   [x] **Backup Tools**: 修正備份工具與路徑問題。
 
 ---
 
-## 4. 已完成項目總覽 (History)
-
-*   [x] **Template Decoupling**: 樣板生成流程解耦，統一讀取 `blog_template.html`。
-*   [x] **Placeholder Standardization**: 全面採用 `{{xxx}}` 雙大括號佔位符。
-*   [x] **Regex Engine**: 移除 DOMDocument，改用 Regex 解析以提升 PHP 5.x 相容性。
-*   [x] **Theme System**: 擴充 Pink 與 Matrix 主題，並強化佈局穩定性。
-*   [x] **Album SPA**: 相簿服務由靜態 HTML 生成轉向 SPA + JSON。
-*   [x] **Map Integration**: 相簿詳情頁整合 Google Maps 與 GPS 資訊。
-*   [x] **Folder Picker**: 後台設定新增相簿路徑選擇器。
+## 4. 已完成細項 (History)
+*   [x] **Template Decoupling**: 樣板讀取流程解耦。
+*   [x] **Placeholder Standardization**: 雙大括號佔位符統一。
+*   [x] **Theme System**: 擴充 Pink, Matrix, Dark 主題。
+*   [x] **AOT Compilation**: 相簿總管 Blazor AOT 優化。
 
 ---
 
-## 5. 剩餘建議項目 (Future Improvements)
-
-*   [ ] **Search Enhancement**: 進階關鍵字搜尋優化 (目前依賴 Google CSE)。
-*   [ ] **CSS Refactoring**: 進一步整合四款主題的共用 CSS 變數，減少重複定義。
-*   [ ] **Backup Cleanup**: 定期自動清理過期的備份檔案。
+## 5. 待處理與未來規劃 (Future Improvements)
+*   [ ] **Search Enhancement**: 改進本地端關鍵字搜尋 (目前依賴 Google CSE)。
+*   [ ] **CSS Refactoring**: 整合主題 CSS 變數，減少重複程式碼。
+*   [ ] **SEO Optimization**: 強化文章自動摘要生成與 Meta 標籤完整性。
+*   [ ] **Automatic Backup Cleanup**: 定期清理過期的全站備份 ZIP。
 
 ---
-**Last Updated**: 2026-02-09 (via Linux `date`)
+**Last Updated**: 2026-02-16 (via Linux `date`)
 **Recorded by**: Gemini CLI Discussion
