@@ -6,10 +6,12 @@ header('Content-Type: application/json');
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 $baseDir = realpath(__DIR__ . '/../');
+$showFiles = isset($_GET['show_files']) && $_GET['show_files'] === '1';
+$extFilter = isset($_GET['ext']) ? explode(',', $_GET['ext']) : array();
 
 if ($action === 'list') {
     $relPath = isset($_GET['path']) ? $_GET['path'] : '';
-    // 安全檢查：防止路徑遍歷攻擊，只允許在 blog 根目錄的上下幾層移動
+    // 安全檢查：防止路徑遍歷
     $targetPath = realpath($baseDir . '/' . $relPath);
     
     if (!$targetPath || strpos($targetPath, realpath($baseDir . '/../..')) === false) {
@@ -19,53 +21,53 @@ if ($action === 'list') {
     $items = array();
     $scan = scandir($targetPath);
     
+    // 處理上層目錄
+    $parentDir = realpath($targetPath . '/..');
+    if ($parentDir && strpos($parentDir, realpath($baseDir . '/../..')) !== false) {
+        // 計算上層相對於根目錄的路徑
+        $parentRel = '';
+        if (strpos($parentDir, $baseDir) === 0) {
+            $parentRel = ltrim(substr($parentDir, strlen($baseDir)), DIRECTORY_SEPARATOR);
+        } else {
+            $parentRel = '../' . ltrim(substr($parentDir, strlen(dirname($baseDir))), DIRECTORY_SEPARATOR);
+        }
+        $items[] = array(
+            'name' => '.. [上層目錄]',
+            'path' => $parentRel ? str_replace('\\', '/', $parentRel) : '',
+            'is_parent' => true
+        );
+    }
+
     foreach ($scan as $item) {
-        if ($item === '.') continue;
+        if ($item === '.' || $item === '..') continue;
         $fullItemPath = $targetPath . DIRECTORY_SEPARATOR . $item;
         
+        $relItemPath = ltrim(substr($fullItemPath, strlen($baseDir)), DIRECTORY_SEPARATOR);
+        if (strpos($fullItemPath, $baseDir) === false) {
+             $relItemPath = '../' . ltrim(substr($fullItemPath, strlen(dirname($baseDir))), DIRECTORY_SEPARATOR);
+        }
+        $relItemPath = str_replace('\\', '/', $relItemPath);
+
         if (is_dir($fullItemPath)) {
-            // 計算相對於 blog 根目錄的相對路徑
-            $relative = '';
-            // 由於 realpath 會處理符號連結與不同平台的斜線，我們手動計算相對關係
-            // 這裡使用一個簡單的方法：直接回傳從根目錄計算的路徑
-            
-            // 取得與 baseDir 的相對關係
-            $pathDiff = substr($fullItemPath, strlen($baseDir));
-            $pathDiff = ltrim(str_replace('', '/', $pathDiff), '/');
-            
-            // 如果是在上層
-            if (strpos($fullItemPath, $baseDir) === false) {
-                // 處理平行目錄情況 (例如 ../album)
-                $parentBase = realpath($baseDir . '/../');
-                if (strpos($fullItemPath, $parentBase) !== false) {
-                    $itemDiff = substr($fullItemPath, strlen($parentBase));
-                    $pathDiff = '../' . ltrim(str_replace('', '/', $itemDiff), '/');
-                }
-            }
-
-            if ($item === '..') {
-                // 向上跳一層的邏輯
-                $parentDir = dirname($targetPath);
-                if (strpos($parentDir, realpath($baseDir . '/../..')) !== false) {
-                    $items[] = array(
-                        'name' => '.. [上層目錄]',
-                        'path' => $relPath . '/..',
-                        'is_parent' => true
-                    );
-                }
-                continue;
-            }
-
             $items[] = array(
                 'name' => $item,
-                'path' => $pathDiff ? $pathDiff . '/' : $item . '/',
+                'path' => $relItemPath,
                 'is_dir' => true
             );
+        } elseif ($showFiles) {
+            $ext = pathinfo($item, PATHINFO_EXTENSION);
+            if (empty($extFilter) || in_array($ext, $extFilter)) {
+                $items[] = array(
+                    'name' => $item,
+                    'path' => $relItemPath,
+                    'is_file' => true
+                );
+            }
         }
     }
 
     echo json_encode(array(
-        'current' => $relPath,
+        'current' => str_replace('\\', '/', $relPath),
         'items' => $items
     ));
 }

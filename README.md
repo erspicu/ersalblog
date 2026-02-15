@@ -17,6 +17,9 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
     *   **Advanced Dashboard**: Real-time system health checks, database statistics, and static file status monitoring.
     *   **Smart Navigation**: Fixed sidebar layout with unified navigation for efficient management.
     *   **Post Pagination**: Server-side pagination (15 posts/page) for fast browsing of large archives.
+*   **Independent Plugin Services**:
+    *   **Album Service**: Advanced photo gallery with Exif parsing and AJAX-based multi-file uploading.
+    *   **MessageBoard Service**: Modern threaded comment system supporting both SQLite and Google Sheets (Serverless) storage with a dedicated admin panel.
 *   **Security First**:
     *   **Script Protection**: Built-in HTML escaping for `<script>` tags to prevent execution in posts while keeping content readable.
     *   **Rate Limiting & CSRF**: Secure login with IP-based lockout and full CSRF protection for all admin actions.
@@ -100,6 +103,9 @@ Model: `gemini-3-pro-preview`
     *   **進階儀表板**: 即時系統健康檢查、資料庫統計及靜態檔案狀態監測。
     *   **智慧導覽**: 固定式側邊欄佈局與統一的導覽組件，提升管理效率。
     *   **文章分頁**: 後台支援伺服器端分頁（每頁 15 篇），輕鬆應對大量文章。
+*   **獨立插件化服務**:
+    *   **相簿服務**: 具備 Exif 解析與基於 AJAX 的進階多檔上傳系統。
+    *   **留言板服務**: 現代話題討論系統，支援 SQLite 與 Google 試算表 (Serverless) 雙模式儲存，內建獨立管理後台。
 *   **安全性強化**:
     *   **腳本防護**: 內建 `<script>` 標籤轉義機制，防止文章內的腳本執行，同時保留技術內容的可讀性。
     *   **安全防禦**: IP 登入鎖定機制與全站 CSRF 防護。

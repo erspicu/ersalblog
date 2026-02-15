@@ -318,8 +318,22 @@ a:focus {
     text-align: left;
 }
 
-.RegionFunctionTitle {
+.RegionFunctionTitle, .messageboardTitle {
     margin: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#messageboard {
+    width: 96%;
+    margin: auto;
+    background-color: #ffffff;
+    border-color: #cccccc;
+    border-width: 2px;
+    border-style: solid;
+    margin-bottom: 10px;
+    padding: 5px;
+    display: block;
 }
 
 /* 日期選單與影片 */

@@ -5,18 +5,18 @@
         <title>Baxermux的攝影Blog</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        
+
         <link rel="canonical" href="https://www.baxermux.org/ersalblog/blog.html" />
-        
+
         <meta name="description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
-        
+
         <meta property="og:title" content="Baxermux的攝影Blog" />
         <meta property="og:description" content="BaxerMux的攝影Blog，主要是介紹攝影器材開箱心得與創作分享。" />
         <meta property="og:image" content="https://www.baxermux.org/ersalblog/preview/BaxerMuxBlog.jpg" />
         <meta property="og:type" content="article" />
         <meta property="og:url" content="https://www.baxermux.org/ersalblog/blog.html" />
         <meta property="og:site_name" content="Baxermux的攝影Blog" />
-        
+
         <meta name="twitter:card" content="summary_large_image" />
 
         <link rel="icon" type="image/png" sizes="192x192" href="https://www.baxermux.org/ersalblog/static/icon-192.png" />
@@ -29,7 +29,7 @@
             var min = isLocal ? "" : ".min";
             var ver = isLocal ? "?v=" + new Date().getTime() : "";
             // 讀取設定檔中的主題，預設為 'blog'
-            var themeFile = (typeof AppConfig !== 'undefined' && AppConfig.theme_file) ? AppConfig.theme_file : 'blog';
+            var themeFile = typeof AppConfig !== "undefined" && AppConfig.theme_file ? AppConfig.theme_file : "blog";
             var css_load = '<link rel="stylesheet" href="' + themeFile + min + ".css" + ver + '"/>';
             document.write(css_load);
             if (window.location.href.indexOf("?") > -1) {
@@ -61,8 +61,7 @@
                 
             </main>
             <div id="footer_body">
-                <div id="PaginationList">
-                </div>
+                <div id="PaginationList"></div>
                 <div id="blog_search">
                     <div id="blog_search_google">
                         <p class="RegionFunctionTitle">文章搜尋服務</p>
@@ -89,6 +88,10 @@
                     <div class="date_list_region">
                         <ul id="myUL"></ul>
                     </div>
+                </div>
+                <div id="messageboard" style="display: none">
+                    <p class="messageboardTitle">留言回覆</p>
+                    <div id="esmessageboard-root"></div>
                 </div>
             </div>
         </div>
@@ -182,7 +185,9 @@
         <template id="tmpl_date_year">
             <li>
                 <span class="caret"
-                    >{{year}}年　<a href="blog.html?/date_range/{{year}}" class="date_link">({{count}})</a></span
+                    >{{year}}年　<a href="blog.html?/date_range/{{year}}" class="date_link"
+                        >({{count}})</a
+                    ></span
                 >
                 <ul class="nested" id="year_{{year}}"></ul>
             </li>
@@ -191,7 +196,9 @@
         <template id="tmpl_date_month">
             <li>
                 <span class="caret"
-                    >{{mon}}月　<a href="blog.html?/date_range/{{key}}" class="date_link">({{count}})</a></span
+                    >{{mon}}月　<a href="blog.html?/date_range/{{key}}" class="date_link"
+                        >({{count}})</a
+                    ></span
                 >
                 <ul class="nested" id="year_mon_{{key}}"></ul>
             </li>
@@ -214,15 +221,6 @@
 
         <script>
             document.write('<script src="static/blog' + min + ".js" + ver + '" defer><\/script>');
-        </script>
-        <script>
-            if (typeof AppConfig !== "undefined" && AppConfig.cse_id) {
-                var gcse = document.createElement("script");
-                gcse.type = "text/javascript";
-                gcse.async = true; // 設定為非同步載入
-                gcse.src = "https://cse.google.com/cse.js?cx=" + AppConfig.cse_id;
-                document.getElementsByTagName("head")[0].appendChild(gcse);
-            }
         </script>
     </body>
 </html>

@@ -13,5 +13,6 @@ return array(
     'month_suffix' => ' (Month)',
     'day_suffix' => ' (Day)',
     'list_page_title' => 'All Posts',
+    'messageboard_title' => 'Comments',
     'html_lang' => 'en-US',
 );

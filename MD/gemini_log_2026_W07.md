@@ -55,12 +55,12 @@
   - 建立 album/remove_win11.sh：用於移除 static/themes/album-win11/目錄。
   - 建立 album/clean_blazor.sh：用於清理 BlazorAlbumExplorer 的 bin/, obj/ 與 publish/ 暫存檔，優化上傳體積.
 - [2026-02-14 11:35:12] 建立 Windows PowerShell 版本之主題管理與清理腳本
-  - 建立 album/rebuild_win11.ps1：支援 Windows 環境下的環境偵測、WASM 安裝、AOT 編譯與發佈.
+  - 建立 album/toolshell/rebuild_win11.ps1：支援 Windows 環境下的環境偵測、WASM 安裝、AOT 編譯與發佈.
   - 建立 album/remove_win11.ps1：Windows 環境專用的主題移除腳本。
   - 建立 album/clean_blazor.ps1：Windows 環境專用的 Blazor 暫存檔清理腳本。
 - [2026-02-14 11:45:32] 整理腳本結構並修正路徑
   - 建立 album/toolshell/ 目錄，並將所有 .sh 與 .ps1 腳本移入.
-  - 修正所有腳本內部的相對路徑（..），確保在子目錄執行時仍能正確指向 album/ 根目錄下的資源。
+  - 修正所有腳本內部的相對路徑（..），確保在子目錄執行時仍能正確指向 album/ 根目錄下的資源時仍能正確指向 album/ 根目錄下的資源。
 - [2026-02-14 11:55:12] 建立 Windows Batch (.bat) 版本之管理與清理腳本
   - 建立 album/toolshell/rebuild_win11.bat、remove_win11.bat 與 clean_blazor.bat。
   - 提供傳統 CMD 環境下的跨平臺相容支援，並處理相對路徑與錯誤檢查.
@@ -74,7 +74,7 @@
   - 優化索引整合邏輯：更新單一相簿時自動保留 index.json 與 shorturl.txt 中的現有資料，大幅提升大型相簿庫的維護效率。
 - [2026-02-14 13:00:12] 重構相簿處理邏輯並整合至 Web 後台
   - 建立 `album/PHP_LIB/AlbumGenerator.php`：將核心掃描、Exif 解析、縮圖生成與 JSON 維護邏輯封裝為類別，達成 CLI 與 Web 共用.
-  - 重構 `make_album.php`：改為呼叫 `AlbumGenerator` 類別，保持原有 CLI 功能不變.
+  - 重構 `make_album.php` : 改為呼叫 `AlbumGenerator` 類別，保持原有 CLI 功能不變.
   - 整合後台 UI：在開左側選單加入「重建全站相簿」，並在相簿列表加入「單一相簿重新整理」按鈕，均透過 Ajax 與 SweetAlert2 實現流暢操作體驗。
 - [2026-02-14 13:25:12] 建立獨立系統維護頁面與細部重建選項
   - 建立 `album/admin/maintenance.php` : 提供視覺化介面供使用者勾選重建參數（強制更新 JSON、縮圖、樣板等）。
@@ -136,7 +136,7 @@
   - 修改 `album_actions.php`：在執行耗時重建任務前主動呼叫 `session_write_close()`，釋放 PHP Session 鎖定，確保併發的進度查詢請求能即時獲得回應而不被主任務阻塞。
 - [2026-02-14 18:25:12] 優化進度更新粒度與管理後台縮圖顯示邏輯
   - 升級 `AlbumGenerator.php`：移除每 10 張更新一次進度的限制，改為每處理一張照片即時回報，確保進度面板數據跳動平滑.
-  - 修正 `albums.php` 與 `album_photos.php` 的縮圖抓取邏輯：將硬編碼的舊版檔名（_thumbXS）對齊為 `compression.json` 定義的 ID 格式（_XS），並實作自動回退機制，解決管理介面誤用原圖導致的載入效能問題。
+  - 修正 `albums.php` 與 `album_photos.php` 的縮圖抓取邏輯：將進度更新方式由「覆寫」改為「狀態合併」。將硬編碼的舊版檔名（_thumbXS）對齊為 `compression.json` 定義的 ID 格式（_XS），並實作自動回退機制，解決管理介面誤用原圖導致的載入效能問題。
 - [2026-02-14 18:40:12] 實作進度追蹤隔離機制與自動清理
   - 升級進度系統：引入任務唯一 ID (progress_id)，實現併發任務下的進度檔隔離，避免多使用者或多頁面同時操作時的資料混淆.
   - 實作自動清理：`AlbumGenerator` 完成任務後將自動刪除對應的進度 JSON 檔，維持伺服器暫存空間整潔。
@@ -173,11 +173,11 @@
   - 優化 `admin/post_save.php`：整合圖像處理引擎（優先使用 Imagick，回退使用 GD），自動將上傳圖片裁切轉製為 1200x630 社交媒體標準規格，並以 `icon-` 前綴存於 `preview/` 目錄。
   - 補齊中英文語系標籤與提示訊息，確保 SEO 管理功能的完整性。
 - [2026-02-14 21:50:12] 實作網站圖示 (Favicon) 的變數化自定義設定
-  - 修改 `static/blog_template.html`：將原本硬編碼的圖示路徑替換為 `{{blog_favicon}}` 樣板變數。
-  - 升級 `admin/settings.php`：於後端設定區塊新增「Blog 圖示路徑」欄位，支援將設定值持久化至 `config.php` 並即時更新環境變數。
+  - 修改 `static/blog_template.html` : 將原本硬編碼的圖示路徑替換為 `{{blog_favicon}}` 樣板變數。
+  - 升級 `admin/settings.php` : 於後端設定區塊新增「Blog 圖示路徑」欄位，支援將設定值持久化至 `config.php` 並即時更新環境變數。
   - 串接建置流程：更新 `StaticGenerator.php` 與 `make_html.php`，確保在靜態生成過程中能正確代入使用者定義的圖示路徑。
 - [2026-02-14 22:00:12] 執行全站靜態重建以套用 Favicon 變數化設定
-  - 執行 `make_html.php -f` 完成強迫完整重建，驗證全站靜態 HTML 之 Favicon 標籤已由硬編碼成功轉型為動態變數驅動。
+  - 執行 `make_html.php -f` 完成強迫完整重建，驗證全站靜態 HTML 之 Favicon 標籤已由硬編碼成功轉型為 dynamic 變數驅動。
 - [2026-02-14 18:25:02] 修正相簿後台建立中文目錄失敗問題：更新 album/admin/album_actions.php 中的目錄名稱驗證正則表達式。
 - [2026-02-14 18:29:41] 修復相簿後台上傳照片按鈕沒反應問題：補全 album/admin/album_photos.php 中缺失的 Modal 結構與 JavaScript 函式。
 - [2026-02-14 18:53:47] 遷移文章 20250131-20250131235411.html 的圖片素材從 pic/ 移至 album/ 服務，更新路徑並重新建置。
@@ -197,3 +197,13 @@
 - [2026-02-14 22:33:55] 移除 album/ThemeSelect.html 中指向管理後台的連結。
 - [2026-02-14 22:50:35] 執行 mini.py 並優化其效能：擴大排除清單（album, pic）並修復 subprocess 呼叫錯誤，成功完成資源壓縮。
 - [2026-02-14 22:52:00] 修復 mini.py 跨平台相容性：透過動態 OS 偵測，確保在 Windows 與 Linux 下均能正確呼叫壓縮工具。
+- [2026-02-15 14:20:14] 更新 gemini.md 規則：明確規範相簿服務 (Album Service) 為獨立子專案，具備完全脫鉤設計與可移植性，Blog 僅透過路徑配置存取。
+- [2026-02-15 14:35:10] 更新 gemini.md 規則：新增留言板服務 (MessageBoard Service) 架構規範，目錄設於 MessageBoard/，比照相簿服務採取完全脫鉤與獨立運作原則。
+- [2026-02-15 14:48:32] 更新 gemini.md 規則：留言板服務納入「混合存儲模式 (Hybrid Storage Mode)」，新增對 Serverless (GAS + Google Sheets) 雲端方案的支持，並強調 UI 與 API 層的極度脫鉤設計。
+- [2026-02-15 19:17:55] 實作 MessageBoard 留言板服務核心架構
+  - 建立 MessageBoard/ 獨立目錄與基本結構。
+  - 實作「適配器模式 (Adapter Pattern)」前端框架：`guestbook.js` 自動偵測環境，並支援 `PHPAdapter` (SQLite) 與 `GASAdapter` (Google Sheets)。
+  - 完成「PHP 本地儲存模式」：建立 `message.php` API 與 `guestbook_messages` 資料表，支援無限層級巢狀回覆、智慧分頁與自動環境辨識。
+  - 整合 Blog 全站主題：針對 Standard, Matrix, Pink, Dark 主題進行 CSS 深度優化，確保留言板視覺風格完美適配。
+  - 建立集中化設定檔 `config.js`：支援多種儲存媒介參數與 UI 排版自定義。
+  - 建立 GAS 後端範本 `Code.gs`：為未來 Google Drive 雲端儲存提供完整 Serverless 解決方案。

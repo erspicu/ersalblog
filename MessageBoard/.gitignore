@@ -1,0 +1,8 @@
+# MessageBoard Local Configurations
+config/config.php
+config/config.js
+
+# SQLite Databases & Directories
+data/*
+!data/README.md
+api/debug.log

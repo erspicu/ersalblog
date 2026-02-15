@@ -247,7 +247,7 @@ a:hover {
     margin: 10px auto;
 }
 
-.RegionFunctionTitle {
+.RegionFunctionTitle, .messageboardTitle {
     color: #00ff41;
     font-weight: bold;
     border-bottom: 2px solid #00ff41;
@@ -255,6 +255,15 @@ a:hover {
     padding-bottom: 3px;
     margin: 8px auto 15px auto;
     text-transform: uppercase;
+}
+
+#messageboard {
+    border: 1px dashed #003b00;
+    padding: 15px;
+    background-color: #000000;
+    width: 98%;
+    margin: 10px auto;
+    text-align: center;
 }
 
 /* 標籤方塊 */

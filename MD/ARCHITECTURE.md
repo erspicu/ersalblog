@@ -47,6 +47,14 @@ The system supports two operating modes:
     *   **Experimental Blazor Explorer**: A high-fidelity Windows 11 / WPF style explorer built with Blazor WebAssembly, optimized with **AOT (Ahead-of-Time)** compilation.
     *   **Build Tooling**: Includes `album/toolshell/` with cross-platform scripts (Bash, PowerShell, Batch) for theme rebuilding and project cleanup.
 
+*   **MessageBoard Service**:
+    *   Located in the `/MessageBoard` directory as an independent plugin-style service.
+    *   **Adapter-Based Storage**: Implements an "Adapter Pattern" frontend framework, supporting seamless switching between local SQLite (PHP) and serverless Google Sheets (GAS) storage.
+    *   **Multi-Tenant Design**: Features dynamic context detection (Site ID / Page ID), allowing a single installation to serve multiple independent sites and pages with isolated data storage.
+    *   **Modern Interaction**: Supports threaded discussions with topics and flattened replies, featuring a sleek, responsive UI with "Optimistic UI" loading states.
+    *   **Independent Admin**: Includes a dedicated dashboard for environment diagnostics, global configuration (Mode/Theme/Language), and message management (deletion/moderation).
+    *   **High Performance**: Dynamically routes to granular storage files (one database per page) to ensure fast load times and unlimited scalability.
+
 *   **Initialization and Health Check**:
     *   **System Diagnostics**: `admin/health_check.php` and `album/admin/health_check.php` provide comprehensive environment verification and permission auditing.
 *   **Security Features**:
@@ -124,6 +132,14 @@ The system supports two operating modes:
     *   **進階上傳佇列**: 實作基於 AJAX 的多檔逐一上傳系統，具備即時進度條與百分比顯示，上傳完成自動觸發資料重建。
     *   **實驗性 Blazor 總管**: 高擬真 Win11 風格檔案總管，已啟用 **AOT** 編譯優化效能。
     *   **自動化工具**: 提供 `album/toolshell/` 目錄，內含支援 Bash, PowerShell 與 Batch 的跨平台管理腳本。
+
+*   **留言板服務 (MessageBoard Service)**:
+    *   位於 `/MessageBoard` 目錄，身為部落格插件式獨立服務。
+    *   **適配器儲存架構**：採用前端「適配器模式 (Adapter Pattern)」，支援在本地 SQLite (PHP) 與 Serverless Google 試算表 (GAS) 儲存間無縫切換。
+    *   **多租戶設計**：具備動態環境偵測 (Site ID / Page ID)，支援單一插件服務於多個獨立站點與頁面，且資料儲存完全隔離。
+    *   **現代化互動**：支援話題討論串模式，提供流暢的縮排回覆 UI 與樂觀 UI (Optimistic UI) 載入狀態。
+    *   **獨立管理後台**：內建專屬管理介面，支援環境診斷、全域設定 (模式/主題/語系) 與留言審核管理。
+    *   **效能優化**：動態路由至精細的儲存檔案（一頁一資料庫/表），確保極速載入與無限擴充能力。
 
 *   **初始化與健康檢查**:
     *   **系統診斷**: `admin/health_check.php` 與 `album/admin/health_check.php` 提供通用的伺服器配置檢查與權限審核。

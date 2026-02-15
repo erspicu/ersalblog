@@ -1,0 +1,84 @@
+/* MessageBoard Plugin Style - Threaded Topic Mode */
+.mb-wrapper { 
+    max-width: 100%; margin: 10px auto; font-family: inherit; padding: 10px; clear: both; text-align: left;
+}
+
+.mb-form-area { 
+    margin-bottom: 40px; background: rgba(128, 128, 128, 0.08); padding: 20px; border-radius: 12px; 
+}
+
+.mb-input { 
+    width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(128, 128, 128, 0.2); 
+    border-radius: 8px; box-sizing: border-box; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: #333;
+}
+
+#messageboard .mb-input { background: rgba(0, 0, 0, 0.2); color: #eee; border-color: rgba(255, 255, 255, 0.1); }
+
+.mb-btn { background: #4a90e2; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+/* 主題討論盒 */
+.mb-thread-box { 
+    margin-bottom: 30px; border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 12px; 
+    background: rgba(255, 255, 255, 0.02); overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 話題主體 */
+.mb-topic { 
+    padding: 20px; background: rgba(128, 128, 128, 0.05); border-bottom: 1px solid rgba(128, 128, 128, 0.1); 
+}
+
+/* 討論內容區域 */
+.mb-discussion { padding: 10px 0; }
+
+.mb-reply-item { 
+    padding: 15px 20px 15px 50px; /* 左側預留縮排空間 */
+    position: relative;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.05);
+}
+.mb-reply-item:last-child { border-bottom: none; }
+
+/* 回覆線條視覺效果 */
+.mb-reply-item::before {
+    content: ""; position: absolute; left: 25px; top: 0; bottom: 0; width: 2px; background: rgba(74, 144, 226, 0.3);
+}
+
+.mb-author { font-weight: bold; color: inherit; margin-right: 12px; }
+.mb-date { opacity: 0.5; font-size: 0.85em; }
+.mb-reply-link { margin-left: 15px; font-size: 0.85em; color: #4a90e2; text-decoration: none; cursor: pointer; }
+
+.mb-badge { background: #4a90e2; color: white; font-size: 0.75em; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+
+.mb-is-admin { border-left: 4px solid #4a90e2; }
+
+.mb-item-content { line-height: 1.6; white-space: pre-wrap; margin-top: 5px; color: inherit; }
+
+.mb-pagination-area { margin-top: 20px; display: flex; justify-content: center; }
+.mb-page-btn { 
+    border: 1px solid #4a90e2; background: transparent; padding: 8px 16px; margin: 0 4px; border-radius: 6px; 
+    cursor: pointer; color: #4a90e2; font-weight: bold;
+}
+.mb-btn.active { background: #4a90e2; color: white; }
+
+/* Loading 效果 */
+.mb-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.mb-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: mb-spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes mb-spin {
+    to { transform: rotate(360deg); }
+}
+

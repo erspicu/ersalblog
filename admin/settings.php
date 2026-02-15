@@ -13,7 +13,9 @@ function getConfigValues($content) {
     if (preg_match("/api_type:\s*'([^']+)'/", $content, $m)) $values['api_type'] = $m[1];
     if (preg_match("/theme_file:\s*'([^']+)'/", $content, $m)) $values['theme_file'] = $m[1];
     if (preg_match("/posts_per_page:\s*(\d+)/", $content, $m)) $values['posts_per_page_js'] = (int)$m[1];
-    if (preg_match("/cse_id:\s*'([^']+)'/", $content, $m)) $values['cse_id'] = $m[1];
+    if (preg_match("/cse_id:\s*'([^']*)'/", $content, $m)) $values['cse_id'] = $m[1];
+    if (preg_match("/guestbook_plugin:\s*'([^']*)'/", $content, $m)) $values['guestbook_plugin'] = $m[1];
+    if (preg_match("/guestbook_per_page:\s*(\d+)/", $content, $m)) $values['guestbook_per_page'] = (int)$m[1];
     return $values;
 }
 
@@ -139,6 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newTheme = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
         $newPerPageJs = isset($_POST['posts_per_page_js']) ? (int)$_POST['posts_per_page_js'] : 10;
         $newCse = isset($_POST['cse_id']) ? $_POST['cse_id'] : '';
+        $newGbPlugin = isset($_POST['guestbook_plugin']) ? $_POST['guestbook_plugin'] : '';
+        $newGbPerPage = isset($_POST['guestbook_per_page']) ? (int)$_POST['guestbook_per_page'] : 5;
 
         if ($newPerPageJs <= 0) {
             $error = "前端每頁文章數量必須大於 0";
@@ -147,7 +151,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newJsContent .= "    api_type: '$newApi',\n";
             $newJsContent .= "    theme_file: '$newTheme',\n";
             $newJsContent .= "    posts_per_page: $newPerPageJs,\n";
-            $newJsContent .= "    cse_id: '$newCse'\n";
+            $newJsContent .= "    cse_id: '$newCse',\n";
+            $newJsContent .= "    guestbook_plugin: '$newGbPlugin',\n";
+            $newJsContent .= "    guestbook_per_page: $newGbPerPage\n";
             $newJsContent .= "};";
 
             if (file_put_contents($configFile, $newJsContent)) {
@@ -358,6 +364,26 @@ if (empty($themes)) $themes = array('blog');
                         <input type="text" name="cse_id" class="form-control" value="<?php echo htmlspecialchars(isset($currentConfig['cse_id']) ? $currentConfig['cse_id'] : ''); ?>">
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_guestbook_plugin'); ?></label>
+                            <div class="input-group">
+                                <input type="text" name="guestbook_plugin" id="guestbook_plugin_input" class="form-control" value="<?php echo htmlspecialchars(isset($currentConfig['guestbook_plugin']) ? $currentConfig['guestbook_plugin'] : ''); ?>" placeholder="MessageBoard/static/guestbook.js">
+                                <button class="btn btn-outline-secondary" type="button" onclick="openFilePicker('guestbook_plugin_input', 'js')">
+                                    <i class="bi bi-filetype-js"></i> 瀏覽...
+                                </button>
+                                <button class="btn btn-outline-danger" type="button" onclick="document.getElementById('guestbook_plugin_input').value = '';">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                            <div class="form-text"><?php echo __('hint_guestbook_plugin'); ?></div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_guestbook_per_page'); ?></label>
+                            <input type="number" name="guestbook_per_page" class="form-control" value="<?php echo htmlspecialchars(isset($currentConfig['guestbook_per_page']) ? $currentConfig['guestbook_per_page'] : 5); ?>" min="1" max="50">
+                        </div>
+                    </div>
+
                     <div class="text-end">
                         <button type="submit" name="save_frontend" class="btn btn-secondary px-4">
                             <i class="bi bi-save"></i> 儲存前端設定
@@ -396,55 +422,84 @@ if (empty($themes)) $themes = array('blog');
 
 <script>
     let folderModal;
-    let selectedFolderPath = '';
-    let currentScanPath = '';
+    let selectedPath = '';
+    let targetInputId = '';
+    let currentPickerMode = 'dir'; // 'dir' or 'file'
+    let currentExtFilter = '';
 
     function openFolderPicker() {
-        if (!folderModal) {
-            folderModal = new bootstrap.Modal(document.getElementById('folderPickerModal'));
-        }
-        selectedFolderPath = document.getElementById('album_path_input').value;
-        loadFolders('');
+        targetInputId = 'album_path_input';
+        currentPickerMode = 'dir';
+        currentExtFilter = '';
+        if (!folderModal) folderModal = new bootstrap.Modal(document.getElementById('folderPickerModal'));
+        loadItems('');
         folderModal.show();
     }
 
-    async function loadFolders(path) {
+    function openFilePicker(inputId, ext = '') {
+        targetInputId = inputId;
+        currentPickerMode = 'file';
+        currentExtFilter = ext;
+        if (!folderModal) folderModal = new bootstrap.Modal(document.getElementById('folderPickerModal'));
+        document.querySelector('#folderPickerModal .modal-title').innerText = '選擇插件檔案 (.js)';
+        loadItems('');
+        folderModal.show();
+    }
+
+    async function loadItems(path) {
         const container = document.getElementById('folder-list');
         const display = document.getElementById('current-folder-display');
         container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
         
         try {
-            const resp = await fetch(`tool_folders.php?action=list&path=${encodeURIComponent(path)}`);
+            const showFiles = currentPickerMode === 'file' ? '1' : '0';
+            const resp = await fetch(`tool_folders.php?action=list&path=${encodeURIComponent(path)}&show_files=${showFiles}&ext=${currentExtFilter}`);
             const data = await resp.json();
-            currentScanPath = data.current;
             display.innerText = data.current || '/ (Blog Root)';
 
             let html = '';
             data.items.forEach(item => {
-                const icon = item.is_parent ? 'bi-arrow-90deg-up' : 'bi-folder';
+                let icon = 'bi-folder';
+                let action = '';
+                
+                if (item.is_parent) {
+                    icon = 'bi-arrow-90deg-up';
+                    action = `loadItems('${item.path}')`;
+                } else if (item.is_dir) {
+                    icon = 'bi-folder';
+                    // 如果是目錄模式，點擊文字選取目錄，點擊右側進入目錄
+                    // 如果是檔案模式，點擊目錄直接進入
+                    if (currentPickerMode === 'dir') {
+                        action = `selectItem('${item.path}')`;
+                    } else {
+                        action = `loadItems('${item.path}')`;
+                    }
+                } else if (item.is_file) {
+                    icon = 'bi-file-earmark-code';
+                    action = `selectItem('${item.path}')`;
+                }
+
                 html += `
                 <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
-                   onclick="event.preventDefault(); ${item.is_parent ? `loadFolders('${item.path}')` : `selectFolder('${item.path}')`}">
+                   onclick="event.preventDefault(); ${action}">
                     <span><i class="bi ${icon} me-2"></i>${item.name}</span>
-                    ${!item.is_parent ? `<button class="btn btn-sm btn-link p-0" onclick="event.stopPropagation(); loadFolders('${item.path}')"><i class="bi bi-chevron-right"></i></button>` : ''}
+                    ${(item.is_dir && !item.is_parent) ? `<button class="btn btn-sm btn-link p-0" onclick="event.stopPropagation(); loadItems('${item.path}')"><i class="bi bi-chevron-right"></i></button>` : ''}
                 </a>`;
             });
             container.innerHTML = html;
         } catch (e) {
-            container.innerHTML = '<div class="alert alert-danger">載入目錄失敗</div>';
+            container.innerHTML = '<div class="alert alert-danger">載入失敗</div>';
         }
     }
 
-    function selectFolder(path) {
-        selectedFolderPath = path;
-        // 移除其他選取狀態
+    function selectItem(path) {
+        selectedPath = path;
         document.querySelectorAll('#folder-list .list-group-item').forEach(el => el.classList.remove('active'));
-        // 標記目前選取
         event.currentTarget.classList.add('active');
     }
 
     document.getElementById('btn-confirm-folder').addEventListener('click', () => {
-        document.getElementById('album_path_input').value = selectedFolderPath;
+        document.getElementById(targetInputId).value = selectedPath;
         folderModal.hide();
     });
 </script>

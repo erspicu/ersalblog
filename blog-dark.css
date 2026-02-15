@@ -316,8 +316,51 @@ a:focus {
     text-align: left;
 }
 
-.RegionFunctionTitle {
+.RegionFunctionTitle, .messageboardTitle {
     margin: 8px;
+    color: #e0e0e0;
+    font-weight: bold;
+    text-align: center;
+}
+
+#messageboard {
+    width: 96%;
+    margin: auto;
+    background-color: #1e1e1e; /* 更深的背景，增加層次 */
+    border: 1px solid #444444;
+    margin-bottom: 20px;
+    padding: 15px;
+    display: block;
+    color: #f0f0f0; /* 極高對比的文字 */
+    border-radius: 8px;
+}
+
+#messageboard .mb-item-group {
+    background-color: #252525; /* 留言群組背景 */
+    border-color: #3d3d3d;
+}
+
+#messageboard .mb-is-reply {
+    background-color: rgba(74, 144, 226, 0.15); /* 更明顯的回覆背景 */
+}
+
+#messageboard .mb-author {
+    color: #4a90e2; /* 讓作者名字更亮眼 */
+}
+
+#messageboard .mb-date {
+    color: #999;
+}
+
+#messageboard .mb-input {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #ffffff;
+}
+
+#messageboard .mb-input:focus {
+    border-color: #4a90e2;
+    outline: none;
 }
 
 /* 日期選單與影片 */

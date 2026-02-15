@@ -509,3 +509,53 @@ function init_image_event() {
 }
 
 init_image_event();
+
+/**
+ * 動態載入留言板插件
+ */
+(function loadMessageBoardPlugin() {
+    if (typeof AppConfig !== 'undefined' && AppConfig.guestbook_plugin) {
+        const root = document.getElementById('esmessageboard-root');
+        if (root) {
+            console.log('Detected MessageBoard container, loading plugin...');
+            
+            // 將部落格的全域設定傳遞給留言板插件 (扁平化格式)
+            window.MBConfig = window.MBConfig || {};
+            if (AppConfig.guestbook_per_page) {
+                window.MBConfig.per_page = AppConfig.guestbook_per_page;
+            }
+
+            const script = document.createElement('script');
+            // 處理相對路徑問題
+            let pluginPath = AppConfig.guestbook_plugin;
+            if (window.location.pathname.includes('/post/') && !pluginPath.startsWith('http') && !pluginPath.startsWith('/')) {
+                pluginPath = '../' + pluginPath;
+            }
+            
+            // 加上版本時間戳，強迫更新快取
+            script.src = pluginPath + '?v=' + new Date().getTime();
+            script.defer = true;
+            script.onload = function() {
+                const container = document.getElementById('messageboard');
+                if (container) container.style.display = 'block';
+            };
+            document.head.appendChild(script);
+        }
+    }
+})();
+
+/**
+ * 動態載入 Google 搜尋服務 (CSE)
+ */
+(function loadGoogleSearch() {
+    if (typeof AppConfig !== "undefined" && AppConfig.cse_id) {
+        console.log('Loading Google Custom Search...');
+        var gcse = document.createElement("script");
+        gcse.type = "text/javascript";
+        gcse.async = true;
+        gcse.src = "https://cse.google.com/cse.js?cx=" + AppConfig.cse_id;
+        document.getElementsByTagName("head")[0].appendChild(gcse);
+    }
+})();
+
+

@@ -194,13 +194,22 @@ body {
     margin: 10px auto;
 }
 
-.RegionFunctionTitle {
+.RegionFunctionTitle, .messageboardTitle {
     color: #d63384;
     font-weight: bold;
     border-bottom: 2px solid #f8bbd0;
     display: inline-block;
     padding-bottom: 3px;
     margin: 8px auto 15px auto;
+}
+
+#messageboard {
+    border: 1px solid #f8bbd0;
+    padding: 15px;
+    background-color: #fff9fa;
+    width: 98%;
+    margin: 10px auto;
+    text-align: center;
 }
 
 /* 標籤方塊 */
