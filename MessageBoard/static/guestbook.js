@@ -50,7 +50,6 @@
             );
 
             this.context = this.detectContext();
-            console.log('MessageBoard Final Config:', this.config);
 
             // 4. 初始化適配器
             if (this.config.mode === 'gas') {
@@ -134,12 +133,13 @@
                 return el ? el.getAttribute('content') : null;
             };
             const siteId = scriptParamSite || getMeta('og:site_name') || window.location.hostname.replace(/\./g, '_');
+            const pageTitle = getMeta('og:title') || document.title;
             let pageId = urlParams.get('page');
             if (!pageId) {
                 const path = window.location.pathname;
                 pageId = path.split('/').pop().replace('.html', '') || 'index';
             }
-            return { site: siteId, page_id: pageId };
+            return { site: siteId, page_id: pageId, page_title: pageTitle };
         }
 
         renderBaseLayout() {

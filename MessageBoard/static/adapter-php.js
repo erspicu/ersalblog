@@ -29,7 +29,11 @@
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ site_id: this.siteId, ...data })
+                body: JSON.stringify({ 
+                    site_id: this.siteId, 
+                    page_title: data.page_title,
+                    ...data 
+                })
             });
             const result = await response.json();
             if (!result.success) throw new Error(result.message || '儲存失敗');

@@ -40,9 +40,13 @@
 .mb-badge { background: #4a90e2; color: white; font-size: 0.75em; padding: 2px 6px; border-radius: 4px; }
 
 .mb-pagination-area { margin-top: 20px; display: flex; justify-content: center; }
+.mb-pagin-list { display: flex; gap: 8px; flex-wrap: nowrap; }
 .mb-page-btn { 
-    border: 1px solid #444; background: #2d2d2d; padding: 8px 16px; margin: 0 4px; border-radius: 6px; 
-    cursor: pointer; color: #ccc;
+    border: 1px solid #444; background: #2d2d2d; padding: 8px 16px; border-radius: 6px; 
+    cursor: pointer; color: #ccc; transition: all 0.2s;
+    display: inline-flex; align-items: center; justify-content: center;
 }
 .mb-page-btn.active { background: #4a90e2; color: white; border-color: #4a90e2; }
+.mb-page-btn:hover:not(.active) { background: #3d3d3d; border-color: #4a90e2; }
+
 .mb-loading { opacity: 0.5; }

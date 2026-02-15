@@ -52,7 +52,11 @@ The system supports two operating modes:
     *   **Adapter-Based Storage**: Implements an "Adapter Pattern" frontend framework, supporting seamless switching between local SQLite (PHP) and serverless Google Sheets (GAS) storage.
     *   **Multi-Tenant Design**: Features dynamic context detection (Site ID / Page ID), allowing a single installation to serve multiple independent sites and pages with isolated data storage.
     *   **Modern Interaction**: Supports threaded discussions with topics and flattened replies, featuring a sleek, responsive UI with "Optimistic UI" loading states.
+    *   **Metadata Integration**: Automatically captures `og:title` or document title during comment submission. Stores this in SQLite `page_meta` tables or Google Drive file descriptions, enabling intuitive "Page Title" display in the admin panel instead of just IDs.
     *   **Independent Admin**: Includes a dedicated dashboard for environment diagnostics, global configuration (Mode/Theme/Language), and message management (deletion/moderation).
+    *   **Security & Scalability**:
+        *   **Admin Security**: Supports changing admin credentials directly via the dashboard.
+        *   **Pagination**: Implements server-side pagination (20 topics/page) in the admin panel to handle high-volume data efficiently.
     *   **High Performance**: Dynamically routes to granular storage files (one database per page) to ensure fast load times and unlimited scalability.
 
 *   **Initialization and Health Check**:
@@ -138,7 +142,11 @@ The system supports two operating modes:
     *   **適配器儲存架構**：採用前端「適配器模式 (Adapter Pattern)」，支援在本地 SQLite (PHP) 與 Serverless Google 試算表 (GAS) 儲存間無縫切換。
     *   **多租戶設計**：具備動態環境偵測 (Site ID / Page ID)，支援單一插件服務於多個獨立站點與頁面，且資料儲存完全隔離。
     *   **現代化互動**：支援話題討論串模式，提供流暢的縮排回覆 UI 與樂觀 UI (Optimistic UI) 載入狀態。
+    *   **元數據整合**：留言提交時自動捕捉 `og:title` 或網頁標題。將其儲存於 SQLite `page_meta` 表或 Google Drive 檔案描述中，讓管理後台能直接顯示「網頁標題」而非僅顯示 ID，大幅提升辨識度。
     *   **獨立管理後台**：內建專屬管理介面，支援環境診斷、全域設定 (模式/主題/語系) 與留言審核管理。
+    *   **安全性與擴充性**：
+        *   **帳號安全**：支援直接在後台修改管理員帳號與密碼。
+        *   **後台分頁**：實作伺服器端分頁機制（每頁 20 個話題），確保在大量留言下的管理效能。
     *   **效能優化**：動態路由至精細的儲存檔案（一頁一資料庫/表），確保極速載入與無限擴充能力。
 
 *   **初始化與健康檢查**:

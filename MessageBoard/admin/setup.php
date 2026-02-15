@@ -7,29 +7,47 @@ $msg = ''; $error = ''; $action = $_POST['action'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jsPath = __DIR__ . '/../config/config.js';
-    $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
-
+    $phpPath = __DIR__ . '/../config/config.php';
+    
     if ($action === 'save_global') {
+        $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
         $newMode = $_POST['mb_mode'] ?? 'local';
         $newTheme = $_POST['mb_theme'] ?? 'default';
         $newLang = $_POST['mb_lang_plugin'] ?? 'zh_TW';
         $newPerPage = (int)($_POST['mb_per_page'] ?? 5);
-
         $content = preg_replace("/mode:\s*'[^']*'/", "mode: '$newMode'", $content);
         $content = preg_replace("/theme:\s*'[^']*'/", "theme: '$newTheme'", $content);
         $content = preg_replace("/lang:\s*'[^']*'/", "lang: '$newLang'", $content);
         $content = preg_replace("/per_page:\s*\d+/", "per_page: $newPerPage", $content);
-
-        if (file_put_contents($jsPath, $content)) {
-            $msg = "全域設定已更新！";
-            $_SESSION['mb_admin_mode'] = $newMode;
-        } else { $error = "設定檔寫入失敗"; }
+        if (file_put_contents($jsPath, $content)) { $msg = "Settings updated!"; $_SESSION['mb_admin_mode'] = $newMode; }
+        else { $error = "Write failed"; }
     } elseif ($action === 'save_gas') {
+        $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
         $newUrl = $_POST['gas_url'] ?? '';
         if (strpos($newUrl, 'https://script.google.com') === 0) {
             $content = preg_replace("/gas_url:\s*'[^']*'/", "gas_url: '$newUrl'", $content);
-            file_put_contents($jsPath, $content); $msg = "GAS 服務網址已更新！";
-        } else { $error = "網址格式不正確"; }
+            file_put_contents($jsPath, $content); $msg = "GAS URL updated!";
+        } else { $error = "Invalid URL"; }
+    } elseif ($action === 'save_account') {
+        $newUsername = trim($_POST['new_username'] ?? '');
+        $newPassword = trim($_POST['new_password'] ?? '');
+        if (empty($newUsername)) {
+            $error = "Username cannot be empty";
+        } else {
+            $phpContent = file_get_contents($phpPath);
+            // 更新帳號
+            $phpContent = preg_replace('/(\$mb_admin_user\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newUsername) . '${3}', $phpContent);
+            // 更新密碼 (如果有填寫)
+            if (!empty($newPassword)) {
+                $phpContent = preg_replace('/(\$mb_admin_pass\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newPassword) . '${3}', $phpContent);
+            }
+            if (file_put_contents($phpPath, $phpContent)) {
+                $msg = __mb('msg_account_updated');
+                $_SESSION['mb_admin_user'] = $newUsername;
+            } else {
+                $error = "Failed to write config.php";
+            }
+        }
     }
 }
 
@@ -46,81 +64,74 @@ if (file_exists($js_file)) {
 }
 
 function get_plugin_langs() {
-    $langs = [];
-    $files = glob(__DIR__ . '/../langs/plugin-*.js');
-    foreach ($files as $f) {
-        if (preg_match('/plugin-([^.]+)\.js$/', basename($f), $m)) $langs[] = $m[1];
-    }
+    $langs = []; $files = glob(__DIR__ . '/../langs/plugin-*.js');
+    foreach ($files as $f) { if (preg_match('/plugin-([^.]+)\.js$/', basename($f), $m)) $langs[] = $m[1]; }
     return $langs;
 }
-
 $diagnostics = mb_get_env_diagnostics();
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo mb_get_lang(); ?>">
 <head>
-    <meta charset="UTF-8">
-    <title>系統設定 - MB Admin</title>
+    <meta charset="UTF-8"><title><?php echo __mb('menu_settings'); ?> - MB Admin</title>
     <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        .diag-item { border-bottom: 1px solid #e9ecef; padding: 12px 0; }
-        .diag-item:last-child { border-bottom: none; }
-        .main-content { background-color: #f8f9fa; }
-    </style>
+    <style>.diag-item { border-bottom: 1px solid #e9ecef; padding: 12px 0; } .diag-item:last-child { border-bottom: none; } .main-content { background-color: #f8f9fa; }</style>
 </head>
 <body>
     <div class="d-flex">
         <?php include 'sidebar_inc.php'; ?>
         <div class="main-content">
-            <h2 class="mb-4">系統環境與設定</h2>
+            <h2 class="mb-4"><?php echo __mb('menu_settings'); ?></h2>
             <?php if($msg): ?><div class="alert alert-success shadow-sm"><?php echo $msg; ?></div><?php endif; ?>
             <?php if($error): ?><div class="alert alert-danger shadow-sm"><?php echo $error; ?></div><?php endif; ?>
             <div class="row">
                 <div class="col-lg-4 mb-4">
+                    <!-- 全域設定卡片 -->
                     <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-globe2 me-2"></i>全域運行設定</div>
+                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-globe2 me-2"></i><?php echo __mb('section_global'); ?></div>
                         <div class="card-body">
                             <form method="POST">
                                 <input type="hidden" name="action" value="save_global">
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">儲存模式</label>
+                                    <label class="form-label small fw-bold"><?php echo __mb('label_mode'); ?></label>
                                     <select name="mb_mode" class="form-select form-select-sm">
-                                        <option value="local" <?php echo ($currentMode === 'local' ? 'selected' : ''); ?>>本地 SQLite</option>
-                                        <option value="gas" <?php echo ($currentMode === 'gas' ? 'selected' : ''); ?>>Google 試算表 (GAS)</option>
+                                        <option value="local" <?php echo ($currentMode === 'local' ? 'selected' : ''); ?>><?php echo __mb('opt_sqlite'); ?></option>
+                                        <option value="gas" <?php echo ($currentMode === 'gas' ? 'selected' : ''); ?>><?php echo __mb('opt_gas'); ?></option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">CSS 主題</label>
+                                    <label class="form-label small fw-bold"><?php echo __mb('label_theme'); ?></label>
                                     <select name="mb_theme" class="form-select form-select-sm">
-                                        <option value="default" <?php echo ($currentTheme === 'default' ? 'selected' : ''); ?>>預設明亮 (Default)</option>
-                                        <option value="dark" <?php echo ($currentTheme === 'dark' ? 'selected' : ''); ?>>深色模式 (Dark)</option>
+                                        <option value="default" <?php echo ($currentTheme === 'default' ? 'selected' : ''); ?>><?php echo __mb('theme_default'); ?></option>
+                                        <option value="dark" <?php echo ($currentTheme === 'dark' ? 'selected' : ''); ?>><?php echo __mb('theme_dark'); ?></option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">外掛預設語系</label>
+                                    <label class="form-label small fw-bold"><?php echo __mb('label_plugin_lang'); ?></label>
                                     <select name="mb_lang_plugin" class="form-select form-select-sm">
-                                        <?php foreach(get_plugin_langs() as $l): ?>
-                                            <option value="<?php echo $l; ?>" <?php echo ($currentLang === $l ? 'selected' : ''); ?>><?php echo $l; ?></option>
-                                        <?php endforeach; ?>
+                                        <?php foreach(get_plugin_langs() as $l): ?><option value="<?php echo $l; ?>" <?php echo ($currentLang === $l ? 'selected' : ''); ?>><?php echo $l; ?></option><?php endforeach; ?>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">每頁主題筆數</label>
+                                    <label class="form-label small fw-bold"><?php echo __mb('label_per_page'); ?></label>
                                     <input type="number" name="mb_per_page" class="form-control form-control-sm" value="<?php echo $currentPerPage; ?>" min="1" max="50">
                                 </div>
-                                <button type="submit" class="btn btn-dark btn-sm w-100">套用全域設定</button>
+                                <button type="submit" class="btn btn-dark btn-sm w-100"><?php echo __mb('label_save_global'); ?></button>
                             </form>
                         </div>
                     </div>
+                    <!-- 診斷卡片 -->
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-shield-check me-2"></i>環境診斷</div>
+                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-shield-check me-2"></i><?php echo __mb('section_env_diag'); ?></div>
                         <div class="card-body">
                             <?php foreach($diagnostics as $d): ?>
                                 <div class="diag-item">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <small class="fw-bold"><?php echo $d['label']; ?></small>
-                                        <span class="badge <?php echo $d['pass'] ? 'bg-success' : 'bg-danger'; ?>">Pass</span>
+                                        <span class="badge <?php echo $d['pass'] ? 'bg-success' : 'bg-danger'; ?>">
+                                            <?php echo $d['pass'] ? __mb('diag_pass') : __mb('diag_fail'); ?>
+                                        </span>
                                     </div>
                                     <div class="small text-muted"><?php echo $d['value']; ?></div>
                                 </div>
@@ -129,33 +140,54 @@ $diagnostics = mb_get_env_diagnostics();
                     </div>
                 </div>
                 <div class="col-lg-8">
-                    <?php if ($currentMode === 'gas'): ?>
+                    <!-- 管理帳號設定 -->
                     <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i>GAS 雲端儲存配置</div>
+                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-person-lock me-2"></i><?php echo __mb('label_admin_account'); ?></div>
                         <div class="card-body py-4">
                             <form method="POST">
-                                <input type="hidden" name="action" value="save_gas">
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">GAS Web App URL</label>
-                                    <input type="url" name="gas_url" class="form-control" value="<?php echo htmlspecialchars($currentGasUrl); ?>" required>
+                                <input type="hidden" name="action" value="save_account">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-bold"><?php echo __mb('label_new_username'); ?></label>
+                                        <input type="text" name="new_username" class="form-control" value="<?php echo htmlspecialchars($_SESSION['mb_admin_user']); ?>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-bold"><?php echo __mb('label_new_password'); ?></label>
+                                        <input type="password" name="new_password" class="form-control" placeholder="<?php echo __mb('hint_password_keep'); ?>">
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-2">儲存雲端網址</button>
+                                <button type="submit" class="btn btn-warning mt-2 px-4" onclick="return confirm('確定要更新帳號密碼嗎？');"><?php echo __mb('btn_save_account'); ?></button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <?php if ($mode === 'gas'): ?>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i><?php echo __mb('section_gas_config'); ?></div>
+                        <div class="card-body py-4">
+                            <form method="POST"><input type="hidden" name="action" value="save_gas">
+                                <div class="mb-3"><label class="form-label small fw-bold">GAS Web App URL</label>
+                                    <div class="input-group mb-3">
+                                        <input type="url" name="gas_url" id="gas_url_input" class="form-control" value="<?php echo htmlspecialchars($currentGasUrl); ?>" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="pasteToInput('gas_url_input')"><i class="bi bi-clipboard-plus"></i> Paste</button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2"><?php echo __mb('label_save_gas'); ?></button>
                             </form>
                         </div>
                     </div>
                     <?php else: ?>
-                    <div class="card border-0 shadow-sm mb-4 bg-white">
-                        <div class="card-body p-5 text-center">
-                            <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                            <h4 class="mt-3">SQLite 模式已就緒</h4>
-                            <p class="text-muted">本系統採用動態資料庫技術。當新的網站或頁面有留言產生時，系統會自動在 <code>data/</code> 目錄下建立對應的資料夾與資料庫檔案。</p>
-                        </div>
-                    </div>
+                    <div class="card border-0 shadow-sm mb-4 bg-white"><div class="card-body p-5 text-center">
+                        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3"><?php echo __mb('status_ready'); ?></h4>
+                        <p class="text-muted"><?php echo __mb('status_ready_desc'); ?></p>
+                    </div></div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
     <script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+    <script>async function pasteToInput(inputId) { try { const text = await navigator.clipboard.readText(); document.getElementById(inputId).value = text; } catch (err) { alert('Clipboard error'); } }</script>
 </body>
 </html>

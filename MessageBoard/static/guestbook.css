@@ -53,11 +53,15 @@
 .mb-item-content { line-height: 1.6; white-space: pre-wrap; margin-top: 5px; color: inherit; }
 
 .mb-pagination-area { margin-top: 20px; display: flex; justify-content: center; }
+.mb-pagin-list { display: flex; gap: 8px; flex-wrap: nowrap; }
 .mb-page-btn { 
-    border: 1px solid #4a90e2; background: transparent; padding: 8px 16px; margin: 0 4px; border-radius: 6px; 
-    cursor: pointer; color: #4a90e2; font-weight: bold;
+    border: 1px solid #4a90e2; background: transparent; padding: 8px 16px; border-radius: 6px; 
+    cursor: pointer; color: #4a90e2; font-weight: bold; transition: all 0.2s;
+    display: inline-flex; align-items: center; justify-content: center;
 }
-.mb-btn.active { background: #4a90e2; color: white; }
+.mb-page-btn.active { background: #4a90e2; color: white; }
+.mb-page-btn:hover:not(.active) { background: rgba(74, 144, 226, 0.1); }
+
 
 /* Loading 效果 */
 .mb-loading {

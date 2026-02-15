@@ -23,12 +23,24 @@
 - **快取控制**：所有動態載入的腳本與樣式均加入時間戳記 (`?v=timestamp`)，徹底解決後台更改設定後瀏覽器快取未更新的問題。
 - **後台設定整合**：於 `admin/settings.php` 加入留言板設定區塊，並實作與相簿服務一致的「JS 檔案選擇器」 UI。
 
+### 3. 使用體驗與管理強化 (User Experience & Admin Enhancements)
+- **智慧分頁 (Smart Pagination)**：在管理後台實作「每頁 20 個主題」的分頁機制，並優化 CSS 按鈕排版，確保大量資料下的載入效能與閱讀舒適度。
+- **網頁標題識別 (Page Title Recognition)**：
+    - 前端插件自動捕捉當前頁面的 `<meta property="og:title">`。
+    - **GAS 模式**：利用 Google Drive 檔案的「描述 (Description)」欄位儲存標題。
+    - **SQLite 模式**：自動建立 `page_meta` 資料表儲存標題。
+    - 後台管理列表現在會優先顯示網頁標題，括號內保留頁面 ID，大幅提升辨識度。
+- **帳號安全管理**：後台設定頁面新增「修改管理員帳號與密碼」功能，無需手動修改 PHP 設定檔。
+- **全介面多語系化**：補齊所有硬編碼文字（如環境診斷項目、刪除確認、GAS 貼上按鈕），確保切換英文介面時體驗一致。
+- **友善工具**：在 GAS 設定欄位旁新增「貼上」按鈕，方便一鍵填入網址。
+- **安裝指南**：建立 `INSTALL_zh_TW.md` 與 `INSTALL_en_US.md`，提供完整的本地與雲端部署教學。
+
 ## 技術優化 (Technical Optimizations)
 - **多語系框架升級**：建立 `MessageBoard/langs/` 目錄，支援後台語系與前端插件語系獨立包。
 - **CSS 主題適配**：建立 `guestbook-dark.css` 並優化各部落格主題 CSS，確保留言板在 Standard, Matrix, Pink, Dark 模式下均擁有絕佳對比度。
 - **GAS 效能優化**：重構 GAS 後端腳本，將資料存儲結構優化為「一站一目錄、一頁一試算表」，大幅提升大規模文章下的載入效率。
 
 ## 版本資訊
-- **Version**: v2026.02.15.19.45
+- **Version**: v2026.02.16.01.55
 - **CLI**: 0.28.2
-- **Model**: gemini-3-flash-preview
+- **Model**: gemini-3-pro-preview

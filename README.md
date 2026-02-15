@@ -20,6 +20,7 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
 *   **Independent Plugin Services**:
     *   **Album Service**: Advanced photo gallery with Exif parsing and AJAX-based multi-file uploading.
     *   **MessageBoard Service**: Modern threaded comment system supporting both SQLite and Google Sheets (Serverless) storage with a dedicated admin panel.
+*   **Comprehensive Documentation**: Includes detailed installation guides (`INSTALL.md`) for both local and cloud deployments.
 *   **Security First**:
     *   **Script Protection**: Built-in HTML escaping for `<script>` tags to prevent execution in posts while keeping content readable.
     *   **Rate Limiting & CSRF**: Secure login with IP-based lockout and full CSRF protection for all admin actions.
@@ -81,7 +82,7 @@ Configurable in `config.js` via `theme_file`. Supports:
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.14.22.53` (UTC+8)
+Version: `v2026.02.16.01.55` (UTC+8)
 CLI Version: `0.28.2`
 Model: `gemini-3-pro-preview`
 
@@ -106,6 +107,7 @@ Model: `gemini-3-pro-preview`
 *   **獨立插件化服務**:
     *   **相簿服務**: 具備 Exif 解析與基於 AJAX 的進階多檔上傳系統。
     *   **留言板服務**: 現代話題討論系統，支援 SQLite 與 Google 試算表 (Serverless) 雙模式儲存，內建獨立管理後台。
+*   **完整技術文件**: 包含詳盡的安裝指南 (`INSTALL.md`)，涵蓋本地與雲端部署流程。
 *   **安全性強化**:
     *   **腳本防護**: 內建 `<script>` 標籤轉義機制，防止文章內的腳本執行，同時保留技術內容的可讀性。
     *   **安全防禦**: IP 登入鎖定機制與全站 CSRF 防護。
@@ -141,6 +143,6 @@ Model: `gemini-3-pro-preview`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.14.22.53` (UTC+8)
+版本號: `v2026.02.16.01.55` (UTC+8)
 CLI 版本: `0.28.2`
 模型名稱: `gemini-3-pro-preview`

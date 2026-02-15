@@ -1,6 +1,6 @@
 <?php
 /**
- * MessageBoard PHP API (SQLite) - 通用平台化版本 (支援中文路徑)
+ * MessageBoard PHP API (SQLite) - 支援標題儲存版
  */
 error_reporting(0);
 ini_set('display_errors', 0);
@@ -8,9 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 function send_json($data) { echo json_encode($data, JSON_UNESCAPED_UNICODE); exit; }
 
-// 安全過濾檔名與目錄名 (保留中文)
 function sanitize_path_node($name) {
-    // 移除危險字元，但保留中文、英數、底線、橫線
     return preg_replace('/[\/\\\:\*\?"<>|]/', '_', $name);
 }
 
@@ -25,15 +23,13 @@ try {
         $input = json_decode(file_get_contents('php://input'), true);
         $site_id = $input['site_id'] ?? 'Default_Site';
         $page_id = $input['page_id'] ?? 'index';
+        $page_title = $input['page_title'] ?? '';
     }
 
-    // 2. 根據 Site ID 動態決定資料庫路徑
     $site_dir_name = sanitize_path_node($site_id);
     $page_file_name = sanitize_path_node($page_id);
-
     $baseDataDir = __DIR__ . '/../data/' . $site_dir_name;
     if (!is_dir($baseDataDir)) mkdir($baseDataDir, 0777, true);
-    
     $dbPath = $baseDataDir . '/' . $page_file_name . '.sqlite3';
 
     $isNewDb = !file_exists($dbPath);
@@ -42,19 +38,34 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    if ($isNewDb) {
-        $pdo->exec("CREATE TABLE guestbook_messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            parent_id INTEGER DEFAULT 0,
-            name TEXT NOT NULL,
-            content TEXT NOT NULL,
-            created_at DATETIME DEFAULT (datetime('now','localtime')),
-            status INTEGER DEFAULT 1
-        );");
-        $pdo->exec("CREATE INDEX idx_parent ON guestbook_messages(parent_id);");
-    }
+    // 初始化資料表
+    $pdo->exec("CREATE TABLE IF NOT EXISTS guestbook_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parent_id INTEGER DEFAULT 0,
+        name TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at DATETIME DEFAULT (datetime('now','localtime')),
+        status INTEGER DEFAULT 1
+    );");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS page_meta (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    );");
 
-    if ($method === 'GET') {
+    if ($method === 'POST') {
+        if (empty($input['name']) || empty($input['content'])) send_json(['success' => false, 'message' => 'Missing fields']);
+        
+        // 更新標題資訊
+        if (!empty($page_title)) {
+            $stmtMeta = $pdo->prepare("INSERT OR REPLACE INTO page_meta (key, value) VALUES ('title', ?)");
+            $stmtMeta->execute([$page_title]);
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content) VALUES (?, ?, ?)");
+        $stmt->execute([ $input['parent_id'] ?? 0, $input['name'], $input['content'] ]);
+        send_json(['success' => true]);
+    } else {
+        // GET 讀取邏輯保持不變 ...
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $per_page = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 10;
         $offset = ($page - 1) * $per_page;
@@ -74,22 +85,7 @@ try {
 
         send_json([
             'messages' => $allMessages,
-            'pagination' => [
-                'total_parents' => (int)$totalParents,
-                'current_page' => $page,
-                'per_page' => $per_page,
-                'total_pages' => ceil($totalParents / $per_page),
-                'active_parents' => $parentIds
-            ]
+            'pagination' => ['total_parents' => (int)$totalParents, 'current_page' => $page, 'per_page' => $per_page, 'total_pages' => ceil($totalParents / $per_page), 'active_parents' => $parentIds]
         ]);
-        
-    } elseif ($method === 'POST') {
-        if (empty($input['name']) || empty($input['content'])) send_json(['success' => false, 'message' => 'Missing fields']);
-        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content) VALUES (?, ?, ?)");
-        $stmt->execute([ $input['parent_id'] ?? 0, $input['name'], $input['content'] ]);
-        send_json(['success' => true]);
     }
-
-} catch (Exception $e) {
-    send_json(['error' => true, 'message' => $e->getMessage()]);
-}
+} catch (Exception $e) { send_json(['error' => true, 'message' => $e->getMessage()]); }
