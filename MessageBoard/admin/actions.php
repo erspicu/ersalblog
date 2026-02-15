@@ -1,13 +1,13 @@
 <?php
-require_once 'system_helper.php';
+require_once 'auth.php';
 mb_require_login();
 
 header('Content-Type: application/json');
 
-$action = $_GET['action'] ?? '';
-$id = $_GET['id'] ?? '';
-$site = $_GET['site'] ?? '';
-$page = $_GET['page'] ?? '';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$id = isset($_GET['id']) ? $_GET['id'] : '';
+$site = isset($_GET['site']) ? $_GET['site'] : '';
+$page = isset($_GET['page']) ? $_GET['page'] : '';
 $mode = $_SESSION['mb_admin_mode'];
 
 function get_gas_url() {

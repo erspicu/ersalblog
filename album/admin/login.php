@@ -2,17 +2,79 @@
 require_once 'auth.php';
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$max_attempts = 5;
+$lockout_time = 15 * 60; // 15 分鐘
+$attempts_log = __DIR__ . '/attempts.log';
+
+/**
+ * 獲取 IP 失敗次數
+ */
+function getIpAttempts($ip) {
+    global $attempts_log;
+    if (!file_exists($attempts_log)) return 0;
+    $attempts = 0;
+    $now = time();
+    $lines = @file($attempts_log);
+    if (!$lines) return 0;
+    foreach ($lines as $line) {
+        $parts = explode('|', trim($line));
+        if (count($parts) < 2) continue;
+        list($logIp, $timestamp) = $parts;
+        if ($logIp === $ip && ($now - $timestamp) < (15 * 60)) {
+            $attempts++;
+        }
+    }
+    return $attempts;
+}
+
+/**
+ * 記錄一次失敗
+ */
+function logAttempt($ip) {
+    global $attempts_log;
+    $line = $ip . '|' . time() . "\n";
+    file_put_contents($attempts_log, $line, FILE_APPEND);
+}
+
+/**
+ * 清除失敗紀錄
+ */
+function clearAttempts($ip) {
+    global $attempts_log;
+    if (!file_exists($attempts_log)) return;
+    $lines = file($attempts_log);
+    $newLines = [];
+    foreach ($lines as $line) {
+        if (strpos($line, $ip . '|') !== 0) $newLines[] = $line;
+    }
+    file_put_contents($attempts_log, implode('', $newLines));
+}
+
+$userIp = $_SERVER['REMOTE_ADDR'];
+$attempts = getIpAttempts($userIp);
+$is_locked = ($attempts >= $max_attempts);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$is_locked) {
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
-    // 語系已透過 auth.php 的 GET 或之前的 Session 設定
 
     if (albumLogin($username, $password)) {
+        clearAttempts($userIp);
         header('Location: index.php');
         exit;
     } else {
-        $error = __('error_login');
+        logAttempt($userIp);
+        $newAttempts = getIpAttempts($userIp);
+        $remaining = $max_attempts - $newAttempts;
+        if ($remaining <= 0) {
+            $error = __('error_lockout');
+            $is_locked = true;
+        } else {
+            $error = sprintf(__('error_login'), $remaining);
+        }
     }
+} elseif ($is_locked) {
+    $error = __('error_lockout');
 }
 ?>
 <!DOCTYPE html>
@@ -39,20 +101,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <div class="alert alert-danger py-2 small"><?php echo $error; ?></div>
         <?php endif; ?>
         <form method="post">
             <div class="mb-3">
-                <label class="form-label"><?php echo __('username'); ?></label>
-                <input type="text" name="username" class="form-control" required autofocus>
+                <label class="form-label small fw-bold"><?php echo __('username'); ?></label>
+                <input type="text" name="username" class="form-control" required autofocus <?php echo $is_locked ? 'disabled' : ''; ?>>
             </div>
             <div class="mb-3">
-                <label class="form-label"><?php echo __('password'); ?></label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="form-label small fw-bold"><?php echo __('password'); ?></label>
+                <input type="password" name="password" class="form-control" required <?php echo $is_locked ? 'disabled' : ''; ?>>
             </div>
             <div class="mb-3">
-                <label class="form-label"><?php echo __('language'); ?></label>
-                <select name="lang" id="lang-selector" class="form-select">
+                <label class="form-label small fw-bold"><?php echo __('language'); ?></label>
+                <select name="lang" id="lang-selector" class="form-select form-select-sm" <?php echo $is_locked ? 'disabled' : ''; ?>>
                     <?php 
                     $adminLangs = getAvailableLangs('admin-');
                     foreach ($adminLangs as $code => $name): 
@@ -62,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endforeach; ?>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary w-100"><?php echo __('login_btn'); ?></button>
+            <button type="submit" class="btn btn-primary w-100 fw-bold" <?php echo $is_locked ? 'disabled' : ''; ?>><?php echo __('login_btn'); ?></button>
         </form>
         <div class="text-center mt-3">
             <a href="../../admin/login.php" class="text-muted small"><?php echo __('go_to_blog'); ?></a>

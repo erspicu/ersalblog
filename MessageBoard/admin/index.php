@@ -1,19 +1,22 @@
 <?php
-require_once 'system_helper.php';
+/**
+ * MessageBoard Admin Index - PHP 5.x Compatible
+ */
+require_once 'auth.php';
 mb_require_login();
 
 $mode = $_SESSION['mb_admin_mode'];
 $status = mb_check_status($mode);
 if (!$status['ok']) { header("Location: setup.php"); exit; }
 
-$selected_site = $_GET['site'] ?? '';
-$selected_page = $_GET['page'] ?? '';
+$selected_site = isset($_GET['site']) ? $_GET['site'] : '';
+$selected_page = isset($_GET['page']) ? $_GET['page'] : '';
 $current_p = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 $per_page = 20;
 
-$sites = [];
-$messages = [];
-$pagination = ['total_pages' => 0, 'current_page' => $current_p];
+$sites = array();
+$messages = array();
+$pagination = array('total_pages' => 0, 'current_page' => $current_p);
 $error = null;
 
 function get_gas_url() {
@@ -31,7 +34,7 @@ if ($mode === 'local') {
         $siteDirs = array_filter(glob($dataDir . '/*'), 'is_dir');
         foreach ($siteDirs as $dir) {
             $siteName = basename($dir);
-            $sites[$siteName] = [];
+            $sites[$siteName] = array();
             foreach (glob($dir . '/*.sqlite3') as $dbFile) {
                 $pId = basename($dbFile, '.sqlite3'); $pTitle = $pId;
                 try {
@@ -39,7 +42,7 @@ if ($mode === 'local') {
                     $meta = $tmpPdo->query("SELECT value FROM page_meta WHERE key='title'")->fetch();
                     if ($meta) $pTitle = $meta['value'];
                 } catch (Exception $e) {}
-                $sites[$siteName][] = ['id' => $pId, 'title' => $pTitle];
+                $sites[$siteName][] = array('id' => $pId, 'title' => $pTitle);
             }
         }
     }
@@ -52,35 +55,39 @@ if ($mode === 'local') {
                 $totalPages = ceil($totalParents / $per_page);
                 $offset = ($current_p - 1) * $per_page;
                 $stmtIds = $pdo->prepare("SELECT id FROM guestbook_messages WHERE parent_id = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?");
-                $stmtIds->execute([$per_page, $offset]);
+                $stmtIds->execute(array($per_page, $offset));
                 $activeIds = $stmtIds->fetchAll(PDO::FETCH_COLUMN);
                 $allMsgs = $pdo->query("SELECT * FROM guestbook_messages ORDER BY created_at ASC")->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($allMsgs as $m) {
                     if ($m['parent_id'] == 0) { if (in_array($m['id'], $activeIds)) $messages[] = $m; }
                     else { if (in_array($m['parent_id'], $activeIds)) $messages[] = $m; }
                 }
-                $pagination = ['total_pages' => $totalPages, 'current_page' => $current_p];
+                $pagination = array('total_pages' => $totalPages, 'current_page' => $current_p);
             }
         } catch (Exception $e) { $error = $e->getMessage(); }
     }
 } else {
     $gasUrl = get_gas_url();
     if ($gasUrl) {
-        $sitesData = json_decode(@file_get_contents($gasUrl . "?action=list_sites"), true);
-        foreach ($sitesData['sites'] ?? [] as $sn) { $sites[$sn] = []; }
+        $sitesJson = @file_get_contents($gasUrl . "?action=list_sites");
+        $sitesData = json_decode($sitesJson, true);
+        $snList = isset($sitesData['sites']) ? $sitesData['sites'] : array();
+        foreach ($snList as $sn) { $sites[$sn] = array(); }
         if ($selected_site) {
             $pagesData = json_decode(@file_get_contents($gasUrl . "?action=list_pages&site_id=" . urlencode($selected_site)), true);
-            $sites[$selected_site] = $pagesData['pages'] ?? [];
+            $sites[$selected_site] = isset($pagesData['pages']) ? $pagesData['pages'] : array();
         }
         if ($selected_site && $selected_page) {
             $msgsData = json_decode(@file_get_contents($gasUrl . "?action=list&site_id=" . urlencode($selected_site) . "&page_id=" . urlencode($selected_page) . "&page=" . $current_p . "&per_page=" . $per_page), true);
-            $rawMsgs = $msgsData['messages'] ?? [];
-            $activeIds = array_map('String', $msgsData['pagination']['active_parents'] ?? []);
+            $rawMsgs = isset($msgsData['messages']) ? $msgsData['messages'] : array();
+            $activeIds = isset($msgsData['pagination']['active_parents']) ? array_map('strval', $msgsData['pagination']['active_parents']) : array();
             foreach($rawMsgs as $m) {
-                if (String($m['parent_id']) === "0") { if (in_array(String($m['id']), $activeIds)) $messages[] = $m; }
-                else { if (in_array(String($m['parent_id']), $activeIds)) $messages[] = $m; }
+                $pid = strval($m['parent_id']);
+                $mid = strval($m['id']);
+                if ($pid === "0") { if (in_array($mid, $activeIds)) $messages[] = $m; }
+                else { if (in_array($pid, $activeIds)) $messages[] = $m; }
             }
-            $pagination = ['total_pages' => $msgsData['pagination']['total_pages'] ?? 0, 'current_page' => $current_p];
+            $pagination = array('total_pages' => (isset($msgsData['pagination']['total_pages']) ? $msgsData['pagination']['total_pages'] : 0), 'current_page' => $current_p);
         }
     } else { $error = "GAS URL not set."; }
 }
@@ -90,10 +97,9 @@ function get_page_link($p) { $params = $_GET; $params['p'] = $p; return '?' . ht
 <!DOCTYPE html>
 <html lang="<?php echo mb_get_lang(); ?>">
 <head>
-    <meta charset="UTF-8">
-    <title><?php echo __mb('admin_title'); ?></title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta charset="UTF-8"><title><?php echo __mb('admin_title'); ?></title>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
     <div class="d-flex">

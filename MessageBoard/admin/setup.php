@@ -1,9 +1,16 @@
 <?php
-require_once 'system_helper.php';
+/**
+ * MessageBoard Admin Setup - PHP 5.x Compatible
+ */
+require_once 'auth.php';
 mb_require_login();
 
 $mode = $_SESSION['mb_admin_mode'];
-$msg = ''; $error = ''; $action = $_POST['action'] ?? '';
+$msg = isset($_GET['msg']) ? $_GET['msg'] : '';
+$success_msg = ''; $error = ''; 
+$action = isset($_POST['action']) ? $_POST['action'] : '';
+
+if ($msg === 'force_change') $error = "為了安全性，請先更換初始密碼 1234。";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jsPath = __DIR__ . '/../config/config.js';
@@ -11,47 +18,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($action === 'save_global') {
         $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
-        $newMode = $_POST['mb_mode'] ?? 'local';
-        $newTheme = $_POST['mb_theme'] ?? 'default';
-        $newLang = $_POST['mb_lang_plugin'] ?? 'zh_TW';
-        $newPerPage = (int)($_POST['mb_per_page'] ?? 5);
+        $newMode = isset($_POST['mb_mode']) ? $_POST['mb_mode'] : 'local';
+        $newTheme = isset($_POST['mb_theme']) ? $_POST['mb_theme'] : 'default';
+        $newLang = isset($_POST['mb_lang_plugin']) ? $_POST['mb_lang_plugin'] : 'zh_TW';
+        $newPerPage = isset($_POST['mb_per_page']) ? (int)$_POST['mb_per_page'] : 5;
+        
         $content = preg_replace("/mode:\s*'[^']*'/", "mode: '$newMode'", $content);
         $content = preg_replace("/theme:\s*'[^']*'/", "theme: '$newTheme'", $content);
         $content = preg_replace("/lang:\s*'[^']*'/", "lang: '$newLang'", $content);
         $content = preg_replace("/per_page:\s*\d+/", "per_page: $newPerPage", $content);
-        if (file_put_contents($jsPath, $content)) { $msg = "Settings updated!"; $_SESSION['mb_admin_mode'] = $newMode; }
-        else { $error = "Write failed"; }
+        
+        if (file_put_contents($jsPath, $content)) { 
+            $success_msg = "Settings updated!"; 
+            $_SESSION['mb_admin_mode'] = $newMode; 
+        } else { $error = "Write failed"; }
+        
     } elseif ($action === 'save_gas') {
         $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
-        $newUrl = $_POST['gas_url'] ?? '';
+        $newUrl = isset($_POST['gas_url']) ? $_POST['gas_url'] : '';
         if (strpos($newUrl, 'https://script.google.com') === 0) {
             $content = preg_replace("/gas_url:\s*'[^']*'/", "gas_url: '$newUrl'", $content);
-            file_put_contents($jsPath, $content); $msg = "GAS URL updated!";
+            file_put_contents($jsPath, $content); $success_msg = "GAS URL updated!";
         } else { $error = "Invalid URL"; }
+        
     } elseif ($action === 'save_account') {
-        $newUsername = trim($_POST['new_username'] ?? '');
-        $newPassword = trim($_POST['new_password'] ?? '');
-        if (empty($newUsername)) {
-            $error = "Username cannot be empty";
-        } else {
-            $phpContent = file_get_contents($phpPath);
-            // 更新帳號
-            $phpContent = preg_replace('/(\$mb_admin_user\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newUsername) . '${3}', $phpContent);
-            // 更新密碼 (如果有填寫)
-            if (!empty($newPassword)) {
-                $phpContent = preg_replace('/(\$mb_admin_pass\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newPassword) . '${3}', $phpContent);
-            }
-            if (file_put_contents($phpPath, $phpContent)) {
-                $msg = __mb('msg_account_updated');
-                $_SESSION['mb_admin_user'] = $newUsername;
-            } else {
-                $error = "Failed to write config.php";
-            }
+        $newUsername = isset($_POST['new_username']) ? trim($_POST['new_username']) : 'admin';
+        $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
+        
+        $finalPassword = $mb_admin_pass;
+        if (!empty($newPassword)) {
+            $finalPassword = password_hash($newPassword . getMBSystemFingerprint(), PASSWORD_BCRYPT);
         }
+
+        $newPhpContent = "<?php\n"
+                       . "/**\n"
+                       . " * MessageBoard Service - PHP Configuration\n"
+                       . " */\n\n"
+                       . "// 管理員帳號設定\n"
+                       . "\$mb_admin_user = '" . addslashes($newUsername) . "';\n"
+                       . "\$mb_admin_pass = '" . addslashes($finalPassword) . "';\n";
+
+        if (file_put_contents($phpPath, $newPhpContent)) {
+            $success_msg = __mb('msg_account_updated');
+            $_SESSION['mb_admin_user'] = $newUsername;
+            $mb_admin_user = $newUsername;
+            $mb_admin_pass = $finalPassword;
+        } else { $error = "Failed to write config.php"; }
     }
 }
 
-// 重新讀取設定
+// 重新讀取 JS 設定
 $currentGasUrl = ''; $currentMode = 'local'; $currentTheme = 'default'; $currentLang = 'zh_TW'; $currentPerPage = 5;
 $js_file = __DIR__ . '/../config/config.js';
 if (file_exists($js_file)) {
@@ -64,7 +80,8 @@ if (file_exists($js_file)) {
 }
 
 function get_plugin_langs() {
-    $langs = []; $files = glob(__DIR__ . '/../langs/plugin-*.js');
+    $langs = array(); 
+    $files = glob(__DIR__ . '/../langs/plugin-*.js');
     foreach ($files as $f) { if (preg_match('/plugin-([^.]+)\.js$/', basename($f), $m)) $langs[] = $m[1]; }
     return $langs;
 }
@@ -74,8 +91,8 @@ $diagnostics = mb_get_env_diagnostics();
 <html lang="<?php echo mb_get_lang(); ?>">
 <head>
     <meta charset="UTF-8"><title><?php echo __mb('menu_settings'); ?> - MB Admin</title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
     <style>.diag-item { border-bottom: 1px solid #e9ecef; padding: 12px 0; } .diag-item:last-child { border-bottom: none; } .main-content { background-color: #f8f9fa; }</style>
 </head>
 <body>
@@ -83,11 +100,10 @@ $diagnostics = mb_get_env_diagnostics();
         <?php include 'sidebar_inc.php'; ?>
         <div class="main-content">
             <h2 class="mb-4"><?php echo __mb('menu_settings'); ?></h2>
-            <?php if($msg): ?><div class="alert alert-success shadow-sm"><?php echo $msg; ?></div><?php endif; ?>
+            <?php if($success_msg): ?><div class="alert alert-success shadow-sm"><?php echo $success_msg; ?></div><?php endif; ?>
             <?php if($error): ?><div class="alert alert-danger shadow-sm"><?php echo $error; ?></div><?php endif; ?>
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <!-- 全域設定卡片 -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-globe2 me-2"></i><?php echo __mb('section_global'); ?></div>
                         <div class="card-body">
@@ -121,7 +137,6 @@ $diagnostics = mb_get_env_diagnostics();
                             </form>
                         </div>
                     </div>
-                    <!-- 診斷卡片 -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-shield-check me-2"></i><?php echo __mb('section_env_diag'); ?></div>
                         <div class="card-body">
@@ -140,7 +155,6 @@ $diagnostics = mb_get_env_diagnostics();
                     </div>
                 </div>
                 <div class="col-lg-8">
-                    <!-- 管理帳號設定 -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-person-lock me-2"></i><?php echo __mb('label_admin_account'); ?></div>
                         <div class="card-body py-4">
@@ -149,7 +163,7 @@ $diagnostics = mb_get_env_diagnostics();
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label small fw-bold"><?php echo __mb('label_new_username'); ?></label>
-                                        <input type="text" name="new_username" class="form-control" value="<?php echo htmlspecialchars($_SESSION['mb_admin_user']); ?>" required>
+                                        <input type="text" name="new_username" class="form-control" value="<?php echo htmlspecialchars($mb_admin_user); ?>" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label small fw-bold"><?php echo __mb('label_new_password'); ?></label>
@@ -160,8 +174,7 @@ $diagnostics = mb_get_env_diagnostics();
                             </form>
                         </div>
                     </div>
-
-                    <?php if ($mode === 'gas'): ?>
+                    <?php if ($currentMode === 'gas'): ?>
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i><?php echo __mb('section_gas_config'); ?></div>
                         <div class="card-body py-4">
@@ -187,7 +200,7 @@ $diagnostics = mb_get_env_diagnostics();
             </div>
         </div>
     </div>
-    <script src="../../admin/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script>async function pasteToInput(inputId) { try { const text = await navigator.clipboard.readText(); document.getElementById(inputId).value = text; } catch (err) { alert('Clipboard error'); } }</script>
 </body>
 </html>

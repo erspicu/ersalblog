@@ -152,6 +152,7 @@ The system supports two operating modes:
 *   **初始化與健康檢查**:
     *   **系統診斷**: `admin/health_check.php` 與 `album/admin/health_check.php` 提供通用的伺服器配置檢查與權限審核。
 *   **安全性 (Security)**:
+    *   **Session 隔離機制**：為部落格主系統 (`BLOG_ADMIN_SESS`)、相簿 (`ALBUM_ADMIN_SESS`) 與留言板 (`MB_ADMIN_SESS`) 實作獨立的 `session_name`。確保在同一網域下，各子系統的登入與登出動作完全獨立，互不干擾。
     *   **主機特徵碼雜湊**: 管理密碼不再以明文儲存，而是結合主機唯一識別碼 (Machine ID) 進行 Bcrypt 雜湊，即使設定檔外流也難以在不同環境破解。
     *   **強制安全性初始化**: 新安裝或仍在使用 "1234" 預設密碼時，系統會強制要求進行安全性設定以加固系統。
     *   **開發者通行證**: 針對 `localhost` 環境支援 `1234` 強制通行證，確保開發測試期間的便利性。
@@ -169,19 +170,21 @@ The system supports two operating modes:
 *   **`/album`**: 獨立相簿服務，含其專屬 `/admin`, `/api` 與 `/Collection`。
 *   **`/album/admin/system_helper.php`**: 相簿服務專用的獨立輔助函式。
 *   **`/album/toolshell`**: 跨平台自動化維護腳本工具包。
+*   **`/MessageBoard`**: 獨立留言板服務，包含其專屬 `/admin`, `/api`, `/data` 與 `/gas`。
 *   **`/MD`**: 專案技術文件、週歷史紀錄檔與資訊架構研究報告 (`STUDY_IA_*.md`)。
 
 ---
 
 ## 3. 關鍵技術特性
 
+*   **相容性優化**: 全站 PHP 代碼經過 5.x 語法降級與 lint 校驗，確保在舊版 AppServ 環境下穩定執行。
 *   **攝影功能**: 前後端協同的 Exif 元數據解析與展示。
 *   **動態資源路徑校正**: `StaticGenerator` 自動為子目錄網頁 (`post/*.html`) 校正 `album/` 與 `pic/` 的相對路徑，確保資源存取無誤。
 *   **效能優化**: 
-    *   JS/CSS 自動壓縮。
+    *   JS/CSS 自動壓縮與在地化 (Local Assets)。
     *   智慧縮圖生成邏輯（僅在原圖大於規格時建立）。
     *   嵌入式 Blazor 應用程式極致 AOT 編譯。
 *   **版本控制**: 嚴格區分代碼與生成產物。
 
 ---
-**文件維護**: 2026 年 2 月 14 日更新。
+**文件維護**: 2026 年 2 月 16 日更新。

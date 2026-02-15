@@ -1,73 +1,103 @@
 <?php
-require_once 'system_helper.php';
+/**
+ * MessageBoard Admin Login - 安全強化介面
+ */
+require_once 'auth.php';
 
 $error = '';
-$defaultMode = mb_get_default_mode();
+$max_attempts = 5;
+$lockout_time = 15 * 60;
+$attempts_log = __DIR__ . '/attempts.log';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user = $_POST['username'] ?? '';
-    $pass = $_POST['password'] ?? '';
-    $mode = $_POST['mode'] ?? 'local';
+function getAttempts($ip) {
+    global $attempts_log;
+    if (!file_exists($attempts_log)) return 0;
+    $now = time(); $attempts = 0;
+    foreach (file($attempts_log) as $line) {
+        $parts = explode('|', trim($line));
+        if (count($parts) < 2) continue;
+        if ($parts[0] === $ip && ($now - $parts[1]) < (15 * 60)) $attempts++;
+    }
+    return $attempts;
+}
 
-    if ($user === $mb_admin_user && $pass === $mb_admin_pass) {
-        $_SESSION['mb_admin_logged_in'] = true;
-        $_SESSION['mb_admin_user'] = $user;
-        // 如果表單有選模式則用表單的，否則用 config.js 的
-        $_SESSION['mb_admin_mode'] = $mode;
-        header("Location: index.php");
-        exit;
+function logAttempt($ip) { global $attempts_log; file_put_contents($attempts_log, $ip . '|' . time() . "\n", FILE_APPEND); }
+function clearAttempts($ip) {
+    global $attempts_log; if (!file_exists($attempts_log)) return;
+    $lines = array_filter(file($attempts_log), function($l) use($ip) { return strpos($l, $ip.'|') !== 0; });
+    file_put_contents($attempts_log, implode('', $lines));
+}
+
+$userIp = $_SERVER['REMOTE_ADDR'];
+$attempts = getAttempts($userIp);
+$is_locked = ($attempts >= $max_attempts);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$is_locked) {
+    $user = isset($_POST['username']) ? $_POST['username'] : '';
+    $pass = isset($_POST['password']) ? $_POST['password'] : '';
+    $mode = isset($_POST['mode']) ? $_POST['mode'] : 'local';
+    
+    if (mb_login($user, $pass, $mode)) {
+        clearAttempts($userIp);
+        header("Location: index.php"); exit;
     } else {
-        $error = __mb('error_auth');
+        logAttempt($userIp);
+        $newAttempts = getAttempts($userIp);
+        $remaining = $max_attempts - $newAttempts;
+        $error = ($remaining <= 0) ? __mb('error_lockout') : sprintf(__mb('error_auth'), $remaining);
+        if ($remaining <= 0) $is_locked = true;
     }
 }
+
+$current_lang = mb_get_lang();
+$langs = mb_get_available_langs();
 ?>
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="<?php echo $current_lang; ?>">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __mb('login_title'); ?></title>
-    <link href="../../admin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap-icons.min.css">
     <style>
-        body { background: #f8f9fa; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-card { width: 100%; max-width: 400px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; }
+        body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .login-card { width: 100%; max-width: 400px; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .brand { text-align: center; font-weight: 800; color: #333; margin-bottom: 1.5rem; letter-spacing: -1px; }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <h3 class="text-center mb-4"><?php echo __mb('admin_title'); ?></h3>
-        <?php if($error): ?>
-            <div class="alert alert-danger"><?php echo $error; ?></div>
-        <?php endif; ?>
+        <div class="text-end mb-3">
+            <select class="form-select form-select-sm d-inline-block w-auto" onchange="location.href='?lang='+this.value">
+                <?php foreach($langs as $code => $name): ?>
+                    <option value="<?php echo $code; ?>" <?php echo ($current_lang === $code ? 'selected' : ''); ?>><?php echo $name; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <h3 class="brand">MessageBoard</h3>
+        <?php if($error): ?><div class="alert alert-danger py-2 small"><?php echo $error; ?></div><?php endif; ?>
         <form method="POST">
             <div class="mb-3">
-                <label class="form-label"><?php echo __mb('label_username'); ?></label>
-                <input type="text" name="username" class="form-control" required autofocus>
+                <label class="form-label small fw-bold"><?php echo __mb('label_username'); ?></label>
+                <input type="text" name="username" class="form-control" required autofocus <?php echo $is_locked ? 'disabled' : ''; ?>>
             </div>
             <div class="mb-3">
-                <label class="form-label"><?php echo __mb('label_password'); ?></label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="form-label small fw-bold"><?php echo __mb('label_password'); ?></label>
+                <input type="password" name="password" class="form-control" required <?php echo $is_locked ? 'disabled' : ''; ?>>
             </div>
-            <div class="mb-4">
-                <label class="form-label"><?php echo __mb('label_mode'); ?></label>
-                <select name="mode" class="form-select">
-                    <option value="local" <?php echo ($defaultMode === 'local' ? 'selected' : ''); ?>><?php echo __mb('opt_sqlite'); ?></option>
-                    <option value="gas" <?php echo ($defaultMode === 'gas' ? 'selected' : ''); ?>><?php echo __mb('opt_gas'); ?></option>
+            <div class="mb-3">
+                <label class="form-label small fw-bold"><?php echo __mb('label_mode'); ?></label>
+                <select name="mode" class="form-select" <?php echo $is_locked ? 'disabled' : ''; ?>>
+                    <option value="local"><?php echo __mb('opt_sqlite'); ?></option>
+                    <option value="gas"><?php echo __mb('opt_gas'); ?></option>
                 </select>
             </div>
-            
-            <div class="mb-4">
-                <label class="form-label">Language / 語言</label>
-                <select class="form-select" onchange="location.href='?lang=' + this.value">
-                    <?php foreach(mb_get_available_langs() as $code => $label): ?>
-                        <option value="<?php echo $code; ?>" <?php echo (mb_get_lang() === $code ? 'selected' : ''); ?>>
-                            <?php echo $label; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 py-2"><?php echo __mb('btn_login'); ?></button>
+            <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" <?php echo $is_locked ? 'disabled' : ''; ?>><?php echo __mb('btn_login'); ?></button>
         </form>
+        <div class="mt-4 text-center">
+            <a href="../../blog.html" class="text-decoration-none text-muted small">&larr; <?php echo __mb('btn_back_to_blog'); ?></a>
+        </div>
     </div>
 </body>
 </html>

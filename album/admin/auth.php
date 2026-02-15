@@ -4,6 +4,7 @@
 // 設定安全的 Session Cookie
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
+session_name('ALBUM_ADMIN_SESS');
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
     ini_set('session.cookie_secure', 1);
 }
