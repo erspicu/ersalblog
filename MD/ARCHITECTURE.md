@@ -49,12 +49,10 @@ The system supports two operating modes:
 
 *   **MessageBoard Service**:
     *   Located in the `/MessageBoard` directory as an independent plugin-style service.
-    *   **Adapter-Based Storage**: Implements an "Adapter Pattern" frontend framework, supporting seamless switching between local SQLite (PHP) and serverless Google Sheets (GAS) storage.
-    *   **Multi-Tenant Design**: Features dynamic context detection (Site ID / Page ID), allowing a single installation to serve multiple independent sites and pages with isolated data storage.
-    *   **UI Consistency & Independence**: The admin dashboard is fully localized with its own asset directory (`assets/`), including Bootstrap 5 and Bootstrap Icons, ensuring it can operate without external CDNs. Its layout (fixed dark sidebar, shadow cards) is perfectly synchronized with the main blog system.
-    *   **Modern Interaction**: Supports threaded discussions with topics and flattened replies, featuring a sleek, responsive UI with "Optimistic UI" loading states.
-    *   **Metadata Integration**: Automatically captures `og:title` or document title during comment submission. Stores this in SQLite `page_meta` tables or Google Drive file descriptions, enabling intuitive "Page Title" display in the admin panel instead of just IDs.
-    *   **Independent Admin**: Includes a dedicated dashboard for environment diagnostics, global configuration (Mode/Theme/Language), and message management (deletion/moderation).
+    *   **Widget Architecture**: Operates as an independent iframe-based widget for perfect CSS/JS isolation and seamless cross-site deployment.
+    *   **Google Auth Integration**: Built-in support for Google Identity Services (GIS), featuring secure backend token verification and user avatar display.
+    *   **Adapter-Based Storage**: Implements an \"Adapter Pattern\" frontend framework, supporting both local SQLite (PHP) and serverless Google Sheets (GAS).
+    *   **Independent Admin**: Includes a dedicated dashboard for environment diagnostics, global configuration (Google Auth, Mode, Theme), and message moderation.
     *   **Security & Scalability**:
         *   **Admin Security**: Supports changing admin credentials directly via the dashboard.
         *   **Pagination**: Implements server-side pagination (20 topics/page) in the admin panel to handle high-volume data efficiently.
@@ -148,12 +146,10 @@ The system supports two operating modes:
 
 *   **留言板服務 (MessageBoard Service)**:
     *   位於 `/MessageBoard` 目錄，身為部落格插件式獨立服務。
-    *   **適配器儲存架構**：採用前端「適配器模式 (Adapter Pattern)」，支援在本地 SQLite (PHP) 與 Serverless Google 試算表 (GAS) 儲存間無縫切換。
-    *   **多租戶設計**：具備動態環境偵測 (Site ID / Page ID)，支援單一插件服務於多個獨立站點與頁面，且資料儲存完全隔離。
-    *   **視覺系統統一與資源獨立**：後台管理介面已完全「在地化 (Localized Assets)」，包含獨立的 Bootstrap 5 資源與 Bootstrap Icons 字體庫，確保服務可在無網環境下獨立運作。其介面佈局（固定式側邊欄、陰影卡片、配色）與部落格主系統完全同步。
-    *   **現代化互動**：支援話題討論串模式，提供流暢的縮排回覆 UI 與樂觀 UI (Optimistic UI) 載入狀態。
-    *   **元數據整合**：留言提交時自動捕捉 `og:title` 或網頁標題。將其儲存於 SQLite `page_meta` 表或 Google Drive 檔案描述中，讓管理後台能直接顯示「網頁標題」而非僅顯示 ID，大幅提升辨識度。
-    *   **獨立管理後台**：內建專屬管理介面，支援環境診斷、全域設定 (模式/主題/語系) 與留言審核管理。
+    *   **Widget 架構**：採獨立 iframe Widget 模式運行，實現完美的 CSS/JS 隔離與跨站部署能力。
+    *   **Google 登入整合**：內建 Google Identity Services (GIS) 支援，具備後端 Token 驗證與使用者頭像顯示功能。
+    *   **適配器儲存架構**：採用前端「適配器模式」，支援在本地 SQLite 與 Serverless Google 試算表 (GAS) 間無縫切換。
+    *   **獨立管理後台**：內建專屬管理介面，支援環境診斷、全域設定 (Google Auth, 模式, 主題) 與留言審核。
     *   **安全性與擴充性**：
         *   **帳號安全**：支援直接在後台修改管理員帳號與密碼。
         *   **後台分頁**：實作伺服器端分頁機制（每頁 20 個話題），確保在大量留言下的管理效能。
