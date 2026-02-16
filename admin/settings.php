@@ -63,7 +63,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newIntro = isset($_POST['blog_introduce']) ? $_POST['blog_introduce'] : '';
         $newFavicon = isset($_POST['blog_favicon']) ? $_POST['blog_favicon'] : '/static/icon-192.png';
         
-        $aiEnabled = isset($_POST['ai_enabled']) ? 'true' : 'false';
+        $aiEnabled = 'false';
+        if (isset($_POST['ai_enabled'])) {
+            $aiEnabled = 'true';
+        } elseif (isset($_POST['ai_enabled_hidden']) && $_POST['ai_enabled_hidden'] === 'false') {
+            $aiEnabled = 'false';
+        } elseif (!$isAjax) {
+            // 非 AJAX 提交時，沒帶 ai_enabled 就是 false
+            $aiEnabled = 'false';
+        } else {
+            // AJAX 提交但沒帶狀態（通常是因為表單沒變動或是 JS 沒補位），則保持原樣
+            // 為了保險起見，我們讓前端一定要帶入狀態。
+            $aiEnabled = isset($aiConfig) && $aiConfig['enabled'] ? 'true' : 'false';
+        }
+
         $aiKey = isset($_POST['ai_api_key']) ? trim($_POST['ai_api_key']) : '';
         $aiModel = isset($_POST['ai_model']) ? $_POST['ai_model'] : 'gemini-3-flash-preview';
 
@@ -105,8 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
             }
 
+            // --- AI Config ---
             if (isset($aiConfig)) {
-                $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)(,)/', '${1}' . $aiEnabled . '${3}', $phpContent);
+                $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)/', '${1}' . $aiEnabled, $phpContent);
                 $phpContent = preg_replace('/(\'api_key\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiKey) . '${3}', $phpContent);
                 $phpContent = preg_replace('/(\'model\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiModel) . '${3}', $phpContent);
             }
@@ -261,7 +275,7 @@ if (empty($themes)) $themes = array('blog');
         <div class="card shadow-sm mb-4">
             <div class="settings-section-title mb-0"><?php echo __('section_backend'); ?></div>
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" id="formBackend">
                     <input type="hidden" name="csrf_token" value="<?php echo getCSRFToken(); ?>">
                     
                     <div class="mb-3">
@@ -445,8 +459,15 @@ if (empty($themes)) $themes = array('blog');
                                 if (confirmMsg && !confirm(confirmMsg)) return;
 
                                 const formData = new FormData(form);
-                                formData.append(action, '1'); // 觸發 PHP 端的儲存判斷
+                                formData.append(action, '1'); 
                                 formData.append('ajax', '1');
+                                // 確保 checkbox 狀態有帶入 (如果沒選，FormData 可能不會帶入)
+                                if (form.id === 'formBackend') {
+                                    const aiEnabled = document.getElementById('aiEnabledSwitch');
+                                    if (aiEnabled && !aiEnabled.checked) {
+                                        formData.append('ai_enabled_hidden', 'false'); // 提供一個隱藏欄位讓後端知道要設為 false
+                                    }
+                                }
 
                                 const originalHtml = this.innerHTML;
                                 this.disabled = true;
