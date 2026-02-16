@@ -128,12 +128,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
             }
 
-            // --- AI Config ---
-            if (isset($aiConfig)) {
-                $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)/', '${1}' . $aiEnabled, $phpContent);
-                $phpContent = preg_replace('/(\'api_key\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiKey) . '${3}', $phpContent);
-                $phpContent = preg_replace('/(\'model\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiModel) . '${3}', $phpContent);
+            // --- AI Config Insertion/Update ---
+            if (strpos($phpContent, '$aiConfig') === false) {
+                // 如果完全沒有 aiConfig，先補上結構
+                $aiTmpl = "\n// --- AI 輔助設定 ---\n";
+                $aiTmpl .= "\$aiConfig = array(\n";
+                $aiTmpl .= "    'enabled' => false,\n";
+                $aiTmpl .= "    'api_key' => '',\n";
+                $aiTmpl .= "    'model'   => 'gemini-3-flash-preview'\n";
+                $aiTmpl .= ");\n";
+                $phpContent = str_replace('?>', $aiTmpl . "?>", $phpContent);
             }
+
+            // 進行取代
+            $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)/', '${1}' . $aiEnabled, $phpContent);
+            $phpContent = preg_replace('/(\'api_key\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiKey) . '${3}', $phpContent);
+            $phpContent = preg_replace('/(\'model\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiModel) . '${3}', $phpContent);
 
             if (file_put_contents($phpFile, $phpContent)) {
                 if ($isAjax) {
