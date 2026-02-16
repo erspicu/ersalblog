@@ -68,7 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('csrf_token', csrfInput.value);
             }
 
-            const response = await fetch('api_ai_helper.php', {
+            const apiUrl = 'api_ai_helper.php';
+            console.log("Fetching AI API:", apiUrl);
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 body: formData
             });
