@@ -43,9 +43,20 @@ try {
         parent_id INTEGER DEFAULT 0,
         name TEXT NOT NULL,
         content TEXT NOT NULL,
+        avatar TEXT,
         created_at DATETIME DEFAULT (datetime('now','localtime')),
         status INTEGER DEFAULT 1
     );");
+    
+    // Auto-migration: Check if avatar column exists (for existing DBs)
+    $res = $pdo->query("PRAGMA table_info(guestbook_messages)");
+    $cols = $res->fetchAll();
+    $hasAvatar = false;
+    foreach($cols as $c) { if($c['name'] === 'avatar') $hasAvatar = true; }
+    if (!$hasAvatar) {
+        $pdo->exec("ALTER TABLE guestbook_messages ADD COLUMN avatar TEXT;");
+    }
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS page_meta (
         key TEXT PRIMARY KEY,
         value TEXT
@@ -59,8 +70,10 @@ try {
             $stmtMeta->execute(array($page_title));
         }
 
-        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content) VALUES (?, ?, ?)");
-        $stmt->execute(array( (isset($input['parent_id']) ? $input['parent_id'] : 0), $input['name'], $input['content'] ));
+        $avatar = isset($input['avatar']) ? $input['avatar'] : null;
+
+        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content, avatar) VALUES (?, ?, ?, ?)");
+        $stmt->execute(array( (isset($input['parent_id']) ? $input['parent_id'] : 0), $input['name'], $input['content'], $avatar ));
         send_json(array('success' => true));
     } else {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;

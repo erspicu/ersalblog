@@ -8,6 +8,19 @@
     <style>
         body { margin: 0; padding: 0; overflow-x: hidden; background: transparent; }
         .mb-loading-screen { display: flex; justify-content: center; align-items: center; height: 100px; font-family: sans-serif; color: #666; }
+        
+        /* User Info Row */
+        .mb-user-row { display: flex; align-items: center; margin-bottom: 15px; min-height: 40px; }
+        .mb-user-badge { display: flex; align-items: center; background: #f0f2f5; padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; }
+        .theme-dark .mb-user-badge { background: #333; border-color: #444; color: #eee; }
+        .mb-user-avatar { width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; }
+        .mb-user-name { font-size: 0.9em; font-weight: bold; }
+        .mb-logout-btn { background: none; border: none; color: #999; margin-left: 8px; cursor: pointer; font-size: 1.2em; line-height: 1; padding: 0 2px; }
+        .mb-logout-btn:hover { color: #f44336; }
+
+        /* Avatar in Message List */
+        .mb-item-avatar { width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; background: #eee; }
+        .mb-item-meta { display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -53,6 +66,13 @@
 
             // Load Config & Language & Adapters
             await loadScript(`../config/config.js${ver}`);
+
+            // Load Google GIS if enabled
+            const mbConfig = window.MBConfig || {};
+            if (mbConfig.google_auth && mbConfig.google_auth.enabled) {
+                await loadScript('https://accounts.google.com/gsi/client');
+            }
+
             await loadScript(`../langs/plugin-${config.lang}.js${ver}`);
             await loadScript(`adapter-php.js${ver}`);
             await loadScript(`adapter-gas.js${ver}`);
@@ -66,14 +86,19 @@
             class MessageBoard {
                 constructor() {
                     this.container = document.getElementById('mb-service-container');
-                    this.state = { page: 1, parent_id: 0 };
+                    this.state = { 
+                        page: 1, 
+                        parent_id: 0,
+                        user: null // Store logged in user info
+                    };
                     
                     // Defaults
                     this.config = Object.assign({
                         mode: 'local',
                         per_page: 5,
                         gas_url: '',
-                        admin: { name: 'Admin', label: '站長' }
+                        admin: { name: 'Admin', label: '站長' },
+                        google_auth: { enabled: false, client_id: '' }
                     }, window.MBConfig || {});
 
                     // Merge options from URL
@@ -95,7 +120,86 @@
 
                     window.esMessageBoardInstance = this; // Global ref for pagination/reply links
                     this.renderBaseLayout();
+                    this.initGoogleAuth(); // Initialize Google Auth button if enabled
                     await this.loadMessages();
+                }
+
+                initGoogleAuth() {
+                    if (!this.config.google_auth || !this.config.google_auth.enabled || !this.config.google_auth.client_id) return;
+                    
+                    try {
+                        google.accounts.id.initialize({
+                            client_id: this.config.google_auth.client_id,
+                            callback: (res) => this.handleGoogleResponse(res)
+                        });
+                        this.renderGoogleBtn();
+                    } catch (e) {
+                        console.warn('Google Auth init failed:', e);
+                    }
+                }
+
+                renderGoogleBtn() {
+                    const btnContainer = document.getElementById('mb-google-btn-container');
+                    if (btnContainer) {
+                        google.accounts.id.renderButton(btnContainer, { 
+                            theme: config.theme === 'dark' ? 'filled_black' : 'outline', 
+                            size: 'medium',
+                            shape: 'pill',
+                            width: 200 // 設定固定寬度，不要撐滿
+                        });
+                    }
+                }
+
+                handleGoogleResponse(response) {
+                    // Decode JWT (Base64)
+                    const base64Url = response.credential.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    const payload = JSON.parse(jsonPayload);
+
+                    console.log('Google User:', payload);
+
+                    this.state.user = {
+                        name: payload.name,
+                        email: payload.email,
+                        picture: payload.picture,
+                        token: response.credential
+                    };
+
+                    // Update UI to show logged in state
+                    this.renderUserInfo();
+                }
+
+                renderUserInfo() {
+                    const L = window.MB_LANG || {};
+                    const userInfoEl = document.getElementById('mb-user-info');
+                    const nameInput = document.getElementById('mb-name');
+                    if (this.state.user) {
+                        userInfoEl.innerHTML = `
+                            <div class="mb-user-badge">
+                                <img src="${this.state.user.picture}" class="mb-user-avatar">
+                                <span class="mb-user-name">${this.state.user.name}</span>
+                                <button type="button" class="mb-logout-btn" onclick="window.esMessageBoardInstance.logout()">×</button>
+                            </div>
+                        `;
+                        if (nameInput) {
+                            nameInput.value = this.state.user.name;
+                            nameInput.readOnly = true;
+                            nameInput.style.display = 'none';
+                        }
+                    } else {
+                        userInfoEl.innerHTML = '<div id="mb-google-btn-container"></div>';
+                        this.renderGoogleBtn();
+                        if (nameInput) {
+                            nameInput.readOnly = false;
+                            nameInput.style.display = 'block';
+                        }
+                    }
+                }
+
+                logout() {
+                    this.state.user = null;
+                    this.renderUserInfo();
                 }
 
                 renderBaseLayout() {
@@ -103,6 +207,9 @@
                     this.container.innerHTML = `
                         <div class="mb-wrapper theme-${config.theme}">
                             <div class="mb-form-area" id="mb-form">
+                                <div id="mb-user-info" class="mb-user-row mb-3">
+                                    <div id="mb-google-btn-container"></div>
+                                </div>
                                 <div id="mb-reply-hint" style="display:none; margin-bottom:10px; color:#4a90e2; font-size:0.9em;">
                                     ${L.reply_hint || 'Reply to: '}<span id="mb-reply-to"></span> <a href="javascript:void(0)" id="mb-cancel-reply" style="margin-left:10px; color:#e74c3c;">${L.cancel_reply || 'Cancel'}</a>
                                 </div>
@@ -169,10 +276,39 @@
                     listEl.innerHTML = threads.map(thread => {
                         const head = thread.head;
                         const isAdmin = head.name === this.config.admin.name;
-                        let html = `<div class="mb-thread-box"><div class="mb-topic ${isAdmin ? 'mb-is-admin' : ''}"><div class="mb-item-meta"><span class="mb-author">${head.name}${isAdmin ? ` <span class="mb-badge">${L.badge_admin || 'Admin'}</span>` : ''}</span><span class="mb-date">${head.created_at}</span><a href="javascript:void(0)" class="mb-reply-link" onclick="window.esMessageBoardInstance.prepareReply('${head.id}', '${head.name.replace(/'/g, "\\'")}')">${L.btn_join || 'Join'}</a></div><div class="mb-item-content">${head.content}</div></div><div class="mb-discussion">`;
+                        const headAvatar = head.avatar ? `<img src="${head.avatar}" class="mb-item-avatar">` : `<div class="mb-item-avatar d-none"></div>`;
+                        
+                        let html = `
+                        <div class="mb-thread-box">
+                            <div class="mb-topic ${isAdmin ? 'mb-is-admin' : ''}">
+                                <div class="mb-item-meta">
+                                    ${headAvatar}
+                                    <div class="mb-meta-text">
+                                        <span class="mb-author">${head.name}${isAdmin ? ` <span class="mb-badge">${L.badge_admin || 'Admin'}</span>` : ''}</span>
+                                        <span class="mb-date">${head.created_at}</span>
+                                    </div>
+                                    <a href="javascript:void(0)" class="mb-reply-link" onclick="window.esMessageBoardInstance.prepareReply('${head.id}', '${head.name.replace(/'/g, "\\'")}')">${L.btn_join || 'Join'}</a>
+                                </div>
+                                <div class="mb-item-content">${head.content}</div>
+                            </div>
+                            <div class="mb-discussion">`;
+                            
                         html += thread.discussion.map(reply => {
                             const isReplyAdmin = reply.name === this.config.admin.name;
-                            return `<div class="mb-reply-item ${isReplyAdmin ? 'mb-is-admin' : ''}"><div class="mb-item-meta"><span class="mb-author">${reply.name}${isReplyAdmin ? ` <span class="mb-badge">${L.badge_admin || 'Admin'}</span>` : ''}</span><span class="mb-date">${reply.created_at}</span><a href="javascript:void(0)" class="mb-reply-link" onclick="window.esMessageBoardInstance.prepareReply('${head.id}', '${reply.name.replace(/'/g, "\\'")}')">${L.btn_reply || 'Reply'}</a></div><div class="mb-item-content">${reply.content}</div></div>`;
+                            const replyAvatar = reply.avatar ? `<img src="${reply.avatar}" class="mb-item-avatar">` : `<div class="mb-item-avatar d-none"></div>`;
+                            
+                            return `
+                            <div class="mb-reply-item ${isReplyAdmin ? 'mb-is-admin' : ''}">
+                                <div class="mb-item-meta">
+                                    ${replyAvatar}
+                                    <div class="mb-meta-text">
+                                        <span class="mb-author">${reply.name}${isReplyAdmin ? ` <span class="mb-badge">${L.badge_admin || 'Admin'}</span>` : ''}</span>
+                                        <span class="mb-date">${reply.created_at}</span>
+                                    </div>
+                                    <a href="javascript:void(0)" class="mb-reply-link" onclick="window.esMessageBoardInstance.prepareReply('${head.id}', '${reply.name.replace(/'/g, "\\'")}')">${L.btn_reply || 'Reply'}</a>
+                                </div>
+                                <div class="mb-item-content">${reply.content}</div>
+                            </div>`;
                         }).join('');
                         return html + `</div></div>`;
                     }).join('');
@@ -214,6 +350,7 @@
                             page_title: config.page_title,
                             name, 
                             content, 
+                            avatar: this.state.user ? this.state.user.picture : null,
                             parent_id: this.state.parent_id 
                         });
                         document.getElementById('mb-content').value = ''; 
