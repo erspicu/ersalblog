@@ -67,5 +67,11 @@ return [
     'diag_hint_php' => '建議使用 PHP 5.6 或以上版本。',
     'diag_hint_pdo' => '這是連接資料庫的基礎組件。',
     'diag_hint_sqlite' => '使用本地儲存模式時必須啟用。',
-    'diag_hint_writable' => '系統需要權限來建立資料庫檔案及目錄。'
+    'diag_hint_writable' => '系統需要權限來建立資料庫檔案及目錄。',
+    // Google Auth
+    'section_google_auth' => 'Google 第三方登入設定',
+    'label_google_auth_enabled' => '啟用 Google 帳號登入功能',
+    'label_google_client_id' => 'Google Client ID',
+    'hint_google_client_id' => '請由 Google Cloud Console 取得 OAuth 2.0 Client ID。',
+    'btn_save_google' => '儲存 Google 設定'
 ];

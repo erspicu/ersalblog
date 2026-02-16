@@ -67,5 +67,11 @@ return [
     'diag_hint_php' => 'PHP 5.6 or higher is recommended.',
     'diag_hint_pdo' => 'Required for database connections.',
     'diag_hint_sqlite' => 'Required for Local storage mode.',
-    'diag_hint_writable' => 'System needs write access to create database files.'
+    'diag_hint_writable' => 'System needs write access to create database files.',
+    // Google Auth
+    'section_google_auth' => 'Google Auth Configuration',
+    'label_google_auth_enabled' => 'Enable Google Sign-in',
+    'label_google_client_id' => 'Google Client ID',
+    'hint_google_client_id' => 'Obtain OAuth 2.0 Client ID from Google Cloud Console.',
+    'btn_save_google' => 'Save Google Settings'
 ];

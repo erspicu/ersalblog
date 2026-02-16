@@ -38,10 +38,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['mb_admin_user'] = $newUsername;
             $mb_admin_user = $newUsername; $mb_admin_pass = $finalPassword;
         } else { $error = "Failed to write config.php"; }
+    } elseif ($action === 'save_google') {
+        $content = file_exists($jsPath) ? file_get_contents($jsPath) : '';
+        $gEnabled = isset($_POST['google_auth_enabled']) ? 'true' : 'false';
+        $gClientId = isset($_POST['google_client_id']) ? trim($_POST['google_client_id']) : '';
+        
+        $content = preg_replace("/enabled:\s*(true|false),/", "enabled: $gEnabled,", $content);
+        $content = preg_replace("/client_id:\s*'[^']*'/", "client_id: '$gClientId'", $content);
+        
+        if (file_put_contents($jsPath, $content)) { $success_msg = "Google Auth settings updated!"; }
+        else { $error = "Write failed"; }
     }
 }
 
 $currentGasUrl = ''; $currentMode = 'local'; $currentTheme = 'default'; $currentLang = 'zh_TW'; $currentPerPage = 5;
+$currentGoogleEnabled = false; $currentGoogleClientId = '';
+
 $js_file = __DIR__ . '/../config/config.js';
 if (file_exists($js_file)) {
     $c = file_get_contents($js_file);
@@ -50,6 +62,10 @@ if (file_exists($js_file)) {
     if (preg_match("/lang:\s*'([^']+)'/", $c, $m)) $currentLang = $m[1];
     if (preg_match("/per_page:\s*(\d+)/", $c, $m)) $currentPerPage = (int)$m[1];
     if (preg_match("/gas_url:\s*'([^']+)'/", $c, $m)) $currentGasUrl = $m[1];
+    
+    // Google Auth
+    if (preg_match("/enabled:\s*(true|false),/", $c, $m)) $currentGoogleEnabled = ($m[1] === 'true');
+    if (preg_match("/client_id:\s*'([^']+)'/", $c, $m)) $currentGoogleClientId = $m[1];
 }
 
 function get_plugin_langs() {
@@ -126,6 +142,25 @@ $diagnostics = mb_get_env_diagnostics();
                             </form>
                         </div>
                     </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i><?php echo __mb('section_google_auth'); ?></div>
+                        <div class="card-body py-4">
+                            <form method="POST"><input type="hidden" name="action" value="save_google">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="google_auth_enabled" id="googleAuthEnabled" <?php echo ($currentGoogleEnabled ? 'checked' : ''); ?>>
+                                    <label class="form-check-label fw-bold" for="googleAuthEnabled"><?php echo __mb('label_google_auth_enabled'); ?></label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold"><?php echo __mb('label_google_client_id'); ?></label>
+                                    <input type="text" name="google_client_id" class="form-control" value="<?php echo htmlspecialchars($currentGoogleClientId); ?>" placeholder="xxxxxxxx.apps.googleusercontent.com">
+                                    <div class="form-text"><?php echo __mb('hint_google_client_id'); ?></div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2 px-4"><?php echo __mb('btn_save_google'); ?></button>
+                            </form>
+                        </div>
+                    </div>
+
                     <?php if ($currentMode === 'gas'): ?>
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i><?php echo __mb('section_gas_config'); ?></div>
