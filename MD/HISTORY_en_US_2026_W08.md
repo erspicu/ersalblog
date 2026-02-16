@@ -11,8 +11,11 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
     - Implemented auto-height synchronization using `postMessage` and `ResizeObserver`.
 - **Google Identity Services (GIS)**:
     - Integrated Google Sign-in with client-side JWT decoding and backend **Token verification (tokeninfo)**.
+    - **Session Persistence**: Implemented `localStorage` to remember login states across page reloads.
     - **Avatar & UID Logging**: Updated SQLite and GAS schemas to store user avatar URLs and unique IDs (`google_sub`).
-- **Admin Integration**: Added Google Auth configuration UI to the MessageBoard admin dashboard for managing Client ID and toggles.
+- **Enhanced Admin Dashboard**:
+    - **Config UI**: Added settings for Google Auth (Client ID/Toggle) and GAS Web App URL.
+    - **Mode Sync**: Fixed synchronization issues between `config.js` and active sessions for management modes.
 
 ### 2. Global Subsystem Security Hardening
 - **Session Isolation**: Independent session names for Blog, Album, and MessageBoard to prevent logout interference.
@@ -30,6 +33,6 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 - **Logging**: Consolidated AI API logs into `debug.txt` with masked credentials.
 
 ## Version Info
-- **Version**: v2026.02.16.22.02
+- **Version**: v2026.02.16.22.13
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview
