@@ -326,12 +326,11 @@ if (empty($themes)) $themes = array('blog');
                             <label class="form-label fw-bold"><?php echo __('label_ai_model'); ?></label>
                             <select name="ai_model" class="form-select" id="aiModelSelect">
                                 <?php 
-                                $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-1.5-flash';
-                                $standardModels = array('gemini-1.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview');
+                                $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-3-flash-preview';
+                                $standardModels = array('gemini-3-flash-preview', 'gemini-2.5-pro');
                                 ?>
-                                <option value="gemini-1.5-flash" <?php echo ($currentModel == 'gemini-1.5-flash') ? 'selected' : ''; ?>>Gemini 1.5 Flash (穩定、最速)</option>
-                                <option value="gemini-3-flash-preview" <?php echo ($currentModel == 'gemini-3-flash-preview') ? 'selected' : ''; ?>>Gemini 3 Flash Preview (高性能預覽)</option>
-                                <option value="gemini-3-pro-preview" <?php echo ($currentModel == 'gemini-3-pro-preview') ? 'selected' : ''; ?>>Gemini 3 Pro Preview (專業編輯)</option>
+                                <option value="gemini-3-flash-preview" <?php echo ($currentModel == 'gemini-3-flash-preview') ? 'selected' : ''; ?>>Gemini 3 Flash Preview (最速、建議)</option>
+                                <option value="gemini-2.5-pro" <?php echo ($currentModel == 'gemini-2.5-pro') ? 'selected' : ''; ?>>Gemini 2.5 Pro (最強效能)</option>
                                 <option value="custom" <?php echo (!in_array($currentModel, $standardModels)) ? 'selected' : ''; ?>>其他 (手動輸入 ID)</option>
                             </select>
                             <div class="mt-2 <?php echo (!in_array($currentModel, $standardModels)) ? '' : 'd-none'; ?>" id="customModelGroup">

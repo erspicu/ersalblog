@@ -1,2 +1,4 @@
 ﻿- [2026-02-16 15:18:47] @BLOG AI.md 讀取這個檔案內容,先初步了解我的大概blog增加功能實作構想,但還會再改
 - [2026-02-16 15:25:30] 更新 config.example.php，新增 $aiConfig 區塊以支援 AI 功能配置。
+- [2026-02-16 19:25:38] AI API Call: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=********
+- [2026-02-16 19:25:49] AI API Call: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=********

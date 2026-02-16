@@ -39,6 +39,18 @@ function callGemini($apiKey, $modelId, $tasks, $content) {
     
     $url = "https://generativelanguage.googleapis.com/" . $version . "/" . $modelFull . ":generateContent?key=" . $apiKey;
 
+    // --- 紀錄 API 呼叫網址 (Debug 用，遮罩 API Key) ---
+    $logFile = __DIR__ . '/../debug.txt';
+    
+    // 確保時區為 UTC+8
+    $dt = new DateTime('now', new DateTimeZone('Asia/Taipei'));
+    $timestamp = $dt->format("Y-m-d H:i:s");
+    
+    $maskedUrl = "https://generativelanguage.googleapis.com/" . $version . "/" . $modelFull . ":generateContent?key=********";
+    $logLine = "[$timestamp] AI API Call: $maskedUrl\n";
+    
+    @file_put_contents($logFile, $logLine, FILE_APPEND);
+
     // 建立 JSON 結構清單
     $required = array();
     if (in_array('title', $tasks)) $required[] = "title";
@@ -105,8 +117,8 @@ $primaryModel = $aiConfig['model'];
 $res = callGemini($apiKey, $primaryModel, $tasks, $content);
 
 // Fallback logic
-if ($res['code'] !== 200 && $primaryModel !== 'gemini-1.5-flash') {
-    $res = callGemini($apiKey, 'gemini-1.5-flash', $tasks, $content);
+if ($res['code'] !== 200 && $primaryModel !== 'gemini-3-flash-preview') {
+    $res = callGemini($apiKey, 'gemini-3-flash-preview', $tasks, $content);
 }
 
 if ($res['code'] !== 200) {
