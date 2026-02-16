@@ -89,7 +89,7 @@
                     this.state = { 
                         page: 1, 
                         parent_id: 0,
-                        user: null // Store logged in user info
+                        user: this.loadUserSession() // 1. 嘗試從儲存空間恢復
                     };
                     
                     // Defaults
@@ -108,6 +108,18 @@
                     this.init();
                 }
 
+                loadUserSession() {
+                    try {
+                        const saved = localStorage.getItem('mb_user_session');
+                        return saved ? JSON.parse(saved) : null;
+                    } catch (e) { return null; }
+                }
+
+                saveUserSession(user) {
+                    if (user) localStorage.setItem('mb_user_session', JSON.stringify(user));
+                    else localStorage.removeItem('mb_user_session');
+                }
+
                 async init() {
                     const L = window.MB_LANG || {};
                     
@@ -120,7 +132,8 @@
 
                     window.esMessageBoardInstance = this; // Global ref for pagination/reply links
                     this.renderBaseLayout();
-                    this.initGoogleAuth(); // Initialize Google Auth button if enabled
+                    this.renderUserInfo(); // 2. 立即根據恢復的狀態渲染 UI
+                    this.initGoogleAuth(); 
                     await this.loadMessages();
                 }
 
@@ -130,9 +143,15 @@
                     try {
                         google.accounts.id.initialize({
                             client_id: this.config.google_auth.client_id,
-                            callback: (res) => this.handleGoogleResponse(res)
+                            callback: (res) => this.handleGoogleResponse(res),
+                            auto_select: true // 3. 如果只有一個帳號，嘗試自動選取
                         });
                         this.renderGoogleBtn();
+                        
+                        // 4. 顯示一鍵登入提示 (如果尚未登入)
+                        if (!this.state.user) {
+                            google.accounts.id.prompt();
+                        }
                     } catch (e) {
                         console.warn('Google Auth init failed:', e);
                     }
@@ -145,7 +164,7 @@
                             theme: config.theme === 'dark' ? 'filled_black' : 'outline', 
                             size: 'medium',
                             shape: 'pill',
-                            width: 200 // 設定固定寬度，不要撐滿
+                            width: 200 
                         });
                     }
                 }
@@ -160,14 +179,14 @@
                     console.log('Google User:', payload);
 
                     this.state.user = {
-                        sub: payload.sub, // Added sub ID
+                        sub: payload.sub,
                         name: payload.name,
                         email: payload.email,
                         picture: payload.picture,
                         token: response.credential
                     };
 
-                    // Update UI to show logged in state
+                    this.saveUserSession(this.state.user); // 5. 儲存 Session
                     this.renderUserInfo();
                 }
 
@@ -175,6 +194,8 @@
                     const L = window.MB_LANG || {};
                     const userInfoEl = document.getElementById('mb-user-info');
                     const nameInput = document.getElementById('mb-name');
+                    if (!userInfoEl) return;
+
                     if (this.state.user) {
                         userInfoEl.innerHTML = `
                             <div class="mb-user-badge">
@@ -192,6 +213,7 @@
                         userInfoEl.innerHTML = '<div id="mb-google-btn-container"></div>';
                         this.renderGoogleBtn();
                         if (nameInput) {
+                            nameInput.value = '';
                             nameInput.readOnly = false;
                             nameInput.style.display = 'block';
                         }
@@ -200,6 +222,7 @@
 
                 logout() {
                     this.state.user = null;
+                    this.saveUserSession(null); // 6. 清除儲存
                     this.renderUserInfo();
                 }
 
