@@ -351,6 +351,7 @@
                             name, 
                             content, 
                             avatar: this.state.user ? this.state.user.picture : null,
+                            google_token: this.state.user ? this.state.user.token : null,
                             parent_id: this.state.parent_id 
                         });
                         document.getElementById('mb-content').value = ''; 

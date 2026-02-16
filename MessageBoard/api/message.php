@@ -44,17 +44,18 @@ try {
         name TEXT NOT NULL,
         content TEXT NOT NULL,
         avatar TEXT,
+        google_sub TEXT,
         created_at DATETIME DEFAULT (datetime('now','localtime')),
         status INTEGER DEFAULT 1
     );");
     
-    // Auto-migration: Check if avatar column exists (for existing DBs)
+    // Auto-migration
     $res = $pdo->query("PRAGMA table_info(guestbook_messages)");
     $cols = $res->fetchAll();
-    $hasAvatar = false;
-    foreach($cols as $c) { if($c['name'] === 'avatar') $hasAvatar = true; }
-    if (!$hasAvatar) {
-        $pdo->exec("ALTER TABLE guestbook_messages ADD COLUMN avatar TEXT;");
+    $hasSub = false;
+    foreach($cols as $c) { if($c['name'] === 'google_sub') $hasSub = true; }
+    if (!$hasSub) {
+        $pdo->exec("ALTER TABLE guestbook_messages ADD COLUMN google_sub TEXT;");
     }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS page_meta (
@@ -65,15 +66,38 @@ try {
     if ($method === 'POST') {
         if (empty($input['name']) || empty($input['content'])) send_json(array('success' => false, 'message' => 'Missing fields'));
         
+        $avatar = isset($input['avatar']) ? $input['avatar'] : null;
+        $google_sub = null;
+
+        // Token Verification (Optional but Recommended)
+        if (!empty($input['google_token'])) {
+            // 透過 Google TokenInfo API 驗證
+            $verifyUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" . urlencode($input['google_token']);
+            $verifyRes = @file_get_contents($verifyUrl);
+            if ($verifyRes) {
+                $tokenData = json_decode($verifyRes, true);
+                if (isset($tokenData['sub'])) {
+                    $google_sub = $tokenData['sub'];
+                    // 強制使用 Token 回傳的資料，防止前端偽造
+                    $input['name'] = isset($tokenData['name']) ? $tokenData['name'] : $input['name'];
+                    $avatar = isset($tokenData['picture']) ? $tokenData['picture'] : $avatar;
+                }
+            }
+        }
+
         if (!empty($page_title)) {
             $stmtMeta = $pdo->prepare("INSERT OR REPLACE INTO page_meta (key, value) VALUES ('title', ?)");
             $stmtMeta->execute(array($page_title));
         }
 
-        $avatar = isset($input['avatar']) ? $input['avatar'] : null;
-
-        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content, avatar) VALUES (?, ?, ?, ?)");
-        $stmt->execute(array( (isset($input['parent_id']) ? $input['parent_id'] : 0), $input['name'], $input['content'], $avatar ));
+        $stmt = $pdo->prepare("INSERT INTO guestbook_messages (parent_id, name, content, avatar, google_sub) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute(array( 
+            (isset($input['parent_id']) ? $input['parent_id'] : 0), 
+            $input['name'], 
+            $input['content'], 
+            $avatar,
+            $google_sub 
+        ));
         send_json(array('success' => true));
     } else {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
