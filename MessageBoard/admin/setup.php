@@ -48,6 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (file_put_contents($jsPath, $content)) { $success_msg = "Google Auth settings updated!"; }
         else { $error = "Write failed"; }
+    } elseif ($action === 'save_gas') {
+        $content = file_get_contents($jsPath);
+        $newGasUrl = isset($_POST['gas_url']) ? trim($_POST['gas_url']) : '';
+        $content = preg_replace("/gas_url:\s*'[^']*'/", "gas_url: '$newGasUrl'", $content);
+        if (file_put_contents($jsPath, $content)) { $success_msg = "GAS URL updated!"; }
+        else { $error = "Write failed"; }
     }
 }
 
@@ -161,17 +167,24 @@ $diagnostics = mb_get_env_diagnostics();
                         </div>
                     </div>
 
-                    <?php if ($currentMode === 'gas'): ?>
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white fw-bold py-3"><i class="bi bi-google me-2"></i><?php echo __mb('section_gas_config'); ?></div>
                         <div class="card-body py-4">
                             <form method="POST"><input type="hidden" name="action" value="save_gas">
-                                <div class="mb-3"><label class="form-label small fw-bold">GAS Web App URL</label><div class="input-group mb-3"><input type="url" name="gas_url" id="gas_url_input" class="form-control" value="<?php echo htmlspecialchars($currentGasUrl); ?>" required><button class="btn btn-outline-secondary" type="button" onclick="pasteToInput('gas_url_input')"><i class="bi bi-clipboard-plus"></i> Paste</button></div></div>
-                                <button type="submit" class="btn btn-primary mt-2"><?php echo __mb('label_save_gas'); ?></button>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">GAS Web App URL</label>
+                                    <div class="input-group mb-2">
+                                        <input type="url" name="gas_url" id="gas_url_input" class="form-control" value="<?php echo htmlspecialchars($currentGasUrl); ?>" placeholder="https://script.google.com/macros/s/.../exec">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="pasteToInput('gas_url_input')"><i class="bi bi-clipboard-plus"></i> Paste</button>
+                                    </div>
+                                    <div class="form-text">設定 Google Apps Script 的部署網址。若要切換至「Google 試算表」模式，此欄位為必填。</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2 px-4"><?php echo __mb('label_save_gas'); ?></button>
                             </form>
                         </div>
                     </div>
-                    <?php else: ?>
+
+                    <?php if ($currentMode === 'local'): ?>
                     <div class="card border-0 shadow-sm mb-4 bg-white"><div class="card-body p-5 text-center"><i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i><h4 class="mt-3"><?php echo __mb('status_ready'); ?></h4><p class="text-muted"><?php echo __mb('status_ready_desc'); ?></p></div></div>
                     <?php endif; ?>
                 </div>
