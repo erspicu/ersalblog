@@ -24,7 +24,7 @@ $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
 // --- AI Cache Handling ---
-$aiCacheFile = __DIR__ . '/../contents/ai_models_cache.json';
+$aiCacheFile = __DIR__ . '/../static/ai_models_cache.json';
 $aiModelsCache = [];
 if (file_exists($aiCacheFile)) {
     $aiModelsCache = json_decode(file_get_contents($aiCacheFile), true);
