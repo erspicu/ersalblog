@@ -375,4 +375,18 @@ return [
     // Security Warning
     'warn_install_file_exists' => '⚠️ 安全警告：安裝檔案 (install.php) 仍然存在。',
     'warn_install_file_exists_desc' => '為了確保系統安全，請在完成安裝後手動將根目錄下的 <code>install.php</code> 刪除。',
+
+    // Settings AJAX & SweetAlert2
+    'swal_confirm_title' => '確定執行？',
+    'swal_confirm_yes' => '確定',
+    'swal_confirm_cancel' => '取消',
+    'swal_save_success' => '儲存成功',
+    'swal_save_fail' => '儲存失敗',
+    'swal_sys_error' => '系統錯誤',
+    'swal_conn_fail' => '無法與伺服器連線',
+    'fetch_loading' => '抓取中...',
+    'save_loading' => '儲存中...',
+    'fetch_success' => '成功獲取並快取了 %d 個模型。',
+    'fetch_fail' => '抓取失敗',
+    'prompt_enter_apikey' => '請先輸入 API Key。',
 ];

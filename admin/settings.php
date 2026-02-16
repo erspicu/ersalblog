@@ -611,6 +611,22 @@ if (empty($themes)) $themes = array('blog');
         folderModal.hide();
     });
 
+    // --- Multi-language Strings for JS ---
+    const lang = {
+        swal_confirm_title: '<?php echo addslashes(__("swal_confirm_title")); ?>',
+        swal_confirm_yes: '<?php echo addslashes(__("swal_confirm_yes")); ?>',
+        swal_confirm_cancel: '<?php echo addslashes(__("swal_confirm_cancel")); ?>',
+        swal_save_success: '<?php echo addslashes(__("swal_save_success")); ?>',
+        swal_save_fail: '<?php echo addslashes(__("swal_save_fail")); ?>',
+        swal_sys_error: '<?php echo addslashes(__("swal_sys_error")); ?>',
+        swal_conn_fail: '<?php echo addslashes(__("swal_conn_fail")); ?>',
+        fetch_loading: '<?php echo addslashes(__("fetch_loading")); ?>',
+        save_loading: '<?php echo addslashes(__("save_loading")); ?>',
+        fetch_success: '<?php echo addslashes(__("fetch_success")); ?>',
+        fetch_fail: '<?php echo addslashes(__("fetch_fail")); ?>',
+        prompt_enter_apikey: '<?php echo addslashes(__("prompt_enter_apikey")); ?>'
+    };
+
     // --- AI Settings UI Logic ---
     const aiSwitch = document.getElementById('aiEnabledSwitch');
     if (aiSwitch) {
@@ -625,7 +641,7 @@ if (empty($themes)) $themes = array('blog');
         btnFetch.addEventListener('click', async function() {
             const apiKey = document.getElementById('aiApiKeyInput').value.trim();
             if (!apiKey) {
-                Swal.fire('請先輸入 API Key。', '', 'warning');
+                Swal.fire(lang.prompt_enter_apikey, '', 'warning');
                 return;
             }
 
@@ -634,14 +650,14 @@ if (empty($themes)) $themes = array('blog');
             const originalBtnHtml = btn.innerHTML;
             
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 抓取中...';
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${lang.fetch_loading}`;
 
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
                 const resp = await fetch(url);
                 const data = await resp.json();
 
-                if (data.error) throw new Error(data.error.message || 'API Key 驗證失敗');
+                if (data.error) throw new Error(data.error.message || lang.fetch_fail);
 
                 const models = data.models || [];
                 const filtered = models.filter(m => 
@@ -673,10 +689,11 @@ if (empty($themes)) $themes = array('blog');
                     select.appendChild(opt);
                 });
 
-                Swal.fire('成功', `已獲取並快取 ${filtered.length} 個模型。`, 'success');
+                const successMsg = lang.fetch_success.replace('%d', filtered.length);
+                Swal.fire(lang.swal_save_success, successMsg, 'success');
 
             } catch (e) {
-                Swal.fire('抓取失敗', e.message, 'error');
+                Swal.fire(lang.fetch_fail, e.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalBtnHtml;
@@ -693,14 +710,14 @@ if (empty($themes)) $themes = array('blog');
 
             if (confirmMsg) {
                 const result = await Swal.fire({
-                    title: '確定執行？',
+                    title: lang.swal_confirm_title,
                     text: confirmMsg,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: '確定',
-                    cancelButtonText: '取消'
+                    confirmButtonText: lang.swal_confirm_yes,
+                    cancelButtonText: lang.swal_confirm_cancel
                 });
                 if (!result.isConfirmed) return;
             }
@@ -718,7 +735,7 @@ if (empty($themes)) $themes = array('blog');
 
             const originalHtml = this.innerHTML;
             this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 儲存中...';
+            this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${lang.save_loading}`;
 
             try {
                 const resp = await fetch('settings.php', {
@@ -731,16 +748,16 @@ if (empty($themes)) $themes = array('blog');
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: '儲存成功',
+                        title: lang.swal_save_success,
                         text: result.message,
                         timer: 2000,
                         showConfirmButton: false
                     });
                 } else {
-                    Swal.fire('儲存失敗', result.message, 'error');
+                    Swal.fire(lang.swal_save_fail, result.message, 'error');
                 }
             } catch (e) {
-                Swal.fire('系統錯誤', '無法與伺服器連線: ' + e.message, 'error');
+                Swal.fire(lang.swal_sys_error, `${lang.swal_conn_fail}: ${e.message}`, 'error');
             } finally {
                 this.disabled = false;
                 this.innerHTML = originalHtml;

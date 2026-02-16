@@ -367,4 +367,18 @@ return [
     // Security Warning
     'warn_install_file_exists' => '⚠️ Security Warning: Installer file (install.php) still exists.',
     'warn_install_file_exists_desc' => 'For security reasons, please manually delete <code>install.php</code> from your root directory after installation.',
+
+    // Settings AJAX & SweetAlert2
+    'swal_confirm_title' => 'Confirm Action?',
+    'swal_confirm_yes' => 'Confirm',
+    'swal_confirm_cancel' => 'Cancel',
+    'swal_save_success' => 'Saved Successfully',
+    'swal_save_fail' => 'Save Failed',
+    'swal_sys_error' => 'System Error',
+    'swal_conn_fail' => 'Connection Failed',
+    'fetch_loading' => 'Fetching...',
+    'save_loading' => 'Saving...',
+    'fetch_success' => 'Successfully fetched and cached %d models.',
+    'fetch_fail' => 'Fetch Failed',
+    'prompt_enter_apikey' => 'Please enter API Key first.',
 ];
