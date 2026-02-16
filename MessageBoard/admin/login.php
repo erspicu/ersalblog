@@ -34,6 +34,9 @@ $userIp = $_SERVER['REMOTE_ADDR'];
 $attempts = getAttempts($userIp);
 $is_locked = ($attempts >= $max_attempts);
 
+// 預設模式採用 config.js 的設定
+$default_mode = mb_get_real_mode();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$is_locked) {
     $user = isset($_POST['username']) ? $_POST['username'] : '';
     $pass = isset($_POST['password']) ? $_POST['password'] : '';
@@ -101,8 +104,8 @@ $langs = mb_get_available_langs();
             <div class="mb-3">
                 <label class="form-label small fw-bold"><?php echo __mb('label_mode'); ?></label>
                 <select name="mode" class="form-select" <?php echo $is_locked ? 'disabled' : ''; ?>>
-                    <option value="local"><?php echo __mb('opt_sqlite'); ?></option>
-                    <option value="gas"><?php echo __mb('opt_gas'); ?></option>
+                    <option value="local" <?php echo ($default_mode === 'local' ? 'selected' : ''); ?>><?php echo __mb('opt_sqlite'); ?></option>
+                    <option value="gas" <?php echo ($default_mode === 'gas' ? 'selected' : ''); ?>><?php echo __mb('opt_gas'); ?></option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary w-100" <?php echo $is_locked ? 'disabled' : ''; ?>><?php echo __mb('btn_login'); ?></button>

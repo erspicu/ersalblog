@@ -38,9 +38,24 @@ function mb_is_logged_in() {
     return isset($_SESSION['mb_admin_logged_in']) && $_SESSION['mb_admin_logged_in'] === true;
 }
 
+/**
+ * 從 config.js 獲取真實的運行模式
+ */
+function mb_get_real_mode() {
+    $js_file = __DIR__ . '/../config/config.js';
+    if (file_exists($js_file)) {
+        $c = file_get_contents($js_file);
+        if (preg_match("/mode:\s*'([^']+)'/", $c, $m)) return $m[1];
+    }
+    return 'local';
+}
+
 function mb_require_login() {
     global $mb_admin_pass;
     if (!mb_is_logged_in()) { header("Location: login.php"); exit; }
+    
+    // 同步真實模式到 Session，確保設定變更後立即生效
+    $_SESSION['mb_admin_mode'] = mb_get_real_mode();
     
     // 強制修改 1234 弱密碼
     if ($mb_admin_pass === '1234' && basename($_SERVER['PHP_SELF']) !== 'setup.php') {
