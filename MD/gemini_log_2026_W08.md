@@ -3,3 +3,4 @@
 - [2026-02-16 19:25:38] AI API Call: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=********
 - [2026-02-16 19:25:49] AI API Call: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=********
 - [2026-02-16 20:32:00] 實作設定頁面 AJAX 儲存與 SweetAlert2 UI，並完成全站語系化 (i18n) 補強與舊版 config.php 自動相容升級。
+- [2026-02-16 20:35:30] 更新系統版本至 v2026.02.16.20.35，完成 AI 輔助功能全站多語系化，並移除過時規劃文件。
