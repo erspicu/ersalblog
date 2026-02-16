@@ -324,18 +324,11 @@ if (empty($themes)) $themes = array('blog');
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold"><?php echo __('label_ai_model'); ?></label>
+                            <?php $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-3-flash-preview'; ?>
                             <select name="ai_model" class="form-select" id="aiModelSelect">
-                                <?php 
-                                $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-3-flash-preview';
-                                $standardModels = array('gemini-3-flash-preview', 'gemini-2.5-pro');
-                                ?>
                                 <option value="gemini-3-flash-preview" <?php echo ($currentModel == 'gemini-3-flash-preview') ? 'selected' : ''; ?>>Gemini 3 Flash Preview (最速、建議)</option>
                                 <option value="gemini-2.5-pro" <?php echo ($currentModel == 'gemini-2.5-pro') ? 'selected' : ''; ?>>Gemini 2.5 Pro (最強效能)</option>
-                                <option value="custom" <?php echo (!in_array($currentModel, $standardModels)) ? 'selected' : ''; ?>>其他 (手動輸入 ID)</option>
                             </select>
-                            <div class="mt-2 <?php echo (!in_array($currentModel, $standardModels)) ? '' : 'd-none'; ?>" id="customModelGroup">
-                                <input type="text" name="ai_model_custom" class="form-control" value="<?php echo htmlspecialchars($currentModel); ?>" placeholder="請輸入模型 ID">
-                            </div>
                             <div class="form-text"><?php echo __('hint_ai_model'); ?></div>
                         </div>
                     </div>
@@ -343,9 +336,6 @@ if (empty($themes)) $themes = array('blog');
                     <script>
                         document.getElementById('aiEnabledSwitch').addEventListener('change', function() {
                             document.getElementById('ai-settings-fields').classList.toggle('d-none', !this.checked);
-                        });
-                        document.getElementById('aiModelSelect').addEventListener('change', function() {
-                            document.getElementById('customModelGroup').classList.toggle('d-none', this.value !== 'custom');
                         });
                     </script>
 
