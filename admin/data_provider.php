@@ -432,7 +432,11 @@ class DataManager {
     }
 
     public function deletePost($id) {
+        $postToDelete = $this->getPost($id);
+        $filename = '';
+
         if ($this->source === 'db' || $this->source === 'sqlite') {
+            if ($postToDelete) $filename = $postToDelete['post_filename'];
             $stmt = $this->pdo->prepare("DELETE FROM blog_posts WHERE id = ?");
             $stmt->execute(array($id));
         } else {
@@ -443,7 +447,9 @@ class DataManager {
             $lines = file($indexFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $newLines = array();
             foreach ($lines as $line) {
-                if (strpos($line, $filename) === false) { // Simple check, better explode
+                if (strpos($line, $filename) === false) {
+                    $newLines[] = $line;
+                } else {
                     $parts = explode('|', $line);
                     if (trim($parts[1]) !== $filename) {
                         $newLines[] = $line;
@@ -458,6 +464,18 @@ class DataManager {
 
             // 3. Remove Category Links
             $this->updateFileCategories($filename, ''); // Empty string = remove all
+        }
+
+        // --- Common Physical File Deletion (For both DB and File modes) ---
+        if ($filename) {
+            // A. Delete generated static HTML
+            $htmlPath = $this->baseDir . '/post/' . $filename;
+            if (file_exists($htmlPath)) @unlink($htmlPath);
+
+            // B. Delete SEO Preview Image (if exists)
+            $cleanFn = pathinfo($filename, PATHINFO_FILENAME);
+            $previewPath = $this->baseDir . '/preview/icon-' . $cleanFn . '.jpg';
+            if (file_exists($previewPath)) @unlink($previewPath);
         }
     }
 

@@ -14,14 +14,22 @@
 - **穩定性校驗**：執行 `php -l` 深度掃描，確保 `album/` 與 `MessageBoard/` 目錄下所有檔案均能於 PHP 5.4+ 環境穩定執行。
 - **陣列語法標準化**：將關鍵路徑下的 `[]` 陣列宣告改回 `array()` 以求最高穩定性。
 
-### 3. 資源在地化 (Asset Localization)
-- **留言板資源脫鉤**：成功抓取 Bootstrap CSS/JS 與 Bootstrap Icons 到 `MessageBoard/admin/assets/`。現在留言板後台管理介面已完全脫離對外部 CDN 的依賴，具備完全獨立運行的能力。
+### 3. 資源在地化與 UI 深度同步
+- **留言板資源脫鉤**：成功將 Bootstrap CSS/JS 與 Bootstrap Icons 抓取至 `MessageBoard/admin/assets/`。管理後台現在已 100% 脫離外部 CDN，確保在無網環境下視覺顯示依然完整。
+- **視覺系統大一統**：重構留言板後台的所有頁面，採用與部落格主系統完全一致的「固定深色側邊欄 + 淺灰底色內容區」佈局。統一了卡片陰影、圓角、按鈕配色與 Badge 樣式，消除了子系統間的視覺割裂感。
+- **語系化標籤完善**：補齊了側邊欄模式提示（管理模式: SQLite / GAS）等最後一批硬編碼字串，確保多語系體驗的完整性。
+
+### 4. AI 輔助創作整合 (AI Assistant Integration)
+- **API 整合**: 新增 `admin/api_ai_helper.php`，整合 Google Gemini API (v1beta)。
+- **功能實作**: 支援自動生成文章標題、SEO 描述、關鍵字標籤，以及優化文章內容。
+- **前端介面**: 於文章編輯器 (`admin/post_edit.php`) 新增 AI 輔助按鈕與操作介面 (`admin/assets/js/ai_helper.js`)。
+- **模型回退機制**: 預設使用高效能模型，若失敗自動回退至 `gemini-1.5-flash` 確保服務可用性。
 
 ## 技術優化 (Technical Optimizations)
 - **重構設定生成邏輯**：修正了 `setup.php` 使用 Regex 替換 `config.php` 導致雜湊值損壞的問題，改為直接生成乾淨的 PHP 檔案內容。
 - **標準化 auth.php 載入鏈**：規範所有行政頁面先配置 Session 參數後再啟動 `session_start()`，解決了 "Session settings cannot be changed when active" 的警告。
 
 ## 版本資訊
-- **Version**: v2026.02.16.20.30
+- **Version**: v2026.02.16.19.22
 - **CLI**: 0.28.2
-- **Model**: gemini-3-pro-preview
+- **Model**: gemini-3-flash-preview

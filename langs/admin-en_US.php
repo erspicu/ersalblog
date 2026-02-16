@@ -136,7 +136,21 @@ return [
     'btn_save_draft' => 'Save Draft',
     'btn_save_publish' => 'Publish',
 
-    // Vibe Info
+    // AI Assistant
+    'btn_ai_assistant' => 'AI Assistant',
+    'modal_ai_title' => 'AI Expert Optimization',
+    'modal_ai_desc' => 'AI will analyze your content to generate titles, suggest SEO filenames, meta descriptions, and refine your content.',
+    'btn_ai_analyze' => 'Start AI Analysis',
+    'btn_ai_apply' => 'Apply AI Results',
+    'label_ai_suggest_title' => 'Suggested Title',
+    'label_ai_suggest_filename' => 'Suggested Filename (SEO)',
+    'label_ai_suggest_desc' => 'Meta Description',
+    'label_ai_suggest_content' => 'Refined Content',
+    'label_ai_suggest_tags' => 'Suggested Tags',
+    'ai_analyzing' => 'AI is thinking...',
+    'ai_disabled' => 'AI features are disabled. Please check config.php.',
+    'error_ai_quota_exceeded' => 'AI quota exceeded (429). Please try again later or check your API key status.',
+    'error_ai_service_busy' => 'AI service is busy or timed out. Please try again.',
     'vibe_info' => 'Vibe coded with Gemini CLI & Gemini AI Models',
 
     // Migrate Tool
@@ -281,6 +295,12 @@ return [
     'hint_guestbook_plugin' => 'Path to the MessageBoard plugin script (leave empty to disable).',
     'label_guestbook_per_page' => 'Guestbook Per Page',
     'msg_settings_saved' => 'Settings saved successfully!',
+    'section_ai' => 'AI Assistant Settings (Google Gemini)',
+    'label_ai_enabled' => 'Enable AI Assistant',
+    'label_ai_api_key' => 'Gemini API Key',
+    'label_ai_model' => 'AI Model',
+    'hint_ai_model' => 'Recommended: gemini-1.5-flash for faster response and higher free quota.',
+    'hint_ai_api_key' => 'Apply for your API Key at Google AI Studio.',
     'error_config_write' => 'Failed to write config.js. Check permissions.',
     'opt_api_file' => 'File System',
     'opt_api_db' => 'MySQL Database',

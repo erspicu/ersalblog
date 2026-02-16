@@ -136,7 +136,21 @@ return [
     'btn_save_draft' => '暫存草稿',
     'btn_save_publish' => '正式發布',
 
-    // Vibe Info
+    // AI Assistant
+    'btn_ai_assistant' => 'AI 輔助優化',
+    'modal_ai_title' => 'AI 專家輔助功能',
+    'modal_ai_desc' => 'AI 將分析您的文章內容，並自動產生標題、建議檔名、SEO 摘要以及修潤內文。',
+    'btn_ai_analyze' => '開始 AI 分析',
+    'btn_ai_apply' => '確認並套用結果',
+    'label_ai_suggest_title' => 'AI 建議標題',
+    'label_ai_suggest_filename' => 'AI 建議檔名 (SEO 友善)',
+    'label_ai_suggest_desc' => 'AI 生成 SEO 摘要',
+    'label_ai_suggest_content' => 'AI 修潤後內容',
+    'label_ai_suggest_tags' => 'AI 擷取標籤',
+    'ai_analyzing' => 'AI 正在思考中...',
+    'ai_disabled' => 'AI 功能未啟用，請檢查 config.php 設定。',
+    'error_ai_quota_exceeded' => 'AI 服務額度已達上限 (429)，請稍後再試。若持續發生，請檢查 API Key 狀態。',
+    'error_ai_service_busy' => 'AI 服務目前繁忙或連線逾時，請再試一次。',
     'vibe_info' => '本系統由 Gemini CLI 與 Gemini AI 模型 Vibe Coding 實作而成',
 
     // Migrate Tool
@@ -281,6 +295,12 @@ return [
     'hint_guestbook_plugin' => '設定 MessageBoard 插件腳本的路徑 (留空則不載入)。',
     'label_guestbook_per_page' => '留言板每頁筆數',
     'msg_settings_saved' => '設定已成功儲存！',
+    'section_ai' => 'AI 輔助功能設定 (Google Gemini)',
+    'label_ai_enabled' => '啟用 AI 輔助優化功能',
+    'label_ai_api_key' => 'Gemini API Key',
+    'label_ai_model' => '選擇 AI 專家模型',
+    'hint_ai_model' => '1.5 Flash 速度最快；3.0 Preview 邏輯與修辭更強。',
+    'hint_ai_api_key' => '請至 Google AI Studio 申請 API Key。',
     'error_config_write' => '寫入 config.js 失敗，請檢查檔案權限。',
     'opt_api_file' => '檔案系統 (File System)',
     'opt_api_db' => 'MySQL 資料庫',

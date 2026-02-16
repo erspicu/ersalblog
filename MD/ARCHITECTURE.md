@@ -51,6 +51,7 @@ The system supports two operating modes:
     *   Located in the `/MessageBoard` directory as an independent plugin-style service.
     *   **Adapter-Based Storage**: Implements an "Adapter Pattern" frontend framework, supporting seamless switching between local SQLite (PHP) and serverless Google Sheets (GAS) storage.
     *   **Multi-Tenant Design**: Features dynamic context detection (Site ID / Page ID), allowing a single installation to serve multiple independent sites and pages with isolated data storage.
+    *   **UI Consistency & Independence**: The admin dashboard is fully localized with its own asset directory (`assets/`), including Bootstrap 5 and Bootstrap Icons, ensuring it can operate without external CDNs. Its layout (fixed dark sidebar, shadow cards) is perfectly synchronized with the main blog system.
     *   **Modern Interaction**: Supports threaded discussions with topics and flattened replies, featuring a sleek, responsive UI with "Optimistic UI" loading states.
     *   **Metadata Integration**: Automatically captures `og:title` or document title during comment submission. Stores this in SQLite `page_meta` tables or Google Drive file descriptions, enabling intuitive "Page Title" display in the admin panel instead of just IDs.
     *   **Independent Admin**: Includes a dedicated dashboard for environment diagnostics, global configuration (Mode/Theme/Language), and message management (deletion/moderation).
@@ -62,6 +63,7 @@ The system supports two operating modes:
 *   **Initialization and Health Check**:
     *   **System Diagnostics**: `admin/health_check.php` and `album/admin/health_check.php` provide comprehensive environment verification and permission auditing.
 *   **Security Features**:
+    *   **Session Isolation**: Implements independent `session_name` for Blog (`BLOG_ADMIN_SESS`), Album (`ALBUM_ADMIN_SESS`), and MessageBoard (`MB_ADMIN_SESS`). This ensures that logging out of one service does not affect the authenticated state of others, even when hosted on the same domain.
     *   **System Fingerprint Hashing**: Passwords are no longer stored in plain text but as Bcrypt hashes combined with a unique host fingerprint (Machine ID or Computer Name), ensuring credentials cannot be easily cracked if moved to a different environment.
     *   **Forced Security Initialization**: New installations or legacy "1234" passwords trigger a mandatory security setup flow to harden the configuration.
     *   **Developer Bypass**: Supports a `1234` master bypass specifically for `localhost` environments to ensure developers are never locked out while testing.
@@ -79,22 +81,26 @@ The system supports two operating modes:
 *   **`/album`**: Independent album service with its own `/admin`, `/api`, and `/Collection`.
 *   **`/album/admin/system_helper.php`**: Dedicated helper for the independent album service.
 *   **`/album/toolshell`**: Cross-platform automation scripts for album maintenance.
+*   **`/MessageBoard`**: Independent message board service with its own `/admin`, `/api`, `/data`, and `/gas`.
 *   **`/MD`**: Project technical documentation and history logs.
 
 ---
 
 ## 3. Key Technical Features
 
+*   **Compatibility Optimization**: Entire PHP codebase has undergone syntax downgrading and lint validation to ensure stable execution in legacy PHP 5.4+ (e.g., AppServ) environments.
 *   **Photography Features**: Frontend photo metadata parsing via `exif.js` and backend server-side Exif extraction.
 *   **Dynamic Resource Mapping**: `StaticGenerator` now automatically adjusts `album/` and `pic/` relative paths for sub-directory static pages (`post/*.html`), ensuring cross-directory asset availability.
 *   **Performance Optimization**: 
     *   Automatic compression of JS/CSS via Python scripts.
+    *   Localization of external assets (Local Assets) for MessageBoard.
     *   Smart thumbnail generation logic (only creates if original is larger than target).
     *   Extreme AOT compilation for embedded Blazor applications.
 *   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`.
+*   **AI Integration**: Built-in `admin/api_ai_helper.php` for AI-assisted content creation (SEO, Title, Tags) using Google Gemini API with smart model fallback.
 
 ---
-**Document Maintenance**: Updated February 14, 2026.
+**Document Maintenance**: Updated February 16, 2026.
 
 ---
 
@@ -141,6 +147,7 @@ The system supports two operating modes:
     *   位於 `/MessageBoard` 目錄，身為部落格插件式獨立服務。
     *   **適配器儲存架構**：採用前端「適配器模式 (Adapter Pattern)」，支援在本地 SQLite (PHP) 與 Serverless Google 試算表 (GAS) 儲存間無縫切換。
     *   **多租戶設計**：具備動態環境偵測 (Site ID / Page ID)，支援單一插件服務於多個獨立站點與頁面，且資料儲存完全隔離。
+    *   **視覺系統統一與資源獨立**：後台管理介面已完全「在地化 (Localized Assets)」，包含獨立的 Bootstrap 5 資源與 Bootstrap Icons 字體庫，確保服務可在無網環境下獨立運作。其介面佈局（固定式側邊欄、陰影卡片、配色）與部落格主系統完全同步。
     *   **現代化互動**：支援話題討論串模式，提供流暢的縮排回覆 UI 與樂觀 UI (Optimistic UI) 載入狀態。
     *   **元數據整合**：留言提交時自動捕捉 `og:title` 或網頁標題。將其儲存於 SQLite `page_meta` 表或 Google Drive 檔案描述中，讓管理後台能直接顯示「網頁標題」而非僅顯示 ID，大幅提升辨識度。
     *   **獨立管理後台**：內建專屬管理介面，支援環境診斷、全域設定 (模式/主題/語系) 與留言審核管理。
@@ -185,6 +192,7 @@ The system supports two operating modes:
     *   智慧縮圖生成邏輯（僅在原圖大於規格時建立）。
     *   嵌入式 Blazor 應用程式極致 AOT 編譯。
 *   **版本控制**: 嚴格區分代碼與生成產物。
+*   **AI 整合**: 內建 `admin/api_ai_helper.php`，利用 Google Gemini API 實現 AI 輔助創作（SEO、標題、標籤），並具備智慧模型回退機制。
 
 ---
 **文件維護**: 2026 年 2 月 16 日更新。

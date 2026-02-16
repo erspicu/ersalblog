@@ -49,6 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newDesc = isset($_POST['blog_description']) ? $_POST['blog_description'] : '';
         $newIntro = isset($_POST['blog_introduce']) ? $_POST['blog_introduce'] : '';
         $newFavicon = isset($_POST['blog_favicon']) ? $_POST['blog_favicon'] : '/static/icon-192.png';
+        
+        $aiEnabled = isset($_POST['ai_enabled']) ? 'true' : 'false';
+        $aiKey = isset($_POST['ai_api_key']) ? trim($_POST['ai_api_key']) : '';
+        $aiModel = isset($_POST['ai_model']) ? $_POST['ai_model'] : 'gemini-1.5-flash';
+        if ($aiModel === 'custom' && isset($_POST['ai_model_custom'])) {
+            $aiModel = trim($_POST['ai_model_custom']);
+        }
 
         // --- 防呆檢查 ---
         if ($newPerPage <= 0) {
@@ -88,6 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $phpContent = preg_replace('/(\$album_path\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newAlbumPath . '${3}', $phpContent);
             } else {
                 $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
+            }
+
+            // --- AI Config ---
+            if (isset($aiConfig)) {
+                $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)(,)/', '${1}' . $aiEnabled . '${3}', $phpContent);
+                $phpContent = preg_replace('/(\'api_key\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiKey) . '${3}', $phpContent);
+                $phpContent = preg_replace('/(\'model\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiModel) . '${3}', $phpContent);
             }
 
             if (file_put_contents($phpFile, $phpContent)) {
@@ -291,6 +305,50 @@ if (empty($themes)) $themes = array('blog');
                         <input type="text" name="blog_favicon" class="form-control" value="<?php echo htmlspecialchars($currentConfig['blog_favicon']); ?>" placeholder="/static/icon-192.png">
                         <div class="form-text"><?php echo __('hint_blog_favicon'); ?></div>
                     </div>
+
+                    <hr>
+                    <div class="settings-section-title bg-light border-start-0 border-top border-bottom rounded-0 ps-0 mb-3" style="border-left: 5px solid #6f42c1 !important;">
+                        <i class="bi bi-robot me-2"></i><?php echo __('section_ai'); ?>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="ai_enabled" id="aiEnabledSwitch" <?php echo (isset($aiConfig) && $aiConfig['enabled']) ? 'checked' : ''; ?>>
+                        <label class="form-check-label fw-bold" for="aiEnabledSwitch"><?php echo __('label_ai_enabled'); ?></label>
+                    </div>
+
+                    <div id="ai-settings-fields" class="<?php echo (isset($aiConfig) && $aiConfig['enabled']) ? '' : 'd-none'; ?>">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_ai_api_key'); ?></label>
+                            <input type="password" name="ai_api_key" class="form-control" value="<?php echo htmlspecialchars(isset($aiConfig) ? $aiConfig['api_key'] : ''); ?>" placeholder="AI Studio API Key">
+                            <div class="form-text"><?php echo __('hint_ai_api_key'); ?></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><?php echo __('label_ai_model'); ?></label>
+                            <select name="ai_model" class="form-select" id="aiModelSelect">
+                                <?php 
+                                $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-1.5-flash';
+                                $standardModels = array('gemini-1.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview');
+                                ?>
+                                <option value="gemini-1.5-flash" <?php echo ($currentModel == 'gemini-1.5-flash') ? 'selected' : ''; ?>>Gemini 1.5 Flash (穩定、最速)</option>
+                                <option value="gemini-3-flash-preview" <?php echo ($currentModel == 'gemini-3-flash-preview') ? 'selected' : ''; ?>>Gemini 3 Flash Preview (高性能預覽)</option>
+                                <option value="gemini-3-pro-preview" <?php echo ($currentModel == 'gemini-3-pro-preview') ? 'selected' : ''; ?>>Gemini 3 Pro Preview (專業編輯)</option>
+                                <option value="custom" <?php echo (!in_array($currentModel, $standardModels)) ? 'selected' : ''; ?>>其他 (手動輸入 ID)</option>
+                            </select>
+                            <div class="mt-2 <?php echo (!in_array($currentModel, $standardModels)) ? '' : 'd-none'; ?>" id="customModelGroup">
+                                <input type="text" name="ai_model_custom" class="form-control" value="<?php echo htmlspecialchars($currentModel); ?>" placeholder="請輸入模型 ID">
+                            </div>
+                            <div class="form-text"><?php echo __('hint_ai_model'); ?></div>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.getElementById('aiEnabledSwitch').addEventListener('change', function() {
+                            document.getElementById('ai-settings-fields').classList.toggle('d-none', !this.checked);
+                        });
+                        document.getElementById('aiModelSelect').addEventListener('change', function() {
+                            document.getElementById('customModelGroup').classList.toggle('d-none', this.value !== 'custom');
+                        });
+                    </script>
 
                     <div class="text-end">
                         <button type="submit" name="save_backend" class="btn btn-primary px-4">

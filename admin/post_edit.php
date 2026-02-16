@@ -61,6 +61,9 @@ $currentCats = array_map('trim', $currentCats);
         .sidebar a:hover, .sidebar a.active { background-color: #495057; color: white; }
         .main-content { margin-left: 250px; width: calc(100% - 250px); min-height: 100vh; padding: 20px; }
         .breadcrumb-item a { text-decoration: none; }
+        .btn-outline-magic { border-color: #6f42c1; color: #6f42c1; transition: all 0.3s; }
+        .btn-outline-magic:hover { background: linear-gradient(45deg, #6f42c1, #e83e8c); border-color: transparent; color: white; }
+        #aiResultModal .diff-preview { background-color: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -107,14 +110,20 @@ $currentCats = array_map('trim', $currentCats);
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?php echo __('label_html_content'); ?></label>
                         <div class="d-flex justify-content-between align-items-end mb-1">
-                            <div class="form-text"><?php echo __('hint_html_content'); ?></div>
-                            <?php if ($album_enabled): ?>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.albumPicker.open()">
-                                <i class="bi bi-images"></i> <?php echo __('btn_pick_from_album'); ?>
-                            </button>
-                            <?php endif; ?>
+                            <div class="btn-group">
+                                <?php if ($album_enabled): ?>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.albumPicker.open()">
+                                    <i class="bi bi-images"></i> <?php echo __('btn_pick_from_album'); ?>
+                                </button>
+                                <?php endif; ?>
+                                <?php if (isset($aiConfig) && $aiConfig['enabled']): ?>
+                                <button type="button" class="btn btn-sm btn-outline-magic btn-ai-trigger" id="btn-ai-helper">
+                                    <i class="bi bi-robot"></i> <?php echo __('btn_ai_assistant'); ?>
+                                </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <textarea name="post_content" class="form-control" style="height: 400px; font-family: monospace;"><?php echo htmlspecialchars($post['post_content']); ?></textarea>
+                        <textarea id="post_content" name="post_content" class="form-control" style="height: 400px; font-family: monospace;"><?php echo htmlspecialchars($post['post_content']); ?></textarea>
                     </div>
 
                     <div class="mb-3 p-3 bg-light rounded border">
@@ -183,6 +192,121 @@ $currentCats = array_map('trim', $currentCats);
 
 <?php require 'common_js_inc.php'; ?>
 <script src="assets/js/tinymce/tinymce.min.js"></script>
+
+<!-- AI Assistant Modal -->
+<div class="modal fade" id="aiHelperModal" tabindex="-1" aria-labelledby="aiHelperModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white" style="background: linear-gradient(45deg, #6f42c1, #e83e8c);">
+                <h5 class="modal-title" id="aiHelperModalLabel"><i class="bi bi-robot"></i> <?php echo __('modal_ai_title'); ?></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ai-init-view">
+                    <div id="ai-error-msg" class="alert alert-danger d-none"></div>
+                    <p class="lead"><?php echo __('modal_ai_desc'); ?></p>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light fw-bold">選擇 AI 處理任務</div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-task-checkbox" type="checkbox" value="title" id="task-title" checked>
+                                <label class="form-check-label" for="task-title">自動命名標題</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-task-checkbox" type="checkbox" value="filename" id="task-filename" checked>
+                                <label class="form-check-label" for="task-filename">建議 SEO 檔案名稱</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-task-checkbox" type="checkbox" value="desc" id="task-desc" checked>
+                                <label class="form-check-label" for="task-desc">生成 SEO 摘要描述</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-task-checkbox" type="checkbox" value="tags" id="task-tags" checked>
+                                <label class="form-check-label" for="task-tags">擷取文章標籤</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input ai-task-checkbox" type="checkbox" value="refine" id="task-refine">
+                                <label class="form-check-label" for="task-refine">文章內文修潤 (修正語病、優化語氣)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-2">
+                        <button type="button" class="btn btn-primary btn-lg" id="btn-ai-start-analyze">
+                            <i class="bi bi-stars"></i> <?php echo __('btn_ai_analyze'); ?>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="ai-loading-view" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <h4><?php echo __('ai_analyzing'); ?></h4>
+                    <p class="text-muted">這可能需要 10-20 秒，請稍候...</p>
+                </div>
+
+                <div id="ai-result-view" class="d-none">
+                    <div class="list-group mb-3">
+                        <!-- Title -->
+                        <div class="list-group-item">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-apply-checkbox" type="checkbox" value="title" id="check-apply-title" checked>
+                                <label class="form-check-label fw-bold" for="check-apply-title"><?php echo __('label_ai_suggest_title'); ?></label>
+                            </div>
+                            <input type="text" id="ai-res-title" class="form-control">
+                        </div>
+
+                        <!-- Filename -->
+                        <div class="list-group-item">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-apply-checkbox" type="checkbox" value="filename" id="check-apply-filename" checked>
+                                <label class="form-check-label fw-bold" for="check-apply-filename"><?php echo __('label_ai_suggest_filename'); ?></label>
+                            </div>
+                            <input type="text" id="ai-res-filename" class="form-control">
+                        </div>
+
+                        <!-- Meta Description -->
+                        <div class="list-group-item">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-apply-checkbox" type="checkbox" value="description" id="check-apply-desc" checked>
+                                <label class="form-check-label fw-bold" for="check-apply-desc"><?php echo __('label_ai_suggest_desc'); ?></label>
+                            </div>
+                            <textarea id="ai-res-desc" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="list-group-item">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-apply-checkbox" type="checkbox" value="tags" id="check-apply-tags" checked>
+                                <label class="form-check-label fw-bold" for="check-apply-tags"><?php echo __('label_ai_suggest_tags'); ?></label>
+                            </div>
+                            <div id="ai-res-tags-container" class="mb-2"></div>
+                            <input type="text" id="ai-res-tags-raw" class="form-control form-control-sm" readonly>
+                        </div>
+
+                        <!-- Content Refinement -->
+                        <div class="list-group-item">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ai-apply-checkbox" type="checkbox" value="content" id="check-apply-content">
+                                <label class="form-check-label fw-bold" for="check-apply-content"><?php echo __('label_ai_suggest_content'); ?> (建議預覽)</label>
+                            </div>
+                            <div class="diff-preview border p-2 bg-light rounded" id="ai-res-content-preview" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success btn-lg" id="btn-ai-apply-selected">
+                            <i class="bi bi-check-all"></i> <?php echo __('btn_ai_apply'); ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/ai_helper.js?v=<?php echo time(); ?>"></script>
+
 <?php if ($album_enabled): ?>
 <script src="assets/js/album_selector.js?v=<?php echo time(); ?>"></script>
 <div class="modal fade" id="albumSelectorModal" tabindex="-1" aria-hidden="true">

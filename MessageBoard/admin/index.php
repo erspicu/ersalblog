@@ -1,6 +1,6 @@
 <?php
 /**
- * MessageBoard Admin Index - PHP 5.x Compatible
+ * MessageBoard Admin Index - 風格統一版
  */
 require_once 'auth.php';
 mb_require_login();
@@ -69,8 +69,7 @@ if ($mode === 'local') {
 } else {
     $gasUrl = get_gas_url();
     if ($gasUrl) {
-        $sitesJson = @file_get_contents($gasUrl . "?action=list_sites");
-        $sitesData = json_decode($sitesJson, true);
+        $sitesData = json_decode(@file_get_contents($gasUrl . "?action=list_sites"), true);
         $snList = isset($sitesData['sites']) ? $sitesData['sites'] : array();
         foreach ($snList as $sn) { $sites[$sn] = array(); }
         if ($selected_site) {
@@ -105,7 +104,7 @@ function get_page_link($p) { $params = $_GET; $params['p'] = $p; return '?' . ht
     <div class="d-flex">
         <?php include 'sidebar_inc.php'; ?>
         <div class="main-content">
-            <h2 class="mb-4"><?php echo __mb('menu_management'); ?> (<?php echo strtoupper($mode); ?>)</h2>
+            <h2 class="mb-4"><?php echo __mb('menu_management'); ?></h2>
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3 align-items-center">
@@ -171,6 +170,7 @@ function get_page_link($p) { $params = $_GET; $params['p'] = $p; return '?' . ht
             <?php endif; ?>
         </div>
     </div>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script>
         function deleteMsg(id) {
             if(confirm('<?php echo __mb('confirm_delete'); ?>')) {

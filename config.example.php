@@ -29,6 +29,15 @@ $adminConfig = array(
     'password' => '1234', // 預設密碼。首次登入後系統將強制要求修改，並結合主機特徵進行雜湊加密，加密後此處將存儲雜湊字串而非明文。
 );
 
+// --- AI 輔助功能設定 ---
+$aiConfig = array(
+    'enabled'    => false,              // 是否啟用 AI 功能 (true/false)
+    'provider'   => 'gemini',           // 目前預設為 gemini
+    'api_key'    => '',                 // Google AI Studio 申請的 API Key
+    'model'      => 'gemini-3-flash-preview', // 使用的模型名稱 (Gemini 3 Flash Preview)
+    'max_tokens' => 1000,               // 限制 AI 回傳的最大長度
+);
+
 //設定時區
 date_default_timezone_set('Asia/Taipei');
 ?>

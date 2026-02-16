@@ -17,6 +17,7 @@ A lightweight, hybrid photography blog system designed for speed, flexibility, a
     *   **Advanced Dashboard**: Real-time system health checks, database statistics, and static file status monitoring.
     *   **Smart Navigation**: Fixed sidebar layout with unified navigation for efficient management.
     *   **Post Pagination**: Server-side pagination (15 posts/page) for fast browsing of large archives.
+    *   **AI Assistant**: Integrated Google Gemini API for automatic SEO summary, title generation, and content refinement.
 *   **Independent Plugin Services**:
     *   **Album Service**: Advanced photo gallery with Exif parsing and AJAX-based multi-file uploading.
     *   **MessageBoard Service**: Modern threaded comment system supporting both SQLite and Google Sheets (Serverless) storage with a dedicated admin panel.
@@ -82,9 +83,9 @@ Configurable in `config.js` via `theme_file`. Supports:
 ---
 
 ### 🛠 Automated Version Control
-Version: `v2026.02.16.01.55` (UTC+8)
+Version: `v2026.02.16.19.22` (UTC+8)
 CLI Version: `0.28.2`
-Model: `gemini-3-pro-preview`
+Model: `gemini-3-flash-preview`
 
 ---
 
@@ -104,6 +105,7 @@ Model: `gemini-3-pro-preview`
     *   **進階儀表板**: 即時系統健康檢查、資料庫統計及靜態檔案狀態監測。
     *   **智慧導覽**: 固定式側邊欄佈局與統一的導覽組件，提升管理效率。
     *   **文章分頁**: 後台支援伺服器端分頁（每頁 15 篇），輕鬆應對大量文章。
+    *   **AI 輔助創作**: 整合 Google Gemini API，支援自動生成 SEO 摘要、標題優化與內容潤飾。
 *   **獨立插件化服務**:
     *   **相簿服務**: 具備 Exif 解析與基於 AJAX 的進階多檔上傳系統。
     *   **留言板服務**: 現代話題討論系統，支援 SQLite 與 Google 試算表 (Serverless) 雙模式儲存，內建獨立管理後台。
@@ -143,6 +145,6 @@ Model: `gemini-3-pro-preview`
 ---
 
 ### 🛠 自動化版本資訊
-版本號: `v2026.02.16.01.55` (UTC+8)
+版本號: `v2026.02.16.19.22` (UTC+8)
 CLI 版本: `0.28.2`
-模型名稱: `gemini-3-pro-preview`
+模型名稱: `gemini-3-flash-preview`

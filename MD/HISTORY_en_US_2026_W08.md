@@ -14,14 +14,22 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 - **Stability Verification**: Conducted `php -l` linting across `album/` and `MessageBoard/` to ensure 100% compatibility with PHP 5.4+ environments.
 - **Array Syntax Standardization**: Replaced `[]` with `array()` in critical paths for maximum legacy support.
 
-### 3. Asset Localization
+### 3. Asset Localization & UI Synchronization
 - **MessageBoard Independence**: Successfully localized Bootstrap CSS/JS and Bootstrap Icons into `MessageBoard/admin/assets/`. The admin dashboard is now 100% independent of external CDNs.
+- **Unified Visual Identity**: Refactored all MessageBoard admin pages to adopt the "Fixed Dark Sidebar + Light Grey Content Area" layout, matching the main blog system. Standardized shadows, rounded corners, button colors, and badges to eliminate visual fragmentation between subsystems.
+- **Completed i18n Tags**: Translated remaining hardcoded strings, such as the sidebar mode indicator (Management Mode: SQLite / GAS), ensuring a seamless English experience.
+
+### 4. AI Assistant Integration
+- **API Integration**: Introduced `admin/api_ai_helper.php` integrating Google Gemini API (v1beta).
+- **Features**: Supports automatic generation of post titles, SEO descriptions, keyword tags, and content refinement.
+- **Frontend Interface**: Added AI helper buttons and UI to the post editor (`admin/post_edit.php`) via `admin/assets/js/ai_helper.js`.
+- **Model Fallback**: Implements automatic fallback to `gemini-1.5-flash` if the primary model fails, ensuring service reliability.
 
 ## Technical Optimizations
 - **Harden Config Generation**: Refactored `setup.php` to regenerate `config.php` entirely instead of using Regex, preventing hash corruption.
 - **Standardized Auth Loading**: Standardized the loading sequence in `auth.php` to configure session parameters before `session_start()`, eliminating "headers already sent" warnings.
 
 ## Version Info
-- **Version**: v2026.02.16.20.30
+- **Version**: v2026.02.16.19.22
 - **CLI**: 0.28.2
-- **Model**: gemini-3-pro-preview
+- **Model**: gemini-3-flash-preview
