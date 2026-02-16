@@ -30,9 +30,23 @@ function doPost(e) {
       siteFolder.addFile(file);
       DriveApp.getRootFolder().removeFile(file);
       // 初始化表頭
-      ss.getSheets()[0].appendRow(["id", "parent_id", "name", "content", "created_at"]);
+      ss.getSheets()[0].appendRow(["id", "parent_id", "name", "content", "avatar", "google_sub", "created_at"]);
       ss.setFrozenRows(1);
     }
+
+    // 自動相容檢查：如果現有表頭沒有 avatar，則補上
+    const sheet = ss.getSheets()[0];
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (headers.indexOf("avatar") === -1) {
+      sheet.insertColumnAfter(4);
+      sheet.getRange(1, 5).setValue("avatar");
+      sheet.insertColumnAfter(5);
+      sheet.getRange(1, 6).setValue("google_sub");
+    }
+
+    // 重新取得最新表頭索引
+    const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const hMap = {}; currentHeaders.forEach((h, i) => hMap[h] = i + 1);
 
     // 如果有傳入標題，更新檔案描述 (Description) 以供後台識別
     if (params.page_title) {
@@ -41,7 +55,18 @@ function doPost(e) {
     
     const id = "msg_" + new Date().getTime();
     const createdAt = Utilities.formatDate(new Date(), CONFIG.TIMEZONE, "yyyy-MM-dd HH:mm:ss");
-    ss.getSheets()[0].appendRow([id, params.parent_id || 0, params.name, params.content, createdAt]);
+    
+    // 準備寫入資料
+    const rowData = new Array(currentHeaders.length);
+    rowData[hMap["id"]-1] = id;
+    rowData[hMap["parent_id"]-1] = params.parent_id || 0;
+    rowData[hMap["name"]-1] = params.name;
+    rowData[hMap["content"]-1] = params.content;
+    rowData[hMap["avatar"]-1] = params.avatar || "";
+    rowData[hMap["google_sub"]-1] = params.google_sub || "";
+    rowData[hMap["created_at"]-1] = createdAt;
+
+    sheet.appendRow(rowData);
     
     return sendJson({ success: true, id: id });
   } catch (err) {

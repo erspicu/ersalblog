@@ -160,6 +160,7 @@
                     console.log('Google User:', payload);
 
                     this.state.user = {
+                        sub: payload.sub, // Added sub ID
                         name: payload.name,
                         email: payload.email,
                         picture: payload.picture,
@@ -351,6 +352,7 @@
                             name, 
                             content, 
                             avatar: this.state.user ? this.state.user.picture : null,
+                            google_sub: this.state.user ? this.state.user.sub : null, // Added
                             google_token: this.state.user ? this.state.user.token : null,
                             parent_id: this.state.parent_id 
                         });
