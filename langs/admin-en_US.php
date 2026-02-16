@@ -299,7 +299,7 @@ return [
     'label_ai_enabled' => 'Enable AI Assistant',
     'label_ai_api_key' => 'Gemini API Key',
     'label_ai_model' => 'AI Model',
-    'hint_ai_model' => 'Recommended: gemini-1.5-flash for faster response and higher free quota.',
+    'hint_ai_model' => 'Click the button above to fetch the latest available models.',
     'hint_ai_api_key' => 'Apply for your API Key at Google AI Studio.',
     'error_config_write' => 'Failed to write config.js. Check permissions.',
     'opt_api_file' => 'File System',

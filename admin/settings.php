@@ -23,20 +23,33 @@ function getConfigValues($content) {
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
-$currentConfig['blog_lang'] = isset($GLOBALS['blog_lang']) ? $GLOBALS['blog_lang'] : 'zh_TW';
-$currentConfig['timezone'] = isset($GLOBALS['blog_timezone']) ? $GLOBALS['blog_timezone'] : 'Asia/Taipei';
-$currentConfig['posts_per_page'] = isset($GLOBALS['posts_per_page']) ? $GLOBALS['posts_per_page'] : 10;
-$currentConfig['posts_per_page_js'] = isset($currentConfig['posts_per_page_js']) ? $currentConfig['posts_per_page_js'] : 10;
-$currentConfig['album_path'] = isset($GLOBALS['album_path']) ? $GLOBALS['album_path'] : 'album/';
-$currentConfig['blog_title'] = isset($GLOBALS['blog_title']) ? $GLOBALS['blog_title'] : '';
-$currentConfig['blog_description'] = isset($GLOBALS['blog_description']) ? $GLOBALS['blog_description'] : '';
-$currentConfig['blog_introduce'] = isset($GLOBALS['blog_introduce']) ? $GLOBALS['blog_introduce'] : '';
-$currentConfig['blog_favicon'] = isset($GLOBALS['blog_favicon']) ? $GLOBALS['blog_favicon'] : '/static/icon-192.png';
+// --- AI Cache Handling ---
+$aiCacheFile = __DIR__ . '/../contents/ai_models_cache.json';
+$aiModelsCache = [];
+if (file_exists($aiCacheFile)) {
+    $aiModelsCache = json_decode(file_get_contents($aiCacheFile), true);
+}
 
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || (isset($_POST['ajax']) && $_POST['ajax'] == '1');
+
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        if ($isAjax) {
+            echo json_encode(['success' => false, 'message' => 'CSRF Validation Failed']);
+            exit;
+        }
         die("CSRF Validation Failed");
+    }
+
+    if (isset($_POST['action']) && $_POST['action'] === 'save_ai_cache') {
+        $models = isset($_POST['models']) ? $_POST['models'] : '[]';
+        if (file_put_contents($aiCacheFile, $models)) {
+            echo json_encode(['success' => true, 'message' => 'AI 模型快取已更新']);
+        } else {
+            echo json_encode(['success' => false, 'message' => '快取寫入失敗']);
+        }
+        exit;
     }
 
     if (isset($_POST['save_backend'])) {
@@ -52,10 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $aiEnabled = isset($_POST['ai_enabled']) ? 'true' : 'false';
         $aiKey = isset($_POST['ai_api_key']) ? trim($_POST['ai_api_key']) : '';
-        $aiModel = isset($_POST['ai_model']) ? $_POST['ai_model'] : 'gemini-1.5-flash';
-        if ($aiModel === 'custom' && isset($_POST['ai_model_custom'])) {
-            $aiModel = trim($_POST['ai_model_custom']);
-        }
+        $aiModel = isset($_POST['ai_model']) ? $_POST['ai_model'] : 'gemini-3-flash-preview';
 
         // --- 防呆檢查 ---
         if ($newPerPage <= 0) {
@@ -76,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phpFile = __DIR__ . '/../config.php';
             $phpContent = file_get_contents($phpFile);
             
-            // 使用 ${1} 語法避免與數值產生歧義
             $phpContent = preg_replace('/(\$blog_title\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newTitle) . '${3}', $phpContent);
             $phpContent = preg_replace('/(\$blog_description\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newDesc) . '${3}', $phpContent);
             $phpContent = preg_replace('/(\$blog_introduce\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newIntro) . '${3}', $phpContent);
@@ -84,7 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phpContent = preg_replace('/(\$blog_timezone\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . $newTimezone . '${3}', $phpContent);
             $phpContent = preg_replace('/(\$posts_per_page\s*=\s*)([^;]*)(;)/', '${1}' . $newPerPage . '${3}', $phpContent);
             
-            // Handle Favicon
             if (strpos($phpContent, '$blog_favicon') !== false) {
                 $phpContent = preg_replace('/(\$blog_favicon\s*=\s*[\'"])([^"\']*)([\'"];)/', '${1}' . addslashes($newFavicon) . '${3}', $phpContent);
             } else {
@@ -97,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $phpContent = str_replace('?>', "\$album_path = " . var_export($newAlbumPath, true) . "; // 相簿服務路徑\n?>", $phpContent);
             }
 
-            // --- AI Config ---
             if (isset($aiConfig)) {
                 $phpContent = preg_replace('/(\'enabled\'\s*=>\s*)(true|false)(,)/', '${1}' . $aiEnabled . '${3}', $phpContent);
                 $phpContent = preg_replace('/(\'api_key\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($aiKey) . '${3}', $phpContent);
@@ -105,21 +112,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (file_put_contents($phpFile, $phpContent)) {
+                if ($isAjax) {
+                    echo json_encode(['success' => true, 'message' => __('msg_settings_saved') . ' (config.php)']);
+                    exit;
+                }
                 $msg = __('msg_settings_saved') . ' (config.php)';
-                $currentConfig['blog_lang'] = $newLang;
-                $currentConfig['timezone'] = $newTimezone;
-                $currentConfig['posts_per_page'] = $newPerPage;
-                $currentConfig['album_path'] = $newAlbumPath;
-                $currentConfig['blog_title'] = $newTitle;
-                $currentConfig['blog_description'] = $newDesc;
-                $currentConfig['blog_introduce'] = $newIntro;
             } else {
                 $error = __('error_config_write') . ' (config.php)';
             }
         }
+        if ($isAjax && $error) {
+            echo json_encode(['success' => false, 'message' => $error]);
+            exit;
+        }
 
     } elseif (isset($_POST['save_account'])) {
-        // --- Change Admin Account & Password ---
         $newUsername = isset($_POST['new_username']) ? trim($_POST['new_username']) : '';
         $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
 
@@ -128,29 +135,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $phpFile = __DIR__ . '/../config.php';
             $phpContent = file_get_contents($phpFile);
-            
-            // 更新帳號
             $phpContent = preg_replace('/(\'username\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . addslashes($newUsername) . '${3}', $phpContent);
             
-            // 更新密碼 (如果有填寫)
             if (!empty($newPassword)) {
                 $fingerprint = getSystemFingerprint();
                 $hashedPassword = password_hash($newPassword . $fingerprint, PASSWORD_BCRYPT);
-                // 轉義 $ 符號避免 preg_replace 誤認為後向引用
                 $replacement = str_replace('$', '\$', $hashedPassword);
                 $phpContent = preg_replace('/(\'password\'\s*=>\s*[\'"])([^"\']*)([\'"])/', '${1}' . $replacement . '${3}', $phpContent);
             }
 
             if (file_put_contents($phpFile, $phpContent)) {
+                $_SESSION['admin_user'] = $newUsername;
+                if ($isAjax) {
+                    echo json_encode(['success' => true, 'message' => __('msg_account_updated')]);
+                    exit;
+                }
                 $msg = __('msg_account_updated');
-                $_SESSION['admin_user'] = $newUsername; // 同步更新目前 Session
             } else {
                 $error = __('error_config_write') . ' (config.php)';
             }
         }
+        if ($isAjax && $error) {
+            echo json_encode(['success' => false, 'message' => $error]);
+            exit;
+        }
 
     } elseif (isset($_POST['save_frontend'])) {
-        // --- Save config.js ---
         $newApi = isset($_POST['api_type']) ? $_POST['api_type'] : 'api_filebase';
         $newTheme = isset($_POST['theme_file']) ? $_POST['theme_file'] : 'blog';
         $newPerPageJs = isset($_POST['posts_per_page_js']) ? (int)$_POST['posts_per_page_js'] : 10;
@@ -171,11 +181,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newJsContent .= "};";
 
             if (file_put_contents($configFile, $newJsContent)) {
+                if ($isAjax) {
+                    echo json_encode(['success' => true, 'message' => __('msg_settings_saved') . ' (config.js)']);
+                    exit;
+                }
                 $msg = __('msg_settings_saved') . ' (config.js)';
-                $currentConfig = array_merge($currentConfig, getConfigValues($newJsContent));
             } else {
                 $error = __('error_config_write') . ' (config.js)';
             }
+        }
+        if ($isAjax && $error) {
+            echo json_encode(['success' => false, 'message' => $error]);
+            exit;
         }
     }
 }
@@ -197,6 +214,7 @@ if (empty($themes)) $themes = array('blog');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('settings_title'); ?> - Blog Admin</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/js/sweetalert2.all.min.js"></script>
     <style>
         .settings-section-title {
             padding: 10px 15px;
@@ -319,15 +337,22 @@ if (empty($themes)) $themes = array('blog');
                     <div id="ai-settings-fields" class="<?php echo (isset($aiConfig) && $aiConfig['enabled']) ? '' : 'd-none'; ?>">
                         <div class="mb-3">
                             <label class="form-label fw-bold"><?php echo __('label_ai_api_key'); ?></label>
-                            <input type="password" name="ai_api_key" class="form-control" value="<?php echo htmlspecialchars(isset($aiConfig) ? $aiConfig['api_key'] : ''); ?>" placeholder="AI Studio API Key">
+                            <div class="input-group">
+                                <input type="password" name="ai_api_key" id="aiApiKeyInput" class="form-control" value="<?php echo htmlspecialchars(isset($aiConfig) ? $aiConfig['api_key'] : ''); ?>" placeholder="AI Studio API Key">
+                                <button class="btn btn-outline-secondary" type="button" id="btn-fetch-models">
+                                    <i class="bi bi-arrow-clockwise"></i> 抓取可用模型
+                                </button>
+                            </div>
                             <div class="form-text"><?php echo __('hint_ai_api_key'); ?></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold"><?php echo __('label_ai_model'); ?></label>
                             <?php $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-3-flash-preview'; ?>
                             <select name="ai_model" class="form-select" id="aiModelSelect">
-                                <option value="gemini-3-flash-preview" <?php echo ($currentModel == 'gemini-3-flash-preview') ? 'selected' : ''; ?>>Gemini 3 Flash Preview (最速、建議)</option>
-                                <option value="gemini-2.5-pro" <?php echo ($currentModel == 'gemini-2.5-pro') ? 'selected' : ''; ?>>Gemini 2.5 Pro (最強效能)</option>
+                                <option value="<?php echo htmlspecialchars($currentModel); ?>" selected>
+                                    目前設定: <?php echo htmlspecialchars($currentModel); ?>
+                                </option>
+                                <option disabled>─── 請點擊上方按鈕重新抓取 ───</option>
                             </select>
                             <div class="form-text"><?php echo __('hint_ai_model'); ?></div>
                         </div>
@@ -336,6 +361,109 @@ if (empty($themes)) $themes = array('blog');
                     <script>
                         document.getElementById('aiEnabledSwitch').addEventListener('change', function() {
                             document.getElementById('ai-settings-fields').classList.toggle('d-none', !this.checked);
+                        });
+
+                        document.getElementById('btn-fetch-models').addEventListener('click', async function() {
+                            const apiKey = document.getElementById('aiApiKeyInput').value.trim();
+                            if (!apiKey) {
+                                Swal.fire('請先輸入 API Key。', '', 'warning');
+                                return;
+                            }
+
+                            const btn = this;
+                            const select = document.getElementById('aiModelSelect');
+                            const originalBtnHtml = btn.innerHTML;
+                            
+                            btn.disabled = true;
+                            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 抓取中...';
+
+                            try {
+                                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                                const resp = await fetch(url);
+                                const data = await resp.json();
+
+                                if (data.error) throw new Error(data.error.message || 'API Key 驗證失敗');
+
+                                const models = data.models || [];
+                                const filtered = models.filter(m => 
+                                    m.supportedGenerationMethods.includes('generateContent') && 
+                                    m.name.toLowerCase().includes('gemini')
+                                );
+
+                                if (filtered.length === 0) throw new Error('找不到可用的 Gemini 模型。');
+
+                                // 準備快取資料
+                                const cacheData = filtered.map(m => ({
+                                    id: m.name.replace('models/', ''),
+                                    displayName: m.displayName
+                                }));
+
+                                // AJAX 存入快取檔案
+                                const fd = new FormData();
+                                fd.append('action', 'save_ai_cache');
+                                fd.append('models', JSON.stringify(cacheData));
+                                fd.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+                                
+                                await fetch('settings.php', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+                                // 更新選單
+                                const currentVal = select.value;
+                                select.innerHTML = '';
+                                cacheData.forEach(m => {
+                                    const opt = document.createElement('option');
+                                    opt.value = m.id;
+                                    opt.textContent = `${m.displayName} (${m.id})`;
+                                    if (m.id === currentVal) opt.selected = true;
+                                    select.appendChild(opt);
+                                });
+
+                                Swal.fire('成功', `已獲取並快取 ${filtered.length} 個模型。`, 'success');
+
+                            } catch (e) {
+                                Swal.fire('抓取失敗', e.message, 'error');
+                            } finally {
+                                btn.disabled = false;
+                                btn.innerHTML = originalBtnHtml;
+                            }
+                        });
+
+                        // --- AJAX Settings Save Logic ---
+                        document.querySelectorAll('.btn-ajax-save').forEach(btn => {
+                            btn.addEventListener('click', async function() {
+                                const action = this.dataset.formAction;
+                                const confirmMsg = this.dataset.confirm;
+                                const form = this.closest('form');
+
+                                if (confirmMsg && !confirm(confirmMsg)) return;
+
+                                const formData = new FormData(form);
+                                formData.append(action, '1'); // 觸發 PHP 端的儲存判斷
+                                formData.append('ajax', '1');
+
+                                const originalHtml = this.innerHTML;
+                                this.disabled = true;
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 儲存中...';
+
+                                try {
+                                    const resp = await fetch('settings.php', {
+                                        method: 'POST',
+                                        body: formData,
+                                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                    });
+                                    const res = await resp.json();
+                                    
+                                    if (res.success) {
+                                        Swal.fire('已儲存', res.message, 'success');
+                                    } else {
+                                        Swal.fire('錯誤', res.message, 'error');
+                                    }
+                                } catch (e) {
+                                    Swal.fire('傳輸失敗', e.message, 'error');
+                                } finally {
+                                    this.disabled = false;
+                                    this.innerHTML = originalHtml;
+                                }
+                            });
                         });
                     </script>
 

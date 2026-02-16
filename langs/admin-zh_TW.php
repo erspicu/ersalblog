@@ -299,7 +299,7 @@ return [
     'label_ai_enabled' => '啟用 AI 輔助優化功能',
     'label_ai_api_key' => 'Gemini API Key',
     'label_ai_model' => '選擇 AI 專家模型',
-    'hint_ai_model' => '1.5 Flash 速度最快；3.0 Preview 邏輯與修辭更強。',
+    'hint_ai_model' => '請點擊上方按鈕抓取最新可用的模型清單。',
     'hint_ai_api_key' => '請至 Google AI Studio 申請 API Key。',
     'error_config_write' => '寫入 config.js 失敗，請檢查檔案權限。',
     'opt_api_file' => '檔案系統 (File System)',
