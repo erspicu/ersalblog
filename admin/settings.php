@@ -481,11 +481,11 @@ if (empty($themes)) $themes = array('blog');
                                 const formData = new FormData(form);
                                 formData.append(action, '1'); 
                                 formData.append('ajax', '1');
-                                // 確保 checkbox 狀態有帶入 (如果沒選，FormData 可能不會帶入)
+                                
                                 if (form.id === 'formBackend') {
                                     const aiEnabled = document.getElementById('aiEnabledSwitch');
                                     if (aiEnabled && !aiEnabled.checked) {
-                                        formData.append('ai_enabled_hidden', 'false'); // 提供一個隱藏欄位讓後端知道要設為 false
+                                        formData.append('ai_enabled_hidden', 'false');
                                     }
                                 }
 
@@ -499,15 +499,21 @@ if (empty($themes)) $themes = array('blog');
                                         body: formData,
                                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                                     });
-                                    const res = await resp.json();
-                                    
-                                    if (res.success) {
-                                        Swal.fire('已儲存', res.message, 'success');
+                                    const result = await resp.json();
+
+                                    if (result.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: '儲存成功',
+                                            text: result.message,
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        });
                                     } else {
-                                        Swal.fire('錯誤', res.message, 'error');
+                                        Swal.fire('儲存失敗', result.message, 'error');
                                     }
                                 } catch (e) {
-                                    Swal.fire('傳輸失敗', e.message, 'error');
+                                    Swal.fire('系統錯誤', '無法與伺服器連線: ' + e.message, 'error');
                                 } finally {
                                     this.disabled = false;
                                     this.innerHTML = originalHtml;
@@ -517,7 +523,7 @@ if (empty($themes)) $themes = array('blog');
                     </script>
 
                     <div class="text-end">
-                        <button type="submit" name="save_backend" class="btn btn-primary px-4">
+                        <button type="button" class="btn btn-primary px-4 btn-ajax-save" data-form-action="save_backend">
                             <i class="bi bi-save"></i> 儲存後端設定
                         </button>
                     </div>
@@ -542,7 +548,7 @@ if (empty($themes)) $themes = array('blog');
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="submit" name="save_account" class="btn btn-warning px-4" onclick="return confirm('確定要更新管理者帳號密碼嗎？');">
+                        <button type="button" class="btn btn-warning px-4 btn-ajax-save" data-form-action="save_account" data-confirm="確定要更新管理者帳號密碼嗎？">
                             <i class="bi bi-person-gear"></i> <?php echo __('btn_save_account'); ?>
                         </button>
                     </div>
@@ -609,7 +615,7 @@ if (empty($themes)) $themes = array('blog');
                     </div>
 
                     <div class="text-end">
-                        <button type="submit" name="save_frontend" class="btn btn-secondary px-4">
+                        <button type="button" class="btn btn-secondary px-4 btn-ajax-save" data-form-action="save_frontend">
                             <i class="bi bi-save"></i> 儲存前端設定
                         </button>
                     </div>
