@@ -207,27 +207,27 @@ $currentCats = array_map('trim', $currentCats);
                     <p class="lead"><?php echo __('modal_ai_desc'); ?></p>
                     
                     <div class="card mb-4">
-                        <div class="card-header bg-light fw-bold">選擇 AI 處理任務</div>
+                        <div class="card-header bg-light fw-bold"><?php echo __('ai_select_tasks'); ?></div>
                         <div class="card-body">
                             <div class="form-check mb-2">
                                 <input class="form-check-input ai-task-checkbox" type="checkbox" value="title" id="task-title" checked>
-                                <label class="form-check-label" for="task-title">自動命名標題</label>
+                                <label class="form-check-label" for="task-title"><?php echo __('ai_task_title'); ?></label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input ai-task-checkbox" type="checkbox" value="filename" id="task-filename" checked>
-                                <label class="form-check-label" for="task-filename">建議 SEO 檔案名稱</label>
+                                <label class="form-check-label" for="task-filename"><?php echo __('ai_task_filename'); ?></label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input ai-task-checkbox" type="checkbox" value="desc" id="task-desc" checked>
-                                <label class="form-check-label" for="task-desc">生成 SEO 摘要描述</label>
+                                <label class="form-check-label" for="task-desc"><?php echo __('ai_task_desc'); ?></label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input ai-task-checkbox" type="checkbox" value="tags" id="task-tags" checked>
-                                <label class="form-check-label" for="task-tags">擷取文章標籤</label>
+                                <label class="form-check-label" for="task-tags"><?php echo __('ai_task_tags'); ?></label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input ai-task-checkbox" type="checkbox" value="refine" id="task-refine">
-                                <label class="form-check-label" for="task-refine">文章內文修潤 (修正語病、優化語氣)</label>
+                                <label class="form-check-label" for="task-refine"><?php echo __('ai_task_refine'); ?></label>
                             </div>
                         </div>
                     </div>
@@ -242,7 +242,7 @@ $currentCats = array_map('trim', $currentCats);
                 <div id="ai-loading-view" class="text-center py-5 d-none">
                     <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
                     <h4><?php echo __('ai_analyzing'); ?></h4>
-                    <p class="text-muted">這可能需要 10-20 秒，請稍候...</p>
+                    <p class="text-muted"><?php echo __('ai_wait_hint'); ?></p>
                 </div>
 
                 <div id="ai-result-view" class="d-none">

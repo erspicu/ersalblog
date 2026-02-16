@@ -151,6 +151,13 @@ return [
     'ai_disabled' => 'AI features are disabled. Please check config.php.',
     'error_ai_quota_exceeded' => 'AI quota exceeded (429). Please try again later or check your API key status.',
     'error_ai_service_busy' => 'AI service is busy or timed out. Please try again.',
+    'ai_select_tasks' => 'Select AI Tasks',
+    'ai_task_title' => 'Auto Title Generation',
+    'ai_task_filename' => 'Suggest SEO Filename',
+    'ai_task_desc' => 'Generate SEO Description',
+    'ai_task_tags' => 'Extract Post Tags',
+    'ai_task_refine' => 'Content Refinement (Grammar & Style)',
+    'ai_wait_hint' => 'This may take 10-20 seconds, please wait...',
     'vibe_info' => 'Vibe coded with Gemini CLI & Gemini AI Models',
 
     // Migrate Tool

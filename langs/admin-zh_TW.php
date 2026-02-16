@@ -151,6 +151,13 @@ return [
     'ai_disabled' => 'AI 功能未啟用，請檢查 config.php 設定。',
     'error_ai_quota_exceeded' => 'AI 服務額度已達上限 (429)，請稍後再試。若持續發生，請檢查 API Key 狀態。',
     'error_ai_service_busy' => 'AI 服務目前繁忙或連線逾時，請再試一次。',
+    'ai_select_tasks' => '選擇 AI 處理任務',
+    'ai_task_title' => '自動命名標題',
+    'ai_task_filename' => '建議 SEO 檔案名稱',
+    'ai_task_desc' => '生成 SEO 摘要描述',
+    'ai_task_tags' => '擷取文章標籤',
+    'ai_task_refine' => '文章內文修潤 (修正語病、優化語氣)',
+    'ai_wait_hint' => '這可能需要 10-20 秒，請稍候...',
     'vibe_info' => '本系統由 Gemini CLI 與 Gemini AI 模型 Vibe Coding 實作而成',
 
     // Migrate Tool
