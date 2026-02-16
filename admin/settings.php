@@ -23,6 +23,16 @@ function getConfigValues($content) {
 $configContent = file_exists($configFile) ? file_get_contents($configFile) : '';
 $currentConfig = getConfigValues($configContent);
 
+// Load values from config.php
+$currentConfig['blog_lang'] = isset($blog_lang) ? $blog_lang : 'zh_TW';
+$currentConfig['timezone'] = isset($blog_timezone) ? $blog_timezone : 'Asia/Taipei';
+$currentConfig['posts_per_page'] = isset($posts_per_page) ? $posts_per_page : 10;
+$currentConfig['album_path'] = isset($album_path) ? $album_path : 'album/';
+$currentConfig['blog_title'] = isset($blog_title) ? $blog_title : '';
+$currentConfig['blog_description'] = isset($blog_description) ? $blog_description : '';
+$currentConfig['blog_introduce'] = isset($blog_introduce) ? $blog_introduce : '';
+$currentConfig['blog_favicon'] = isset($blog_favicon) ? $blog_favicon : '/static/icon-192.png';
+
 // --- AI Cache Handling ---
 $aiCacheFile = __DIR__ . '/../static/ai_models_cache.json';
 $aiModelsCache = [];
