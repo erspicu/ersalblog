@@ -349,10 +349,18 @@ if (empty($themes)) $themes = array('blog');
                             <label class="form-label fw-bold"><?php echo __('label_ai_model'); ?></label>
                             <?php $currentModel = isset($aiConfig) ? $aiConfig['model'] : 'gemini-3-flash-preview'; ?>
                             <select name="ai_model" class="form-select" id="aiModelSelect">
-                                <option value="<?php echo htmlspecialchars($currentModel); ?>" selected>
-                                    目前設定: <?php echo htmlspecialchars($currentModel); ?>
-                                </option>
-                                <option disabled>─── 請點擊上方按鈕重新抓取 ───</option>
+                                <?php if (!empty($aiModelsCache)): ?>
+                                    <?php foreach ($aiModelsCache as $m): ?>
+                                        <option value="<?php echo htmlspecialchars($m['id']); ?>" <?php echo ($currentModel == $m['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($m['displayName']); ?> (<?php echo htmlspecialchars($m['id']); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <option value="<?php echo htmlspecialchars($currentModel); ?>" selected>
+                                        目前設定: <?php echo htmlspecialchars($currentModel); ?>
+                                    </option>
+                                    <option disabled>─── 請點擊上方按鈕重新抓取 ───</option>
+                                <?php endif; ?>
                             </select>
                             <div class="form-text"><?php echo __('hint_ai_model'); ?></div>
                         </div>
