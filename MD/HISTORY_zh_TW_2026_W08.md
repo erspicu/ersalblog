@@ -26,9 +26,9 @@
 - **模型回退機制**: 預設使用高效能模型，若失敗自動回退至 `gemini-3-flash-preview` 確保服務可用性。
 - **動態模型清單**: 實作 `admin/settings.php` 的動態模型抓取功能，支援從 Google API 獲取最新模型列表並快取至 `static/ai_models_cache.json`。
 - **設定頁面重構**: 
-    - 全面導入 **AJAX** 更新機制，設定儲存不再刷新頁面。
-    - 整合 **SweetAlert2** 提供更佳的使用者操作回饋。
-    - 移除過時的手動模型 ID 輸入欄位，改用動態選單。
+    - 全面導入 **AJAX** 更新機制與 **SweetAlert2** UI，提供流暢的儲存體驗。
+    - **多語系支援**: 完成設定頁面所有 AJAX 動作與彈窗文字的 i18n 整合。
+    - **舊版相容性**: 實作 `config.php` 自動結構補全功能，支援將 AI 設定自動寫入舊版設定檔。
 
 ## 技術優化 (Technical Optimizations)
 - **重構設定生成邏輯**：修正了 `setup.php` 使用 Regex 替換 `config.php` 導致雜湊值損壞的問題，改為直接生成乾淨的 PHP 檔案內容。
@@ -36,6 +36,6 @@
 - **日誌優化**: AI API 呼叫日誌改寫入根目錄 `debug.txt` 並遮罩 API Key，方便除錯。
 
 ## 版本資訊
-- **Version**: v2026.02.16.20.08
+- **Version**: v2026.02.16.20.32
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview

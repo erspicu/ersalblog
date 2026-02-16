@@ -26,9 +26,9 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 - **Model Fallback**: Implements automatic fallback to `gemini-3-flash-preview` if the primary model fails, ensuring service reliability.
 - **Dynamic Model List**: Implemented dynamic model fetching in `admin/settings.php`, allowing users to retrieve the latest models from Google API and cache them in `static/ai_models_cache.json`.
 - **Settings Refactoring**:
-    - Fully adopted **AJAX** for settings updates, eliminating page reloads.
-    - Integrated **SweetAlert2** for enhanced user feedback.
-    - Removed obsolete manual model ID input fields in favor of the dynamic dropdown.
+    - Fully adopted **AJAX** for settings updates and integrated **SweetAlert2** for enhanced user feedback.
+    - **i18n Integration**: Completed multi-language support for all AJAX actions and UI strings in the settings page.
+    - **Legacy Compatibility**: Implemented automatic `config.php` structure completion to support writing AI settings to older configuration files.
 
 ## Technical Optimizations
 - **Harden Config Generation**: Refactored `setup.php` to regenerate `config.php` entirely instead of using Regex, preventing hash corruption.
@@ -36,6 +36,6 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 - **Log Optimization**: AI API call logs are now written to `debug.txt` in the root directory with masked API keys for easier debugging.
 
 ## Version Info
-- **Version**: v2026.02.16.20.08
+- **Version**: v2026.02.16.20.32
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview
