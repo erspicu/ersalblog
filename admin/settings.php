@@ -691,7 +691,19 @@ if (empty($themes)) $themes = array('blog');
             const confirmMsg = this.dataset.confirm;
             const form = this.closest('form');
 
-            if (confirmMsg && !confirm(confirmMsg)) return;
+            if (confirmMsg) {
+                const result = await Swal.fire({
+                    title: '確定執行？',
+                    text: confirmMsg,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '確定',
+                    cancelButtonText: '取消'
+                });
+                if (!result.isConfirmed) return;
+            }
 
             const formData = new FormData(form);
             formData.append(action, '1'); 
