@@ -53,6 +53,8 @@ return [
     'hint_password_keep' => '若不修改密碼請留空',
     'btn_save_account' => '更新帳號密碼',
     'msg_account_updated' => '管理員帳號密碼已成功更新！',
+    'warning_weak_password_title' => '安全性警告：您正在使用預設密碼',
+    'warning_weak_password_desc' => '為了確保您的留言板管理安全，建議您儘快前往系統設定修改預設密碼 1234。',
     // 診斷項目
     'diag_php_ver' => 'PHP 版本',
     'diag_pdo' => 'PDO 擴充功能',

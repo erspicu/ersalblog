@@ -105,6 +105,17 @@ function get_page_link($p) { $params = $_GET; $params['p'] = $p; return '?' . ht
         <?php include 'sidebar_inc.php'; ?>
         <div class="main-content">
             <h2 class="mb-4"><?php echo __mb('menu_management'); ?></h2>
+
+            <?php if (isset($_SESSION['mb_weak_password']) && $_SESSION['mb_weak_password']): ?>
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                <div>
+                    <strong><?php echo __mb('warning_weak_password_title'); ?></strong><br>
+                    <small><?php echo __mb('warning_weak_password_desc'); ?> <a href="setup.php" class="alert-link"><?php echo __mb('menu_settings'); ?></a></small>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3 align-items-center">

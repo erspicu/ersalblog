@@ -57,10 +57,8 @@ function mb_require_login() {
     // 同步真實模式到 Session，確保設定變更後立即生效
     $_SESSION['mb_admin_mode'] = mb_get_real_mode();
     
-    // 強制修改 1234 弱密碼
-    if ($mb_admin_pass === '1234' && basename($_SERVER['PHP_SELF']) !== 'setup.php') {
-        header("Location: setup.php?msg=force_change"); exit;
-    }
+    // 檢查是否使用 1234 弱密碼，改為記錄在 Session 中而不強制導向
+    $_SESSION['mb_weak_password'] = ($mb_admin_pass === '1234');
 }
 
 function mb_login($username, $password, $mode) {

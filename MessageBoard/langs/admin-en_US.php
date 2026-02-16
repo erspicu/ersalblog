@@ -53,6 +53,8 @@ return [
     'hint_password_keep' => 'Leave blank to keep current password',
     'btn_save_account' => 'Update Account',
     'msg_account_updated' => 'Admin account updated successfully!',
+    'warning_weak_password_title' => 'Security Warning: Default Password in Use',
+    'warning_weak_password_desc' => 'To keep your MessageBoard secure, please change your default password "1234" in System Settings as soon as possible.',
     // Diagnostics
     'diag_php_ver' => 'PHP Version',
     'diag_pdo' => 'PDO Extension',
