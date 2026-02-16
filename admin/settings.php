@@ -400,128 +400,6 @@ if (empty($themes)) $themes = array('blog');
                         </div>
                     </div>
 
-                    <script>
-                        document.getElementById('aiEnabledSwitch').addEventListener('change', function() {
-                            document.getElementById('ai-settings-fields').classList.toggle('d-none', !this.checked);
-                        });
-
-                        document.getElementById('btn-fetch-models').addEventListener('click', async function() {
-                            const apiKey = document.getElementById('aiApiKeyInput').value.trim();
-                            if (!apiKey) {
-                                Swal.fire('請先輸入 API Key。', '', 'warning');
-                                return;
-                            }
-
-                            const btn = this;
-                            const select = document.getElementById('aiModelSelect');
-                            const originalBtnHtml = btn.innerHTML;
-                            
-                            btn.disabled = true;
-                            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 抓取中...';
-
-                            try {
-                                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-                                const resp = await fetch(url);
-                                const data = await resp.json();
-
-                                if (data.error) throw new Error(data.error.message || 'API Key 驗證失敗');
-
-                                const models = data.models || [];
-                                const filtered = models.filter(m => 
-                                    m.supportedGenerationMethods.includes('generateContent') && 
-                                    m.name.toLowerCase().includes('gemini')
-                                );
-
-                                if (filtered.length === 0) throw new Error('找不到可用的 Gemini 模型。');
-
-                                // 準備快取資料
-                                const cacheData = filtered.map(m => ({
-                                    id: m.name.replace('models/', ''),
-                                    displayName: m.displayName
-                                }));
-
-                                // AJAX 存入快取檔案
-                                const fd = new FormData();
-                                fd.append('action', 'save_ai_cache');
-                                fd.append('models', JSON.stringify(cacheData));
-                                fd.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
-                                
-                                await fetch('settings.php', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-
-                                // 更新選單
-                                const currentVal = select.value;
-                                select.innerHTML = '';
-                                cacheData.forEach(m => {
-                                    const opt = document.createElement('option');
-                                    opt.value = m.id;
-                                    opt.textContent = `${m.displayName} (${m.id})`;
-                                    if (m.id === currentVal) opt.selected = true;
-                                    select.appendChild(opt);
-                                });
-
-                                Swal.fire('成功', `已獲取並快取 ${filtered.length} 個模型。`, 'success');
-
-                            } catch (e) {
-                                Swal.fire('抓取失敗', e.message, 'error');
-                            } finally {
-                                btn.disabled = false;
-                                btn.innerHTML = originalBtnHtml;
-                            }
-                        });
-
-                        // --- AJAX Settings Save Logic ---
-                        document.querySelectorAll('.btn-ajax-save').forEach(btn => {
-                            btn.addEventListener('click', async function() {
-                                const action = this.dataset.formAction;
-                                const confirmMsg = this.dataset.confirm;
-                                const form = this.closest('form');
-
-                                if (confirmMsg && !confirm(confirmMsg)) return;
-
-                                const formData = new FormData(form);
-                                formData.append(action, '1'); 
-                                formData.append('ajax', '1');
-                                
-                                if (form.id === 'formBackend') {
-                                    const aiEnabled = document.getElementById('aiEnabledSwitch');
-                                    if (aiEnabled && !aiEnabled.checked) {
-                                        formData.append('ai_enabled_hidden', 'false');
-                                    }
-                                }
-
-                                const originalHtml = this.innerHTML;
-                                this.disabled = true;
-                                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 儲存中...';
-
-                                try {
-                                    const resp = await fetch('settings.php', {
-                                        method: 'POST',
-                                        body: formData,
-                                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                                    });
-                                    const result = await resp.json();
-
-                                    if (result.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: '儲存成功',
-                                            text: result.message,
-                                            timer: 2000,
-                                            showConfirmButton: false
-                                        });
-                                    } else {
-                                        Swal.fire('儲存失敗', result.message, 'error');
-                                    }
-                                } catch (e) {
-                                    Swal.fire('系統錯誤', '無法與伺服器連線: ' + e.message, 'error');
-                                } finally {
-                                    this.disabled = false;
-                                    this.innerHTML = originalHtml;
-                                }
-                            });
-                        });
-                    </script>
-
                     <div class="text-end">
                         <button type="button" class="btn btn-primary px-4 btn-ajax-save" data-form-action="save_backend">
                             <i class="bi bi-save"></i> 儲存後端設定
@@ -731,6 +609,131 @@ if (empty($themes)) $themes = array('blog');
     document.getElementById('btn-confirm-folder').addEventListener('click', () => {
         document.getElementById(targetInputId).value = selectedPath;
         folderModal.hide();
+    });
+
+    // --- AI Settings UI Logic ---
+    const aiSwitch = document.getElementById('aiEnabledSwitch');
+    if (aiSwitch) {
+        aiSwitch.addEventListener('change', function() {
+            const fields = document.getElementById('ai-settings-fields');
+            if (fields) fields.classList.toggle('d-none', !this.checked);
+        });
+    }
+
+    const btnFetch = document.getElementById('btn-fetch-models');
+    if (btnFetch) {
+        btnFetch.addEventListener('click', async function() {
+            const apiKey = document.getElementById('aiApiKeyInput').value.trim();
+            if (!apiKey) {
+                Swal.fire('請先輸入 API Key。', '', 'warning');
+                return;
+            }
+
+            const btn = this;
+            const select = document.getElementById('aiModelSelect');
+            const originalBtnHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 抓取中...';
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const resp = await fetch(url);
+                const data = await resp.json();
+
+                if (data.error) throw new Error(data.error.message || 'API Key 驗證失敗');
+
+                const models = data.models || [];
+                const filtered = models.filter(m => 
+                    m.supportedGenerationMethods.includes('generateContent') && 
+                    m.name.toLowerCase().includes('gemini')
+                );
+
+                if (filtered.length === 0) throw new Error('找不到可用的 Gemini 模型。');
+
+                const cacheData = filtered.map(m => ({
+                    id: m.name.replace('models/', ''),
+                    displayName: m.displayName
+                }));
+
+                const fd = new FormData();
+                fd.append('action', 'save_ai_cache');
+                fd.append('models', JSON.stringify(cacheData));
+                fd.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+                
+                await fetch('settings.php', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+                const currentVal = select.value;
+                select.innerHTML = '';
+                cacheData.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = `${m.displayName} (${m.id})`;
+                    if (m.id === currentVal) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+                Swal.fire('成功', `已獲取並快取 ${filtered.length} 個模型。`, 'success');
+
+            } catch (e) {
+                Swal.fire('抓取失敗', e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+        });
+    }
+
+    // --- AJAX Settings Save Logic ---
+    document.querySelectorAll('.btn-ajax-save').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const action = this.dataset.formAction;
+            const confirmMsg = this.dataset.confirm;
+            const form = this.closest('form');
+
+            if (confirmMsg && !confirm(confirmMsg)) return;
+
+            const formData = new FormData(form);
+            formData.append(action, '1'); 
+            formData.append('ajax', '1');
+            
+            if (form.id === 'formBackend') {
+                const aiEnabled = document.getElementById('aiEnabledSwitch');
+                if (aiEnabled && !aiEnabled.checked) {
+                    formData.append('ai_enabled_hidden', 'false');
+                }
+            }
+
+            const originalHtml = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 儲存中...';
+
+            try {
+                const resp = await fetch('settings.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await resp.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '儲存成功',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('儲存失敗', result.message, 'error');
+                }
+            } catch (e) {
+                Swal.fire('系統錯誤', '無法與伺服器連線: ' + e.message, 'error');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalHtml;
+            }
+        });
     });
 </script>
 </body>
