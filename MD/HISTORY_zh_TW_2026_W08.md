@@ -23,13 +23,19 @@
 - **API 整合**: 新增 `admin/api_ai_helper.php`，整合 Google Gemini API (v1beta)。
 - **功能實作**: 支援自動生成文章標題、SEO 描述、關鍵字標籤，以及優化文章內容。
 - **前端介面**: 於文章編輯器 (`admin/post_edit.php`) 新增 AI 輔助按鈕與操作介面 (`admin/assets/js/ai_helper.js`)。
-- **模型回退機制**: 預設使用高效能模型，若失敗自動回退至 `gemini-1.5-flash` 確保服務可用性。
+- **模型回退機制**: 預設使用高效能模型，若失敗自動回退至 `gemini-3-flash-preview` 確保服務可用性。
+- **動態模型清單**: 實作 `admin/settings.php` 的動態模型抓取功能，支援從 Google API 獲取最新模型列表並快取至 `static/ai_models_cache.json`。
+- **設定頁面重構**: 
+    - 全面導入 **AJAX** 更新機制，設定儲存不再刷新頁面。
+    - 整合 **SweetAlert2** 提供更佳的使用者操作回饋。
+    - 移除過時的手動模型 ID 輸入欄位，改用動態選單。
 
 ## 技術優化 (Technical Optimizations)
 - **重構設定生成邏輯**：修正了 `setup.php` 使用 Regex 替換 `config.php` 導致雜湊值損壞的問題，改為直接生成乾淨的 PHP 檔案內容。
 - **標準化 auth.php 載入鏈**：規範所有行政頁面先配置 Session 參數後再啟動 `session_start()`，解決了 "Session settings cannot be changed when active" 的警告。
+- **日誌優化**: AI API 呼叫日誌改寫入根目錄 `debug.txt` 並遮罩 API Key，方便除錯。
 
 ## 版本資訊
-- **Version**: v2026.02.16.19.22
+- **Version**: v2026.02.16.20.08
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview

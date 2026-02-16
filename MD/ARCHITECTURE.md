@@ -97,7 +97,10 @@ The system supports two operating modes:
     *   Smart thumbnail generation logic (only creates if original is larger than target).
     *   Extreme AOT compilation for embedded Blazor applications.
 *   **Version Control**: Strictly distinguishes between "Code" and "Content/Artifacts" via `.gitignore`.
-*   **AI Integration**: Built-in `admin/api_ai_helper.php` for AI-assisted content creation (SEO, Title, Tags) using Google Gemini API with smart model fallback.
+*   **AI Integration**: 
+    *   **Core**: Built-in `admin/api_ai_helper.php` for AI-assisted content creation using Google Gemini API.
+    *   **Dynamic Configuration**: `admin/settings.php` supports dynamic fetching of available AI models from Google, caching them in `static/ai_models_cache.json`.
+    *   **UX**: Settings page utilizes AJAX for seamless updates and SweetAlert2 for notifications.
 
 ---
 **Document Maintenance**: Updated February 16, 2026.
@@ -192,7 +195,10 @@ The system supports two operating modes:
     *   智慧縮圖生成邏輯（僅在原圖大於規格時建立）。
     *   嵌入式 Blazor 應用程式極致 AOT 編譯。
 *   **版本控制**: 嚴格區分代碼與生成產物。
-*   **AI 整合**: 內建 `admin/api_ai_helper.php`，利用 Google Gemini API 實現 AI 輔助創作（SEO、標題、標籤），並具備智慧模型回退機制。
+*   **AI 整合**: 
+    *   **核心**: 內建 `admin/api_ai_helper.php`，利用 Google Gemini API 實現 AI 輔助創作。
+    *   **動態配置**: `admin/settings.php` 支援動態抓取 Google 可用模型清單，並快取於 `static/ai_models_cache.json`。
+    *   **UX**: 設定頁面全面採用 AJAX 非同步更新與 SweetAlert2 提示，提升操作體驗。
 
 ---
 **文件維護**: 2026 年 2 月 16 日更新。

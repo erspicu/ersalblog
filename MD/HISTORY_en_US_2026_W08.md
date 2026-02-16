@@ -23,13 +23,19 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 - **API Integration**: Introduced `admin/api_ai_helper.php` integrating Google Gemini API (v1beta).
 - **Features**: Supports automatic generation of post titles, SEO descriptions, keyword tags, and content refinement.
 - **Frontend Interface**: Added AI helper buttons and UI to the post editor (`admin/post_edit.php`) via `admin/assets/js/ai_helper.js`.
-- **Model Fallback**: Implements automatic fallback to `gemini-1.5-flash` if the primary model fails, ensuring service reliability.
+- **Model Fallback**: Implements automatic fallback to `gemini-3-flash-preview` if the primary model fails, ensuring service reliability.
+- **Dynamic Model List**: Implemented dynamic model fetching in `admin/settings.php`, allowing users to retrieve the latest models from Google API and cache them in `static/ai_models_cache.json`.
+- **Settings Refactoring**:
+    - Fully adopted **AJAX** for settings updates, eliminating page reloads.
+    - Integrated **SweetAlert2** for enhanced user feedback.
+    - Removed obsolete manual model ID input fields in favor of the dynamic dropdown.
 
 ## Technical Optimizations
 - **Harden Config Generation**: Refactored `setup.php` to regenerate `config.php` entirely instead of using Regex, preventing hash corruption.
 - **Standardized Auth Loading**: Standardized the loading sequence in `auth.php` to configure session parameters before `session_start()`, eliminating "headers already sent" warnings.
+- **Log Optimization**: AI API call logs are now written to `debug.txt` in the root directory with masked API keys for easier debugging.
 
 ## Version Info
-- **Version**: v2026.02.16.19.22
+- **Version**: v2026.02.16.20.08
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview
