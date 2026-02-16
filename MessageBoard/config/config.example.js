@@ -25,6 +25,12 @@
         admin: {
             name: 'Admin',
             label: '站長'
+        },
+
+        // --- Google 第三方登入設定 ---
+        google_auth: {
+            enabled: false, // 設為 true 啟用 Google 登入
+            client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'
         }
     };
 

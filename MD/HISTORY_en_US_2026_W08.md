@@ -4,33 +4,34 @@ Core Focus: Comprehensive security hardening, Session isolation implementation, 
 
 ## Major Changes
 
-### 1. Global Subsystem Security Hardening
-- **Session Isolation**: Configured independent session names for Blog (`BLOG_ADMIN_SESS`), Album (`ALBUM_ADMIN_SESS`), and MessageBoard (`MB_ADMIN_SESS`).
-- **Unified Auth Engine**: MessageBoard admin now utilizes "Bcrypt + System Fingerprint" hashing and includes IP-based rate limiting.
+### 1. MessageBoard Widgetization & Google Auth Integration
+- **Widget Architecture Refactoring**: Transitioned MessageBoard from DOM injection to an **independent iframe-based Widget**.
+    - Created `messageboard.html` as a standalone execution environment for better CSS/JS isolation.
+    - Implemented a bootstrapper (`guestbook.js`) to dynamically generate iframes, supporting cross-site deployment and simplifying Google domain verification.
+    - Implemented auto-height synchronization using `postMessage` and `ResizeObserver`.
+- **Google Identity Services (GIS)**:
+    - Integrated Google Sign-in for one-tap authentication.
+    - Implemented client-side JWT decoding to retrieve user names and avatars.
+    - **Avatar Storage & Display**: Updated SQLite schema and PHP API to store user avatar URLs and display them in the comment list.
+- **Configurable Settings**: Integrated Google Client ID and toggle into `MessageBoard/config/config.js`.
 
-### 2. Deep PHP 5.x Compatibility Optimization
-- **Syntax Downgrading**: Replaced all PHP 7+ Null Coalescing operators (`??`) with `isset() ? :` patterns.
-- **Array Syntax Standardization**: Replaced `[]` with `array()` in critical paths.
+### 2. Global Subsystem Security Hardening
+- **Session Isolation**: Independent session names for Blog, Album, and MessageBoard to prevent cross-service logout interference.
+- **Unified Auth Engine**: Synchronized authentication mechanisms across all sub-services.
 
-### 3. AI Assistant Integration
-- **API Integration**: Introduced `admin/api_ai_helper.php` integrating Google Gemini API (v1beta).
-- **Settings Refactoring**:
-    - Fully adopted **AJAX** for updates and integrated **SweetAlert2** for enhanced user feedback.
-    - **Legacy Compatibility**: Implemented automatic `config.php` structure completion to support writing AI settings to older configuration files.
-- **Comprehensive i18n Support**:
-    - Completed multi-language support for all AJAX actions, modal strings, and model fetching flows in the settings page.
-    - Localized all previously hardcoded strings in the AI Assistant Modal within the post editor.
+### 3. Deep PHP 5.x Compatibility Optimization
+- **Syntax Downgrading**: Ensured stable execution in legacy PHP 5.4+ environments.
+- **Legacy Compatibility**: Automated structure completion for older `config.php` files.
 
-### 4. System Optimization & Cleanup
-- **Asset Localization**: MessageBoard admin is now 100% independent of external CDNs.
-- **Cleanup**: Removed the obsolete `BLOG AI.md` planning document.
+### 4. AI Assistant Integration
+- **Settings Refactoring**: Fully adopted **AJAX** for updates and **SweetAlert2** for enhanced user feedback.
+- **Comprehensive i18n Support**: Completed localization for all AI-related UI across the admin panel.
 
 ## Technical Optimizations
-- **Harden Config Generation**: Refactored `setup.php` to prevent hash corruption.
-- **Standardized Auth Loading**: Standardized the loading sequence in `auth.php`.
-- **Log Optimization**: AI API call logs are now written to `debug.txt` in the root directory with masked API keys.
+- **Cleanup**: Removed the obsolete `BLOG AI.md` document.
+- **Log Optimization**: AI API logs are now directed to `debug.txt` with masked keys.
 
 ## Version Info
-- **Version**: v2026.02.16.20.35
+- **Version**: v2026.02.16.21.52
 - **CLI**: 0.28.2
 - **Model**: gemini-3-flash-preview
